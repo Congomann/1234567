@@ -74,6 +74,7 @@ import ClientVerify from './pages/verify/ClientVerify';
 import { RealEstateAdmin } from './pages/admin/RealEstateAdmin';
 import { RealEstateCms } from './pages/admin/RealEstateCms';
 import { ProductCms } from './pages/admin/ProductCms';
+import { Analytics } from '@vercel/analytics/react';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -132,6 +133,7 @@ const App: React.FC = () => {
     <DataProvider>
       <ThemeProvider>
         <Router>
+          <Analytics />
           <Routes>
             {/* PUBLIC WEBSITE */}
             <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
