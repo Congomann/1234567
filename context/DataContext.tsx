@@ -131,7 +131,7 @@ export const useData = () => {
 };
 
 const INITIAL_USERS: User[] = [
-  { id: '1', name: 'NHFG Admin', email: 'admin@nhfg.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', onboardingCompleted: true },
+  { id: 'admin-main', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', onboardingCompleted: true },
   { id: '2', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200', onboardingCompleted: true },
   { id: '4', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true },
   { id: '5', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true },
@@ -358,11 +358,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password?: string) => {
     const cleanEmail = email.trim().toLowerCase();
+
+    // 1. ATTEMPT INTERNAL BACKEND LOGIN (Postgres)
+    // This handles the new internal admin credentials from User Request 10
+    try {
+      const backendUser = await Backend.login(cleanEmail, password);
+      if (backendUser) {
+        setUser(backendUser);
+        pushNotification('Neural Terminal Active', `Authenticated internal node: ${backendUser.name}`, 'success');
+        return true;
+      }
+    } catch (e) {
+      console.warn("[DataContext] Backend login trace:", e);
+    }
+
+    // 2. ATTEMPT FIREBASE AUTH (Public/Hybrid)
     try {
       await signInWithEmailAndPassword(auth, cleanEmail, password || '');
       return true;
     } catch (error: any) {
-      // Fallback to mock login if firebase fails (e.g. for demo users not in firebase)
+      // 3. LEGACY MOCK FALLBACK (Demo/Dev)
       const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
       if (found) {
         console.log("Firebase login failed, falling back to mock user:", cleanEmail);
@@ -370,7 +385,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return true;
       }
 
-      console.error("Login failed", error);
+      console.error("Login failed across all gateways", error);
       if (error.code === 'auth/operation-not-allowed') {
         pushNotification('Login Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
       }

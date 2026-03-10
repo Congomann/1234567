@@ -452,31 +452,114 @@ app.post('/api/webhooks/:platform', async (req, res) => {
 
 // 4. Auth
 app.post('/api/auth/login', async (req, res) => {
-  const { email } = req.body;
-  // Simplified login for demo - in prod use bcrypt compare
-  const result = await pool.query('SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL', [email]);
-  if (result.rows.length > 0) {
-    const u = result.rows[0];
-    const token = jwt.sign(
-      { sub: u.email, id: u.id, role: u.role },
-      SECRET_KEY,
-      { expiresIn: '30d' }
-    );
-    res.json({
-      access_token: token,
-      token_type: 'bearer',
-      user: {
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        category: u.category,
-        avatar: u.avatar_url,
-        productsSold: u.products_sold
+  const { email, password } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL', [email]);
+    if (result.rows.length > 0) {
+      const u = result.rows[0];
+
+      // Simple SHA-256 comparison for the provided internal password
+      const hash = crypto.createHash('sha256').update(password || '').digest('hex');
+
+      // If the user has a password_hash, check it. Otherwise (for demo/fallback), allow if it's the default 'password'
+      const isValid = u.password_hash ? (u.password_hash === hash) : (password === 'password');
+
+      if (!isValid) {
+        return res.status(401).json({ error: 'Invalid credentials' });
       }
-    });
-  } else {
-    res.status(401).json({ error: 'User not found' });
+
+      const token = jwt.sign(
+        { sub: u.email, id: u.id, role: u.role },
+        SECRET_KEY,
+        { expiresIn: '30d' }
+      );
+      res.json({
+        access_token: token,
+        token_type: 'bearer',
+        user: {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          category: u.category,
+          avatar: u.avatar_url,
+          productsSold: u.products_sold
+        }
+      });
+    } else {
+      res.status(401).json({ error: 'User not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4.5 Users Management
+app.get('/api/users', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, name, role, category, title, phone, avatar, bio, microsite_enabled as "micrositeEnabled", products_sold as "productsSold", license_states as "licenseStates", onboarding_completed as "onboardingCompleted", created_at as "createdAt", deleted_at as "deletedAt" FROM users ORDER BY name ASC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/users', authenticateToken, async (req, res) => {
+  // STRICT PERMISSION: Only Admin can manage users
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const { id, email, name, role, category, title, phone, avatar, bio, micrositeEnabled, productsSold, licenseStates, onboardingCompleted, password } = req.body;
+
+    await client.query('BEGIN');
+
+    let passwordHash = null;
+    if (password) {
+      passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    }
+
+    const upsertQuery = `
+      INSERT INTO users (
+        id, email, name, role, category, title, phone, avatar, bio, 
+        microsite_enabled, products_sold, license_states, onboarding_completed, password_hash
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      ON CONFLICT (id) DO UPDATE SET
+        email = EXCLUDED.email,
+        name = EXCLUDED.name,
+        role = EXCLUDED.role,
+        category = EXCLUDED.category,
+        title = EXCLUDED.title,
+        phone = EXCLUDED.phone,
+        avatar = EXCLUDED.avatar,
+        bio = EXCLUDED.bio,
+        microsite_enabled = EXCLUDED.microsite_enabled,
+        products_sold = EXCLUDED.products_sold,
+        license_states = EXCLUDED.license_states,
+        onboarding_completed = EXCLUDED.onboarding_completed,
+        password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash)
+      RETURNING id
+    `;
+
+    const userId = id || crypto.randomUUID();
+    const result = await client.query(upsertQuery, [
+      userId, email, name, role, category, title, phone, avatar, bio,
+      micrositeEnabled || false, productsSold || [], licenseStates || [], onboardingCompleted || false,
+      passwordHash
+    ]);
+
+    await client.query('COMMIT');
+    res.json({ id: result.rows[0].id, success: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 
