@@ -1,11 +1,10 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, AI_ASSISTANT_ID, Task, TaskPriority } from '../types';
+import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, Task, TaskPriority } from '../types';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Backend } from '../services/apiBackend';
-import { generateStrategicBrief, generateSmartReminder, getInternalAssistantResponse, enrichLeadContext } from '../services/geminiService';
 import { socketService } from '../services/socketService';
 
 interface AutomationMetrics {
@@ -113,7 +112,6 @@ interface DataContextType {
 
   addWorkflow: (workflow: Partial<Workflow>) => void;
   toggleWorkflow: (id: string) => void;
-  reAnalyzeLead: (leadId: string) => Promise<void>;
   triggerPulse: () => void;
 
   addTask: (task: Omit<Task, 'id' | 'order'>) => void;
@@ -139,7 +137,6 @@ const INITIAL_USERS: User[] = [
   { id: '7', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true },
   { id: '8', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true },
   { id: '9', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false },
-  { id: AI_ASSISTANT_ID, name: 'Gemini Logic Hub', email: 'intelligence@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, avatar: 'https://img.icons8.com/color/512/google-gemini.png', onboardingCompleted: true },
   { id: '10', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true }
 ];
 
@@ -206,38 +203,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setNotifications(prev => [newNotif, ...prev]);
   }, []);
 
-  const triggerAutomation = useCallback(async (lead: Lead) => {
-    pushNotification('Neural Hub Triggered', `Workflow: Neural Intake Logic active for ${lead.name}`, 'info');
-    setProcessingLeads(prev => [...prev, { leadId: lead.id, activeNode: 'AI BRIEF' }]);
-
-    const contextBrief = await enrichLeadContext(lead);
-    const existingNotes = lead.notes || '';
-    updateLead(lead.id, { notes: `${existingNotes}\n\n[AI INTEREST ANALYSIS]:\n${contextBrief}` });
-
-    setTimeout(async () => {
-      const brief = await generateStrategicBrief(lead);
-      updateLead(lead.id, { aiAnalysis: brief });
-      pushNotification('Neural Path: Brief', `Gemini completed strategic mapping for ${lead.name}`, 'success');
-      setProcessingLeads(prev => prev.map(p => p.leadId === lead.id ? { ...p, activeNode: 'GENERATE REMINDER' } : p));
-
-      setTimeout(async () => {
-        const reminderData = await generateSmartReminder(lead);
-        const newEvent: CalendarEvent = { id: crypto.randomUUID(), title: reminderData.title!, description: reminderData.description, date: reminderData.date!, time: reminderData.time!, type: 'reminder', creatorId: AI_ASSISTANT_ID, creatorName: 'NHFG Intelligence' };
-        setEvents(prev => [...prev, newEvent]);
-        pushNotification('Neural Path: Reminder', `Follow-up event added to your calendar for ${reminderData.date}`, 'info');
-        setProcessingLeads(prev => prev.map(p => p.leadId === lead.id ? { ...p, activeNode: 'DRAFT SMS' } : p));
-
-        setTimeout(() => {
-          setProcessingLeads(prev => prev.filter(p => p.leadId !== lead.id));
-          setAutomationMetrics(prev => {
-            const next = { executions: prev.executions + 1, bandwidthSaved: prev.bandwidthSaved + 25 };
-            localStorage.setItem('nhfg_automation_metrics', JSON.stringify(next));
-            return next;
-          });
-        }, 1500);
-      }, 1500);
-    }, 2000);
-  }, [pushNotification]);
 
   const addLead = useCallback(async (leadData: Partial<Lead>, assignTo?: string) => {
     const newLead: Lead = {
@@ -261,8 +226,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await Backend.saveLead(newLead);
     setLeads(prev => [newLead, ...prev]);
     pushNotification('New Lead Received', `Inquiry from ${newLead.name}.`, 'success', 'lead', newLead.id);
-    triggerAutomation(newLead);
-  }, [pushNotification, triggerAutomation]);
+  }, [pushNotification]);
 
   const updateLead = useCallback(async (id: string, data: Partial<Lead>) => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, ...data } : l));
@@ -318,7 +282,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const [storedLeads, storedUsers, storedClients, storedSettings, storedWorkflows, storedEvents] = await Promise.all([
         Backend.getLeads(), Backend.getUsers(), Backend.getClients(), Backend.getSettings(), Backend.getWorkflows(), Backend.getEvents()
       ]);
-      setAllUsers(storedUsers.length > 0 ? [...INITIAL_USERS, ...storedUsers.filter(u => u.id !== AI_ASSISTANT_ID && !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS);
+      setAllUsers(storedUsers.length > 0 ? [...INITIAL_USERS, ...storedUsers.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS);
       setLeads(storedLeads);
       setClients(storedClients);
       if (storedSettings) setCompanySettings(storedSettings);
@@ -344,15 +308,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('nhfg_testimonials', JSON.stringify(testimonials));
   }, [testimonials]);
 
-  const reAnalyzeLead = async (leadId: string) => {
-    const lead = leads.find(l => l.id === leadId);
-    if (lead) {
-      pushNotification('AI Intelligence', 'Running deep strategic re-analysis...', 'info');
-      const brief = await generateStrategicBrief(lead);
-      updateLead(leadId, { aiAnalysis: brief });
-      pushNotification('AI Intelligence', 'Strategic brief updated successfully.', 'success');
-    }
-  };
 
   const updateLeadStatus = useCallback((id: string, status: LeadStatus, analysis?: string) => { updateLead(id, { status, aiAnalysis: analysis }); }, [updateLead]);
 
@@ -581,21 +536,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setChatMessages(prev => [...prev, newMessage]);
     socketService.send({ type: 'CHAT_MESSAGE', payload: { ...newMessage, senderName: user.name } });
 
-    if (receiverId === AI_ASSISTANT_ID) {
-      const history = chatMessages
-        .filter(m => (m.senderId === user.id && m.receiverId === AI_ASSISTANT_ID) || (m.senderId === AI_ASSISTANT_ID && m.receiverId === user.id))
-        .slice(-10)
-        .map(m => ({ role: m.senderId === user.id ? 'user' as const : 'model' as const, text: m.text }));
-
-      const assistantReply = await getInternalAssistantResponse(text, `User Role: ${user.role}, Name: ${user.name}`, history);
-
-      const aiMessage: ChatMessage = { id: crypto.randomUUID(), senderId: AI_ASSISTANT_ID, receiverId: user.id, text: assistantReply, timestamp: new Date(), read: false };
-
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, aiMessage]);
-        pushNotification('Intelligence Update', 'New insights available in your Neural Hub.', 'info');
-      }, 1000);
-    }
   };
 
   const submitJobApplication = (data: any) => { setJobApplications(prev => [...prev, { ...data, id: crypto.randomUUID(), date: new Date().toISOString(), status: 'Pending' }]); };
@@ -778,7 +718,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       assignCarriers, markChatRead, editChatMessage, deleteChatMessage, sendChatMessage, submitJobApplication, updateJobApplicationStatus,
       updateApplicationStatus, updateTransactionStatus, addPortfolio, updatePortfolio, deletePortfolio, addComplianceDoc,
       updateFeeStatus, addAdvisoryFee, updateAdvisoryFee, deleteAdvisoryFee, addLoanApplication, updateLoanApplication, deleteLoanApplication,
-      addProperty, updateProperty, deleteProperty, addWorkflow, toggleWorkflow, reAnalyzeLead, triggerPulse, properties, transactions,
+      addProperty, updateProperty, deleteProperty, addWorkflow, toggleWorkflow, triggerPulse, properties, transactions,
       addTask, toggleTask, deleteTask, reorderTasks
     }}>
       {children}

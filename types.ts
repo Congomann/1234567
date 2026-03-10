@@ -1,6 +1,4 @@
 
-export const AI_ASSISTANT_ID = 'nhfg-ai-node-01';
-
 export enum LeadStatus {
   NEW = 'New',
   CONTACTED = 'Contacted',

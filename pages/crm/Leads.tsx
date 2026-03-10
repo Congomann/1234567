@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType } from '../../types';
-import { Sparkles, Loader2, Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, BrainCircuit } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DetailRowProps {
@@ -58,7 +58,7 @@ const PriorityBadge = ({ priority }: { priority?: string }) => {
 };
 
 export const Leads: React.FC = () => {
-    const { leads, updateLeadStatus, updateLead, user, allUsers, reAnalyzeLead } = useData();
+    const { leads, updateLeadStatus, updateLead, user, allUsers } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
     const [sourceFilter, setSourceFilter] = useState<string>('All');
@@ -66,7 +66,6 @@ export const Leads: React.FC = () => {
     const [showArchived, setShowArchived] = useState(false);
     const [viewLead, setViewLead] = useState<Lead | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [editedLeadData, setEditedLeadData] = useState<Partial<Lead>>({});
 
     const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
@@ -161,15 +160,6 @@ export const Leads: React.FC = () => {
         }
     };
 
-    const handleReAnalyze = async () => {
-        if (viewLead) {
-            setIsAnalyzing(true);
-            await reAnalyzeLead(viewLead.id);
-            const updated = leads.find(l => l.id === viewLead.id);
-            if (updated) setViewLead(updated);
-            setIsAnalyzing(false);
-        }
-    };
 
     const statusColors: any = {
         [LeadStatus.NEW]: 'bg-blue-100 text-blue-800',
@@ -353,18 +343,14 @@ export const Leads: React.FC = () => {
                         <div className="flex justify-between items-center mb-10">
                             <div className="flex items-center gap-5">
                                 <div className="p-4 bg-blue-50 text-blue-600 rounded-3xl">
-                                    <BrainCircuit size={32} className={isAnalyzing ? 'animate-pulse' : ''} />
+                                    <Eye size={32} />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0B2240]">Lead Intelligence Hub</h2>
+                                    <h2 className="text-3xl font-black text-[#0B2240]">Lead Detail Hub</h2>
                                     <p className="text-slate-500 text-sm font-medium">{viewLead.name} • {viewLead.interest}</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={handleReAnalyze} disabled={isAnalyzing} className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-sm shadow-lg transition-all disabled:opacity-50">
-                                    {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                                    Analyze with Gemini 3
-                                </button>
                                 <button onClick={() => { setViewLead(null); setIsEditing(false); }} className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-all"><X className="h-5 w-5" /></button>
                             </div>
                         </div>
@@ -398,18 +384,14 @@ export const Leads: React.FC = () => {
                             </div>
 
                             <div className="lg:col-span-2 space-y-6">
-                                {/* AI STRATEGIC BRIEF */}
-                                <div className="bg-blue-50/50 p-8 rounded-[2.5rem] border border-blue-100 shadow-sm relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-8 opacity-5 -rotate-12 transition-transform group-hover:scale-110"><BrainCircuit size={160} /></div>
+                                <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
                                     <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-lg font-black text-blue-900 flex items-center gap-2"><Sparkles className="h-5 w-5 text-blue-600" /> Neural Intelligence Brief</h3>
-                                        <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] bg-white px-3 py-1 rounded-full border border-blue-100">Gemini 3 Pro Engine</span>
+                                        <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">Administrative Summary</h3>
                                     </div>
-                                    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-blue-100 text-slate-700 text-sm leading-relaxed font-medium min-h-[150px] whitespace-pre-wrap">
-                                        {viewLead.aiAnalysis ? viewLead.aiAnalysis : (
+                                    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 text-slate-700 text-sm leading-relaxed font-medium min-h-[150px] whitespace-pre-wrap">
+                                        {viewLead.notes ? viewLead.notes : (
                                             <div className="text-center py-10">
-                                                <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-300 mb-4" />
-                                                <p className="text-slate-400 italic">No analysis generated yet. Click 'Analyze with Gemini' to map this lead's strategy.</p>
+                                                <p className="text-slate-400 italic">No notes or interaction recorded yet. Unlock edit mode to add details.</p>
                                             </div>
                                         )}
                                     </div>

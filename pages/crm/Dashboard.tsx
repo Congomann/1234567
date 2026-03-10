@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
-import { 
-    Users, Wallet, TrendingUp, Activity, ArrowUpRight, 
+import {
+    Users, Wallet, TrendingUp, Activity, ArrowUpRight,
     MonitorCheck, BarChart3, ShieldAlert, Cpu, ArrowRight,
     Search, Bell, LayoutGrid, Webhook, Bug, RefreshCw, MessageSquarePlus, ChevronRight, AlertCircle, Clock, Info, Server, Globe, Zap, ShieldCheck,
     FileText, GripVertical, CheckCircle2, Trash2, Plus
@@ -11,7 +11,7 @@ import {
 import { UserRole, LeadStatus, TaskPriority, Task } from '../../types';
 
 const MetricCard = ({ title, value, subtext, icon: Icon, colorClass, trend, onClick }: any) => (
-    <div 
+    <div
         onClick={onClick}
         className="bg-white/60 backdrop-blur-md p-8 rounded-[2.5rem] shadow-sm border border-white/40 hover:shadow-xl hover:bg-white transition-all group cursor-pointer flex flex-col justify-between min-h-[220px]"
     >
@@ -89,9 +89,9 @@ const TaskList = () => {
             </div>
 
             <form onSubmit={handleAddTask} className="flex gap-2 mb-6">
-                <input 
-                    type="text" 
-                    placeholder="New priority node..." 
+                <input
+                    type="text"
+                    placeholder="New priority node..."
                     className="flex-1 bg-white border border-slate-200 rounded-2xl px-6 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
                     value={newTaskTitle}
                     onChange={e => setNewTaskTitle(e.target.value)}
@@ -103,7 +103,7 @@ const TaskList = () => {
 
             <div className="space-y-2">
                 {sortedTasks.map((task, index) => (
-                    <div 
+                    <div
                         key={task.id}
                         draggable
                         onDragStart={() => handleDragStart(index)}
@@ -117,14 +117,14 @@ const TaskList = () => {
                     >
                         {/* Drop Indicator Line */}
                         {overIndex === index && draggedIndex !== null && draggedIndex !== index && (
-                             <div className={`absolute left-0 right-0 h-1 bg-blue-600 rounded-full z-20 ${draggedIndex > index ? '-top-1' : '-bottom-1'}`}></div>
+                            <div className={`absolute left-0 right-0 h-1 bg-blue-600 rounded-full z-20 ${draggedIndex > index ? '-top-1' : '-bottom-1'}`}></div>
                         )}
 
                         <div className="text-slate-300 group-hover:text-blue-500 transition-colors cursor-grab active:cursor-grabbing">
                             <GripVertical size={18} />
                         </div>
-                        
-                        <button 
+
+                        <button
                             onClick={() => toggleTask(task.id)}
                             className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-slate-200'}`}
                         >
@@ -137,15 +137,14 @@ const TaskList = () => {
                             </p>
                         </div>
 
-                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md shrink-0 border ${
-                            task.priority === TaskPriority.HIGH ? 'bg-red-50 text-red-600 border-red-100' :
-                            task.priority === TaskPriority.MEDIUM ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                            'bg-blue-50 text-blue-600 border-blue-100'
-                        }`}>
+                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md shrink-0 border ${task.priority === TaskPriority.HIGH ? 'bg-red-50 text-red-600 border-red-100' :
+                                task.priority === TaskPriority.MEDIUM ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                    'bg-blue-50 text-blue-600 border-blue-100'
+                            }`}>
                             {task.priority}
                         </span>
 
-                        <button 
+                        <button
                             onClick={() => deleteTask(task.id)}
                             className="p-1.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                         >
@@ -153,7 +152,7 @@ const TaskList = () => {
                         </button>
                     </div>
                 ))}
-                
+
                 {sortedTasks.length === 0 && (
                     <div className="text-center py-12 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
                         <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No tasks defined.</p>
@@ -167,7 +166,7 @@ const TaskList = () => {
 export const Dashboard: React.FC = () => {
     const { user, metrics, notifications, markNotificationRead, allUsers, leads, jobApplications } = useData();
     const navigate = useNavigate();
-    
+
     const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.SUB_ADMIN;
 
     const advisorStats = [
@@ -178,38 +177,38 @@ export const Dashboard: React.FC = () => {
     ];
 
     const adminStats = [
-        { 
-            title: "Website Health", 
-            value: "99.9%", 
-            subtext: "Current Uptime", 
-            icon: Globe, 
-            colorClass: "bg-emerald-50 text-emerald-600", 
+        {
+            title: "Website Health",
+            value: "99.9%",
+            subtext: "Current Uptime",
+            icon: Globe,
+            colorClass: "bg-emerald-50 text-emerald-600",
             trend: "STATUS: UP",
             route: "/crm/admin/website"
         },
-        { 
-            title: "API Ingestion", 
-            value: "100%", 
-            subtext: "Sync Success Rate", 
-            icon: Zap, 
-            colorClass: "bg-blue-50 text-blue-600", 
+        {
+            title: "API Ingestion",
+            value: "100%",
+            subtext: "Sync Success Rate",
+            icon: Zap,
+            colorClass: "bg-blue-50 text-blue-600",
             trend: "OK: GOOGLE/META",
             route: "/crm/admin/marketing"
         },
-        { 
-            title: "Advisor Requests", 
+        {
+            title: "Advisor Requests",
             value: jobApplications.filter(a => a.status === 'Pending').length + 3,
-            subtext: "Action Required", 
-            icon: MessageSquarePlus, 
+            subtext: "Action Required",
+            icon: MessageSquarePlus,
             colorClass: "bg-orange-50 text-orange-600",
             trend: "5 URGENT",
             route: "/crm/onboarding"
         },
-        { 
-            title: "Security & CRM", 
-            value: "SECURE", 
-            subtext: "System Encryption", 
-            icon: ShieldCheck, 
+        {
+            title: "Security & CRM",
+            value: "SECURE",
+            subtext: "System Encryption",
+            icon: ShieldCheck,
             colorClass: "bg-purple-50 text-purple-600",
             trend: "AES-256",
             route: "/crm/legal"
@@ -254,21 +253,21 @@ export const Dashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <MetricCard 
-                        key={i} 
-                        {...stat} 
+                    <MetricCard
+                        key={i}
+                        {...stat}
                         onClick={() => navigate(stat.route)}
                     />
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                
+
                 <div className="lg:col-span-2 bg-white/40 backdrop-blur-md p-10 rounded-[3.5rem] shadow-sm border border-white/50 flex flex-col min-h-[600px]">
                     <div className="flex justify-between items-center mb-10">
                         <div>
                             <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">
-                                {isAdmin ? 'System Intelligence Feed' : 'Interaction & Alerts'}
+                                System Activity Logs
                             </h3>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
                                 {isAdmin ? 'Website Health & CRM Traces' : 'Real-time Prospect Monitoring'}
@@ -282,53 +281,53 @@ export const Dashboard: React.FC = () => {
                     <div className="space-y-4">
                         {isAdmin ? (
                             <>
-                                <LogItem 
-                                    title="Google Ads Webhook Success" 
-                                    desc="New lead ingested from 'Wealth 2024' Campaign. No latency detected in master node." 
-                                    time="2m ago" 
-                                    icon={Webhook} 
-                                    type="success" 
+                                <LogItem
+                                    title="Webhook Ingestion Success"
+                                    desc="New lead ingested from 'Wealth 2024' Campaign. Synchronization verified."
+                                    time="2m ago"
+                                    icon={Webhook}
+                                    type="success"
                                 />
-                                <LogItem 
-                                    title="Advisor Request: Signature Approval" 
-                                    desc="Sarah RealEstate updated her professional title. Approval pending in Signature Lab." 
-                                    time="15m ago" 
-                                    icon={Info} 
-                                    type="info" 
+                                <LogItem
+                                    title="Advisor Request: Signature Approval"
+                                    desc="Sarah RealEstate updated her professional title. Approval pending in Signature Lab."
+                                    time="15m ago"
+                                    icon={Info}
+                                    type="info"
                                 />
-                                <LogItem 
-                                    title="Automatic Database Backup" 
-                                    desc="Incremental snapshot saved to encrypted cloud node. CRC integrity verified." 
-                                    time="1h ago" 
-                                    icon={ShieldCheck} 
-                                    type="success" 
+                                <LogItem
+                                    title="Automatic Database Backup"
+                                    desc="Incremental snapshot saved to encrypted cloud node. CRC integrity verified."
+                                    time="1h ago"
+                                    icon={ShieldCheck}
+                                    type="success"
                                 />
-                                <LogItem 
-                                    title="Microsite Error Flagged" 
-                                    desc="Broken link detected on Advisor #4 Microsite (Profile section assets)." 
-                                    time="2h ago" 
-                                    icon={Bug} 
-                                    type="alert" 
+                                <LogItem
+                                    title="Microsite Error Flagged"
+                                    desc="Broken link detected on Advisor #4 Microsite (Profile section assets)."
+                                    time="2h ago"
+                                    icon={Bug}
+                                    type="alert"
                                 />
-                                <LogItem 
-                                    title="Terms of Use Update" 
-                                    desc="Admin modified Step 2 of the Onboarding Flow. Action logged by Master-UID-1." 
-                                    time="4h ago" 
-                                    icon={FileText} 
-                                    type="info" 
+                                <LogItem
+                                    title="Terms of Use Update"
+                                    desc="Admin modified Step 2 of the Onboarding Flow. Action logged by Master-UID-1."
+                                    time="4h ago"
+                                    icon={FileText}
+                                    type="info"
                                 />
                             </>
                         ) : (
                             notifications.slice(0, 6).map((n) => (
                                 <div key={n.id} onClick={() => handleActivityClick(n)} className="p-6 bg-white/60 rounded-[2rem] border border-white/80 hover:shadow-md transition-all cursor-pointer group flex items-start gap-4">
-                                     <div className={`p-2 rounded-xl border ${getPriorityColor(n.type)}`}>
-                                         <Bell size={16} />
-                                     </div>
-                                     <div className="flex-1">
-                                         <p className="text-sm font-bold text-slate-700">{n.title}</p>
-                                         <p className="text-xs text-slate-500 mt-1 font-medium">{n.message}</p>
-                                     </div>
-                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(n.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                    <div className={`p-2 rounded-xl border ${getPriorityColor(n.type)}`}>
+                                        <Bell size={16} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-bold text-slate-700">{n.title}</p>
+                                        <p className="text-xs text-slate-500 mt-1 font-medium">{n.message}</p>
+                                    </div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             ))
                         )}
@@ -346,12 +345,12 @@ export const Dashboard: React.FC = () => {
                         <div className="bg-[#B7BDC5] p-10 rounded-[3rem] shadow-xl relative overflow-hidden min-h-[480px]">
                             <div className="absolute top-10 right-10 opacity-30 text-white pointer-events-none">
                                 <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M0 30H20L30 10L50 50L60 20L70 40L80 30H120" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M0 30H20L30 10L50 50L60 20L70 40L80 30H120" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </div>
-                            
+
                             <h3 className="text-xl font-black text-[#5C6675] mb-12 relative z-10 uppercase tracking-widest">Active Deployments</h3>
-                            
+
                             <div className="space-y-12 relative z-10">
                                 <div className="space-y-4">
                                     <p className="text-[10px] font-black text-[#4E88F5] uppercase tracking-[0.3em]">Microsite Status</p>
@@ -365,8 +364,8 @@ export const Dashboard: React.FC = () => {
                                     <p className="text-[10px] font-black text-[#4E88F5] uppercase tracking-[0.3em]">Pending Onboarding</p>
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-black text-[#5C6675]">{jobApplications.filter(a => a.status === 'Pending').length} Apps Review</span>
-                                        <button 
-                                            onClick={() => navigate('/crm/onboarding')} 
+                                        <button
+                                            onClick={() => navigate('/crm/onboarding')}
                                             className="text-[10px] font-black bg-[#4E88F5] text-white px-5 py-2 rounded-xl hover:bg-blue-600 transition-all shadow-md uppercase tracking-widest"
                                         >
                                             View
@@ -375,8 +374,8 @@ export const Dashboard: React.FC = () => {
                                 </div>
 
                                 <div className="pt-8 mt-12 border-t border-white/20">
-                                    <button 
-                                        onClick={() => navigate('/crm/admin/website')} 
+                                    <button
+                                        onClick={() => navigate('/crm/admin/website')}
                                         className="w-full py-5 bg-[#C9CFD7] text-[#5C6675] rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-3 shadow-inner border border-white/20"
                                     >
                                         <MonitorCheck size={18} /> Site Config

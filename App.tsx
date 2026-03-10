@@ -66,7 +66,6 @@ import {
   RateTools,
   RefinanceCalc
 } from './pages/crm/mortgage/MortgagePages';
-import { AIChatWidget } from './components/AIChatWidget';
 import { BookingPage } from './pages/public/BookingPage';
 import { AutomationStudio } from './pages/crm/AutomationStudio';
 import { BankVerification } from './pages/crm/BankVerification';
@@ -123,7 +122,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     <Navbar />
     <main className="flex-grow">{children}</main>
     <Footer />
-    <AIChatWidget />
   </div>
 );
 
