@@ -89,6 +89,7 @@ export interface User {
   deletedAt?: string;
   calendarUrl?: string;
   onboardingCompleted?: boolean;
+  password?: string;
 }
 
 export interface LifeDetails {
