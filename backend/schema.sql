@@ -221,3 +221,46 @@ CREATE INDEX idx_bank_verifications_client ON bank_verifications(client_name);
 CREATE INDEX idx_bank_verifications_status ON bank_verifications(status);
 CREATE INDEX idx_plaid_items_item_id ON plaid_items(item_id);
 
+
+-- ── ANALYTICS ────────────────────────────────────────────────────────────────
+-- Track unique visitors
+CREATE TABLE analytics_visitors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    visitor_id VARCHAR(100) UNIQUE NOT NULL, -- Permanent ID stored in cookie/localStorage
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    device_type VARCHAR(50),
+    screen_resolution VARCHAR(20),
+    language VARCHAR(10),
+    location_data JSONB, -- { city, country, region, lat, lon }
+    metadata JSONB, -- Flexible store for screen size, timezone, etc.
+    first_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Track user sessions
+CREATE TABLE analytics_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    visitor_id VARCHAR(100) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE,
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP WITH TIME ZONE,
+    duration_seconds INT DEFAULT 0,
+    session_metadata JSONB
+);
+
+-- Track individual page views
+CREATE TABLE analytics_page_views (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    visitor_id VARCHAR(100) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE,
+    session_id UUID REFERENCES analytics_sessions(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    path TEXT NOT NULL,
+    title TEXT,
+    referrer TEXT,
+    viewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    event_metadata JSONB -- Tracking custom events or specific page data
+);
+
+CREATE INDEX idx_analytics_visitor_id ON analytics_visitors(visitor_id);
+CREATE INDEX idx_analytics_page_views_visitor ON analytics_page_views(visitor_id);
+CREATE INDEX idx_analytics_sessions_visitor ON analytics_sessions(visitor_id);

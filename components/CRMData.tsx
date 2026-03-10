@@ -37,7 +37,8 @@ import {
     Smartphone,
     Landmark,
     Home,
-    Monitor
+    Monitor,
+    Activity
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -64,7 +65,8 @@ const ADMIN_TOUR_STEPS = [
     { id: 'nav-carrier-setup', title: 'Carrier Setup', text: 'Provision specific insurance carriers to advisor tiers.', targetId: 'nav-carrier-setup', path: '/crm/admin/carriers' },
     { id: 'nav-client-reviews', title: 'Client Reviews', text: 'Moderate and approve testimonials before they go live.', targetId: 'nav-client-reviews', path: '/crm/admin/testimonials' },
     { id: 'nav-email-signature', title: 'Email Signature', text: 'Generate branded HTML signatures for the whole group.', targetId: 'nav-email-signature', path: '/crm/admin/signature' },
-    { id: 'nav-api-integrations', title: 'API Integrations', text: 'Trace raw webhook data from Google and Meta Ads.', targetId: 'nav-api-integrations', path: '/crm/admin/marketing' }
+    { id: 'nav-api-integrations', title: 'API Integrations', text: 'Trace raw webhook data from Google and Meta Ads.', targetId: 'nav-api-integrations', path: '/crm/admin/marketing' },
+    { id: 'nav-analytics', title: 'User Analytics', text: 'Real-time tracking of website visitors, sessions, and behavior.', targetId: 'nav-analytics', path: '/crm/admin/analytics' }
 ];
 
 interface CRMLayoutProps {
@@ -200,6 +202,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             admin.push({ path: '/crm/admin/testimonials', label: 'Client Reviews', icon: Award, tourId: 'nav-client-reviews' });
             admin.push({ path: '/crm/admin/signature', label: 'Email Signature', icon: PenTool, tourId: 'nav-email-signature' });
             admin.push({ path: '/crm/admin/marketing', label: 'API Integrations', icon: Webhook, tourId: 'nav-api-integrations' });
+            admin.push({ path: '/crm/admin/analytics', label: 'User Analytics', icon: Activity, tourId: 'nav-analytics' });
         }
 
         return { main, vertical, shared, admin };
@@ -216,8 +219,8 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 to={item.path}
                 id={item.tourId}
                 className={`flex items-center gap-4 px-6 py-3.5 text-sm font-bold transition-all duration-300 group relative ${isActive
-                        ? 'bg-[#3B82F6] text-white shadow-[0_4px_20px_rgba(59,130,246,0.3)] rounded-full'
-                        : 'text-slate-400 hover:bg-white/5 hover:text-white rounded-full'
+                    ? 'bg-[#3B82F6] text-white shadow-[0_4px_20px_rgba(59,130,246,0.3)] rounded-full'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white rounded-full'
                     } ${isHighlighted ? 'z-[70] ring-4 ring-blue-500 bg-blue-600 text-white shadow-[0_0_50px_rgba(59,130,246,0.8)] scale-105' : ''}`}
             >
                 <item.icon className={`h-5 w-5 transition-colors ${isActive || isHighlighted ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} strokeWidth={isActive ? 3 : 2.5} />

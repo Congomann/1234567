@@ -1958,6 +1958,152 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
 
 
 // ════════════════════════════════════════════════════════════════════════════════
+// ANALYTICS & USER TRACKING
+// ════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * @openapi
+ * /api/analytics/collect:
+ *   post:
+ *     summary: Collect tracking data
+ *     description: Receives visitor metadata, sessions, and page views.
+ *     responses:
+ *       200:
+ *         description: Successfully tracked.
+ */
+app.post('/api/analytics/collect', async (req, res) => {
+  const {
+    visitorId,
+    sessionId,
+    url,
+    path,
+    title,
+    referrer,
+    metadata = {},
+    eventMetadata = {}
+  } = req.body;
+
+  if (!visitorId) return res.status(400).json({ error: 'visitorId is required' });
+
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ua = req.headers['user-agent'] || 'Unknown';
+
+    // 1. Upsert Visitor
+    await pool.query(`
+            INSERT INTO analytics_visitors 
+                (visitor_id, ip_address, user_agent, device_type, screen_resolution, language, metadata, last_seen)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+            ON CONFLICT (visitor_id) DO UPDATE SET
+                last_seen = NOW(),
+                ip_address = EXCLUDED.ip_address,
+                user_agent = EXCLUDED.user_agent,
+                metadata = analytics_visitors.metadata || EXCLUDED.metadata
+        `, [
+      visitorId,
+      ip,
+      ua,
+      metadata.deviceType || 'Unknown',
+      metadata.screenResolution || 'Unknown',
+      metadata.language || 'en',
+      JSON.stringify(metadata)
+    ]);
+
+    // 2. Handle Session
+    let currentSessionId = sessionId;
+    if (currentSessionId && currentSessionId !== 'null') {
+      // Update existing session heartbeat
+      await pool.query(`
+                UPDATE analytics_sessions 
+                SET ended_at = NOW(), 
+                    duration_seconds = EXTRACT(EPOCH FROM (NOW() - started_at))::INT
+                WHERE id = $1 AND visitor_id = $2
+            `, [currentSessionId, visitorId]);
+    } else {
+      // Create new session
+      const sessionRes = await pool.query(`
+                INSERT INTO analytics_sessions (visitor_id, started_at)
+                VALUES ($1, NOW())
+                RETURNING id
+            `, [visitorId]);
+      currentSessionId = sessionRes.rows[0].id;
+    }
+
+    // 3. Log Page View
+    if (url || path) {
+      await pool.query(`
+                INSERT INTO analytics_page_views (visitor_id, session_id, url, path, title, referrer, event_metadata)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `, [
+        visitorId,
+        currentSessionId,
+        url || '',
+        path || '',
+        title || '',
+        referrer || '',
+        JSON.stringify({ ...eventMetadata, ...metadata })
+      ]);
+    }
+
+    res.json({ success: true, sessionId: currentSessionId });
+  } catch (err) {
+    console.error('[Analytics] Collection error:', err.message);
+    res.status(500).json({ error: 'Failed to collect analytics' });
+  }
+});
+
+// 2. Admin: Get Analytics Overview
+app.get('/api/admin/analytics/stats', authenticateToken, async (req, res) => {
+  // Note: authenticateToken might set role to 'admin' (lowercase) or 'Administrator' based on DB
+  const role = req.user.role;
+  if (role !== 'Administrator' && role !== 'admin') {
+    return res.status(403).json({ error: 'Administrator privileges required' });
+  }
+
+  try {
+    const totalVisitors = await pool.query('SELECT COUNT(*) FROM analytics_visitors');
+    const activeSessions = await pool.query("SELECT COUNT(*) FROM analytics_sessions WHERE ended_at > NOW() - INTERVAL '30 minutes'");
+    const topPages = await pool.query(`
+            SELECT path, COUNT(*) as views 
+            FROM analytics_page_views 
+            GROUP BY path 
+            ORDER BY views DESC 
+            LIMIT 10
+        `);
+    const recentVisitors = await pool.query(`
+            SELECT * FROM analytics_visitors 
+            ORDER BY last_seen DESC 
+            LIMIT 50
+        `);
+
+    res.json({
+      totalVisitors: parseInt(totalVisitors.rows[0].count),
+      activeSessions: parseInt(activeSessions.rows[0].count),
+      topPages: topPages.rows,
+      recentVisitors: recentVisitors.rows
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Admin: Delete Visitor Data
+app.delete('/api/admin/analytics/visitors/:visitorId', authenticateToken, async (req, res) => {
+  const role = req.user.role;
+  if (role !== 'Administrator' && role !== 'admin') {
+    return res.status(403).json({ error: 'Administrator privileges required' });
+  }
+
+  try {
+    await pool.query('DELETE FROM analytics_visitors WHERE visitor_id = $1', [req.params.visitorId]);
+    res.json({ success: true, message: 'Visitor data deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════════
 // ENDPOINT 12 — Get account data for a verification (balance + transactions)
 // GET /api/plaid/verifications/:id/data
 // ════════════════════════════════════════════════════════════════════════════════
@@ -1975,6 +2121,62 @@ app.get('/api/plaid/verifications/:id/data', authenticateToken, async (req, res)
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ANALYTICS TRACKING SCRIPT (Public Delivery)
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/analytics.js', (req, res) => {
+  const origin = `${req.protocol}://${req.get('host')}`;
+  const script = `
+(function() {
+    var VISITOR_ID_KEY = 'nhfg_visitor_id';
+    var SESSION_ID_KEY = 'nhfg_session_id';
+    var API_URL = '${origin}/api/analytics/collect';
+
+    function getVisitorId() {
+        var id = localStorage.getItem(VISITOR_ID_KEY);
+        if (!id) {
+            id = 'vis_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem(VISITOR_ID_KEY, id);
+        }
+        return id;
+    }
+
+    function track() {
+        var data = {
+            visitorId: getVisitorId(),
+            sessionId: sessionStorage.getItem(SESSION_ID_KEY),
+            url: window.location.href,
+            path: window.location.pathname,
+            title: document.title,
+            referrer: document.referrer,
+            metadata: {
+                screenResolution: window.screen.width + 'x' + window.screen.height,
+                language: navigator.language,
+                isThirdParty: true
+            }
+        };
+
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.sessionId) sessionStorage.setItem(SESSION_ID_KEY, d.sessionId);
+        })
+        .catch(function(e) {});
+    }
+
+    track();
+    // Heartbeat every 60s
+    setInterval(track, 60000);
+})();
+    `;
+  res.type('application/javascript').send(script);
 });
 
 server.listen(PORT, () => {

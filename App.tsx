@@ -73,6 +73,8 @@ import ClientVerify from './pages/verify/ClientVerify';
 import { RealEstateAdmin } from './pages/admin/RealEstateAdmin';
 import { RealEstateCms } from './pages/admin/RealEstateCms';
 import { ProductCms } from './pages/admin/ProductCms';
+import { AdminAnalytics } from './pages/admin/AdminAnalytics';
+import { AnalyticsTracker } from './components/AnalyticsTracker';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -130,6 +132,7 @@ const App: React.FC = () => {
     <DataProvider>
       <ThemeProvider>
         <Router>
+          <AnalyticsTracker />
           <Routes>
             {/* PUBLIC WEBSITE */}
             <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
@@ -205,6 +208,7 @@ const App: React.FC = () => {
                 <Route path="admin/testimonials" element={<AdminTestimonials />} />
                 <Route path="admin/signature" element={<EmailSignature />} />
                 <Route path="admin/marketing" element={<MarketingIntegrations />} />
+                <Route path="admin/analytics" element={<AdminAnalytics />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
