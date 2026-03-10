@@ -1,228 +1,262 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar as CalendarIcon, AlertCircle, CheckCircle2, Coffee } from 'lucide-react';
+import { CalendarEvent } from '../../types';
+import { useData } from '../../context/DataContext';
 
 interface EventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  isReadOnly: boolean;
-  editingId: string | null;
-  formData: any;
-  setFormData: (data: any) => void;
-  handleSubmit: (e: React.FormEvent) => void;
-  handleDelete: () => void;
-  animConfig: any;
-  user: any;
-  todayStr: string;
+    isOpen: boolean;
+    close: () => void;
+    selectedDate: Date | null;
+    selectedEvent: CalendarEvent | null;
+    prefillType: CalendarEvent['type'];
 }
 
-export const EventModal: React.FC<EventModalProps> = ({
-  isOpen,
-  onClose,
-  isReadOnly,
-  editingId,
-  formData,
-  setFormData,
-  handleSubmit,
-  handleDelete,
-  animConfig,
-  user,
-  todayStr
-}) => {
-  if (!isOpen) return null;
+export const EventModal: React.FC<EventModalProps> = ({ isOpen, close, selectedDate, selectedEvent, prefillType }) => {
+    const { addEvent, updateEvent, deleteEvent, user } = useData();
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col bg-white overflow-y-auto no-scrollbar"
-    >
-      <motion.div 
-        initial={animConfig.modal.initial}
-        animate={animConfig.modal.animate}
-        exit={animConfig.modal.exit}
-        transition={animConfig.modal.transition}
-        className="flex-1 flex flex-col w-full"
-      >
-        <div className="flex items-center justify-between px-10 py-8 border-b border-slate-100 bg-white sticky top-0 z-10 shadow-sm">
-          <button onClick={onClose} className="flex items-center gap-3 text-slate-800 hover:text-blue-600 transition-all font-black text-sm uppercase tracking-widest group">
-            <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" /> Back
-          </button>
-          <h3 className="text-2xl font-black text-slate-800 tracking-tighter uppercase">
-            {editingId ? 'Event Details' : 'Create New Calendar Entry'}
-          </h3>
-          <div className="w-16" />
-        </div>
+    // Default states
+    const [title, setTitle] = useState('');
+    const [type, setType] = useState<CalendarEvent['type']>(prefillType);
+    const [date, setDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [time, setTime] = useState('09:00 AM');
+    const [description, setDescription] = useState('');
+    const [meetingLink, setMeetingLink] = useState('');
 
-        <div className="flex-1 w-full max-w-4xl mx-auto px-8 py-16 pb-32">
-          <form onSubmit={handleSubmit} className="space-y-12">
-            <div>
-              <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">Title / Description</label>
-              <input 
-                type="text" required autoFocus disabled={isReadOnly || formData.type === 'off-day'}
-                className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-10 py-8 text-2xl font-black focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-slate-200 shadow-inner disabled:opacity-70"
-                placeholder={formData.type === 'off-day' ? "Advisor Out of Office" : "e.g. Portfolio Strategy Review"}
-                value={formData.type === 'off-day' ? `${user?.name} Off-Day` : formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div>
-                <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">
-                  {formData.type === 'off-day' ? 'Start Date' : 'Event Date'}
-                </label>
-                <input type="date" required min={todayStr} disabled={isReadOnly}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-xl font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner disabled:opacity-70"
-                  value={formData.startDate}
-                  onChange={e => setFormData({...formData, startDate: e.target.value, endDate: e.target.value > formData.endDate ? e.target.value : formData.endDate})}
-                />
-              </div>
-              {formData.type === 'off-day' && (
-                <div>
-                  <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">End Date (Until)</label>
-                  <input type="date" required min={formData.startDate} disabled={isReadOnly}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-xl font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner"
-                    value={formData.endDate}
-                    onChange={e => setFormData({...formData, endDate: e.target.value})}
-                  />
+    // Auto visibility defaults: Meeting -> Public, Off Day -> Public, Task -> Private, Reminder -> Private
+    const getDefaultVisibility = (t: CalendarEvent['type']) => (t === 'meeting' || t === 'off-day') ? 'public' : 'private';
+    const [visibility, setVisibility] = useState<'public' | 'private'>(getDefaultVisibility(prefillType));
+
+    useEffect(() => {
+        if (selectedEvent) {
+            setTitle(selectedEvent.title);
+            setType(selectedEvent.type);
+            setDate(selectedEvent.date);
+            setEndDate(selectedEvent.endDate || '');
+            setTime(selectedEvent.time || '09:00 AM');
+            setDescription(selectedEvent.description || '');
+            setMeetingLink(selectedEvent.meetingLink || '');
+            setVisibility(selectedEvent.visibility || getDefaultVisibility(selectedEvent.type));
+        } else if (selectedDate) {
+            const dStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+            setDate(dStr);
+            setEndDate('');
+            setType(prefillType);
+            setVisibility(getDefaultVisibility(prefillType));
+            const defaults = { meeting: 'New Meeting', task: 'New Task', reminder: 'New Reminder', 'off-day': 'Off Day' };
+            setTitle(defaults[prefillType]);
+            setDescription('');
+            setMeetingLink('');
+            setTime('09:00 AM');
+        }
+    }, [selectedEvent, selectedDate, prefillType]);
+
+    // Handle manual type change to auto-update visibility
+    const handleTypeChange = (newType: CalendarEvent['type']) => {
+        setType(newType);
+        setVisibility(getDefaultVisibility(newType));
+    };
+
+    const handleSave = () => {
+        if (!title.trim() || !date) return;
+
+        const eventData: Partial<CalendarEvent> = {
+            title, type, date, time, description, meetingLink, visibility,
+            endDate: type === 'off-day' && endDate ? endDate : undefined,
+            creatorId: user?.id, creatorName: user?.name, status: 'scheduled'
+        };
+
+        if (selectedEvent) {
+            updateEvent({ ...selectedEvent, ...eventData } as CalendarEvent);
+        } else {
+            addEvent(eventData as CalendarEvent);
+        }
+        close();
+    };
+
+    const handleDelete = () => {
+        if (selectedEvent) {
+            deleteEvent(selectedEvent.id);
+            close();
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={close}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden flex flex-col"
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 pb-4 border-b border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800">{selectedEvent ? 'Edit Event' : 'New Event'}</h2>
+                    <button onClick={close} className="text-slate-400 hover:text-slate-600 bg-slate-100 p-2 rounded-full transition-colors">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-              )}
-              {formData.type !== 'off-day' && (
-                  <>
+
+                {/* Body form */}
+                <div className="p-6 space-y-4 overflow-y-auto max-h-[70vh] no-scrollbar">
+
+                    {/* Title */}
                     <div>
-                        <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">Start Time</label>
-                        <input type="time" required disabled={isReadOnly}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-xl font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 disabled:bg-slate-100 disabled:text-slate-300 transition-all shadow-inner"
-                            value={formData.time}
-                            onChange={e => setFormData({...formData, time: e.target.value})}
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Title</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            placeholder="Event Title..."
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:font-normal placeholder:text-slate-400"
                         />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Type */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Type</label>
+                            <select
+                                value={type}
+                                onChange={e => handleTypeChange(e.target.value as any)}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none"
+                            >
+                                <option value="meeting">Meeting</option>
+                                <option value="task">Task</option>
+                                <option value="reminder">Reminder</option>
+                                <option value="off-day">Off Day</option>
+                            </select>
+                        </div>
+
+                        {/* Visibility */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Visibility</label>
+                            <select
+                                value={visibility}
+                                onChange={e => setVisibility(e.target.value as any)}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none"
+                            >
+                                <option value="public">Public (Team)</option>
+                                <option value="private">Private (Only You)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Date */}
+                        <div className={type === 'off-day' ? 'col-span-1' : 'col-span-2'}>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Date {type === 'off-day' ? '(From)' : ''}</label>
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={e => setDate(e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            />
+                        </div>
+
+                        {/* End Date (Only for Off-Day) */}
+                        {type === 'off-day' && (
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">End Date (To)</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={e => setEndDate(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                />
+                            </div>
+                        )}
+
+                        {/* Time */}
+                        {type !== 'off-day' && (
+                            <div className="col-span-2 mt-2">
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Time</label>
+                                <input
+                                    type="text"
+                                    value={time}
+                                    onChange={e => setTime(e.target.value)}
+                                    placeholder="09:00 AM"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* External Link */}
+                    {(type === 'meeting' || meetingLink) && (
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Meeting Link</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="url"
+                                    value={meetingLink}
+                                    onChange={e => setMeetingLink(e.target.value)}
+                                    placeholder="https://zoom.us/j/..."
+                                    className="flex-1 bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:font-normal placeholder:text-slate-400"
+                                />
+                                {meetingLink && (
+                                    <a
+                                        href={meetingLink.startsWith('http') ? meetingLink : `https://${meetingLink}`}
+                                        target="_blank" rel="noreferrer"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center px-4 rounded-xl text-sm font-bold shadow-sm transition-colors whitespace-nowrap"
+                                    >
+                                        Join
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Notes */}
                     <div>
-                        <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">End Time</label>
-                        <input type="time" required disabled={isReadOnly}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-xl font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 disabled:bg-slate-100 disabled:text-slate-300 transition-all shadow-inner"
-                            value={formData.endTime}
-                            onChange={e => setFormData({...formData, endTime: e.target.value})}
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Notes / Description</label>
+                        <textarea
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            placeholder="Add details, agendas, or reminders..."
+                            rows={3}
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:font-normal placeholder:text-slate-400 resize-none"
                         />
                     </div>
-                  </>
-              )}
-            </div>
+                </div>
 
-            {formData.type === 'meeting' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div>
-                      <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">Meeting Link</label>
-                      <input 
-                          type="url" 
-                          disabled={isReadOnly}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-lg font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner"
-                          placeholder="https://meet.google.com/..."
-                          value={formData.meetingLink}
-                          onChange={e => setFormData({...formData, meetingLink: e.target.value})}
-                      />
-                  </div>
-                  <div>
-                      <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">Participants (Comma Separated)</label>
-                      <input 
-                          type="text" 
-                          disabled={isReadOnly}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-lg font-bold outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner"
-                          placeholder="John Doe, Jane Smith..."
-                          value={formData.participants}
-                          onChange={e => setFormData({...formData, participants: e.target.value})}
-                      />
-                  </div>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-[11px] font-black text-slate-400 uppercase mb-8 ml-2 tracking-[0.2em]">Classification</label>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                  {[
-                    { id: 'meeting', icon: CalendarIcon, label: 'Meeting', active: 'border-emerald-600 text-emerald-600 ring-emerald-50' },
-                    { id: 'reminder', icon: AlertCircle, label: 'Reminder', active: 'border-amber-400 text-amber-500 ring-amber-50' },
-                    { id: 'task', icon: CheckCircle2, label: 'Task', active: 'border-blue-600 text-blue-600 ring-blue-50' },
-                    { id: 'off-day', icon: Coffee, label: 'Off Day', active: 'border-rose-600 text-rose-600 ring-rose-50' }
-                  ].map(type => (
-                      <button
-                          key={type.id}
-                          type="button"
-                          disabled={isReadOnly}
-                          onClick={() => setFormData({...formData, type: type.id as any})}
-                          className={`flex flex-col items-center justify-center gap-5 py-12 rounded-[4rem] border-2 transition-all group relative overflow-hidden
-                              ${formData.type === type.id ? `bg-white ${type.active} shadow-2xl scale-105 z-10 ring-8` : 'bg-slate-50 border-transparent text-slate-400 hover:border-slate-200 hover:bg-white'}
-                              ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                          `}
-                      >   
-                          <type.icon className={`h-12 w-12 transition-transform duration-500 group-hover:scale-110`} />
-                          <div className="text-center">
-                              <span className="block text-[11px] font-black uppercase tracking-[0.25em]">{type.label}</span>
-                              <span className="text-[9px] font-bold opacity-60 uppercase tracking-widest mt-1">
-                                  {(type.id === 'reminder' || type.id === 'task') ? 'Private' : 'Public'}
-                              </span>
-                          </div>
-                      </button>
-                  ))}
-              </div>
-            </div>
-
-            <div>
-                <label className="block text-[11px] font-black text-slate-400 uppercase mb-4 ml-2 tracking-[0.2em]">Additional Notes</label>
-                <textarea 
-                    disabled={isReadOnly}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-[2.5rem] px-8 py-6 text-lg font-medium outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner min-h-[150px]"
-                    placeholder="Add any details, agenda items, or notes here..."
-                    value={formData.description}
-                    onChange={e => setFormData({...formData, description: e.target.value})}
-                />
-            </div>
-
-            <div className="flex items-center gap-4 pt-8">
-                {editingId && !isReadOnly && (
-                    <>
-                        <button 
-                            type="button"
+                {/* Footer actions */}
+                <div className="p-6 pt-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50 mt-auto">
+                    {selectedEvent ? (
+                        <button
                             onClick={handleDelete}
-                            className="px-6 py-5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-full font-black uppercase tracking-widest text-xs transition-all border border-rose-100 hover:border-rose-200"
+                            className="px-4 py-2.5 text-sm font-bold text-red-600 bg-red-100 hover:bg-red-200 rounded-xl transition-colors"
                         >
                             Delete
                         </button>
-                        <button 
-                            type="button"
-                            onClick={() => setFormData({ ...formData, status: formData.status === 'canceled' ? 'scheduled' : 'canceled' })}
-                            className={`px-6 py-5 rounded-full font-black uppercase tracking-widest text-xs transition-all border ${
-                                formData.status === 'canceled' 
-                                ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100' 
-                                : 'bg-slate-50 text-slate-500 hover:bg-slate-100 border-slate-200'
-                            }`}
+                    ) : (
+                        <div /> // spacer
+                    )}
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={close}
+                            className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-xl transition-colors"
                         >
-                            {formData.status === 'canceled' ? 'Restore Event' : 'Cancel Event'}
+                            Cancel
                         </button>
-                    </>
-                )}
-                <div className="flex-1" />
-                <button 
-                    type="button"
-                    onClick={onClose}
-                    className="px-10 py-5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black uppercase tracking-widest text-xs transition-all"
-                >
-                    Close
-                </button>
-                {!isReadOnly && (
-                    <button 
-                        type="submit"
-                        className="px-12 py-5 bg-blue-600 text-white hover:bg-blue-700 rounded-full font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95"
-                    >
-                        {editingId ? 'Save Changes' : 'Create Event'}
-                    </button>
-                )}
-            </div>
-          </form>
+                        <button
+                            onClick={handleSave}
+                            disabled={!title.trim()}
+                            className="px-6 py-2.5 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-sm transition-all active:scale-95"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </div>
+
+            </motion.div>
         </div>
-      </motion.div>
-    </motion.div>
-  );
+    );
 };

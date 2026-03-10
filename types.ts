@@ -6,7 +6,7 @@ export enum LeadStatus {
   CONTACTED = 'Contacted',
   UNAVAILABLE = 'Unavailable',
   PROPOSAL = 'Proposal',
-  APPROVED = 'Approved', 
+  APPROVED = 'Approved',
   CLOSED = 'Closed',
   LOST = 'Lost',
   ASSIGNED = 'Assigned'
@@ -70,7 +70,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
-  category: AdvisorCategory; 
+  category: AdvisorCategory;
   title?: string;
   yearsOfExperience?: number;
   productsSold?: ProductType[];
@@ -122,7 +122,7 @@ export interface Lead {
   score: number;
   qualification: 'Hot' | 'Warm' | 'Cold';
   isSimulated?: boolean;
-  assignedTo?: string; 
+  assignedTo?: string;
   priority?: 'High' | 'Medium' | 'Low';
   notes?: string;
   source?: string;
@@ -244,6 +244,7 @@ export interface CalendarEvent {
   id: string;
   title: string;
   date: string;
+  endDate?: string;
   time: string;
   endTime?: string;
   type: 'meeting' | 'reminder' | 'task' | 'off-day';
@@ -254,6 +255,7 @@ export interface CalendarEvent {
   participants?: { name: string; avatar?: string }[];
   creatorId?: string;
   creatorName?: string;
+  visibility?: 'public' | 'private';
 }
 
 export interface Email {
@@ -320,9 +322,9 @@ export interface Resource {
   id: string;
   title: string;
   type: 'PDF' | 'Link' | 'Video' | 'Article' | 'Blog' | 'Image' | 'YouTube';
-  url: string; 
-  thumbnail?: string; 
-  content?: string; 
+  url: string;
+  thumbnail?: string;
+  content?: string;
   description?: string;
   dateAdded: string;
   author?: string;
@@ -370,6 +372,7 @@ export interface CompanySettings {
   aboutImageUrl?: string;
   productImages?: Record<string, string>;
   partners?: Record<string, string>;
+  partnerMarqueeSpeed?: number;
   hiddenProducts?: string[];
   customProducts?: ProductListing[];
   termsOfUse?: string;
@@ -378,7 +381,12 @@ export interface CompanySettings {
   socialLinks?: SocialLink[];
   logoUrl?: string;
   hideLogo?: boolean;
-  
+
+  // Theme & Branding
+  themePrimaryColor?: string;
+  themeSecondaryColor?: string;
+  themeStructure?: 'default' | 'modern' | 'minimal' | 'bold' | 'ios' | 'macos' | 'material' | 'neumorphic';
+
   // Real Estate Portal Specifics
   realEstateAbout?: string;
   realEstateContactCta?: string;
@@ -389,7 +397,7 @@ export interface Testimonial {
   id: string;
   advisorId: string;
   clientName: string;
-  rating: number; 
+  rating: number;
   reviewText: string;
   status: 'pending' | 'approved' | 'pending_edit';
   date: string;
@@ -421,7 +429,7 @@ export enum ApplicationStatus {
 
 export interface Application {
   id: string;
-  leadId: string; 
+  leadId: string;
   clientName: string;
   carrier: string;
   policyNumber: string;
@@ -455,7 +463,7 @@ export interface PropertyListing {
   listedDate: string;
   sellerName: string;
   advisorId: string;
-  
+
   // Overview
   headline?: string;
   description?: string;
@@ -567,50 +575,50 @@ export interface EscrowTransaction {
 }
 
 export interface PortfolioHolding {
-    id: string;
-    ticker: string;
-    name: string;
-    shares: number;
-    price: number;
-    value: number;
-    allocation: number;
-    assetClass: 'Equity' | 'Fixed Income' | 'Cash' | 'Alternative';
+  id: string;
+  ticker: string;
+  name: string;
+  shares: number;
+  price: number;
+  value: number;
+  allocation: number;
+  assetClass: 'Equity' | 'Fixed Income' | 'Cash' | 'Alternative';
 }
 
 export interface ClientPortfolio {
-    id: string;
-    clientId: string;
-    clientName: string;
-    totalValue: number;
-    ytdReturn: number;
-    riskProfile: 'Conservative' | 'Moderate' | 'Aggressive' | 'Growth';
-    holdings: PortfolioHolding[];
-    lastRebalanced: string;
-    advisorId: string;
+  id: string;
+  clientId: string;
+  clientName: string;
+  totalValue: number;
+  ytdReturn: number;
+  riskProfile: 'Conservative' | 'Moderate' | 'Aggressive' | 'Growth';
+  holdings: PortfolioHolding[];
+  lastRebalanced: string;
+  advisorId: string;
 }
 
 export interface ComplianceDocument {
-    id: string;
-    title: string;
-    type: 'Form ADV' | 'KYC' | 'Risk Assessment' | 'Trade Blotter' | 'IPS' | 'Annual Review';
-    clientName?: string;
-    uploadDate: string;
-    status: 'Valid' | 'Expired' | 'Pending Review';
-    url: string;
-    advisorId: string;
+  id: string;
+  title: string;
+  type: 'Form ADV' | 'KYC' | 'Risk Assessment' | 'Trade Blotter' | 'IPS' | 'Annual Review';
+  clientName?: string;
+  uploadDate: string;
+  status: 'Valid' | 'Expired' | 'Pending Review';
+  url: string;
+  advisorId: string;
 }
 
 export interface AdvisoryFee {
-    id: string;
-    clientId: string;
-    clientName: string;
-    aum: number;
-    feeRate: number; 
-    billingPeriod: 'Q1' | 'Q2' | 'Q3' | 'Q4';
-    amount: number;
-    status: 'Invoiced' | 'Paid' | 'Overdue';
-    dueDate: string;
-    advisorId: string;
+  id: string;
+  clientId: string;
+  clientName: string;
+  aum: number;
+  feeRate: number;
+  billingPeriod: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  amount: number;
+  status: 'Invoiced' | 'Paid' | 'Overdue';
+  dueDate: string;
+  advisorId: string;
 }
 
 export enum AccountType {
@@ -706,28 +714,28 @@ export interface BankRule {
 }
 
 export interface LoanApplication {
-    id: string;
-    clientName: string;
-    loanAmount: number;
-    loanType: 'Purchase' | 'Refinance' | 'HELOC' | 'Cash-Out Refi';
-    status: 'Applied' | 'Processing' | 'Underwriting' | 'Approved' | 'Closed' | 'Declined';
-    interestRate: number;
-    currentRate?: number;
-    propertyValue: number;
-    ltv: number;
-    creditScore: number;
-    advisorId: string;
-    createdAt: string;
-    strategicGoal?: 'Lower Payment' | 'Equity Access' | 'Debt Consolidation' | 'Wealth Building';
-    monthlySavings?: number;
-    lifetimeInterestSavings?: number;
+  id: string;
+  clientName: string;
+  loanAmount: number;
+  loanType: 'Purchase' | 'Refinance' | 'HELOC' | 'Cash-Out Refi';
+  status: 'Applied' | 'Processing' | 'Underwriting' | 'Approved' | 'Closed' | 'Declined';
+  interestRate: number;
+  currentRate?: number;
+  propertyValue: number;
+  ltv: number;
+  creditScore: number;
+  advisorId: string;
+  createdAt: string;
+  strategicGoal?: 'Lower Payment' | 'Equity Access' | 'Debt Consolidation' | 'Wealth Building';
+  monthlySavings?: number;
+  lifetimeInterestSavings?: number;
 }
 
 export enum WorkflowTrigger {
-    LEAD_INGESTION = 'LEAD INGESTION',
-    POLICY_EXPIRATION = 'POLICY EXPIRATION',
-    CLIENT_BIRTHDAY = 'CLIENT BIRTHDAY',
-    MANUAL_TRIGGER = 'MANUAL TRIGGER'
+  LEAD_INGESTION = 'LEAD INGESTION',
+  POLICY_EXPIRATION = 'POLICY EXPIRATION',
+  CLIENT_BIRTHDAY = 'CLIENT BIRTHDAY',
+  MANUAL_TRIGGER = 'MANUAL TRIGGER'
 }
 
 export interface Workflow {

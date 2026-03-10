@@ -2,7 +2,8 @@
 import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 import { Lead, ProductType, CalendarEvent, AI_ASSISTANT_ID } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Provide a mocked fallback key to prevent app-breaking initialization errors.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'AIzaSy_Mock_Key_For_Development_Only' });
 
 /**
  * LEAD ENRICHMENT (Contextual Analysis)
@@ -85,9 +86,9 @@ export const generateStrategicBrief = async (lead: Lead): Promise<string> => {
  * Processes internal chat messages and administrative queries.
  */
 export const getInternalAssistantResponse = async (
-  message: string, 
+  message: string,
   userContext: string,
-  history: {role: 'user'|'model', text: string}[] = []
+  history: { role: 'user' | 'model', text: string }[] = []
 ): Promise<string> => {
   try {
     const chat = ai.chats.create({

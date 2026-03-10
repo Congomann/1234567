@@ -2,482 +2,192 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarEvent } from '../../types';
-import { getAnimationConfig, getDaysInMonth, getFirstDayOfMonth, formatDateHeader, formatTimeForInput, isEventStartingSoon } from '../../components/calendar/utils';
-import { CalendarHeader, FilterType } from '../../components/calendar/CalendarHeader';
-import { CalendarGrid } from '../../components/calendar/CalendarGrid';
-import { WeekView } from '../../components/calendar/WeekView';
-import { AgendaSidebar } from '../../components/calendar/AgendaSidebar';
-import { ReminderToast } from '../../components/calendar/ReminderToast';
-import { ContextMenu } from '../../components/calendar/ContextMenu';
+import { Sidebar } from '../../components/calendar/Sidebar';
+import { GridMonth } from '../../components/calendar/GridMonth';
+import { GridWeek } from '../../components/calendar/GridWeek';
+import { GridDay } from '../../components/calendar/GridDay';
 import { EventModal } from '../../components/calendar/EventModal';
-import { AnimationSettings } from '../../components/calendar/AnimationSettings';
+import { ChevronLeft, ChevronRight, Search, List, Filter, Bell, Globe } from 'lucide-react';
+
+export type CalendarViewType = 'month' | 'week' | 'day';
 
 export const Calendar: React.FC = () => {
   const { events, addEvent, updateEvent, deleteEvent, user } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'month' | 'week'>('week');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [animationMode, setAnimationMode] = useState<'Minimal' | 'Professional' | 'Friendly' | 'Dynamic'>('Professional');
-  const [filterType, setFilterType] = useState<FilterType>('all');
-  
-  const [dragStartDate, setDragStartDate] = useState<string | null>(null);
-  const [dragCurrentDate, setDragCurrentDate] = useState<string | null>(null);
+  const [view, setView] = useState<CalendarViewType>('month');
 
-  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, dateStr: string } | null>(null);
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [prefillType, setPrefillType] = useState<CalendarEvent['type']>('meeting');
 
-  const [activeReminder, setActiveReminder] = useState<CalendarEvent | null>(null);
+  // Utilities
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
 
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
-
-  const animConfig = getAnimationConfig(animationMode);
-
-  /**
-   * Filter logic for privacy AND tabs:
-   * 1. Off-days are public (everyone sees everyone's red marks)
-   * 2. Meetings are public (company-wide)
-   * 3. Reminders and Tasks are PRIVATE (only visible to creator)
-   */
+  // Visible events logic based on Public / Private
   const visibleEvents = useMemo(() => {
-    // 1. Privacy Filter
-    let filtered = events.filter(e => {
-        if (e.type === 'off-day' || e.type === 'meeting') return true;
-        return e.creatorId === user?.id;
+    return events.filter(e => {
+      // Default visibility fallback based on instructions if undefined
+      const isPublic = e.visibility ? e.visibility === 'public' : (e.type === 'meeting' || e.type === 'off-day');
+
+      // Public events visible to all. Private visible only to creator.
+      if (isPublic) return true;
+      return e.creatorId === user?.id;
     });
+  }, [events, user]);
 
-    // 2. Tab Filter
-    switch (filterType) {
-        case 'events':
-            // Show non-meeting events (tasks, reminders)
-            filtered = filtered.filter(e => e.type !== 'meeting' && e.type !== 'off-day');
-            break;
-        case 'meeting':
-            filtered = filtered.filter(e => e.type === 'meeting');
-            break;
-        case 'canceled':
-            filtered = filtered.filter(e => e.status === 'canceled');
-            break;
-        case 'conflicted':
-            // Basic conflict detection (assuming 1 hour duration for simplicity)
-            // Ideally we check start/end times but we only have start time.
-            // We'll mark conflicts if they are on the same day and same hour.
-            const conflictIds = new Set<string>();
-            const eventMap = new Map<string, CalendarEvent[]>();
-            
-            filtered.forEach(e => {
-                if (e.status === 'canceled') return;
-                const key = `${e.date}-${e.time}`;
-                if (!eventMap.has(key)) eventMap.set(key, []);
-                eventMap.get(key)?.push(e);
-            });
-
-            eventMap.forEach((group) => {
-                if (group.length > 1) {
-                    group.forEach(e => conflictIds.add(e.id));
-                }
-            });
-            
-            filtered = filtered.filter(e => conflictIds.has(e.id));
-            break;
-        case 'all':
-        default:
-            // No additional filtering
-            break;
-    }
-
-    return filtered;
-  }, [events, user, filterType]);
-
-  const [formData, setFormData] = useState<{
-    title: string;
-    startDate: string;
-    endDate: string;
-    time: string;
-    endTime: string;
-    type: 'meeting' | 'reminder' | 'task' | 'off-day';
-    status: 'scheduled' | 'canceled' | 'completed';
-    description?: string;
-    meetingLink?: string;
-    participants?: string; // Comma separated names
-  }>({
-    title: '',
-    startDate: todayStr,
-    endDate: todayStr,
-    time: '09:00',
-    endTime: '10:00',
-    type: 'meeting',
-    status: 'scheduled',
-    description: '',
-    meetingLink: '',
-    participants: ''
-  });
-  
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const editingEvent = events.find(e => e.id === editingId);
-  const isReadOnly = editingId ? editingEvent?.creatorId !== user?.id : false;
-
-  const changeMonth = (offset: number) => {
-    const newDate = new Date(currentDate.setMonth(currentDate.getMonth() + offset));
-    setCurrentDate(new Date(newDate));
+  // Handlers
+  const handlePrev = () => {
+    const d = new Date(currentDate);
+    if (view === 'month') d.setMonth(d.getMonth() - 1);
+    if (view === 'week') d.setDate(d.getDate() - 7);
+    if (view === 'day') d.setDate(d.getDate() - 1);
+    setCurrentDate(d);
   };
 
-  const handleOpenCreateModal = () => {
-    setEditingId(null);
-    setFormData({
-        title: '',
-        startDate: todayStr,
-        endDate: todayStr,
-        time: '09:00',
-        endTime: '10:00',
-        type: 'meeting',
-        status: 'scheduled',
-        description: '',
-        meetingLink: '',
-        participants: ''
-    });
-    setIsModalOpen(true);
+  const handleNext = () => {
+    const d = new Date(currentDate);
+    if (view === 'month') d.setMonth(d.getMonth() + 1);
+    if (view === 'week') d.setDate(d.getDate() + 7);
+    if (view === 'day') d.setDate(d.getDate() + 1);
+    setCurrentDate(d);
   };
 
-  const handleDateClick = (dateStr: string) => {
-    if (dateStr < todayStr) return;
-    setEditingId(null);
-    setFormData({
-        title: '',
-        startDate: dateStr,
-        endDate: dateStr,
-        time: '09:00',
-        endTime: '10:00',
-        type: 'meeting',
-        status: 'scheduled',
-        description: '',
-        meetingLink: '',
-        participants: ''
-    });
-    setIsModalOpen(true);
+  const handleToday = () => {
+    setCurrentDate(new Date());
   };
 
-  // Drag to Create (Selection)
-  const handleDragStart = (dateStr: string) => {
-    if (dateStr < todayStr) return;
-    setDragStartDate(dateStr);
-    setDragCurrentDate(dateStr);
+  const openModalNew = (date: string, type: CalendarEvent['type'] = 'meeting', time: string = '09:00 AM') => {
+    setSelectedEvent(null);
+    setSelectedDate(new Date(date + 'T00:00:00'));
+    setPrefillType(type);
+    setModalOpen(true);
   };
 
-  const handleDragEnter = (dateStr: string) => {
-    if (!dragStartDate || dateStr < todayStr) return;
-    setDragCurrentDate(dateStr);
+  const openModalEdit = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setSelectedDate(null);
+    setModalOpen(true);
   };
 
-  const handleDragEnd = () => {
-    if (!dragStartDate || !dragCurrentDate) {
-        setDragStartDate(null);
-        setDragCurrentDate(null);
-        return;
-    }
-
-    const start = dragStartDate < dragCurrentDate ? dragStartDate : dragCurrentDate;
-    const end = dragStartDate > dragCurrentDate ? dragStartDate : dragCurrentDate;
-
-    if (start !== end) {
-      setEditingId(null);
-      setFormData({
-          title: '',
-          startDate: start,
-          endDate: end,
-          time: '09:00',
-          endTime: '10:00',
-          type: 'meeting',
-          status: 'scheduled',
-          description: '',
-          meetingLink: '',
-          participants: ''
-      });
-      setIsModalOpen(true);
-    }
-    
-    setDragStartDate(null);
-    setDragCurrentDate(null);
-  };
-
-  // Drag to Reschedule (Event)
-  const handleEventDragStart = (e: React.DragEvent, event: CalendarEvent) => {
-    e.stopPropagation();
-    e.dataTransfer.setData('eventId', event.id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleEventDrop = (e: React.DragEvent, dateStr: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const eventId = e.dataTransfer.getData('eventId');
-    if (eventId && dateStr >= todayStr) {
-      const event = events.find(e => e.id === eventId);
-      if (event && event.creatorId === user?.id) {
-        updateEvent({ ...event, date: dateStr });
-      }
-    }
-  };
-
-  const handleWeekEventDrop = (e: React.DragEvent, dateStr: string, timeStr?: string) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const eventId = e.dataTransfer.getData('eventId');
-      if (eventId && dateStr >= todayStr) {
-        const event = events.find(e => e.id === eventId);
-        if (event && event.creatorId === user?.id) {
-          const updates: any = { date: dateStr };
-          if (timeStr) updates.time = timeStr;
-          updateEvent({ ...event, ...updates });
-        }
-      }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleContextMenu = (e: React.MouseEvent, dateStr: string) => {
-    e.preventDefault();
-    if (dateStr < todayStr) return;
-    setContextMenu({ x: e.clientX, y: e.clientY, dateStr });
-  };
-
-  const closeContextMenu = () => setContextMenu(null);
-
-  const handleQuickAction = (type: 'meeting' | 'reminder' | 'task' | 'off-day') => {
-    if (!contextMenu) return;
-    setEditingId(null);
-    setFormData({
-        title: '',
-        startDate: contextMenu.dateStr,
-        endDate: contextMenu.dateStr,
-        time: '09:00',
-        endTime: '10:00',
-        type,
-        status: 'scheduled',
-        description: '',
-        meetingLink: '',
-        participants: ''
-    });
-    setIsModalOpen(true);
-    closeContextMenu();
-  };
-
-  const handleEventClick = (event: CalendarEvent) => {
-    setEditingId(event.id);
-    setFormData({
-        title: event.title,
-        startDate: event.date,
-        endDate: event.date,
-        time: formatTimeForInput(event.time),
-        endTime: event.endTime ? formatTimeForInput(event.endTime) : '10:00',
-        type: event.type,
-        status: event.status || 'scheduled',
-        description: event.description || '',
-        meetingLink: event.meetingLink || '',
-        participants: event.participants?.map(p => p.name).join(', ') || ''
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isReadOnly) return;
-    
-    const [hours, minutes] = formData.time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    const formattedTime = formData.type === 'off-day' ? 'All Day' : `${hour12}:${minutes} ${ampm}`;
-
-    const [endHours, endMinutes] = formData.endTime.split(':');
-    const endHour = parseInt(endHours);
-    const endAmpm = endHour >= 12 ? 'PM' : 'AM';
-    const endHour12 = endHour % 12 || 12;
-    const formattedEndTime = formData.type === 'off-day' ? 'All Day' : `${endHour12}:${endMinutes} ${endAmpm}`;
-
-    const participantsList = formData.participants
-      ? formData.participants.split(',').map(name => ({ name: name.trim() })).filter(p => p.name)
-      : [];
-
-    if (editingId) {
-        updateEvent({
-            id: editingId,
-            title: formData.title,
-            date: formData.startDate,
-            time: formattedTime,
-            endTime: formattedEndTime,
-            type: formData.type,
-            status: formData.status,
-            description: formData.description,
-            meetingLink: formData.meetingLink,
-            participants: participantsList,
-            creatorId: editingEvent?.creatorId,
-            creatorName: editingEvent?.creatorName
-        });
+  const titleFormat = () => {
+    if (view === 'month') {
+      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (view === 'week') {
+      const start = new Date(currentDate);
+      start.setDate(start.getDate() - start.getDay());
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     } else {
-        const start = new Date(formData.startDate);
-        const end = new Date(formData.endDate);
-        
-        if (start > end) {
-            alert("End date cannot be before start date.");
-            return;
-        }
-
-        const tempDate = new Date(start);
-        while (tempDate <= end) {
-            const currentStr = tempDate.toISOString().split('T')[0];
-            addEvent({
-                title: formData.type === 'off-day' ? `${user?.name || 'Advisor'} Off-Day` : formData.title,
-                date: currentStr,
-                time: formattedTime,
-                endTime: formattedEndTime,
-                type: formData.type,
-                status: formData.status,
-                description: formData.description,
-                meetingLink: formData.meetingLink,
-                participants: participantsList,
-                creatorId: user?.id,
-                creatorName: user?.name
-            });
-            tempDate.setDate(tempDate.getDate() + 1);
-        }
-    }
-    setIsModalOpen(false);
-  };
-
-  const handleDelete = () => {
-    if (editingId && !isReadOnly) {
-        if(window.confirm('Delete this event?')) {
-            deleteEvent(editingId);
-            setIsModalOpen(false);
-        }
+      return currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     }
   };
-
-  const upcomingEvents = useMemo(() => {
-      return [...visibleEvents]
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .filter(e => new Date(e.date) >= new Date(new Date().setHours(0,0,0,0)));
-  }, [visibleEvents]);
-
-  const checkEventStartingSoon = (date: string, time: string) => isEventStartingSoon(date, time, todayStr);
-
-  // Check for upcoming meetings to show reminder toast
-  useEffect(() => {
-    const checkReminders = () => {
-      const upcomingMeeting = upcomingEvents.find(e => e.type === 'meeting' && checkEventStartingSoon(e.date, e.time));
-      if (upcomingMeeting && activeReminder?.id !== upcomingMeeting.id) {
-        setActiveReminder(upcomingMeeting);
-      } else if (!upcomingMeeting) {
-        setActiveReminder(null);
-      }
-    };
-    
-    checkReminders();
-    const interval = setInterval(checkReminders, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, [upcomingEvents, activeReminder, todayStr]);
 
   return (
-    <motion.div 
-      className="flex flex-col lg:flex-row h-full gap-8"
-      initial={animConfig.container.initial}
-      animate={animConfig.container.animate}
-      transition={animConfig.container.transition}
-    >
-      <div className="flex-1 flex flex-col bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-        <CalendarHeader
-          currentDate={currentDate}
-          formatDateHeader={formatDateHeader}
-          changeMonth={changeMonth}
-          setCurrentDate={setCurrentDate}
-          setIsSettingsOpen={setIsSettingsOpen}
-          handleOpenCreateModal={handleOpenCreateModal}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-        />
+    <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+      {/* Sidebar with Alerts */}
+      <Sidebar visibleEvents={visibleEvents} onAlertClick={openModalEdit} />
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-            {viewMode === 'month' ? (
-                <CalendarGrid
-                currentDate={currentDate}
-                visibleEvents={visibleEvents}
-                user={user}
-                animConfig={animConfig}
-                todayStr={todayStr}
-                dragStartDate={dragStartDate}
-                dragCurrentDate={dragCurrentDate}
-                isEventStartingSoon={checkEventStartingSoon}
-                handleDateClick={handleDateClick}
-                handleDragStart={handleDragStart}
-                handleDragEnter={handleDragEnter}
-                handleDragEnd={handleDragEnd}
-                handleDragOver={handleDragOver}
-                handleEventDrop={handleEventDrop}
-                handleContextMenu={handleContextMenu}
-                handleEventDragStart={handleEventDragStart}
-                handleEventClick={handleEventClick}
-                getFirstDayOfMonth={getFirstDayOfMonth}
-                getDaysInMonth={getDaysInMonth}
-                />
-            ) : (
-                <WeekView
-                    currentDate={currentDate}
-                    visibleEvents={visibleEvents}
-                    user={user}
-                    animConfig={animConfig}
-                    todayStr={todayStr}
-                    isEventStartingSoon={checkEventStartingSoon}
-                    handleEventClick={handleEventClick}
-                    handleEventDragStart={handleEventDragStart}
-                    handleEventDrop={handleWeekEventDrop}
-                    handleDragOver={handleDragOver}
-                />
-            )}
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-white/50 backdrop-blur-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-white">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
+              <button onClick={handleToday} className="px-4 py-1.5 text-sm font-semibold text-slate-700 bg-white rounded-lg shadow-sm">Today</button>
+              <button onClick={handlePrev} className="p-2 text-slate-500 hover:text-slate-900 transition-colors"><ChevronLeft size={20} /></button>
+              <button onClick={handleNext} className="p-2 text-slate-500 hover:text-slate-900 transition-colors"><ChevronRight size={20} /></button>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 min-w-[160px]">{titleFormat()}</h2>
+            <div className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-1.5 ml-1 mt-1 uppercase tracking-widest">
+              <Globe size={14} />
+              {Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ')}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex bg-slate-100/80 p-1 rounded-xl text-sm font-medium">
+              <button
+                onClick={() => setView('month')}
+                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'month' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => setView('week')}
+                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'week' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => setView('day')}
+                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'day' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Day
+              </button>
+            </div>
+            <button className="bg-slate-900 text-white p-2.5 rounded-full hover:bg-slate-800 transition-transform hover:scale-105 active:scale-95 shadow-sm">
+              <PlusIcon className="w-5 h-5" onClick={() => openModalNew(todayStr)} />
+            </button>
+          </div>
+        </div>
+
+        {/* Calendar View Area */}
+        <div className="flex-1 overflow-auto bg-white relative">
+          {view === 'month' && (
+            <GridMonth
+              currentDate={currentDate}
+              visibleEvents={visibleEvents}
+              openModalNew={openModalNew}
+              openModalEdit={openModalEdit}
+              updateEvent={updateEvent}
+              todayStr={todayStr}
+            />
+          )}
+          {view === 'week' && (
+            <GridWeek
+              currentDate={currentDate}
+              visibleEvents={visibleEvents}
+              openModalNew={openModalNew}
+              openModalEdit={openModalEdit}
+              updateEvent={updateEvent}
+              todayStr={todayStr}
+            />
+          )}
+          {view === 'day' && (
+            <GridDay
+              currentDate={currentDate}
+              visibleEvents={visibleEvents}
+              openModalNew={openModalNew}
+              openModalEdit={openModalEdit}
+              updateEvent={updateEvent}
+              todayStr={todayStr}
+            />
+          )}
         </div>
       </div>
 
-      <AgendaSidebar
-        upcomingEvents={upcomingEvents}
-        animConfig={animConfig}
-        isEventStartingSoon={checkEventStartingSoon}
-        handleEventClick={handleEventClick}
-      />
-
-      <ReminderToast
-        activeReminder={activeReminder}
-        setActiveReminder={setActiveReminder}
-      />
-
-      <ContextMenu
-        contextMenu={contextMenu}
-        closeContextMenu={closeContextMenu}
-        handleQuickAction={handleQuickAction}
-      />
-
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        isReadOnly={isReadOnly}
-        editingId={editingId}
-        formData={formData}
-        setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        handleDelete={handleDelete}
-        animConfig={animConfig}
-        user={user}
-        todayStr={todayStr}
-      />
-
-      <AnimationSettings
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        animationMode={animationMode}
-        setAnimationMode={setAnimationMode}
-      />
-    </motion.div>
+      <AnimatePresence>
+        {modalOpen && (
+          <EventModal
+            isOpen={modalOpen}
+            close={() => setModalOpen(false)}
+            selectedDate={selectedDate}
+            selectedEvent={selectedEvent}
+            prefillType={prefillType}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
+
+const PlusIcon = ({ className, onClick }: { className?: string; onClick?: () => void }) => (
+  <svg onClick={onClick} className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+  </svg>
+);

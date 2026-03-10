@@ -1,165 +1,304 @@
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState, useEffect } from 'react';
 import { CalendarEvent } from '../../types';
 import { CalendarEventCard } from './CalendarEventCard';
 
 interface WeekViewProps {
-  currentDate: Date;
-  visibleEvents: CalendarEvent[];
-  user: any;
-  animConfig: any;
-  todayStr: string;
-  isEventStartingSoon: (date: string, time: string) => boolean;
-  handleEventClick: (event: CalendarEvent) => void;
-  handleEventDragStart: (e: React.DragEvent, event: CalendarEvent) => void;
-  handleEventDrop: (e: React.DragEvent, dateStr: string, timeStr?: string) => void;
-  handleDragOver: (e: React.DragEvent) => void;
+    currentDate: Date;
+    visibleEvents: CalendarEvent[];
+    user: any;
+    animConfig: any;
+    todayStr: string;
+    isEventStartingSoon: (date: string, time: string) => boolean;
+    handleEventClick: (event: CalendarEvent) => void;
+    handleEventDragStart: (e: React.DragEvent, event: CalendarEvent) => void;
+    handleEventDrop: (e: React.DragEvent, dateStr: string, timeStr?: string) => void;
+    handleDragOver: (e: React.DragEvent) => void;
+    handleDateClick?: (dateStr: string, timeStr?: string) => void;
 }
 
+const toLocalDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const parseTime = (timeStr: string): { h: number; m: number } => {
+    if (!timeStr || timeStr === 'All Day') return { h: 9, m: 0 };
+    const parts = timeStr.trim().split(' ');
+    const [hStr, mStr] = (parts[0] || '9:00').split(':');
+    let h = parseInt(hStr) || 9;
+    const m = parseInt(mStr) || 0;
+    const modifier = parts[1]?.toUpperCase();
+    if (modifier === 'PM' && h !== 12) h += 12;
+    if (modifier === 'AM' && h === 12) h = 0;
+    return { h, m };
+};
+
+// Pixel height for one hour
+const PX_PER_HOUR = 120;
+// Start hour offset for the grid (we display 6am onward)
+const GRID_START_HOUR = 6;
+
+// Hours to display in the left column
+const DISPLAY_HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
+const hourLabel = (h: number) => {
+    if (h === 0 || h === 24) return '12am';
+    if (h === 12) return '12pm';
+    return h < 12 ? `${h}am` : `${h - 12}pm`;
+};
+
 export const WeekView: React.FC<WeekViewProps> = ({
-  currentDate,
-  visibleEvents,
-  user,
-  animConfig,
-  todayStr,
-  isEventStartingSoon,
-  handleEventClick,
-  handleEventDragStart,
-  handleEventDrop,
-  handleDragOver
+    currentDate,
+    visibleEvents,
+    user,
+    animConfig,
+    todayStr,
+    isEventStartingSoon,
+    handleEventClick,
+    handleEventDragStart,
+    handleEventDrop,
+    handleDragOver,
+    handleDateClick,
 }) => {
-  const weekDays = useMemo(() => {
-    const startOfWeek = new Date(currentDate);
-    const day = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    startOfWeek.setDate(diff);
+    // Compute the 7 days of the current week (Mon..Sun or Sun..Sat – using Mon-first as in Figma)
+    const weekDays = useMemo(() => {
+        const d = new Date(currentDate);
+        const day = d.getDay(); // 0=Sun
+        const diffToMon = day === 0 ? -6 : 1 - day;
+        d.setDate(d.getDate() + diffToMon);
+        return Array.from({ length: 7 }, (_, i) => {
+            const nd = new Date(d);
+            nd.setDate(d.getDate() + i);
+            return nd;
+        });
+    }, [currentDate]);
 
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      days.push(d);
-    }
-    return days;
-  }, [currentDate]);
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const iv = setInterval(() => setNow(new Date()), 60000);
+        return () => clearInterval(iv);
+    }, []);
 
-  const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6 AM to 11 PM
+    const gridHeight = DISPLAY_HOURS.length * PX_PER_HOUR;
 
-  const getEventStyle = (event: CalendarEvent) => {
-    const parseTime = (timeStr: string) => {
-        if (timeStr === 'All Day') return { h: 9, m: 0 };
-        const [time, modifier] = timeStr.split(' ');
-        let [h, m] = time.split(':').map(Number);
-        if (modifier === 'PM' && h !== 12) h += 12;
-        if (modifier === 'AM' && h === 12) h = 0;
-        return { h, m };
+    // Compute absolute positioning for an event card
+    const getEventPos = (event: CalendarEvent) => {
+        const start = parseTime(event.time);
+        const end = event.endTime ? parseTime(event.endTime) : { h: start.h + 1, m: start.m };
+        const startMins = (start.h - GRID_START_HOUR) * 60 + start.m;
+        const durationMins = (end.h * 60 + end.m) - (start.h * 60 + start.m);
+        return {
+            top: Math.max(0, startMins) * (PX_PER_HOUR / 60),
+            height: Math.max(30, durationMins * (PX_PER_HOUR / 60)),
+        };
     };
 
-    const start = parseTime(event.time);
-    const end = event.endTime ? parseTime(event.endTime) : { h: start.h + 1, m: start.m };
-
-    const startMinutes = (start.h - 6) * 60 + start.m; // Offset by 6 AM
-    const durationMinutes = (end.h * 60 + end.m) - (start.h * 60 + start.m);
-    
-    // 1 hour = 120px (2px per minute)
-    const top = startMinutes * 2;
-    const height = durationMinutes * 2;
-
-    return {
-        top: `${top}px`,
-        height: `${height}px`,
-        position: 'absolute' as const,
-        left: '4px',
-        right: '4px',
-        zIndex: 10
+    const handleColumnDrop = (e: React.DragEvent, dateStr: string, colRect: DOMRect) => {
+        const y = e.clientY - colRect.top;
+        const minutesFromStart = Math.max(0, y / (PX_PER_HOUR / 60));
+        const totalMins = Math.floor(minutesFromStart);
+        const hour = GRID_START_HOUR + Math.floor(totalMins / 60);
+        const minute = totalMins % 60;
+        const h12 = hour % 12 || 12;
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const timeStr = `${h12}:${String(minute).padStart(2, '0')} ${ampm}`;
+        handleEventDrop(e, dateStr, timeStr);
     };
-  };
 
-  return (
-    <div className="flex flex-col h-full overflow-hidden bg-white">
-      {/* Header Row */}
-      <div className="flex border-b border-slate-200">
-        <div className="w-20 flex-shrink-0 p-4 text-center font-bold text-slate-400 text-xs bg-slate-50 border-r border-slate-100">
-            GMT
-        </div>
-        <div className="flex-1 grid grid-cols-7 divide-x divide-slate-100">
-            {weekDays.map((day, i) => {
-                const dateStr = day.toISOString().split('T')[0];
-                const isToday = dateStr === todayStr;
-                return (
-                    <div key={i} className={`p-4 text-center border-b-4 ${isToday ? 'bg-blue-50/50 border-blue-600' : 'border-transparent'}`}>
-                        <div className={`text-sm font-bold uppercase ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>
-                            <span className="text-lg mr-1">{day.getDate().toString().padStart(2, '0')}</span>
-                            {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-      </div>
-
-      {/* Time Grid */}
-      <div className="flex-1 overflow-y-auto no-scrollbar relative">
-        <div className="flex min-h-[1440px]"> {/* 12 hours * 120px = 1440px minimum, but we have 18 hours */}
-            {/* Time Labels */}
-            <div className="w-20 flex-shrink-0 bg-slate-50 border-r border-slate-100 divide-y divide-slate-100">
-                {hours.map(hour => (
-                    <div key={hour} className="h-[120px] relative">
-                        <span className="absolute -top-3 left-0 right-0 text-center text-xs font-bold text-slate-400">
-                            {hour > 12 ? `${hour - 12}pm` : hour === 12 ? '12pm' : `${hour}am`}
-                        </span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Days Columns */}
-            <div className="flex-1 grid grid-cols-7 divide-x divide-slate-100 relative">
-                {/* Horizontal Grid Lines */}
-                <div className="absolute inset-0 pointer-events-none z-0">
-                    {hours.map(hour => (
-                        <div key={hour} className="h-[120px] border-b border-slate-50 w-full" />
-                    ))}
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', background: '#fff' }}>
+            {/* ─── Header Row ─── */}
+            <div style={{
+                display: 'flex',
+                borderBottom: '1px solid #e5e7eb',
+                flexShrink: 0,
+                background: '#fff',
+            }}>
+                {/* GMT label cell */}
+                <div style={{
+                    width: 72, flexShrink: 0,
+                    padding: '14px 0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRight: '1px solid #e5e7eb',
+                    fontSize: 12, fontWeight: 600, color: '#6b7280', letterSpacing: 0.5,
+                }}>
+                    GMT
                 </div>
 
+                {/* Day header cells */}
                 {weekDays.map((day, i) => {
-                    const dateStr = day.toISOString().split('T')[0];
-                    const dayEvents = visibleEvents.filter(e => e.date === dateStr && e.type !== 'off-day');
+                    const dateStr = toLocalDateStr(day);
+                    const isToday = dateStr === todayStr;
+                    const dayName = day.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue …
+                    const dayNum = String(day.getDate()).padStart(2, '0');
 
                     return (
-                        <div 
-                            key={i} 
-                            className="relative h-full group"
-                            onDragOver={handleDragOver}
-                            onDrop={(e) => {
-                                // Calculate time based on drop position Y
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                const y = e.clientY - rect.top + e.currentTarget.scrollTop;
-                                const minutesFrom6am = y / 2;
-                                const hour = Math.floor(minutesFrom6am / 60) + 6;
-                                const minute = Math.floor(minutesFrom6am % 60);
-                                const timeStr = `${hour > 12 ? hour - 12 : hour}:${minute.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
-                                handleEventDrop(e, dateStr, timeStr);
+                        <div
+                            key={i}
+                            style={{
+                                flex: 1,
+                                padding: '12px 0',
+                                textAlign: 'center',
+                                borderRight: i < 6 ? '1px solid #e5e7eb' : 'none',
+                                background: isToday ? '#f9fafb' : '#fff',
+                                fontSize: 13,
+                                fontWeight: isToday ? 700 : 500,
+                                color: isToday ? '#111827' : '#374151',
                             }}
                         >
-                            {/* Render Events */}
-                            {dayEvents.map(event => (
-                                <div key={event.id} style={getEventStyle(event)}>
-                                    <CalendarEventCard
-                                        event={event}
-                                        user={user}
-                                        animConfig={animConfig}
-                                        isEventStartingSoon={isEventStartingSoon}
-                                        handleEventDragStart={handleEventDragStart}
-                                        handleEventClick={handleEventClick}
-                                    />
-                                </div>
-                            ))}
+                            {dayNum} {dayName}
                         </div>
                     );
                 })}
             </div>
+
+            {/* ─── Time Grid ─── */}
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+                <div style={{ display: 'flex', height: gridHeight }}>
+                    {/* Time Labels column */}
+                    <div style={{
+                        width: 72, flexShrink: 0,
+                        borderRight: '1px solid #e5e7eb',
+                        background: '#fff',
+                    }}>
+                        {DISPLAY_HOURS.map(h => (
+                            <div
+                                key={h}
+                                style={{
+                                    height: PX_PER_HOUR,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderBottom: '1px solid #f1f5f9',
+                                }}
+                            >
+                                <span style={{
+                                    fontSize: 13,
+                                    fontWeight: 500,
+                                    color: '#6b7280',
+                                }}>
+                                    {hourLabel(h)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Day columns */}
+                    {weekDays.map((day, colIdx) => {
+                        const dateStr = toLocalDateStr(day);
+                        const isToday = dateStr === todayStr;
+                        const dayEvents = visibleEvents.filter(e => e.date === dateStr && e.type !== 'off-day');
+
+                        // current-time indicator offset
+                        const nowOffsetPx = isToday && now.getHours() >= GRID_START_HOUR
+                            ? ((now.getHours() - GRID_START_HOUR) * 60 + now.getMinutes()) * (PX_PER_HOUR / 60)
+                            : null;
+
+                        return (
+                            <div
+                                key={colIdx}
+                                style={{
+                                    flex: 1,
+                                    borderRight: colIdx < 6 ? '1px solid #e5e7eb' : 'none',
+                                    position: 'relative',
+                                    background: '#fff',
+                                }}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    handleColumnDrop(e, dateStr, rect);
+                                }}
+                                onClick={(e) => {
+                                    if ((e.target as HTMLElement) !== e.currentTarget) return;
+                                    if (!handleDateClick) return;
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const y = e.clientY - rect.top;
+                                    const totalMins = Math.max(0, y / (PX_PER_HOUR / 60));
+                                    const hour = GRID_START_HOUR + Math.floor(totalMins / 60);
+                                    const minute = Math.floor(totalMins) % 60;
+                                    const h12 = hour % 12 || 12;
+                                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                                    handleDateClick(dateStr, `${h12}:${String(minute).padStart(2, '0')} ${ampm}`);
+                                }}
+                            >
+                                {/* Horizontal hour grid lines */}
+                                {DISPLAY_HOURS.map((h, hi) => {
+                                    const isLunch = h === 12;
+                                    return (
+                                        <div
+                                            key={hi}
+                                            style={{
+                                                position: 'absolute',
+                                                top: hi * PX_PER_HOUR,
+                                                left: 0, right: 0,
+                                                height: PX_PER_HOUR,
+                                                borderBottom: '1px solid #f1f5f9',
+                                                pointerEvents: 'none',
+                                                zIndex: 0,
+                                                // Diagonal stripe pattern for the lunch hour (12pm)
+                                                ...(isLunch ? {
+                                                    backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 8px, #f1f5f9 8px, #f1f5f9 9px)',
+                                                } : {}),
+                                            }}
+                                        />
+                                    );
+                                })}
+
+                                {/* Current-time red line */}
+                                {nowOffsetPx !== null && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: nowOffsetPx,
+                                        left: 0, right: 0,
+                                        height: 2,
+                                        backgroundColor: '#ef4444',
+                                        zIndex: 30,
+                                        pointerEvents: 'none',
+                                    }}>
+                                        <div style={{
+                                            width: 8, height: 8, borderRadius: '50%',
+                                            backgroundColor: '#ef4444',
+                                            marginTop: -3, marginLeft: -1,
+                                        }} />
+                                    </div>
+                                )}
+
+                                {/* Today column highlight strip */}
+                                {isToday && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        backgroundColor: 'rgba(59,130,246,0.02)',
+                                        zIndex: 0, pointerEvents: 'none',
+                                    }} />
+                                )}
+
+                                {/* Events */}
+                                {dayEvents.map(event => {
+                                    const { top, height } = getEventPos(event);
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            style={{
+                                                position: 'absolute',
+                                                top, height,
+                                                left: 4, right: 4,
+                                                zIndex: 10,
+                                            }}
+                                        >
+                                            <CalendarEventCard
+                                                event={event}
+                                                user={user}
+                                                animConfig={animConfig}
+                                                isEventStartingSoon={isEventStartingSoon}
+                                                handleEventDragStart={handleEventDragStart}
+                                                handleEventClick={handleEventClick}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };

@@ -47,7 +47,7 @@ export const Home: React.FC = () => {
   // Playlist Logic
   const playlist =
     companySettings.heroVideoPlaylist &&
-    companySettings.heroVideoPlaylist.length > 0
+      companySettings.heroVideoPlaylist.length > 0
       ? companySettings.heroVideoPlaylist
       : [companySettings.heroBackgroundUrl];
 
@@ -135,49 +135,20 @@ export const Home: React.FC = () => {
 
         {(companySettings.heroBackgroundType === "video" ||
           companySettings.heroBackgroundType === "youtube") && (
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="absolute bottom-10 right-10 p-4 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-lg border border-white/10 transition-all z-20 pointer-events-auto"
-          >
-            {isMuted ? (
-              <VolumeX className="h-6 w-6" />
-            ) : (
-              <Volume2 className="h-6 w-6" />
-            )}
-          </button>
-        )}
+            <button
+              onClick={() => setIsMuted(!isMuted)}
+              className="absolute bottom-10 right-10 p-4 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-lg border border-white/10 transition-all z-20 pointer-events-auto"
+            >
+              {isMuted ? (
+                <VolumeX className="h-6 w-6" />
+              ) : (
+                <Volume2 className="h-6 w-6" />
+              )}
+            </button>
+          )}
       </div>
 
-      {/* Partners Section */}
-      {Object.keys(partners).length > 0 && (
-        <div className="py-16 bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-xs font-black text-slate-400 uppercase tracking-[0.25em] mb-12">
-              OUR PARTNERS
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-12 transition-all duration-500">
-              {Object.entries(partners).map(([name, url]) => (
-                <div key={name} className="h-16">
-                  <img
-                    src={
-                      (url as string).startsWith("http") ||
-                      (url as string).startsWith("data:")
-                        ? url
-                        : `https://logo.clearbit.com/${url}`
-                    }
-                    alt={name}
-                    className="h-full object-contain max-w-[200px]"
-                    title={name}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       <div className="py-24 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -278,6 +249,52 @@ export const Home: React.FC = () => {
                 );
               })}
           </div>
+
+          {/* New Animated Marquee Partners Section */}
+          {Object.keys(partners).length > 0 && (
+            <div className="mt-32 pt-20 border-t border-slate-200 overflow-hidden relative w-full left-1/2 -ml-[50vw] right-1/2 -mr-[50vw] bg-transparent">
+              <div className="w-screen">
+                <p className="text-center text-xs font-black text-slate-400 uppercase tracking-[0.25em] mb-12">
+                  OUR PARTNERS
+                </p>
+                <div className="w-full relative flex items-center mb-16 px-4">
+
+                  <div
+                    className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
+                    style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
+                  >
+                    {/* Render the list 3 times to ensure looping seamlessly fills screen */}
+                    {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
+                      <div key={`${name}-${idx}`} className="h-12 flex-shrink-0 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100">
+                        <img
+                          src={
+                            (url as string).startsWith("http") ||
+                              (url as string).startsWith("data:")
+                              ? url
+                              : `https://logo.clearbit.com/${url}`
+                          }
+                          alt={name}
+                          className="h-full object-contain max-w-[150px]"
+                          title={name}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes partnerMarquee {
+                  from { transform: translateX(0); }
+                  to { transform: translateX(calc(-25% - 1rem)); } 
+                }
+              `}} />
+            </div>
+          )}
+
         </div>
       </div>
 

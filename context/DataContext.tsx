@@ -27,7 +27,7 @@ interface DataContextType {
   metrics: DashboardMetrics;
   automationMetrics: AutomationMetrics;
   notifications: Notification[];
-  chatMessages: ChatMessage[] ;
+  chatMessages: ChatMessage[];
   companySettings: CompanySettings;
   resources: Resource[];
   commissions: any[];
@@ -63,7 +63,6 @@ interface DataContextType {
   clearNotifications: () => void;
   completeOnboarding: (signatureData?: string) => void;
   updateIntegrationConfig: (config: Partial<IntegrationConfig>) => void;
-  simulateMarketingLead: (platform: 'google_ads' | 'meta_ads' | 'tiktok_ads' | 'linkedin_ads', rawPayload: any) => void;
   getAdvisorAssignments: (advisorId: string) => AdvisorAssignment[];
   likeResource: (id: string) => void;
   dislikeResource: (id: string) => void;
@@ -79,7 +78,7 @@ interface DataContextType {
   rejectTestimonialEdit: (id: string) => void;
   addCallback: (request: any) => void;
   handleAdvisorLeadAction: (id: string, action: string, reason?: string) => void;
-  
+
   addEvent: (event: Partial<CalendarEvent>) => void;
   updateEvent: (event: Partial<CalendarEvent>) => void;
   deleteEvent: (id: string) => void;
@@ -95,7 +94,7 @@ interface DataContextType {
   submitJobApplication: (data: any) => void;
   updateJobApplicationStatus: (id: string, status: string, config?: any) => void;
   updateApplicationStatus: (id: string, status: ApplicationStatus) => void;
-  
+
   addProperty: (property: Partial<PropertyListing>) => void;
   updateProperty: (id: string, property: Partial<PropertyListing>) => void;
   deleteProperty: (id: string) => void;
@@ -173,33 +172,33 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [integrationLogs, setIntegrationLogs] = useState<IntegrationLog[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [processingLeads, setProcessingLeads] = useState<ProcessingState[]>([]);
-  
+
   const [automationMetrics, setAutomationMetrics] = useState<AutomationMetrics>({
     executions: 2087,
     bandwidthSaved: 521 * 60
   });
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-      phone: '(800) 555-0199', email: 'contact@newholland.com', address: '123 Finance Way', city: 'New York', state: 'NY', zip: '10001',
-      heroBackgroundType: 'image', heroBackgroundUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070',
-      heroTitle: 'Securing Your Future', heroSubtitle: 'Comprehensive financial solutions for every stage of life.',
-      footerDescription: 'Providing tailored insurance solutions that secure financial peace of mind for individuals, families, and businesses.',
-      socialLinks: [{ platform: 'Facebook', url: '#' }, { platform: 'LinkedIn', url: '#' }, { platform: 'X', url: '#' }, { platform: 'Instagram', url: '#' }, { platform: 'YouTube', url: '#' }, { platform: 'TikTok', url: '#' }],
-      termsOfUse: '', solicitorAgreement: '', heroVideoPlaylist: [],
-      realEstateAbout: "Our entire team of agents with years of combined experience represents the gold standard in real estate. We don't just sell properties; we build communities and secure legacies.",
-      realEstateContactCta: "Ready to start your real estate journey? Our team is standing by to provide expert guidance tailored to your specific goals.",
-      realEstateResources: [
-        { id: '1', title: 'Home Buying Guide 2024', url: '#', description: 'Comprehensive roadmap for first-time buyers.', type: 'Buying' },
-        { id: '2', title: 'Market Trends Report', url: '#', description: 'Analysis of residential market shifts.', type: 'Investing' }
-      ],
-      customProducts: [
-        { id: 'life', title: 'Life Insurance', description: "Ensure your family's financial security with our comprehensive life insurance plans.", features: ['Term Life', 'Whole Life', 'Universal Life', 'Final Expense'], image: "https://picsum.photos/600/400?random=1", icon: 'ShieldCheck', color: 'blue', link: '/life-insurance', isHidden: false, order: 0 },
-        { id: 'real-estate', title: 'Real Estate', description: "Specialized coverage for real estate investors, landlords, and property managers.", features: ['Loss of Rent', 'Vacant Property', 'Multi-family Dwelling', 'Renovation Risk'], image: "https://picsum.photos/600/400?random=3", icon: 'HomeIcon', color: 'amber', link: '/real-estate', isHidden: false, order: 1 },
-        { id: 'mortgage', title: 'Mortgage Lending & Refinance', description: "Transform your mortgage into a strategic financial tool with personalized lending and refinance solutions.", features: ['Lower Monthly Payments', 'Cash-Out Refinance', 'Debt Consolidation', 'Strategic Mortgage Planning'], image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Landmark', color: 'cyan', link: '/mortgage', isHidden: false, order: 2 },
-        { id: 'business', title: 'Business & Professional Liability', description: "Protect your business assets, operations, and professional reputation with tailored commercial and E&O packages.", features: ['General Liability', "Worker's Comp", 'Professional Liability (E&O)', 'Cyber Liability'], image: "https://picsum.photos/600/400?random=2", icon: 'Briefcase', color: 'purple', link: '/business-insurance', isHidden: false, order: 3 },
-        { id: 'auto', title: 'Auto Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "https://picsum.photos/600/400?random=6", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
-        { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 }
-      ]
+    phone: '(800) 555-0199', email: 'contact@newholland.com', address: '123 Finance Way', city: 'New York', state: 'NY', zip: '10001',
+    heroBackgroundType: 'image', heroBackgroundUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070',
+    heroTitle: 'Securing Your Future', heroSubtitle: 'Comprehensive financial solutions for every stage of life.',
+    footerDescription: 'Providing tailored insurance solutions that secure financial peace of mind for individuals, families, and businesses.',
+    socialLinks: [{ platform: 'Facebook', url: '#' }, { platform: 'LinkedIn', url: '#' }, { platform: 'X', url: '#' }, { platform: 'Instagram', url: '#' }, { platform: 'YouTube', url: '#' }, { platform: 'TikTok', url: '#' }],
+    termsOfUse: '', solicitorAgreement: '', heroVideoPlaylist: [],
+    realEstateAbout: "Our entire team of agents with years of combined experience represents the gold standard in real estate. We don't just sell properties; we build communities and secure legacies.",
+    realEstateContactCta: "Ready to start your real estate journey? Our team is standing by to provide expert guidance tailored to your specific goals.",
+    realEstateResources: [
+      { id: '1', title: 'Home Buying Guide 2024', url: '#', description: 'Comprehensive roadmap for first-time buyers.', type: 'Buying' },
+      { id: '2', title: 'Market Trends Report', url: '#', description: 'Analysis of residential market shifts.', type: 'Investing' }
+    ],
+    customProducts: [
+      { id: 'life', title: 'Life Insurance', description: "Ensure your family's financial security with our comprehensive life insurance plans.", features: ['Term Life', 'Whole Life', 'Universal Life', 'Final Expense'], image: "https://picsum.photos/600/400?random=1", icon: 'ShieldCheck', color: 'blue', link: '/life-insurance', isHidden: false, order: 0 },
+      { id: 'real-estate', title: 'Real Estate', description: "Specialized coverage for real estate investors, landlords, and property managers.", features: ['Loss of Rent', 'Vacant Property', 'Multi-family Dwelling', 'Renovation Risk'], image: "https://picsum.photos/600/400?random=3", icon: 'HomeIcon', color: 'amber', link: '/real-estate', isHidden: false, order: 1 },
+      { id: 'mortgage', title: 'Mortgage Lending & Refinance', description: "Transform your mortgage into a strategic financial tool with personalized lending and refinance solutions.", features: ['Lower Monthly Payments', 'Cash-Out Refinance', 'Debt Consolidation', 'Strategic Mortgage Planning'], image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Landmark', color: 'cyan', link: '/mortgage', isHidden: false, order: 2 },
+      { id: 'business', title: 'Business & Professional Liability', description: "Protect your business assets, operations, and professional reputation with tailored commercial and E&O packages.", features: ['General Liability', "Worker's Comp", 'Professional Liability (E&O)', 'Cyber Liability'], image: "https://picsum.photos/600/400?random=2", icon: 'Briefcase', color: 'purple', link: '/business-insurance', isHidden: false, order: 3 },
+      { id: 'auto', title: 'Auto Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "https://picsum.photos/600/400?random=6", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
+      { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 }
+    ]
   });
 
   const pushNotification = useCallback((title: string, message: string, type: 'info' | 'success' | 'warning' | 'alert' = 'info', resourceType?: any, relatedId?: string) => {
@@ -210,7 +209,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const triggerAutomation = useCallback(async (lead: Lead) => {
     pushNotification('Neural Hub Triggered', `Workflow: Neural Intake Logic active for ${lead.name}`, 'info');
     setProcessingLeads(prev => [...prev, { leadId: lead.id, activeNode: 'AI BRIEF' }]);
-    
+
     const contextBrief = await enrichLeadContext(lead);
     const existingNotes = lead.notes || '';
     updateLead(lead.id, { notes: `${existingNotes}\n\n[AI INTEREST ANALYSIS]:\n${contextBrief}` });
@@ -266,17 +265,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [pushNotification, triggerAutomation]);
 
   const updateLead = useCallback(async (id: string, data: Partial<Lead>) => {
-      setLeads(prev => prev.map(l => l.id === id ? { ...l, ...data } : l));
-      const found = leads.find(l => l.id === id);
-      if (found) await Backend.saveLead({ ...found, ...data });
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, ...data } : l));
+    const found = leads.find(l => l.id === id);
+    if (found) await Backend.saveLead({ ...found, ...data });
   }, [leads]);
 
   // --- Task Operations ---
   const addTask = (taskData: Omit<Task, 'id' | 'order'>) => {
     const newTask: Task = {
-        ...taskData,
-        id: crypto.randomUUID(),
-        order: tasks.length,
+      ...taskData,
+      id: crypto.randomUUID(),
+      order: tasks.length,
     };
     setTasks(prev => [...prev, newTask]);
     pushNotification('Task Created', newTask.title, 'success');
@@ -292,25 +291,25 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const reorderTasks = (sourceIndex: number, targetIndex: number) => {
     setTasks(prev => {
-        const sorted = [...prev].sort((a, b) => a.order - b.order);
-        const [removed] = sorted.splice(sourceIndex, 1);
-        sorted.splice(targetIndex, 0, removed);
-        return sorted.map((item, index) => ({ ...item, order: index }));
+      const sorted = [...prev].sort((a, b) => a.order - b.order);
+      const [removed] = sorted.splice(sourceIndex, 1);
+      sorted.splice(targetIndex, 0, removed);
+      return sorted.map((item, index) => ({ ...item, order: index }));
     });
   };
 
   useEffect(() => {
     if (user) {
-        socketService.connect();
-        const unsubscribe = socketService.subscribe((data) => {
-            if (data.type === 'NEW_LEAD') {
-                pushNotification('New Lead Ingested', `New lead received from ${data.payload.source}`, 'success', 'lead', data.payload.id);
-                Backend.getLeads().then(setLeads);
-            } else if (data.type === 'CHAT_MESSAGE') {
-                setChatMessages(prev => [...prev, data.payload]);
-            }
-        });
-        return () => { unsubscribe(); socketService.disconnect(); };
+      socketService.connect();
+      const unsubscribe = socketService.subscribe((data) => {
+        if (data.type === 'NEW_LEAD') {
+          pushNotification('New Lead Ingested', `New lead received from ${data.payload.source}`, 'success', 'lead', data.payload.id);
+          Backend.getLeads().then(setLeads);
+        } else if (data.type === 'CHAT_MESSAGE') {
+          setChatMessages(prev => [...prev, data.payload]);
+        }
+      });
+      return () => { unsubscribe(); socketService.disconnect(); };
     }
   }, [user, pushNotification]);
 
@@ -327,7 +326,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (storedEvents && storedEvents.length > 0) setEvents(storedEvents);
       const storedMetrics = localStorage.getItem('nhfg_automation_metrics');
       if (storedMetrics) setAutomationMetrics(JSON.parse(storedMetrics));
-      
+
       const storedTasks = localStorage.getItem('nhfg_tasks');
       if (storedTasks) setTasks(JSON.parse(storedTasks));
 
@@ -356,151 +355,150 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateLeadStatus = useCallback((id: string, status: LeadStatus, analysis?: string) => { updateLead(id, { status, aiAnalysis: analysis }); }, [updateLead]);
-  
-  const login = async (email: string, password?: string) => {
-      const cleanEmail = email.trim().toLowerCase();
-      try {
-        await signInWithEmailAndPassword(auth, cleanEmail, password || '');
-        return true;
-      } catch (error: any) {
-        // Fallback to mock login if firebase fails (e.g. for demo users not in firebase)
-        const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
-        if (found) { 
-            console.log("Firebase login failed, falling back to mock user:", cleanEmail);
-            setUser(found); 
-            return true; 
-        }
 
-        console.error("Login failed", error);
-        if (error.code === 'auth/operation-not-allowed') {
-            pushNotification('Login Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
-        }
-        return false;
+  const login = async (email: string, password?: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      await signInWithEmailAndPassword(auth, cleanEmail, password || '');
+      return true;
+    } catch (error: any) {
+      // Fallback to mock login if firebase fails (e.g. for demo users not in firebase)
+      const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
+      if (found) {
+        console.log("Firebase login failed, falling back to mock user:", cleanEmail);
+        setUser(found);
+        return true;
       }
+
+      console.error("Login failed", error);
+      if (error.code === 'auth/operation-not-allowed') {
+        pushNotification('Login Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
+      }
+      return false;
+    }
   };
 
   const signup = async (email: string, password: string, name: string, role: UserRole = UserRole.CLIENT) => {
-      try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const newUser: User = {
-              id: userCredential.user.uid,
-              name,
-              email,
-              role,
-              category: AdvisorCategory.ADMIN, // Default category
-              onboardingCompleted: false
-          };
-          await setDoc(doc(db, 'users', newUser.id), newUser);
-          setUser(newUser);
-          return true;
-      } catch (error: any) {
-          console.error("Signup failed", error);
-          if (error.code === 'auth/operation-not-allowed') {
-              pushNotification('Signup Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
-          }
-          return false;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser: User = {
+        id: userCredential.user.uid,
+        name,
+        email,
+        role,
+        category: AdvisorCategory.ADMIN, // Default category
+        onboardingCompleted: false
+      };
+      await setDoc(doc(db, 'users', newUser.id), newUser);
+      setUser(newUser);
+      return true;
+    } catch (error: any) {
+      console.error("Signup failed", error);
+      if (error.code === 'auth/operation-not-allowed') {
+        pushNotification('Signup Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
       }
+      return false;
+    }
   };
 
   const resetPassword = async (email: string) => {
-      try {
-          await sendPasswordResetEmail(auth, email);
-          return true;
-      } catch (error) {
-          console.error("Password reset failed", error);
-          return false;
-      }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error("Password reset failed", error);
+      return false;
+    }
   };
 
-  const logout = async () => { 
-      await signOut(auth);
-      Backend.logout(); 
-      setUser(null); 
+  const logout = async () => {
+    await signOut(auth);
+    Backend.logout();
+    setUser(null);
   };
 
   useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-          if (firebaseUser) {
-              try {
-                  const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                  if (userDoc.exists()) {
-                      setUser(userDoc.data() as User);
-                  } else {
-                      // Fallback if user is in Auth but not Firestore
-                      const newUser: User = {
-                          id: firebaseUser.uid,
-                          name: firebaseUser.displayName || 'User',
-                          email: firebaseUser.email || '',
-                          role: UserRole.CLIENT,
-                          category: AdvisorCategory.ADMIN,
-                          onboardingCompleted: false
-                      };
-                      setUser(newUser);
-                  }
-              } catch (e) {
-                  console.error("Error fetching user profile", e);
-              }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            setUser(userDoc.data() as User);
           } else {
-              // Only clear user if not using a mock user (handled by login fallback)
-              // Actually, for security, we should probably clear it. 
-              // But to keep demo working, we might need to be careful.
-              // For now, let's assume if firebase says no user, there is no user.
-              // But wait, if I logged in via mock, firebaseUser is null.
-              // So I shouldn't force setUser(null) if I have a mock user logged in?
-              // The mock login sets 'user' state. onAuthStateChanged fires on mount.
-              // If I am logged in via mock, firebaseUser is null.
-              // So this will clear my mock user.
-              // I should only clear if I was previously logged in via Firebase?
-              // Or I should migrate mock users to Firebase?
-              // Let's just set user to null if firebaseUser is null, effectively disabling mock persistence across reloads unless I use local storage for mock.
-              // The original code didn't seem to persist mock user across reloads except maybe via Backend?
-              // Backend used localStorage 'nhfg_jwt_token'.
-              // Let's stick to Firebase as the source of truth.
-              setUser(null);
+            // Fallback if user is in Auth but not Firestore
+            const newUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'User',
+              email: firebaseUser.email || '',
+              role: UserRole.CLIENT,
+              category: AdvisorCategory.ADMIN,
+              onboardingCompleted: false
+            };
+            setUser(newUser);
           }
-      });
-      return () => unsubscribe();
+        } catch (e) {
+          console.error("Error fetching user profile", e);
+        }
+      } else {
+        // Only clear user if not using a mock user (handled by login fallback)
+        // Actually, for security, we should probably clear it. 
+        // But to keep demo working, we might need to be careful.
+        // For now, let's assume if firebase says no user, there is no user.
+        // But wait, if I logged in via mock, firebaseUser is null.
+        // So I shouldn't force setUser(null) if I have a mock user logged in?
+        // The mock login sets 'user' state. onAuthStateChanged fires on mount.
+        // If I am logged in via mock, firebaseUser is null.
+        // So this will clear my mock user.
+        // I should only clear if I was previously logged in via Firebase?
+        // Or I should migrate mock users to Firebase?
+        // Let's just set user to null if firebaseUser is null, effectively disabling mock persistence across reloads unless I use local storage for mock.
+        // The original code didn't seem to persist mock user across reloads except maybe via Backend?
+        // Backend used localStorage 'nhfg_jwt_token'.
+        // Let's stick to Firebase as the source of truth.
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const addEvent = (e: Partial<CalendarEvent>) => {
-      const newEvent = { ...e, id: crypto.randomUUID() } as CalendarEvent;
-      setEvents(prev => [...prev, newEvent]);
-      Backend.saveEvent(newEvent);
+    const newEvent = { ...e, id: crypto.randomUUID() } as CalendarEvent;
+    setEvents(prev => [...prev, newEvent]);
+    Backend.saveEvent(newEvent);
   };
   const updateEvent = (e: Partial<CalendarEvent>) => {
-      setEvents(prev => {
-          const updated = prev.map(ev => ev.id === e.id ? { ...ev, ...e } : ev);
-          const found = updated.find(ev => ev.id === e.id);
-          if (found) Backend.saveEvent(found);
-          return updated;
-      });
+    setEvents(prev => {
+      const updated = prev.map(ev => ev.id === e.id ? { ...ev, ...e } : ev);
+      const found = updated.find(ev => ev.id === e.id);
+      if (found) Backend.saveEvent(found);
+      return updated;
+    });
   };
   const deleteEvent = (id: string) => {
-      setEvents(prev => prev.filter(e => e.id !== id));
-      Backend.deleteEvent(id);
+    setEvents(prev => prev.filter(e => e.id !== id));
+    Backend.deleteEvent(id);
   };
   const updateUser = (id: string, data: Partial<User>) => {
-      setAllUsers(prev => {
-          const updated = prev.map(u => u.id === id ? {...u, ...data} : u);
-          const found = updated.find(u => u.id === id);
-          if (found) Backend.saveUser(found);
-          return updated;
-      });
+    setAllUsers(prev => {
+      const updated = prev.map(u => u.id === id ? { ...u, ...data } : u);
+      const found = updated.find(u => u.id === id);
+      if (found) Backend.saveUser(found);
+      return updated;
+    });
   };
   const updateCompanySettings = (s: CompanySettings) => { setCompanySettings(s); Backend.saveSettings(s); };
   const markNotificationRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   const clearNotifications = () => setNotifications([]);
   const completeOnboarding = (signatureData?: string) => { if (user) updateUser(user.id, { onboardingCompleted: true }); };
   const updateIntegrationConfig = (c: Partial<IntegrationConfig>) => setIntegrationConfig(prev => ({ ...prev, ...c }));
-  const simulateMarketingLead = async (p: any, load: any) => { await Backend.handleWebhook(p, load); };
   const getAdvisorAssignments = () => [];
-  const likeResource = () => {};
-  const dislikeResource = () => {};
-  const shareResource = () => {};
-  const addResourceComment = () => {};
-  const addResource = (r: Partial<Resource>) => {};
-  const deleteResource = (id: string) => {};
-  
+  const likeResource = () => { };
+  const dislikeResource = () => { };
+  const shareResource = () => { };
+  const addResourceComment = () => { };
+  const addResource = (r: Partial<Resource>) => { };
+  const deleteResource = (id: string) => { };
+
   const addTestimonial = (testimonial: Omit<Testimonial, 'id' | 'status' | 'date'>) => {
     setTestimonials(prev => [...prev, { ...testimonial, id: crypto.randomUUID(), status: 'pending', date: new Date().toISOString() } as Testimonial]);
   };
@@ -511,47 +509,47 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTestimonials(prev => prev.filter(t => t.id !== id));
   };
   const submitTestimonialEdit = (id: string, edits: Partial<Testimonial>) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { 
-        ...t, 
-        status: 'pending_edit',
-        editedClientName: edits.clientName,
-        editedRating: edits.rating,
-        editedReviewText: edits.reviewText
+    setTestimonials(prev => prev.map(t => t.id === id ? {
+      ...t,
+      status: 'pending_edit',
+      editedClientName: edits.clientName,
+      editedRating: edits.rating,
+      editedReviewText: edits.reviewText
     } : t));
   };
   const approveTestimonialEdit = (id: string) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { 
-        ...t, 
-        status: 'approved',
-        clientName: t.editedClientName || t.clientName,
-        rating: t.editedRating || t.rating,
-        reviewText: t.editedReviewText || t.reviewText,
-        editedClientName: undefined,
-        editedRating: undefined,
-        editedReviewText: undefined
+    setTestimonials(prev => prev.map(t => t.id === id ? {
+      ...t,
+      status: 'approved',
+      clientName: t.editedClientName || t.clientName,
+      rating: t.editedRating || t.rating,
+      reviewText: t.editedReviewText || t.reviewText,
+      editedClientName: undefined,
+      editedRating: undefined,
+      editedReviewText: undefined
     } : t));
   };
   const rejectTestimonialEdit = (id: string) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { 
-        ...t, 
-        status: 'approved',
-        editedClientName: undefined,
-        editedRating: undefined,
-        editedReviewText: undefined
+    setTestimonials(prev => prev.map(t => t.id === id ? {
+      ...t,
+      status: 'approved',
+      editedClientName: undefined,
+      editedRating: undefined,
+      editedReviewText: undefined
     } : t));
   };
 
-  const addCallback = (r: any) => {};
-  const handleAdvisorLeadAction = (id: string, a: string) => {};
+  const addCallback = (r: any) => { };
+  const handleAdvisorLeadAction = (id: string, a: string) => { };
   const addAdvisor = (data: Partial<User>) => {
-      const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
-      setAllUsers(prev => [...prev, newUser]);
-      Backend.saveUser(newUser);
+    const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
+    setAllUsers(prev => [...prev, newUser]);
+    Backend.saveUser(newUser);
   };
   const deleteAdvisor = (id: string) => updateUser(id, { deletedAt: new Date().toISOString() });
   const restoreUser = (id: string) => updateUser(id, { deletedAt: undefined });
   const permanentlyDeleteUser = (id: string) => setAllUsers(prev => prev.filter(u => u.id !== id));
-  const assignCarriers = () => {};
+  const assignCarriers = () => { };
   const markChatRead = (id: string) => {
     setChatMessages(prev => prev.map(m => (m.senderId === id || m.receiverId === id) ? { ...m, read: true } : m));
   };
@@ -563,48 +561,48 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const sendChatMessage = async (receiverId: string, text: string, attachment?: any) => {
-      if (!user) return;
-      const newMessage: ChatMessage = { id: crypto.randomUUID(), senderId: user.id, receiverId, text, timestamp: new Date(), read: false, attachment };
-      setChatMessages(prev => [...prev, newMessage]);
-      socketService.send({ type: 'CHAT_MESSAGE', payload: { ...newMessage, senderName: user.name } });
+    if (!user) return;
+    const newMessage: ChatMessage = { id: crypto.randomUUID(), senderId: user.id, receiverId, text, timestamp: new Date(), read: false, attachment };
+    setChatMessages(prev => [...prev, newMessage]);
+    socketService.send({ type: 'CHAT_MESSAGE', payload: { ...newMessage, senderName: user.name } });
 
-      if (receiverId === AI_ASSISTANT_ID) {
-          const history = chatMessages
-            .filter(m => (m.senderId === user.id && m.receiverId === AI_ASSISTANT_ID) || (m.senderId === AI_ASSISTANT_ID && m.receiverId === user.id))
-            .slice(-10)
-            .map(m => ({ role: m.senderId === user.id ? 'user' as const : 'model' as const, text: m.text }));
-          
-          const assistantReply = await getInternalAssistantResponse(text, `User Role: ${user.role}, Name: ${user.name}`, history);
-          
-          const aiMessage: ChatMessage = { id: crypto.randomUUID(), senderId: AI_ASSISTANT_ID, receiverId: user.id, text: assistantReply, timestamp: new Date(), read: false };
-          
-          setTimeout(() => {
-            setChatMessages(prev => [...prev, aiMessage]);
-            pushNotification('Intelligence Update', 'New insights available in your Neural Hub.', 'info');
-          }, 1000);
-      }
+    if (receiverId === AI_ASSISTANT_ID) {
+      const history = chatMessages
+        .filter(m => (m.senderId === user.id && m.receiverId === AI_ASSISTANT_ID) || (m.senderId === AI_ASSISTANT_ID && m.receiverId === user.id))
+        .slice(-10)
+        .map(m => ({ role: m.senderId === user.id ? 'user' as const : 'model' as const, text: m.text }));
+
+      const assistantReply = await getInternalAssistantResponse(text, `User Role: ${user.role}, Name: ${user.name}`, history);
+
+      const aiMessage: ChatMessage = { id: crypto.randomUUID(), senderId: AI_ASSISTANT_ID, receiverId: user.id, text: assistantReply, timestamp: new Date(), read: false };
+
+      setTimeout(() => {
+        setChatMessages(prev => [...prev, aiMessage]);
+        pushNotification('Intelligence Update', 'New insights available in your Neural Hub.', 'info');
+      }, 1000);
+    }
   };
 
   const submitJobApplication = (data: any) => { setJobApplications(prev => [...prev, { ...data, id: crypto.randomUUID(), date: new Date().toISOString(), status: 'Pending' }]); };
   const updateJobApplicationStatus = (id: string, status: string, config?: any) => {
-      setJobApplications(prev => prev.map(app => {
-          if (app.id === id) {
-              if (status === 'Approved' && app.status !== 'Approved') {
-                  const newUser: User = { id: crypto.randomUUID(), name: app.fullName, email: app.email, phone: app.phone, role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: config?.products || [], contractLevel: config?.contractLevel || 50, onboardingCompleted: false, avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.fullName)}&background=0D8ABC&color=fff` };
-                  setAllUsers(users => [...users, newUser]);
-                  Backend.saveUser(newUser);
-              }
-              return { ...app, status: status as any };
-          }
-          return app;
-      }));
+    setJobApplications(prev => prev.map(app => {
+      if (app.id === id) {
+        if (status === 'Approved' && app.status !== 'Approved') {
+          const newUser: User = { id: crypto.randomUUID(), name: app.fullName, email: app.email, phone: app.phone, role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: config?.products || [], contractLevel: config?.contractLevel || 50, onboardingCompleted: false, avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.fullName)}&background=0D8ABC&color=fff` };
+          setAllUsers(users => [...users, newUser]);
+          Backend.saveUser(newUser);
+        }
+        return { ...app, status: status as any };
+      }
+      return app;
+    }));
   };
   const updateApplicationStatus = (id: string, status: ApplicationStatus) => {
     setApplications(prev => prev.map(app => app.id === id ? { ...app, status } : app));
   };
   const addProperty = (p: any) => {
-      const newProp: PropertyListing = { id: crypto.randomUUID(), address: '', city: '', state: '', zip: '', price: 0, type: 'Residential', status: 'Pending Approval', listedDate: new Date().toISOString(), sellerName: '', advisorId: user?.id || '', image: '', ...p };
-      setProperties(prev => [newProp, ...prev]);
+    const newProp: PropertyListing = { id: crypto.randomUUID(), address: '', city: '', state: '', zip: '', price: 0, type: 'Residential', status: 'Pending Approval', listedDate: new Date().toISOString(), sellerName: '', advisorId: user?.id || '', image: '', ...p };
+    setProperties(prev => [newProp, ...prev]);
   };
   const updateProperty = (id: string, property: Partial<PropertyListing>) => {
     setProperties(prev => prev.map(p => p.id === id ? { ...p, ...property } : p));
@@ -617,16 +615,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const addPortfolio = (p: Partial<ClientPortfolio>) => {
     const newP: ClientPortfolio = {
-        id: crypto.randomUUID(),
-        advisorId: user?.id || '1',
-        lastRebalanced: new Date().toISOString(),
-        clientName: p.clientName || 'New Portfolio',
-        totalValue: p.totalValue || 0,
-        ytdReturn: p.ytdReturn || 0,
-        riskProfile: p.riskProfile || 'Moderate',
-        holdings: p.holdings || [],
-        clientId: p.clientId || 'unknown',
-        ...p
+      id: crypto.randomUUID(),
+      advisorId: user?.id || '1',
+      lastRebalanced: new Date().toISOString(),
+      clientName: p.clientName || 'New Portfolio',
+      totalValue: p.totalValue || 0,
+      ytdReturn: p.ytdReturn || 0,
+      riskProfile: p.riskProfile || 'Moderate',
+      holdings: p.holdings || [],
+      clientId: p.clientId || 'unknown',
+      ...p
     };
     setPortfolios(prev => [...prev, newP]);
   };
@@ -638,14 +636,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const addComplianceDoc = (data: Partial<ComplianceDocument>) => {
     const newDoc: ComplianceDocument = {
-        id: crypto.randomUUID(),
-        title: data.title || 'Untitled Doc',
-        type: data.type || 'KYC',
-        uploadDate: new Date().toISOString(),
-        status: 'Pending Review',
-        url: data.url || '#',
-        advisorId: user?.id || '1',
-        ...data
+      id: crypto.randomUUID(),
+      title: data.title || 'Untitled Doc',
+      type: data.type || 'KYC',
+      uploadDate: new Date().toISOString(),
+      status: 'Pending Review',
+      url: data.url || '#',
+      advisorId: user?.id || '1',
+      ...data
     };
     setComplianceDocs(prev => [...prev, newDoc]);
   };
@@ -654,17 +652,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const addAdvisoryFee = (data: Partial<AdvisoryFee>) => {
     const newFee: AdvisoryFee = {
-        id: crypto.randomUUID(),
-        advisorId: user?.id || '1',
-        clientName: data.clientName || 'Unnamed Client',
-        clientId: data.clientId || 'unknown',
-        aum: data.aum || 0,
-        feeRate: data.feeRate || 0.01,
-        billingPeriod: data.billingPeriod || 'Q1',
-        amount: data.amount || 0,
-        status: data.status || 'Invoiced',
-        dueDate: data.dueDate || new Date().toISOString(),
-        ...data
+      id: crypto.randomUUID(),
+      advisorId: user?.id || '1',
+      clientName: data.clientName || 'Unnamed Client',
+      clientId: data.clientId || 'unknown',
+      aum: data.aum || 0,
+      feeRate: data.feeRate || 0.01,
+      billingPeriod: data.billingPeriod || 'Q1',
+      amount: data.amount || 0,
+      status: data.status || 'Invoiced',
+      dueDate: data.dueDate || new Date().toISOString(),
+      ...data
     };
     setAdvisoryFees(prev => [...prev, newFee]);
   };
@@ -676,18 +674,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const addLoanApplication = (l: Partial<LoanApplication>) => {
     const newApp: LoanApplication = {
-        id: `LOAN-${Math.floor(Math.random() * 10000)}`,
-        createdAt: new Date().toISOString(),
-        advisorId: user?.id || '1',
-        clientName: l.clientName || 'Unnamed Client',
-        loanAmount: l.loanAmount || 0,
-        loanType: l.loanType || 'Purchase',
-        status: 'Applied',
-        interestRate: l.interestRate || 6.5,
-        propertyValue: l.propertyValue || 0,
-        ltv: l.ltv || 80,
-        creditScore: l.creditScore || 700,
-        ...l
+      id: `LOAN-${Math.floor(Math.random() * 10000)}`,
+      createdAt: new Date().toISOString(),
+      advisorId: user?.id || '1',
+      clientName: l.clientName || 'Unnamed Client',
+      loanAmount: l.loanAmount || 0,
+      loanType: l.loanType || 'Purchase',
+      status: 'Applied',
+      interestRate: l.interestRate || 6.5,
+      propertyValue: l.propertyValue || 0,
+      ltv: l.ltv || 80,
+      creditScore: l.creditScore || 700,
+      ...l
     };
     setLoanApplications(prev => [...prev, newApp]);
   };
@@ -698,42 +696,42 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoanApplications(prev => prev.filter(l => l.id !== id));
   };
   const updateClient = useCallback(async (id: string, data: Partial<Client>) => {
-      const client = clients.find(c => c.id === id);
-      if (client) {
-          const updated = { ...client, ...data };
-          await Backend.saveClient(updated);
-          setClients(prev => prev.map(c => c.id === id ? updated : c));
-      }
+    const client = clients.find(c => c.id === id);
+    if (client) {
+      const updated = { ...client, ...data };
+      await Backend.saveClient(updated);
+      setClients(prev => prev.map(c => c.id === id ? updated : c));
+    }
   }, [clients]);
   const assignLeads = useCallback(async (leadIds: string[], advisorId: string) => {
-      const targetLeads = leads.filter(l => leadIds.includes(l.id));
-      for (const lead of targetLeads) {
-          const updatedLead: Lead = { ...lead, assignedTo: advisorId, status: LeadStatus.ASSIGNED };
-          await Backend.saveLead(updatedLead);
-      }
-      Backend.getLeads().then(setLeads);
+    const targetLeads = leads.filter(l => leadIds.includes(l.id));
+    for (const lead of targetLeads) {
+      const updatedLead: Lead = { ...lead, assignedTo: advisorId, status: LeadStatus.ASSIGNED };
+      await Backend.saveLead(updatedLead);
+    }
+    Backend.getLeads().then(setLeads);
   }, [leads]);
   const addWorkflow = (wf: Partial<Workflow>) => {
-      const newWorkflow: Workflow = { id: `wf-${Math.random().toString(36).substr(2, 9)}`, name: wf.name || 'New Workflow', description: wf.description || 'Custom autonomous neural path.', trigger: wf.trigger || WorkflowTrigger.LEAD_INGESTION, actions: wf.actions || [], status: 'active', impact: wf.impact || 'MEDIUM', category: wf.category || 'OPERATIONS', executionsYTD: 0, createdAt: new Date().toISOString() };
-      setWorkflows(prev => [newWorkflow, ...prev]);
-      Backend.saveWorkflow(newWorkflow);
-      pushNotification('Workflow Deployed', `New logic engine node "${newWorkflow.name}" is now operational.`, 'success');
+    const newWorkflow: Workflow = { id: `wf-${Math.random().toString(36).substr(2, 9)}`, name: wf.name || 'New Workflow', description: wf.description || 'Custom autonomous neural path.', trigger: wf.trigger || WorkflowTrigger.LEAD_INGESTION, actions: wf.actions || [], status: 'active', impact: wf.impact || 'MEDIUM', category: wf.category || 'OPERATIONS', executionsYTD: 0, createdAt: new Date().toISOString() };
+    setWorkflows(prev => [newWorkflow, ...prev]);
+    Backend.saveWorkflow(newWorkflow);
+    pushNotification('Workflow Deployed', `New logic engine node "${newWorkflow.name}" is now operational.`, 'success');
   };
   const toggleWorkflow = (id: string) => {
-      setWorkflows(prev => prev.map(wf => {
-          if (wf.id === id) {
-              const nextStatus = wf.status === 'active' ? 'paused' : 'active';
-              const updated = { ...wf, status: nextStatus as any };
-              Backend.saveWorkflow(updated);
-              return updated;
-          }
-          return wf;
-      }));
+    setWorkflows(prev => prev.map(wf => {
+      if (wf.id === id) {
+        const nextStatus = wf.status === 'active' ? 'paused' : 'active';
+        const updated = { ...wf, status: nextStatus as any };
+        Backend.saveWorkflow(updated);
+        return updated;
+      }
+      return wf;
+    }));
   };
 
   const triggerPulse = useCallback(() => {
     pushNotification('Global Pulse Initiated', 'Recalibrating all neural chain nodes...', 'warning');
-    
+
     // Simulate a system-wide recalibration
     setProcessingLeads(prev => {
       const activeLeads = leads.filter(l => l.status === LeadStatus.NEW || l.status === LeadStatus.ASSIGNED).slice(0, 3);
@@ -758,7 +756,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       notifications, chatMessages, companySettings, resources: [], commissions: [], events, testimonials,
       availableCarriers: [], colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
-      markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig, simulateMarketingLead,
+      markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
       addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
       addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,

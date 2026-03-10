@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
+import { ThemeProvider } from './components/ThemeProvider';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/website/Home';
@@ -13,8 +13,8 @@ import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
 import { Securities } from './pages/website/Securities';
 import { Advisors } from './pages/website/Advisors';
-import { About } from './pages/website/About'; 
-import { Resources } from './pages/website/Resources'; 
+import { About } from './pages/website/About';
+import { Resources } from './pages/website/Resources';
 import { Contact } from './pages/website/Contact';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
@@ -23,12 +23,12 @@ import { ClientPortal } from './pages/client/ClientPortal';
 import { CRMLayout } from './components/CRMData';
 import { Dashboard } from './pages/crm/Dashboard';
 import { Leads } from './pages/crm/Leads';
-import { LeadIntake } from './pages/crm/LeadIntake'; 
+import { LeadIntake } from './pages/crm/LeadIntake';
 import { Clients } from './pages/crm/Clients';
 import { Commissions } from './pages/crm/Commissions';
 import { Calendar } from './pages/crm/Calendar';
 import { Inbox } from './pages/crm/Inbox';
-import { Chat } from './pages/crm/Chat'; 
+import { Chat } from './pages/crm/Chat';
 import { ProfileSettings } from './pages/crm/ProfileSettings';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { WebsiteSettings } from './pages/admin/WebsiteSettings';
@@ -36,38 +36,41 @@ import { CarrierAssignment } from './pages/admin/CarrierAssignment';
 import { UserRole } from './types';
 import { AdvisorMicrosite } from './pages/website/AdvisorMicrosite';
 import { AdminTestimonials } from './pages/admin/AdminTestimonials';
-import { EmailSignature } from './pages/admin/EmailSignature'; 
-import { MarketingIntegrations } from './pages/admin/MarketingIntegrations'; 
-import { JoinTeam } from './pages/website/JoinTeam'; 
-import { Onboarding } from './pages/crm/Onboarding'; 
-import { AdvisorOnboardingFlow } from './pages/crm/AdvisorOnboardingFlow'; 
+import { EmailSignature } from './pages/admin/EmailSignature';
+import { MarketingIntegrations } from './pages/admin/MarketingIntegrations';
+import { JoinTeam } from './pages/website/JoinTeam';
+import { Onboarding } from './pages/crm/Onboarding';
+import { AdvisorOnboardingFlow } from './pages/crm/AdvisorOnboardingFlow';
 import { LegalCompliance } from './pages/crm/LegalCompliance';
 import { PrivacyPolicy } from './pages/website/PrivacyPolicy';
 import { TermsOfUse } from './pages/website/TermsOfUse';
-import { 
-  PoliciesApps, 
-  CommercialQuotes, 
-  PoliciesRenewals, 
-  AutoQuotes, 
-  FleetManager, 
-  Claims 
-} from './pages/crm/insurance/InsurancePages'; 
-import { 
-  PropertyPipeline, 
-  TransactionsEscrow 
-} from './pages/crm/real-estate/RealEstatePages'; 
-import { 
-  PortfolioMgmt, 
-  ComplianceDocs, 
-  AdvisoryFees 
-} from './pages/crm/securities/SecuritiesPages'; 
-import { 
-  LoanApplications, 
-  RateTools, 
-  RefinanceCalc 
+import {
+  PoliciesApps,
+  CommercialQuotes,
+  PoliciesRenewals,
+  AutoQuotes,
+  FleetManager,
+  Claims
+} from './pages/crm/insurance/InsurancePages';
+import {
+  PropertyPipeline,
+  TransactionsEscrow
+} from './pages/crm/real-estate/RealEstatePages';
+import {
+  PortfolioMgmt,
+  ComplianceDocs,
+  AdvisoryFees
+} from './pages/crm/securities/SecuritiesPages';
+import {
+  LoanApplications,
+  RateTools,
+  RefinanceCalc
 } from './pages/crm/mortgage/MortgagePages';
 import { AIChatWidget } from './components/AIChatWidget';
+import { BookingPage } from './pages/public/BookingPage';
 import { AutomationStudio } from './pages/crm/AutomationStudio';
+import { BankVerification } from './pages/crm/BankVerification';
+import ClientVerify from './pages/verify/ClientVerify';
 import { RealEstateAdmin } from './pages/admin/RealEstateAdmin';
 import { RealEstateCms } from './pages/admin/RealEstateCms';
 import { ProductCms } from './pages/admin/ProductCms';
@@ -81,7 +84,7 @@ import { ProductCms } from './pages/admin/ProductCms';
 const ProtectedCRMRoute: React.FC = () => {
   const { user } = useData();
   const location = useLocation();
-  
+
   if (!user) return <Navigate to="/login" replace />;
 
   const allowedRoles = [UserRole.ADMIN, UserRole.MANAGER, UserRole.SUB_ADMIN, UserRole.ADVISOR];
@@ -89,7 +92,7 @@ const ProtectedCRMRoute: React.FC = () => {
 
   // Force Onboarding completion for all new advisors
   if (user.role === UserRole.ADVISOR && !user.onboardingCompleted && location.pathname !== '/crm/onboarding-flow') {
-      return <Navigate to="/crm/onboarding-flow" replace />;
+    return <Navigate to="/crm/onboarding-flow" replace />;
   }
 
   if (location.pathname === '/crm/onboarding-flow') return <Outlet />;
@@ -102,31 +105,32 @@ const ProtectedCRMRoute: React.FC = () => {
 };
 
 const ManagerRoute: React.FC = () => {
-    const { user } = useData();
-    // PERMISSIONS: Allows Administrators and Managers to access user management and onboarding.
-    if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.MANAGER) return <Navigate to="/crm/dashboard" replace />;
-    return <Outlet />;
+  const { user } = useData();
+  // PERMISSIONS: Allows Administrators and Managers to access user management and onboarding.
+  if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.MANAGER) return <Navigate to="/crm/dashboard" replace />;
+  return <Outlet />;
 };
 
 const SuperAdminRoute: React.FC = () => {
-    const { user } = useData();
-    // PERMISSIONS: Restricting high-level configuration to Administrators only.
-    if (user?.role !== UserRole.ADMIN) return <Navigate to="/crm/dashboard" replace />;
-    return <Outlet />;
+  const { user } = useData();
+  // PERMISSIONS: Restricting high-level configuration to Administrators only.
+  if (user?.role !== UserRole.ADMIN) return <Navigate to="/crm/dashboard" replace />;
+  return <Outlet />;
 };
 
-const PublicLayout: React.FC<{children: React.ReactNode}> = ({ children }) => (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">{children}</main>
-      <Footer />
-      <AIChatWidget />
-    </div>
+const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="flex flex-col min-h-screen">
+    <Navbar />
+    <main className="flex-grow">{children}</main>
+    <Footer />
+    <AIChatWidget />
+  </div>
 );
 
 const App: React.FC = () => {
   return (
     <DataProvider>
+      <ThemeProvider>
         <Router>
           <Routes>
             {/* PUBLIC WEBSITE */}
@@ -146,12 +150,18 @@ const App: React.FC = () => {
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
-            
+
             {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/client-portal" element={<PublicLayout><ClientPortal /></PublicLayout>} />
+
+            {/* CLIENT BANK VERIFICATION (public — no auth required) */}
+            <Route path="/verify/:token" element={<ClientVerify />} />
+
+            {/* PUBLIC BOOKING / SCHEDULING PAGE */}
+            <Route path="/schedule" element={<PublicLayout><BookingPage /></PublicLayout>} />
 
             {/* ADVISOR TERMINAL (CRM) */}
             <Route path="/crm" element={<ProtectedCRMRoute />}>
@@ -161,14 +171,15 @@ const App: React.FC = () => {
               <Route path="inbox" element={<Inbox />} />
               <Route path="chat" element={<Chat />} />
               <Route path="leads" element={<Leads />} />
-              <Route path="intake" element={<LeadIntake />} /> 
+              <Route path="intake" element={<LeadIntake />} />
               <Route path="clients" element={<Clients />} />
               <Route path="commissions" element={<Commissions />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
               <Route path="automation" element={<AutomationStudio />} />
-              
+              <Route path="bank-verification" element={<BankVerification />} />
+
               {/* VERTICAL HUBS */}
               <Route path="applications" element={<PoliciesApps />} />
               <Route path="properties" element={<PropertyPipeline />} />
@@ -179,28 +190,29 @@ const App: React.FC = () => {
               <Route path="portfolio" element={<PortfolioMgmt />} />
               <Route path="compliance" element={<ComplianceDocs />} />
               <Route path="fees" element={<AdvisoryFees />} />
-              
+
               {/* ADMIN CONTROL PANEL */}
               <Route element={<ManagerRoute />}>
-                  <Route path="admin" element={<AdminUsers />} />
-                  <Route path="onboarding" element={<Onboarding />} />
-                  <Route path="admin/real-estate" element={<RealEstateAdmin />} />
-                  <Route path="admin/real-estate-cms" element={<RealEstateCms />} />
+                <Route path="admin" element={<AdminUsers />} />
+                <Route path="onboarding" element={<Onboarding />} />
+                <Route path="admin/real-estate" element={<RealEstateAdmin />} />
+                <Route path="admin/real-estate-cms" element={<RealEstateCms />} />
               </Route>
-              
+
               {/* SUPER ADMIN ONLY - Based on screenshot request */}
               <Route element={<SuperAdminRoute />}>
-                  <Route path="admin/website" element={<WebsiteSettings />} />
-                  <Route path="admin/products" element={<ProductCms />} />
-                  <Route path="admin/carriers" element={<CarrierAssignment />} />
-                  <Route path="admin/testimonials" element={<AdminTestimonials />} />
-                  <Route path="admin/signature" element={<EmailSignature />} /> 
-                  <Route path="admin/marketing" element={<MarketingIntegrations />} />
+                <Route path="admin/website" element={<WebsiteSettings />} />
+                <Route path="admin/products" element={<ProductCms />} />
+                <Route path="admin/carriers" element={<CarrierAssignment />} />
+                <Route path="admin/testimonials" element={<AdminTestimonials />} />
+                <Route path="admin/signature" element={<EmailSignature />} />
+                <Route path="admin/marketing" element={<MarketingIntegrations />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
+      </ThemeProvider>
     </DataProvider>
   );
 };

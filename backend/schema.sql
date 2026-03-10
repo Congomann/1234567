@@ -155,3 +155,69 @@ CREATE TABLE events (
 CREATE INDEX idx_leads_email ON leads(email);
 CREATE INDEX idx_leads_assigned ON leads(assigned_to);
 CREATE INDEX idx_clients_advisor ON clients(advisor_id);
+
+-- COMPANY SETTINGS (Content Management)
+CREATE TABLE company_settings (
+    id VARCHAR(50) PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- WORKFLOWS
+CREATE TABLE workflows (
+    id VARCHAR(50) PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── PLAID ITEMS ───────────────────────────────────────────────────────────────
+-- One row per Plaid Link session (institution connection).
+-- access_token is the long-lived token returned after public token exchange.
+-- NEVER expose access_token to the frontend.
+CREATE TABLE plaid_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    item_id VARCHAR(255) UNIQUE NOT NULL,          -- Plaid's item_id
+    access_token TEXT NOT NULL,                    -- Encrypted at rest in prod
+    institution_id VARCHAR(100),
+    institution_name VARCHAR(255),
+    created_by UUID REFERENCES users(id),
+    client_name VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── BANK VERIFICATIONS ────────────────────────────────────────────────────────
+-- Full audit trail for every client bank verification attempt.
+CREATE TABLE bank_verifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    plaid_item_id UUID REFERENCES plaid_items(id),  -- NULL for manual entries
+    client_name VARCHAR(255) NOT NULL,
+    client_email VARCHAR(255),
+    client_phone VARCHAR(50),
+    institution_name VARCHAR(255) NOT NULL,
+    account_name VARCHAR(255),
+    account_mask VARCHAR(10) NOT NULL,              -- Last 4 digits only
+    account_type VARCHAR(20) CHECK (account_type IN ('checking', 'savings', 'credit', 'other')),
+    routing_number VARCHAR(9),                      -- Verified routing number from Plaid Auth
+    plaid_account_id VARCHAR(255),                  -- Plaid's account_id for future API calls
+    -- Verification outcome
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'verified', 'failed', 'micro_deposit')),
+    verification_method VARCHAR(10) NOT NULL DEFAULT 'manual'
+        CHECK (verification_method IN ('plaid', 'manual')),
+    -- Risk indicators computed at verification time
+    name_match BOOLEAN DEFAULT FALSE,
+    account_active BOOLEAN DEFAULT FALSE,
+    draft_risk VARCHAR(10) DEFAULT 'medium'
+        CHECK (draft_risk IN ('low', 'medium', 'high')),
+    -- Audit fields
+    verified_at TIMESTAMP WITH TIME ZONE,
+    verified_by UUID REFERENCES users(id),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_bank_verifications_client ON bank_verifications(client_name);
+CREATE INDEX idx_bank_verifications_status ON bank_verifications(status);
+CREATE INDEX idx_plaid_items_item_id ON plaid_items(item_id);
+

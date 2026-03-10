@@ -1,128 +1,255 @@
+/**
+ * NHFG Bank Verification Service
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Production-ready service layer that proxies all Plaid operations through
+ * the NHFG backend API (server.cjs).
+ *
+ * IMPORTANT:
+ *  - The Plaid access_token is NEVER sent to or stored on the frontend.
+ *  - All sensitive token operations happen exclusively on the backend.
+ *  - The frontend only ever receives masked account data and verification IDs.
+ *
+ * Flow:
+ *  1. createLinkToken()     → backend calls Plaid /link/token/create
+ *  2. usePlaidLink()        → user completes Plaid Link widget (Plaid JS SDK)
+ *  3. exchangeToken()       → backend exchanges public_token, calls Auth, saves to DB
+ *  4. getVerifications()    → backend queries bank_verifications table
+ *  5. updateStatus()        → backend PATCH on individual record
+ *  6. saveManual()          → backend validates routing # (ABA checksum) + saves
+ */
 
-import { BankAccount, BankTransaction, AccountType } from '../types';
+const BASE_URL = (() => {
+  const isLocal =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+  return isLocal ? 'http://localhost:3001/api' : `${window.location.origin}/api`;
+})();
 
-// MOCK BACKEND DATABASE
-const STORAGE_KEYS = {
-  ACCOUNTS: 'nhfg_real_bank_accounts',
-  TRANSACTIONS: 'nhfg_real_transactions'
+
+const getHeaders = (): HeadersInit => {
+  const token = localStorage.getItem('nhfg_jwt_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 };
 
-const MOCK_INSTITUTIONS = [
-  { id: 'ins_1', name: 'Chase', logo: 'https://logo.clearbit.com/chase.com' },
-  { id: 'ins_2', name: 'Bank of America', logo: 'https://logo.clearbit.com/bankofamerica.com' },
-  { id: 'ins_3', name: 'Wells Fargo', logo: 'https://logo.clearbit.com/wellsfargo.com' },
-  { id: 'ins_4', name: 'American Express', logo: 'https://logo.clearbit.com/americanexpress.com' },
-  { id: 'ins_5', name: 'Citi', logo: 'https://logo.clearbit.com/citi.com' },
-];
+/** Generic fetch wrapper with error extraction */
+const apiFetch = async <T>(
+  path: string,
+  opts: RequestInit = {}
+): Promise<{ data: T | null; error: string | null }> => {
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      ...opts,
+      headers: { ...getHeaders(), ...(opts.headers || {}) },
+    });
 
-// Helper to simulate API latency
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const BankingService = {
-  // 1. Simulate getting a Link Token from backend (Plaid)
-  createLinkToken: async (userId: string) => {
-    await delay(800);
-    return { link_token: `link-sandbox-${Math.random().toString(36).substr(2)}` };
-  },
-
-  // 2. Simulate exchanging public token for access token & getting accounts
-  exchangeTokenAndGetAccounts: async (publicToken: string, institutionId: string, userId: string) => {
-    await delay(1500); // Simulate secure server exchange
-    
-    const institution = MOCK_INSTITUTIONS.find(i => i.id === institutionId) || MOCK_INSTITUTIONS[0];
-    const isCredit = institution.name === 'American Express' || institution.name === 'Citi';
-
-    const newAccount: BankAccount = {
-      id: `ba_${Math.random().toString(36).substr(2, 9)}`,
-      userId,
-      institutionName: institution.name,
-      accountName: isCredit ? `${institution.name} Platinum` : `${institution.name} Business Checking`,
-      mask: Math.floor(1000 + Math.random() * 9000).toString(),
-      type: isCredit ? 'Credit Card' : 'Checking',
-      balance: isCredit ? -(Math.floor(Math.random() * 5000)) : Math.floor(Math.random() * 150000),
-      lastSynced: new Date().toISOString(),
-      status: 'active'
-    };
-
-    // Persist to "DB"
-    const currentAccounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS) || '[]');
-    localStorage.setItem(STORAGE_KEYS.ACCOUNTS, JSON.stringify([...currentAccounts, newAccount]));
-
-    // Generate initial transaction history
-    await BankingService.syncTransactions(newAccount.id);
-
-    return newAccount;
-  },
-
-  // 3. Simulate fetching transactions (The "Sync")
-  syncTransactions: async (accountId: string) => {
-    await delay(1000);
-    
-    // Generate realistic random transactions
-    const merchants = [
-        { name: 'Starbucks', cat: 'Meals & Ent', amountRange: [5, 25] },
-        { name: 'Uber Technologies', cat: 'Travel', amountRange: [15, 60] },
-        { name: 'Delta Airlines', cat: 'Travel', amountRange: [200, 800] },
-        { name: 'Staples', cat: 'Office Supplies', amountRange: [20, 150] },
-        { name: 'Amazon Web Services', cat: 'Software & CRM', amountRange: [50, 500] },
-        { name: 'Apple Store', cat: 'Office Supplies', amountRange: [1000, 3000] },
-        { name: 'Shell Oil', cat: 'Travel', amountRange: [30, 80] },
-        { name: 'Marriott Hotels', cat: 'Travel', amountRange: [150, 400] },
-        { name: 'Salesforce.com', cat: 'Software & CRM', amountRange: [100, 300] },
-        { name: 'USPS', cat: 'Office Supplies', amountRange: [5, 50] },
-        { name: 'Client Payment', cat: 'Revenue', amountRange: [1000, 5000], isIncome: true }
-    ];
-
-    const numTx = Math.floor(Math.random() * 5) + 2; // 2-7 new transactions
-    const newTransactions: BankTransaction[] = [];
-
-    for (let i = 0; i < numTx; i++) {
-        const merch = merchants[Math.floor(Math.random() * merchants.length)];
-        const amount = (Math.floor(Math.random() * (merch.amountRange[1] - merch.amountRange[0])) + merch.amountRange[0]);
-        
-        // Income is positive, Expense is negative
-        const finalAmount = merch.isIncome ? amount : -amount;
-
-        newTransactions.push({
-            id: `tx_${Math.random().toString(36).substr(2, 12)}`,
-            bankAccountId: accountId,
-            date: new Date().toISOString().split('T')[0],
-            merchant: merch.name,
-            amount: finalAmount,
-            category: '', // Raw from bank = uncategorized in our system initially
-            status: 'pending'
-        });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        msg = body.error || body.message || body.hint || msg;
+      } catch { /* non-JSON body */ }
+      return { data: null, error: msg };
     }
 
-    // Persist
-    const currentTx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
-    const updatedTx = [...newTransactions, ...currentTx];
-    localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(updatedTx));
-
-    return updatedTx.filter((t: any) => t.bankAccountId === accountId);
-  },
-
-  // 4. Get Data
-  getAccounts: (userId: string) => {
-      const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS) || '[]');
-      // In a real app, backend filters. Here we filter locally.
-      // If user is admin (company), return company accounts. If advisor, return theirs.
-      return all.filter((a: any) => a.userId === userId); 
-  },
-
-  getTransactions: (accountId: string) => {
-      const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
-      return all.filter((t: any) => t.bankAccountId === accountId);
-  },
-
-  // 5. Update Status
-  reconcile: (txId: string, category: string, journalEntryId: string) => {
-      const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
-      const updated = all.map((t: any) => 
-          t.id === txId 
-          ? { ...t, status: 'reconciled', category, journalEntryId } 
-          : t
-      );
-      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(updated));
+    const data: T = await res.json();
+    return { data, error: null };
+  } catch (err: any) {
+    const isOffline = err instanceof TypeError;
+    return {
+      data: null,
+      error: isOffline ? 'Backend offline — check that the server is running.' : err.message,
+    };
   }
+};
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export interface VerificationRecord {
+  id: string;
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  institution_name: string;
+  account_name?: string;
+  account_mask: string;
+  account_type: 'checking' | 'savings' | 'credit' | 'other';
+  routing_number?: string;      // Partially masked e.g. "****0021" — never full
+  plaid_account_id?: string;
+  status: 'pending' | 'verified' | 'failed' | 'micro_deposit';
+  verification_method: 'plaid' | 'manual';
+  name_match: boolean;
+  account_active: boolean;
+  draft_risk: 'low' | 'medium' | 'high';
+  verified_at?: string;
+  verified_by?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface LinkTokenResponse {
+  link_token: string;
+  expiration: string;
+}
+
+export interface ExchangeTokenPayload {
+  publicToken: string;
+  institutionId?: string;
+  institutionName?: string;
+  clientName: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  accountId?: string; // Plaid account_id from onSuccess metadata
+}
+
+export interface ExchangeTokenResponse {
+  success: boolean;
+  verificationId: string;
+  accountMask: string;
+  accountType: string;
+  institutionName: string;
+  routingNumber: string | null;   // Partially masked
+  nameMatch: boolean;
+  accountActive: boolean;
+  draftRisk: 'low' | 'medium' | 'high';
+  status: 'verified';
+}
+
+export interface ManualVerificationPayload {
+  clientName: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  institutionName: string;
+  accountMask: string;         // Last 4 digits only — NEVER the full account number
+  accountType: 'checking' | 'savings';
+  routingNumber: string;
+  notes?: string;
+}
+
+export const BankVerificationService = {
+
+  /**
+   * Step 1 — Get a Plaid Link Token from the backend.
+   * The link_token is short-lived (~30 min) and used only to open the
+   * Plaid Link widget on the client side.
+   *
+   * Docs: POST /api/plaid/create-link-token
+   */
+  createLinkToken: async (
+    clientName: string,
+    userId?: string
+  ): Promise<{ data: LinkTokenResponse | null; error: string | null }> => {
+    return apiFetch<LinkTokenResponse>('/plaid/create-link-token', {
+      method: 'POST',
+      body: JSON.stringify({ clientName, userId }),
+    });
+  },
+
+  /**
+   * Step 3 — Exchange the public_token returned by Plaid Link.
+   * The backend will:
+   *   a) Exchange public_token → access_token (stored in DB, never returned here)
+   *   b) Call Plaid Auth to retrieve routing + account numbers
+   *   c) Create a bank_verifications record in PostgreSQL
+   *   d) Return only safe, masked metadata
+   *
+   * Docs: POST /api/plaid/exchange-token
+   */
+  exchangeToken: async (
+    payload: ExchangeTokenPayload
+  ): Promise<{ data: ExchangeTokenResponse | null; error: string | null }> => {
+    return apiFetch<ExchangeTokenResponse>('/plaid/exchange-token', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
+   * Fetch all verification records from the database.
+   * Supports optional search and status filter.
+   *
+   * Docs: GET /api/plaid/verifications
+   */
+  getVerifications: async (
+    search?: string,
+    status?: string
+  ): Promise<{ data: VerificationRecord[] | null; error: string | null }> => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status && status !== 'all') params.set('status', status);
+    const qs = params.toString() ? `?${params}` : '';
+    return apiFetch<VerificationRecord[]>(`/plaid/verifications${qs}`);
+  },
+
+  /**
+   * Update a verification record's status.
+   * Used by internal staff to manually approve, reject, or flag records.
+   *
+   * Docs: PATCH /api/plaid/verifications/:id
+   */
+  updateStatus: async (
+    id: string,
+    status: VerificationRecord['status'],
+    notes?: string
+  ): Promise<{ data: VerificationRecord | null; error: string | null }> => {
+    return apiFetch<VerificationRecord>(`/plaid/verifications/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes }),
+    });
+  },
+
+  /**
+   * Save a manual ACH verification entry.
+   * The backend performs ABA checksum validation on the routing number.
+   * Account numbers are NEVER sent or stored — only the last 4 digits (mask).
+   * Manual entries start in "micro_deposit" status.
+   *
+   * Docs: POST /api/plaid/verifications/manual
+   */
+  saveManual: async (
+    payload: ManualVerificationPayload
+  ): Promise<{ data: VerificationRecord | null; error: string | null }> => {
+    return apiFetch<VerificationRecord>('/plaid/verifications/manual', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
+   * Update client info for a verification record.
+   *
+   * Docs: PATCH /api/plaid/verifications/:id/info
+   */
+  updateInfo: async (
+    id: string,
+    payload: {
+      client_name?: string;
+      client_email?: string;
+      client_phone?: string;
+      institution_name?: string;
+      routing_number?: string;
+      notes?: string;
+    }
+  ): Promise<{ data: VerificationRecord | null; error: string | null }> => {
+    return apiFetch<VerificationRecord>(`/plaid/verifications/${id}/info`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
+   * Delete a verification record.
+   *
+   * Docs: DELETE /api/plaid/verifications/:id
+   */
+  deleteVerification: async (
+    id: string
+  ): Promise<{ data: any | null; error: string | null }> => {
+    return apiFetch<any>(`/plaid/verifications/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
 };
