@@ -10,6 +10,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { Backend } from "../../services/apiBackend";
 
 export const JoinTeam: React.FC = () => {
   const { submitJobApplication } = useData();
@@ -44,23 +45,35 @@ export const JoinTeam: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate backend submission logic
-    setTimeout(() => {
-      submitJobApplication({
+    try {
+      const payload = {
         fullName: formData.fullName,
-        email: formData.email,
+        personalEmail: formData.email,
         phone: formData.phone,
-        address: formData.address,
-        licenseNumber: formData.licenseNumber,
+        licenseInfo: formData.licenseNumber,
         experience: formData.experience,
-        resumeName: resume?.name,
-      });
+        address: formData.address,
+      };
+      console.log('[JoinTeam] Submitting payload:', payload);
+      await Backend.post('/onboarding/apply', payload);
 
-      setIsSubmitting(false);
+      // Also trigger the local state/notification if context has it
+      if (submitJobApplication) {
+        submitJobApplication({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          licenseNumber: formData.licenseNumber,
+          experience: formData.experience,
+          resumeName: resume?.name,
+        });
+      }
+
       setIsSuccess(true);
       setFormData({
         fullName: "",
@@ -71,7 +84,11 @@ export const JoinTeam: React.FC = () => {
         experience: "",
       });
       setResume(null);
-    }, 1500);
+    } catch (err: any) {
+      alert(`Submission failed: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

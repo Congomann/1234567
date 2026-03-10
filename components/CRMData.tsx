@@ -59,7 +59,7 @@ const ADMIN_TOUR_STEPS = [
 
     // ADMINISTRATION SECTION
     { id: 'nav-user-terminal', title: 'Administration / User Terminal', text: 'The master switch for user permissions and advisor management.', targetId: 'nav-user-terminal', path: '/crm/admin' },
-    { id: 'nav-onboarding', title: 'Onboarding Feed', text: 'Review and approve new advisor applications.', targetId: 'nav-onboarding', path: '/crm/onboarding' },
+    { id: 'nav-onboarding', title: 'Advisor Applications', text: 'Review and approve new advisor applications.', targetId: 'nav-onboarding', path: '/crm/onboarding' },
     { id: 'nav-re-approval', title: 'Listing Approval', text: 'Review and approve Real Estate property listings across the firm.', targetId: 'nav-re-approval', path: '/crm/admin/real-estate' },
     { id: 'nav-re-cms', title: 'Real Estate CMS', text: 'Manage localized content for the Real Estate portal.', targetId: 'nav-re-cms', path: '/crm/admin/real-estate-cms' },
     { id: 'nav-site-config', title: 'Site Config', text: 'CMS controls for the public-facing corporate website.', targetId: 'nav-site-config', path: '/crm/admin/website' },
@@ -193,7 +193,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         const admin = [];
         if (isManagerOrAdmin) {
             admin.push({ path: '/crm/admin', label: 'User Terminal', icon: Users, tourId: 'nav-user-terminal' });
-            admin.push({ path: '/crm/onboarding', label: 'Onboarding Feed', icon: ClipboardCheck, tourId: 'nav-onboarding' });
+            admin.push({ path: '/crm/onboarding', label: 'Advisor Applications', icon: ClipboardCheck, tourId: 'nav-onboarding' });
             admin.push({ path: '/crm/admin/real-estate', label: 'Listing Approval', icon: Home, tourId: 'nav-re-approval' });
             admin.push({ path: '/crm/admin/real-estate-cms', label: 'Real Estate CMS', icon: Monitor, tourId: 'nav-re-cms' });
         }

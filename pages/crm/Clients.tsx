@@ -2,10 +2,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Client, ProductType, UserRole } from '../../types';
-import { Search, Filter, Download, Edit2, X, Mail, Phone, Shield } from 'lucide-react';
+import { Search, Filter, Download, Edit2, X, Mail, Phone, Shield, MessageSquare, Activity } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
+import { CaseChat } from '../../components/chat/CaseChat';
 
 export const Clients: React.FC = () => {
     const { clients, updateClient, user } = useData();
@@ -46,10 +47,17 @@ export const Clients: React.FC = () => {
         return result;
     }, [clients, user, productFilter, searchTerm]);
 
+    const [modalTab, setModalTab] = useState<'info' | 'chat'>('info');
+
     const handleEdit = (client: Client) => {
         setEditingClient(client);
         setEditForm({ ...client });
+        setModalTab('info');
     };
+
+    // ... handleSave same ...
+
+    // --- Modal Tab Render ---
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -179,8 +187,8 @@ export const Clients: React.FC = () => {
                                     </td>
                                     <td className="px-8 py-8" onClick={() => handleEdit(client)}>
                                         <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${getStatusText(client.renewalDate) === 'Active' ? 'bg-green-100 text-green-700' :
-                                                getStatusText(client.renewalDate) === 'Expired' ? 'bg-red-100 text-red-700' :
-                                                    'bg-orange-100 text-orange-700'
+                                            getStatusText(client.renewalDate) === 'Expired' ? 'bg-red-100 text-red-700' :
+                                                'bg-orange-100 text-orange-700'
                                             }`}>
                                             {getStatusText(client.renewalDate)}
                                         </span>
@@ -239,109 +247,136 @@ export const Clients: React.FC = () => {
                                     <Edit2 className="h-8 w-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">Edit Client Account</h2>
+                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">{modalTab === 'chat' ? 'Underwriting Case Chat' : 'Edit Client Account'}</h2>
                                     <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">Advisor Administrative Console</p>
                                 </div>
                             </div>
                             <button onClick={() => setEditingClient(null)} className="p-4 hover:bg-slate-100 rounded-full transition-colors"><X className="h-8 w-8 text-slate-300" /></button>
                         </div>
 
-                        <form onSubmit={handleSave} className="space-y-8">
-                            {/* Identitiy Block */}
-                            <div className="bg-slate-50 p-10 rounded-[2.5rem] border-2 border-slate-100 space-y-8">
-                                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
-                                    <span className="h-1.5 w-1.5 bg-blue-600 rounded-full"></span>
-                                    Account Identity
-                                </h3>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Legal Full Name</label>
-                                    <input
-                                        className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
-                                        value={editForm.name || ''}
-                                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                    />
+                        <div className="flex gap-4 mb-10 border-b border-slate-100 pb-1">
+                            <button
+                                onClick={() => setModalTab('info')}
+                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'info' ? 'text-blue-600' : 'text-slate-400'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Shield size={14} /> Profile & Policy
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Email Address</label>
-                                        <input
-                                            type="email"
-                                            className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
-                                            value={editForm.email || ''}
-                                            onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Primary Phone</label>
-                                        <input
-                                            type="tel"
-                                            className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
-                                            value={editForm.phone || ''}
-                                            onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                                        />
-                                    </div>
+                                {modalTab === 'info' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
+                            <button
+                                onClick={() => setModalTab('chat')}
+                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'chat' ? 'text-blue-600' : 'text-slate-400'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <MessageSquare size={14} /> Case Chat
                                 </div>
-                            </div>
+                                {modalTab === 'chat' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
+                        </div>
 
-                            {/* Policy Block */}
-                            <div className="bg-white p-10 rounded-[2.5rem] border-4 border-blue-50 space-y-8 shadow-sm">
-                                <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] flex items-center gap-3">
-                                    <span className="h-1.5 w-1.5 bg-blue-600 rounded-full"></span>
-                                    Policy Administration
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Master Policy Number</label>
+                        {modalTab === 'info' ? (
+                            <form onSubmit={handleSave} className="space-y-8">
+                                {/* Identitiy Block */}
+                                <div className="bg-slate-50 p-10 rounded-[2.5rem] border-2 border-slate-100 space-y-8">
+                                    <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                        <span className="h-1.5 w-1.5 bg-blue-600 rounded-full"></span>
+                                        Account Identity
+                                    </h3>
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Legal Full Name</label>
                                         <input
-                                            className="w-full bg-blue-50/30 text-[#0B2240] border-2 border-blue-100 rounded-2xl px-6 py-6 text-2xl font-black font-mono focus:ring-4 focus:ring-blue-200 outline-none transition-all"
-                                            value={editForm.policyNumber || ''}
-                                            onChange={e => setEditForm({ ...editForm, policyNumber: e.target.value })}
+                                            className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
+                                            value={editForm.name || ''}
+                                            onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Coverage Product</label>
-                                        <select
-                                            className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none appearance-none cursor-pointer"
-                                            value={editForm.product}
-                                            onChange={e => setEditForm({ ...editForm, product: e.target.value as ProductType })}
-                                        >
-                                            {Object.values(ProductType).map(p => <option key={p} value={p}>{p}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Issuing Carrier</label>
-                                        <input
-                                            className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
-                                            value={editForm.carrier || ''}
-                                            onChange={e => setEditForm({ ...editForm, carrier: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Annual Premium ($)</label>
-                                        <input
-                                            type="number"
-                                            className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
-                                            value={editForm.premium || ''}
-                                            onChange={e => setEditForm({ ...editForm, premium: Number(e.target.value) })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Renewal Date</label>
-                                        <input
-                                            type="date"
-                                            className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
-                                            value={editForm.renewalDate || ''}
-                                            onChange={e => setEditForm({ ...editForm, renewalDate: e.target.value })}
-                                        />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Email Address</label>
+                                            <input
+                                                type="email"
+                                                className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
+                                                value={editForm.email || ''}
+                                                onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Primary Phone</label>
+                                            <input
+                                                type="tel"
+                                                className="w-full bg-white text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none shadow-sm transition-all"
+                                                value={editForm.phone || ''}
+                                                onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="pt-10 flex gap-6">
-                                <button type="button" onClick={() => setEditingClient(null)} className="flex-1 py-6 rounded-full font-black text-slate-400 bg-slate-100 hover:bg-slate-200 transition-all uppercase tracking-widest text-xs">Discard</button>
-                                <button type="submit" className="flex-1 py-6 rounded-full font-black bg-[#0B2240] text-white hover:bg-blue-800 transition-all shadow-2xl shadow-blue-900/30 transform active:scale-95 uppercase tracking-widest text-xs">Commit Updates</button>
+                                {/* Policy Block */}
+                                <div className="bg-white p-10 rounded-[2.5rem] border-4 border-blue-50 space-y-8 shadow-sm">
+                                    <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                        <span className="h-1.5 w-1.5 bg-blue-600 rounded-full"></span>
+                                        Policy Administration
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Master Policy Number</label>
+                                            <input
+                                                className="w-full bg-blue-50/30 text-[#0B2240] border-2 border-blue-100 rounded-2xl px-6 py-6 text-2xl font-black font-mono focus:ring-4 focus:ring-blue-200 outline-none transition-all"
+                                                value={editForm.policyNumber || ''}
+                                                onChange={e => setEditForm({ ...editForm, policyNumber: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Coverage Product</label>
+                                            <select
+                                                className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none appearance-none cursor-pointer"
+                                                value={editForm.product}
+                                                onChange={e => setEditForm({ ...editForm, product: e.target.value as ProductType })}
+                                            >
+                                                {Object.values(ProductType).map(p => <option key={p} value={p}>{p}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Issuing Carrier</label>
+                                            <input
+                                                className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
+                                                value={editForm.carrier || ''}
+                                                onChange={e => setEditForm({ ...editForm, carrier: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Annual Premium ($)</label>
+                                            <input
+                                                type="number"
+                                                className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
+                                                value={editForm.premium || ''}
+                                                onChange={e => setEditForm({ ...editForm, premium: Number(e.target.value) })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Renewal Date</label>
+                                            <input
+                                                type="date"
+                                                className="w-full bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-2xl px-6 py-5 text-sm font-black focus:ring-4 focus:ring-blue-100 outline-none"
+                                                value={editForm.renewalDate || ''}
+                                                onChange={e => setEditForm({ ...editForm, renewalDate: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-10 flex gap-6">
+                                    <button type="button" onClick={() => setEditingClient(null)} className="flex-1 py-6 rounded-full font-black text-slate-400 bg-slate-100 hover:bg-slate-200 transition-all uppercase tracking-widest text-xs">Discard</button>
+                                    <button type="submit" className="flex-1 py-6 rounded-full font-black bg-[#0B2240] text-white hover:bg-blue-800 transition-all shadow-2xl shadow-blue-900/30 transform active:scale-95 uppercase tracking-widest text-xs">Commit Updates</button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="animate-fade-in overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 min-h-[500px]">
+                                {editingClient && <CaseChat caseId={editingClient.id} clientName={editingClient.name} />}
                             </div>
-                        </form>
+                        )}
                     </div>
                 </div>
             )}

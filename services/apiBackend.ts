@@ -42,13 +42,18 @@ class NHFGBackend {
 
             try {
                 // Attempt to parse JSON error detail
-                const errorData = await res.json();
-                errorMessage = errorData.detail || errorData.message || errorMessage;
+                const text = await res.clone().text();
+                const errorData = JSON.parse(text);
+                errorMessage = errorData.message || errorData.error || errorData.detail || errorMessage;
+                console.error(`[Backend Response Error JSON]`, errorData);
             } catch (e) {
                 // If not JSON, attempt to read as plain text
                 try {
                     const text = await res.clone().text();
-                    if (text && text.length < 150) errorMessage = text;
+                    if (text) {
+                        errorMessage = text.length < 150 ? text : `HTTP Error ${res.status}: (Body too large)`;
+                        console.error(`[Backend Response Error Text]`, text);
+                    }
                 } catch (textErr) { }
             }
 
@@ -228,6 +233,24 @@ class NHFGBackend {
             } catch (e) { }
         }
         await DB.delete('events', id);
+    }
+
+    // --- GENERIC HTTP METHODS ---
+    async get<T>(path: string): Promise<T> {
+        const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+        return this.apiRequest<T>(url, { headers: this.getAuthHeaders() }, path.replace(/\//g, '_'));
+    }
+
+    async post<T>(path: string, body: any): Promise<T> {
+        const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+        console.log(`[Backend POST] ${url}`, body);
+        const options: RequestInit = {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify(body)
+        };
+        const res = await fetch(url, options);
+        return this.handleResponse(res);
     }
 
 

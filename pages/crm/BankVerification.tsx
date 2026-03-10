@@ -36,6 +36,7 @@ import {
     VerificationRecord,
     ManualVerificationPayload,
 } from '../../services/bankingService';
+import { socketService } from '../../services/socketService';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -780,6 +781,23 @@ export const BankVerification: React.FC = () => {
     }, [search, filterStatus]);
 
     useEffect(() => { loadRecords(); }, [loadRecords]);
+
+    useEffect(() => {
+        const unsubscribe = socketService.subscribe((data) => {
+            if (data.type === 'BANK_VERIFICATION_CREATED') {
+                setRecords(prev => {
+                    const exists = prev.some(r => r.id === data.payload.id);
+                    if (exists) return prev;
+                    return [data.payload, ...prev];
+                });
+                showToast(`New verification: ${data.payload.client_name}`);
+            } else if (data.type === 'BANK_VERIFICATION_UPDATED') {
+                setRecords(prev => prev.map(r => r.id === data.payload.id ? { ...r, ...data.payload } : r));
+                showToast(`Status updated: ${data.payload.client_name} (${data.payload.status})`);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     const handleUpdateStatus = async (id: string, status: VerificationRecord['status']) => {
         const { data, error } = await BankVerificationService.updateStatus(id, status);

@@ -271,6 +271,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           Backend.getLeads().then(setLeads);
         } else if (data.type === 'CHAT_MESSAGE') {
           setChatMessages(prev => [...prev, data.payload]);
+        } else if (data.type === 'NEW_ADVISOR_APPLICATION') {
+          pushNotification('New Advisor Application', `Application received from ${data.payload.full_name}.`, 'info', 'onboarding', data.payload.id);
         }
       });
       return () => { unsubscribe(); socketService.disconnect(); };

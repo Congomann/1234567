@@ -62,6 +62,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+  console.log(`\n>>> [API ${req.method}] ${req.url}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('>>> [API Body]', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
 
 // Database Connection - Google Cloud SQL Support
 let poolConfig;
@@ -94,7 +101,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) {
     if (process.env.NODE_ENV === 'development') {
-      req.user = { id: 'mock-user-id', role: 'admin' };
+      req.user = { id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2', role: 'Administrator' };
       return next();
     }
     return res.status(401).json({ error: 'Unauthorized' });
@@ -103,7 +110,7 @@ const authenticateToken = (req, res, next) => {
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) {
       if (process.env.NODE_ENV === 'development') {
-        req.user = { id: 'mock-user-id', role: 'admin' };
+        req.user = { id: 'mock-user-id', role: 'Administrator' };
         return next();
       }
       return res.status(403).json({ error: 'Forbidden' });
@@ -569,6 +576,277 @@ app.post('/api/users', authenticateToken, async (req, res) => {
   }
 });
 
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ADVISOR ONBOARDING SYSTEM
+// ════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * @swagger
+ * /api/onboarding/apply:
+ *   post:
+ *     summary: Submit a new advisor application (Public)
+ */
+// Onboarding Table Initialization & User Table Hardening
+const initOnboardingTables = async () => {
+  try {
+    // 1. Ensure User table has necessary columns for modern onboarding
+    const safeAddUserCol = async (col, def) => {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${def}`).catch(() => { });
+    };
+    await safeAddUserCol('contract_level', 'NUMERIC(5,2) DEFAULT 50');
+    await safeAddUserCol('products_sold', 'JSONB DEFAULT \'[]\'::jsonb');
+    await safeAddUserCol('onboarding_completed', 'BOOLEAN DEFAULT FALSE');
+    await safeAddUserCol('personal_email', 'VARCHAR(255)');
+    await safeAddUserCol('password_hash', 'VARCHAR(255)');
+
+    // 2. Create Onboarding Specific tables
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS advisor_applications (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        full_name VARCHAR(255) NOT NULL,
+        personal_email VARCHAR(255) UNIQUE NOT NULL,
+        phone VARCHAR(50),
+        license_info TEXT,
+        status VARCHAR(50) DEFAULT 'pending_approval',
+        company_email VARCHAR(255),
+        contract_level NUMERIC(5,2),
+        authorized_products JSONB,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS activation_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        token VARCHAR(128) UNIQUE NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    console.log('[DB] ✅ Onboarding & User schema verified');
+  } catch (err) {
+    console.error('[DB] Onboarding init error:', err.message);
+  }
+};
+initOnboardingTables();
+
+app.post('/api/onboarding/apply', async (req, res) => {
+  const { fullName, personalEmail, phone, licenseInfo, experience, address } = req.body;
+  
+  if (!fullName) return res.status(400).json({ error: 'Missing field: fullName' });
+  if (!personalEmail) return res.status(400).json({ error: 'Missing field: personalEmail' });
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO advisor_applications (full_name, personal_email, phone, license_info, experience, address)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [fullName, personalEmail, phone, licenseInfo, experience, address]
+    );
+
+    // Notify Admin/Manager
+    broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: result.rows[0] });
+
+    console.log(`[Onboarding] New application from: ${fullName}`);
+    res.status(201).json({ success: true, message: 'Application submitted successfully.' });
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(400).json({ error: 'An application with this email already exists.' });
+    }
+    console.error('[Onboarding] Application error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/admin/onboarding/applications:
+ *   get:
+ *     summary: List all advisor applications (Admin/Manager only)
+ */
+app.get('/api/admin/onboarding/applications', authenticateToken, async (req, res) => {
+  if (!['Administrator', 'Manager'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+  try {
+    const result = await pool.query('SELECT * FROM advisor_applications ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/admin/onboarding/applications/:id/approve:
+ *   post:
+ *     summary: Approve an application and send activation email
+ */
+app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, async (req, res) => {
+  if (!['Administrator', 'Manager'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+  const { id } = req.params;
+  const { companyEmail, contractLevel, productsSold, tempPassword } = req.body;
+
+  if (!companyEmail) return res.status(400).json({ error: 'Company email is required for approval.' });
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Get application details
+    const appRes = await client.query('SELECT * FROM advisor_applications WHERE id = $1', [id]);
+    if (appRes.rows.length === 0) throw new Error('Application not found.');
+    const application = appRes.rows[0];
+
+    // 2. Update application status
+    await client.query(
+      'UPDATE advisor_applications SET status = $1, company_email = $2, contract_level = $3, authorized_products = $4, updated_at = NOW() WHERE id = $5',
+      ['approved', companyEmail, contractLevel || 50, JSON.stringify(productsSold || []), id]
+    );
+
+    // 3. Create/Update user account (Status: pending_activation)
+    // Map application data to user record
+    const passwordHash = tempPassword ? crypto.createHash('sha256').update(tempPassword).digest('hex') : null;
+    const userRes = await client.query(
+      `INSERT INTO users (name, email, personal_email, role, status, password_hash, contract_level, products_sold)
+       VALUES ($1, $2, $3, 'Advisor', 'pending_activation', $4, $5, $6)
+       ON CONFLICT (email) DO UPDATE SET 
+         personal_email = EXCLUDED.personal_email,
+         status = 'pending_activation',
+         contract_level = EXCLUDED.contract_level,
+         products_sold = EXCLUDED.products_sold,
+         password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash)
+       RETURNING id`,
+      [application.full_name, companyEmail, application.personal_email, passwordHash, contractLevel || 50, JSON.stringify(productsSold || [])]
+    );
+    const userId = userRes.rows[0].id;
+
+    // 4. Generate activation token
+    const token = crypto.randomBytes(48).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await client.query(
+      'INSERT INTO activation_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
+      [userId, token, expiresAt]
+    );
+
+    await client.query('COMMIT');
+
+    // 5. Send Welcome Email
+    const appUrl = process.env.APP_URL || 'http://localhost:5173';
+    const activationUrl = `${appUrl}/activate/${token}`;
+
+    const welcomeHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #1e3a5f;">Welcome to New Holland Financial Group!</h2>
+        <p>Hi ${application.full_name},</p>
+        <p>Your advisor account has been approved. We are excited to have you on the team!</p>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Your company email address:</strong></p>
+          <p style="font-size: 18px; color: #2563eb; margin: 5px 0;">${companyEmail}</p>
+        </div>
+        <p>Please click the button below to activate your account and set your password. This link will expire in 24 hours.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${activationUrl}" style="background: #2563eb; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Activate My Account</a>
+        </div>
+        <p style="font-size: 12px; color: #64748b;">If the button doesn't work, copy and paste this link: <br> ${activationUrl}</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">New Holland Financial Group · Professional Advisor Network</p>
+      </div>
+    `;
+
+    try {
+      await sendEmail({
+        to: application.personal_email,
+        subject: 'Welcome to NHFG — Account Activation Required',
+        html: welcomeHtml
+      });
+      console.log(`[Email] Welcome email sent to: ${application.personal_email}`);
+    } catch (mailErr) {
+      console.error('[Email] Failed to send welcome email:', mailErr.message);
+      // We don't fail the whole request here, but we log it. 
+      // In production, you might want to handle this more strictly.
+    }
+
+    res.json({ success: true, message: 'Application approved and activation email sent.' });
+  } catch (err) {
+    if (client) await client.query('ROLLBACK');
+    console.error('[Onboarding] Approval error:', err.message);
+    res.status(500).json({ error: err.message });
+  } finally {
+    if (client) client.release();
+  }
+});
+
+/**
+ * @swagger
+ * /api/onboarding/activate/:token:
+ *   get:
+ *     summary: Verify activation token (Public)
+ */
+app.get('/api/onboarding/activate/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT at.*, u.email, u.name 
+       FROM activation_tokens at 
+       JOIN users u ON at.user_id = u.id 
+       WHERE at.token = $1 AND at.is_used = FALSE AND at.expires_at > NOW()`,
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired activation link.' });
+    }
+
+    res.json({ success: true, user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/onboarding/complete-activation:
+ *   post:
+ *     summary: Set password and activate account (Public)
+ */
+app.post('/api/onboarding/complete-activation', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ error: 'Token and password are required.' });
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Verify token
+    const tokenRes = await client.query(
+      'SELECT * FROM activation_tokens WHERE token = $1 AND is_used = FALSE AND expires_at > NOW()',
+      [token]
+    );
+    if (tokenRes.rows.length === 0) throw new Error('Invalid or expired token.');
+    const userId = tokenRes.rows[0].user_id;
+
+    // 2. Hash password and update user
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    await client.query(
+      "UPDATE users SET password_hash = $1, status = 'active', onboarding_completed = TRUE WHERE id = $2",
+      [passwordHash, userId]
+    );
+
+    // 3. Mark token as used
+    await client.query('UPDATE activation_tokens SET is_used = TRUE WHERE token = $1', [token]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Account activated successfully. You can now log in.' });
+  } catch (err) {
+    if (client) await client.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  } finally {
+    if (client) client.release();
+  }
+});
+
 // 5. Calendar Events
 app.get('/api/events', authenticateToken, async (req, res) => {
   try {
@@ -742,11 +1020,21 @@ let plaidClient = null;
 let PlaidEnvs = null;   // PlaidEnvironments — cached after first require
 
 const initPlaid = () => {
-  const { PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ENV } = process.env;
+  const { PLAID_CLIENT_ID, PLAID_SECRET, PLAID_SECRET_PRODUCTION, PLAID_ENV } = process.env;
+
   if (!PLAID_CLIENT_ID || PLAID_CLIENT_ID === 'your_plaid_client_id_here') {
     console.warn('[Plaid] ⚠️  PLAID_CLIENT_ID not set — endpoints will return 503 until configured.');
     return;
   }
+
+  // Choose the secret based on the environment
+  const activeSecret = PLAID_ENV === 'production' ? PLAID_SECRET_PRODUCTION : PLAID_SECRET;
+
+  if (!activeSecret) {
+    console.warn(`[Plaid] ⚠️  PLAID_SECRET${PLAID_ENV === 'production' ? '_PRODUCTION' : ''} not set for env: ${PLAID_ENV}.`);
+    return;
+  }
+
   try {
     const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
     PlaidEnvs = PlaidEnvironments;
@@ -762,19 +1050,42 @@ const initPlaid = () => {
       baseOptions: {
         headers: {
           'PLAID-CLIENT-ID': PLAID_CLIENT_ID,
-          'PLAID-SECRET': PLAID_SECRET,
+          'PLAID-SECRET': activeSecret,
         },
       },
     });
 
     plaidClient = new PlaidApi(configuration);
-    console.log(`[Plaid] ✅ SDK ready — env: ${PLAID_ENV || 'sandbox'}`);
+    console.log(`[Plaid] ✅ SDK ready — env: ${PLAID_ENV || 'sandbox'} — using secret: ${activeSecret.slice(0, 4)}...`);
   } catch (err) {
     console.error('[Plaid] Init failed:', err.message);
   }
 };
 
 initPlaid();
+
+/**
+ * Ensures Plaid SDK is initialized before processing requests.
+ */
+const requirePlaid = (res) => {
+  if (!plaidClient) {
+    res.status(503).json({ error: 'Plaid is not configured. Ensure PLAID_CLIENT_ID and PLAID_SECRET are set in .env' });
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Derived risk scoring for ACH drafts based on Plaid verification signals.
+ * Logic: Prior returns = High, Verified = Low, Others = Medium.
+ */
+const computeDraftRisk = (insights, plaidVerifStatus, hasPriorReturns, authMethod) => {
+  if (hasPriorReturns === true) return 'high';
+  if (plaidVerifStatus === 'verification_failed') return 'high';
+  if (['automatically_verified', 'manually_verified', 'database_matched'].includes(plaidVerifStatus)) return 'low';
+  if (authMethod === 'INSTANT_AUTH') return 'low';
+  return 'medium';
+};
 
 // ── DB Tables (idempotent — safe on every boot) ────────────────────────────────
 const migratePlaidTables = async () => {
@@ -1095,6 +1406,7 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
     );
 
     const savedRecord = verifyInsert.rows[0];
+    broadcast({ type: 'BANK_VERIFICATION_CREATED', payload: savedRecord });
 
     // ── Return SAFE metadata only (no access_token, no full account numbers) ─────
     res.json({
@@ -1266,7 +1578,9 @@ app.patch('/api/plaid/verifications/:id', authenticateToken, async (req, res) =>
       [status, notes || null, req.user?.id || null, id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Verification not found' });
-    res.json(result.rows[0]);
+    const record = result.rows[0];
+    broadcast({ type: 'BANK_VERIFICATION_UPDATED', payload: record });
+    return res.json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1323,7 +1637,9 @@ RETURNING * `,
         accountMask, accountType || 'checking', routingNumber,
         notes || null, req.user?.id || null]
     );
-    res.status(201).json(result.rows[0]);
+    const record = result.rows[0];
+    broadcast({ type: 'BANK_VERIFICATION_CREATED', payload: record });
+    res.status(201).json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1402,14 +1718,18 @@ app.post('/api/plaid/webhook', async (req, res) => {
 
     // AUTH / AUTOMATICALLY_VERIFIED — micro-deposit confirmed, mark verified
     if (webhook_type === 'AUTH' && webhook_code === 'AUTOMATICALLY_VERIFIED') {
-      await pool.query(
+      const result = await pool.query(
         `UPDATE bank_verifications
          SET status = 'verified', verified_at = NOW(),
              plaid_verification_status = 'automatically_verified', updated_at = NOW()
          WHERE plaid_item_id = $1
-           AND ($2::VARCHAR IS NULL OR plaid_account_id = $2)`,
+           AND ($2::VARCHAR IS NULL OR plaid_account_id = $2)
+         RETURNING *`,
         [plaidItemDbId, account_id || null]
       );
+      if (result.rows.length > 0) {
+        broadcast({ type: 'BANK_VERIFICATION_UPDATED', payload: result.rows[0] });
+      }
       console.log(`[Plaid Webhook] ✅ Auto-verified — item: ${item_id}`);
     }
 
@@ -1712,7 +2032,7 @@ app.get('/api/plaid/client-verify/:token', async (req, res) => {
     // Create a Plaid link_token for this client
     let linkToken = null;
     if (plaidClient) {
-      const products = ['auth', 'transactions'];
+      const products = (process.env.PLAID_PRODUCTS || 'auth').split(',').map(s => s.trim());
       const countryCodes = (process.env.PLAID_COUNTRY_CODES || 'US').split(',').map(s => s.trim());
       const linkResp = await plaidClient.linkTokenCreate({
         user: { client_user_id: link.verification_id },
@@ -1877,7 +2197,7 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
       : (internalStatus === 'verified' ? 'low' : 'medium');
 
     // ── H: Update bank_verifications ─────────────────────────────────────────
-    await pool.query(
+    const result = await pool.query(
       `UPDATE bank_verifications SET
          plaid_item_id             = $1::uuid,
          institution_name          = COALESCE($2, 'Unknown Bank'),
@@ -1907,7 +2227,8 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
          data_captured_at          = NOW(),
          verified_at               = CASE WHEN $10::text = 'verified' THEN NOW() ELSE NULL END,
          updated_at                = NOW()
-       WHERE id = $26::uuid`,
+       WHERE id = $26::uuid
+       RETURNING *`,
       [
         plaidItemDbId,
         institutionName,
@@ -1932,6 +2253,10 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
         verificationId,
       ]
     );
+
+    if (result.rows.length > 0) {
+      broadcast({ type: 'BANK_VERIFICATION_UPDATED', payload: result.rows[0] });
+    }
 
     // ── I: Mark link as used ─────────────────────────────────────────────────
     await pool.query(
@@ -2334,6 +2659,287 @@ app.get('/analytics.js', (req, res) => {
 })();
     `;
   res.type('application/javascript').send(script);
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════════
+// CHAT & CASE COMMUNICATION SYSTEM
+// ════════════════════════════════════════════════════════════════════════════════
+
+const PREDEFINED_MESSAGES = [
+  "Application declined because of medication history.",
+  "Please recheck that the client address is correct.",
+  "Please verify that the client's SSN is correct.",
+  "Please verify that the client's bank information is correct.",
+  "Does the client currently have another policy?",
+  "If yes, how much coverage does the policy provide?",
+  "If no, no additional information is required.",
+  "Application declined. Let's try a different carrier."
+];
+
+const CARRIER_SUGGESTIONS = [
+  "Aflac", "Transamerica", "GEICO", "Combined Insurance", "Colonial Life"
+];
+
+// Helper to check if a message is from an advisor to a sub-admin and restricted
+const isRestrictedMessage = (senderRole, receiverRole, content) => {
+  if (senderRole === 'Advisor' && receiverRole === 'Sub-Admin') {
+    return !PREDEFINED_MESSAGES.some(msg => content.includes(msg)) &&
+      !CARRIER_SUGGESTIONS.some(carrier => content.includes(carrier));
+  }
+  return false;
+};
+
+/**
+ * @swagger
+ * /api/chat/channels:
+ *   get:
+ *     summary: Get all channels the user is a member of
+ */
+app.get('/api/chat/channels', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT c.*, 
+       (SELECT json_agg(u.name) FROM chat_channel_members cm 
+        JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
+       (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message
+       FROM chat_channels c
+       JOIN chat_channel_members cm ON c.id = cm.channel_id
+       WHERE cm.user_id = $1`,
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/chat/channels:
+ *   post:
+ *     summary: Create a new chat channel (Admin/Manager only)
+ */
+app.post('/api/chat/channels', authenticateToken, async (req, res) => {
+  try {
+    const { name, type, product_type } = req.body;
+
+    // Authorization check
+    if (!['Administrator', 'Manager'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Only Admins and Managers can create group channels.' });
+    }
+
+    const channelRes = await pool.query(
+      `INSERT INTO chat_channels (name, type, product_type, created_by)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, type || 'group', product_type || null, req.user.id]
+    );
+
+    const channel = channelRes.rows[0];
+
+    // Auto-add creator as member
+    await pool.query(
+      'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2)',
+      [channel.id, req.user.id]
+    );
+
+    // If it's an advisor channel, auto-add all relevant roles
+    if (type === 'advisor_channel') {
+      await pool.query(
+        `INSERT INTO chat_channel_members (channel_id, user_id)
+         SELECT $1, id FROM users WHERE role IN ('Administrator', 'Manager', 'Sub-Admin')
+         ON CONFLICT DO NOTHING`,
+        [channel.id]
+      );
+    }
+
+    res.json(channel);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/chat/messages/{channelId}:
+ *   get:
+ *     summary: Get messages for a specific channel
+ */
+app.get('/api/chat/messages/:channelId', authenticateToken, async (req, res) => {
+  try {
+    const { channelId } = req.params;
+    const result = await pool.query(
+      `SELECT m.*, u.name as sender_name, u.role as sender_role, u.avatar as sender_avatar
+       FROM chat_messages m
+       JOIN users u ON m.sender_id = u.id
+       WHERE m.channel_id = $1
+       ORDER BY m.created_at ASC`,
+      [channelId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/chat/messages:
+ *   post:
+ *     summary: Send a new message
+ */
+app.post('/api/chat/messages', authenticateToken, async (req, res) => {
+  try {
+    const { channelId, content, metadata } = req.body;
+    const senderId = req.user.id;
+    const senderRole = req.user.role;
+
+    // Fetch channel and members to check restrictions
+    const channelRes = await pool.query('SELECT * FROM chat_channels WHERE id = $1', [channelId]);
+    if (channelRes.rows.length === 0) return res.status(404).json({ error: 'Channel not found' });
+    const channel = channelRes.rows[0];
+
+    const membersRes = await pool.query(
+      'SELECT u.id, u.role FROM chat_channel_members cm JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = $1',
+      [channelId]
+    );
+    const members = membersRes.rows;
+
+    // Check Advisor -> Sub-Admin restriction
+    const hasSubAdmin = members.some(m => m.role === 'Sub-Admin');
+    if (senderRole === 'Advisor' && hasSubAdmin && channel.type !== 'direct' && channel.type !== 'group') {
+      // In Case Chats or specialized Sub-Admin channels, advisors must use predefined text
+      if (isRestrictedMessage('Advisor', 'Sub-Admin', content)) {
+        return res.status(403).json({ error: 'Advisors can only send predefined messages to Sub-Admins.' });
+      }
+    }
+
+    const messageRes = await pool.query(
+      `INSERT INTO chat_messages (channel_id, sender_id, content, metadata)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [channelId, senderId, content, metadata || {}]
+    );
+
+    const newMessage = {
+      ...messageRes.rows[0],
+      sender_name: req.user.name || 'User',
+      sender_role: senderRole
+    };
+
+    // Broadcast via WebSocket
+    broadcast({ type: 'NEW_MESSAGE', channelId, message: newMessage });
+
+    res.json(newMessage);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/chat/case/{caseId}:
+ *   get:
+ *     summary: Get or create a Case Chat for a client/lead
+ */
+app.get('/api/chat/case/:caseId', authenticateToken, async (req, res) => {
+  try {
+    const { caseId } = req.params;
+
+    // Check if channel exists for this case
+    let channelRes = await pool.query('SELECT * FROM chat_channels WHERE case_id = $1', [caseId]);
+
+    if (channelRes.rows.length === 0) {
+      // Create new case channel
+      const leadRes = await pool.query('SELECT name FROM leads WHERE id = $1', [caseId]);
+      const caseName = leadRes.rows[0]?.name || 'Unknown Client';
+
+      const newChannel = await pool.query(
+        "INSERT INTO chat_channels (name, type, case_id, created_by) VALUES ($1, 'case_chat', $2, $3) RETURNING *",
+        [`Case: ${caseName}`, caseId, req.user.id]
+      );
+
+      const channel = newChannel.rows[0];
+
+      // Auto-add default members: Creator, and all Sub-Admins/Admins
+      // In production, you might want to only add assigned advisor
+      await pool.query(
+        `INSERT INTO chat_channel_members (channel_id, user_id)
+         SELECT $1, id FROM users WHERE role IN ('Administrator', 'Manager', 'Sub-Admin')
+         ON CONFLICT DO NOTHING`,
+        [channel.id]
+      );
+
+      // Add current user if not already added
+      await pool.query(
+        'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [channel.id, req.user.id]
+      );
+
+      channelRes = { rows: [channel] };
+    }
+
+    res.json(channelRes.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/case-notes/{clientId}:
+ *   get:
+ *     summary: Get medical and underwriting notes for a client
+ */
+app.get('/api/case-notes/:clientId', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT n.*, u.name as author_name, u.role as author_role
+       FROM case_notes n
+       JOIN users u ON n.author_id = u.id
+       WHERE n.client_id = $1
+       ORDER BY n.created_at DESC`,
+      [req.params.clientId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/case-notes:
+ *   post:
+ *     summary: Add a structured case note (Admin/Manager/Sub-Admin only for medical)
+ */
+app.post('/api/case-notes', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, noteType, content, structuredData } = req.body;
+
+    // Restriction: Only Sub-Admins/Admins can add Medical notes
+    if (noteType === 'medical' && !['Administrator', 'Manager', 'Sub-Admin'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Only Underwriting staff can add medical notes.' });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO case_notes (client_id, author_id, note_type, content, structured_data)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [clientId, req.user.id, noteType, content, structuredData || {}]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('[Global Error]', err);
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+  res.status(500).json({ error: 'Internal Server Error', details: err.message });
 });
 
 server.listen(PORT, () => {

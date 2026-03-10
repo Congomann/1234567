@@ -77,6 +77,9 @@ import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { CommissionRecon } from './pages/admin/CommissionRecon';
 import { LandingPageBuilder } from './pages/admin/LandingPageBuilder';
 import { AnalyticsTracker } from './components/AnalyticsTracker';
+import AdvisorApplication from './pages/onboarding/AdvisorApplication';
+import AdminOnboarding from './pages/admin/AdminOnboarding';
+import ActivateAccount from './pages/onboarding/ActivateAccount';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -151,6 +154,7 @@ const App: React.FC = () => {
             <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
+            <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
 
@@ -197,7 +201,7 @@ const App: React.FC = () => {
               {/* ADMIN CONTROL PANEL */}
               <Route element={<ManagerRoute />}>
                 <Route path="admin" element={<AdminUsers />} />
-                <Route path="onboarding" element={<Onboarding />} />
+                <Route path="onboarding" element={<AdminOnboarding />} />
                 <Route path="admin/real-estate" element={<RealEstateAdmin />} />
                 <Route path="admin/real-estate-cms" element={<RealEstateCms />} />
               </Route>

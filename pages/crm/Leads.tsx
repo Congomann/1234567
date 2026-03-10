@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
-import { Lead, LeadStatus, UserRole, ProductType } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download } from 'lucide-react';
+import { Lead, LeadStatus, UserRole, ProductType, ApplicationStatus } from '../../types';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
+import { CaseChat } from '../../components/chat/CaseChat';
 import { Link } from 'react-router-dom';
 import { AnalyticsService } from '../../services/analyticsService';
 import { Backend } from '../../services/apiBackend';
@@ -75,7 +76,7 @@ export const Leads: React.FC = () => {
     const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
     const [showBulkSuccess, setShowBulkSuccess] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof Lead, direction: 'asc' | 'desc' } | null>(null);
-    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'vault'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'underwriting' | 'vault'>('profile');
     const [browseHistory, setBrowseHistory] = useState<any[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
     const [loadingContext, setLoadingContext] = useState(false);
@@ -460,6 +461,10 @@ export const Leads: React.FC = () => {
                                 {viewingLead?.visitor_id && <span className="ml-2 h-2 w-2 bg-green-500 rounded-full inline-block animate-pulse"></span>}
                                 {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
                             </button>
+                            <button onClick={() => setActiveTab('underwriting')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'underwriting' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                Underwriting
+                                {activeTab === 'underwriting' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
                             <button onClick={() => setActiveTab('vault')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'vault' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
                                 Document Vault
                                 {activeTab === 'vault' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
@@ -570,6 +575,12 @@ export const Leads: React.FC = () => {
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'underwriting' && viewingLead && (
+                            <div className="animate-fade-in">
+                                <CaseChat caseId={viewingLead.id} clientName={viewingLead.name} />
                             </div>
                         )}
 

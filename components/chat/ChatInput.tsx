@@ -1,141 +1,158 @@
 
-import React, { useRef, useState } from 'react';
-import { Paperclip, Mic, Send, Image as ImageIcon, File, X } from 'lucide-react';
-import { ChatAttachment } from '../../types';
-import { AudioRecorder } from './AudioRecorder';
+import React, { useState } from 'react';
+import { Send, PlusCircle, CheckCircle2, AlertCircle, Info, Activity, ShieldAlert, Pill } from 'lucide-react';
+import { UserRole } from '../../types';
 
 interface ChatInputProps {
-  onSendMessage: (text: string, attachment?: ChatAttachment) => void;
+  onSend: (text: string, metadata?: any) => void;
+  userRole: UserRole;
+  isSubAdminInChannel: boolean;
+  channelType: 'direct' | 'group' | 'advisor_channel' | 'case_chat';
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
-  const [text, setText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const PREDEFINED_MESSAGES = [
+  { text: "Application declined because of medication history.", group: "Status", icon: <Pill size={14} /> },
+  { text: "Please recheck that the client address is correct.", group: "Follow-up", icon: <Info size={14} /> },
+  { text: "Please verify that the client's SSN is correct.", group: "Verification", icon: <ShieldAlert size={14} /> },
+  { text: "Please verify that the client's bank information is correct.", group: "Verification", icon: <ShieldAlert size={14} /> },
+  { text: "Does the client currently have another policy?", group: "Follow-up", icon: <CheckCircle2 size={14} /> },
+  { text: "Application declined. Let's try a different carrier.", group: "Status", icon: <AlertCircle size={14} /> }
+];
 
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (text.trim()) {
-      onSendMessage(text);
+const CARRIER_SUGGESTIONS = [
+  "Aflac", "Transamerica", "GEICO", "Combined Insurance", "Colonial Life"
+];
+
+export const ChatInput: React.FC<ChatInputProps> = ({ onSend, userRole, isSubAdminInChannel, channelType }) => {
+  const [text, setText] = useState('');
+  const [showPresets, setShowPresets] = useState(false);
+  const [showCarriers, setShowCarriers] = useState(false);
+  const [currentFollowUp, setCurrentFollowUp] = useState<string | null>(null);
+
+  const isAdvisor = userRole === UserRole.ADVISOR;
+  // Advisors must use predefined messages if a Sub-Admin is present in Case Chats / System Channels
+  const isRestricted = isAdvisor && isSubAdminInChannel && (channelType === 'case_chat' || channelType === 'advisor_channel');
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+    onSend(text);
+    setText('');
+    setCurrentFollowUp(null);
+    setShowPresets(false);
+    setShowCarriers(false);
+  };
+
+  const handleSelectPreset = (msg: string) => {
+    if (msg === "Does the client currently have another policy?") {
+      setCurrentFollowUp(msg);
+      setText(msg);
+    } else if (msg === "Application declined. Let's try a different carrier.") {
+      setShowCarriers(true);
+      setText(msg);
+    } else {
+      onSend(msg);
+      setShowPresets(false);
       setText('');
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
+  const handleFollowUpResponse = (response: 'Yes' | 'No') => {
+    const fullMsg = `${currentFollowUp} Selection: ${response}. ${response === 'Yes' ? 'Pending coverage amount...' : 'No further info required.'}`;
+    if (response === 'Yes') {
+      setText(`${currentFollowUp} Response: Yes. Checking coverage amount...`);
+      setCurrentFollowUp("coverage_amount");
+    } else {
+      onSend(fullMsg);
+      setCurrentFollowUp(null);
+      setText('');
     }
   };
 
-  const handleAudioSend = (blob: Blob) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onloadend = () => {
-        const base64 = reader.result as string;
-        onSendMessage('', { type: 'audio', url: base64, name: 'voice_note.webm' });
-        setIsRecording(false);
-    };
+  const handleCarrierSelect = (carrier: string) => {
+    onSend(`Application declined. Suggested Carrier: ${carrier}`, { suggestedCarrier: carrier });
+    setShowCarriers(false);
+    setShowPresets(false);
+    setText('');
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const processFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        const result = ev.target?.result as string;
-        const type = file.type.startsWith('image/') ? 'image' : 'file';
-        onSendMessage('', { type, url: result, name: file.name });
-    };
-    reader.readAsDataURL(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  if (isRecording) {
-      return (
-          <div className="p-4 bg-white/80 backdrop-blur-xl border-t border-white/20 animate-slide-up">
-              <AudioRecorder onSend={handleAudioSend} onCancel={() => setIsRecording(false)} />
+  if (isRestricted) {
+    return (
+      <div className="p-4 border-t border-slate-100 bg-slate-50 relative bottom-0">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 mb-1">
+            <ShieldAlert size={12} className="text-orange-500" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Restricted Management Channel</span>
           </div>
-      )
+
+          {currentFollowUp === "Does the client currently have another policy?" ? (
+            <div className="flex gap-2">
+              <button onClick={() => handleFollowUpResponse('Yes')} className="flex-1 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-lg">YES</button>
+              <button onClick={() => handleFollowUpResponse('No')} className="flex-1 py-3 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">NO</button>
+            </div>
+          ) : currentFollowUp === "coverage_amount" ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Type coverage amount (e.g. $100k)..."
+                className="flex-1 px-4 py-3 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none ring-2 ring-blue-500/20"
+                value={text.split('Response: Yes. ')[1] || ''}
+                onChange={(e) => setText(`Does the client currently have another policy? Response: Yes. ${e.target.value}`)}
+              />
+              <button onClick={() => handleSend()} className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold">SEND</button>
+            </div>
+          ) : showCarriers ? (
+            <div className="grid grid-cols-2 gap-2">
+              {CARRIER_SUGGESTIONS.map(c => (
+                <button key={c} onClick={() => handleCarrierSelect(c)} className="py-2.5 px-4 bg-white border border-slate-200 rounded-xl text-[10px] font-black text-slate-600 hover:bg-blue-50 hover:border-blue-200 transition-all text-left uppercase">{c}</button>
+              ))}
+              <button onClick={() => setShowCarriers(false)} className="col-span-2 py-2 text-[10px] font-bold text-slate-400">Back to presets</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
+              {PREDEFINED_MESSAGES.map((m, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSelectPreset(m.text)}
+                  className="group flex items-center gap-3 w-full p-3 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all text-left"
+                >
+                  <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-blue-100 text-slate-400 group-hover:text-blue-600 transition-colors">
+                    {m.icon}
+                  </div>
+                  <div className="flex-1">
+                    <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">{m.group}</span>
+                    <span className="text-xs font-bold text-slate-700">{m.text}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div 
-        className="p-4 bg-white/60 backdrop-blur-xl border-t border-white/10 relative"
-        onDragEnter={handleDrag}
-    >
-      {dragActive && (
-          <div 
-            className="absolute inset-0 z-50 bg-blue-600/10 backdrop-blur-sm border-2 border-dashed border-blue-500 rounded-none flex flex-col items-center justify-center transition-all animate-pulse"
-            onDragLeave={handleDrag}
-            onDrop={handleDrop}
-            onDragOver={handleDrag}
-          >
-              <File className="h-12 w-12 text-blue-600 mb-2" />
-              <p className="text-blue-600 font-black text-lg">Release to send file</p>
-          </div>
-      )}
-
-      <form 
-        onSubmit={handleSubmit}
-        className="flex items-end gap-2 bg-white/80 p-2 rounded-[2rem] border border-slate-200 shadow-sm focus-within:border-blue-300 focus-within:shadow-md transition-all duration-300 ring-1 ring-black/5"
-      >
-        <button 
-            type="button" 
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
-        >
-            <Paperclip className="h-5 w-5 transform -rotate-45" />
+    <div className="p-4 bg-white border-t border-slate-100">
+      <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-1.5 border border-slate-100 focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:bg-white transition-all shadow-inner">
+        <button className="p-3 text-slate-400 hover:text-blue-600 transition-colors">
+          <PlusCircle size={20} />
         </button>
-        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
-
-        <textarea
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Secure message..."
-            rows={1}
-            className="flex-1 bg-transparent border-none focus:ring-0 resize-none py-3 px-1 text-sm text-slate-800 placeholder:text-slate-400 max-h-40 scrollbar-hide font-medium"
-            style={{ minHeight: '44px' }}
+        <input
+          type="text"
+          className="flex-1 bg-transparent border-none px-2 py-3 text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
+          placeholder="Type a message..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
         />
-
-        {text.trim() ? (
-            <button type="submit" className="p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow-md transition-all active:scale-90 flex-shrink-0">
-                <Send className="h-4 w-4 ml-0.5" />
-            </button>
-        ) : (
-            <button 
-                type="button" 
-                onClick={() => setIsRecording(true)}
-                className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
-            >
-                <Mic className="h-5 w-5" />
-            </button>
-        )}
-      </form>
+        <button
+          onClick={handleSend}
+          disabled={!text.trim()}
+          className="p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all disabled:opacity-50 disabled:shadow-none"
+        >
+          <Send size={18} />
+        </button>
+      </div>
     </div>
   );
 };
