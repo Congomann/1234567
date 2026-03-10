@@ -10,6 +10,23 @@ const http = require('http');
 const WebSocket = require('ws');
 require('dotenv').config();
 
+// ════════════════════════════════════════════════════════════════════════════════
+// DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
+// ════════════════════════════════════════════════════════════════════════════════
+/**
+ * 1. DATABASE: 
+ *    - Ensure you have executed 'backend/supabase_schema.sql' in your Supabase SQL Editor.
+ *    - In Vercel, set DATABASE_URL or POSTGRES_URL to your Supabase Connection String.
+ *    - Use the "Transaction Mode" connection string (port 6543) for serverless environments.
+ * 
+ * 2. AUTH & JWT:
+ *    - Set SECRET_KEY in Vercel Environment Variables.
+ * 
+ * 3. CORS:
+ *    - The 'cors()' middleware allows all origins. For production, consider restricted whitelist.
+ */
+// ════════════════════════════════════════════════════════════════════════════════
+
 const app = express();
 const server = http.createServer(app);
 
@@ -86,9 +103,19 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
   };
 } else {
   // Standard TCP Connection (Localhost or External IP)
+  // Supports Vercel/Supabase standard environment variable names
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
+  
+  if (!connectionString && process.env.NODE_ENV === 'production') {
+    console.error('[DB] CRITICAL: No database connection string found in environment variables.');
+  }
+
   poolConfig = {
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    connectionString: connectionString,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   };
 }
 
