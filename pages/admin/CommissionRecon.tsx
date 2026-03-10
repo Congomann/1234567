@@ -12,8 +12,12 @@ import {
     Filter,
     ArrowUpRight,
     ArrowDownRight,
-    RefreshCw
+    RefreshCw,
+    Download
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { PDFBrandingService } from '../../services/pdfBrandingService';
 
 interface Reconciliation {
     id: string;
@@ -76,6 +80,35 @@ export const CommissionRecon: React.FC = () => {
     const totalActual = reconciliations.reduce((sum, r) => sum + Number(r.actual_amount || 0), 0);
     const totalExpected = reconciliations.reduce((sum, r) => sum + Number(r.expected_amount || 0), 0);
 
+    const generatePDF = () => {
+        const doc = new jsPDF({ orientation: 'landscape' });
+        PDFBrandingService.addHeader(doc, "Commission Reconciliation Audit Report");
+
+        const tableColumn = ["Carrier", "Client Name", "Expected", "Actual Paid", "Delta", "Status"];
+        const tableRows: any[] = [];
+
+        filtered.forEach(item => {
+            tableRows.push([
+                item.carrier,
+                item.client_name,
+                `$${Number(item.expected_amount).toLocaleString()}`,
+                `$${Number(item.actual_amount).toLocaleString()}`,
+                `$${item.difference.toLocaleString()}`,
+                item.status
+            ]);
+        });
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            ...PDFBrandingService.tableStyles,
+            startY: 55,
+        });
+
+        PDFBrandingService.addFooter(doc);
+        doc.save(`NHFG_Recon_Audit_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
     return (
         <div className="space-y-8 pb-20 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -84,6 +117,14 @@ export const CommissionRecon: React.FC = () => {
                     <p className="text-slate-500 font-medium mt-1">Cross-reference carrier statements with internal pipeline data.</p>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
+                    <button
+                        onClick={generatePDF}
+                        disabled={filtered.length === 0}
+                        className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-white border border-slate-200 text-slate-600 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg hover:bg-slate-50 transition-all disabled:opacity-50"
+                    >
+                        <Download size={16} />
+                        Export Audit
+                    </button>
                     <button
                         onClick={handleUploadSim}
                         disabled={isUploading}
@@ -195,7 +236,7 @@ export const CommissionRecon: React.FC = () => {
                                     </td>
                                     <td className="px-8 py-6 text-center">
                                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${item.status === 'Matched' ? 'bg-green-100 text-green-700' :
-                                                item.status === 'Discrepancy' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+                                            item.status === 'Discrepancy' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
                                             }`}>
                                             {item.status}
                                         </span>

@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { PDFBrandingService } from '../../services/pdfBrandingService';
 import { Link } from 'react-router-dom';
 import { AnalyticsService } from '../../services/analyticsService';
 import { Backend } from '../../services/apiBackend';
@@ -66,9 +68,9 @@ export const Leads: React.FC = () => {
     const [sourceFilter, setSourceFilter] = useState<string>('All');
     const [assignedFilter, setAssignedFilter] = useState<string>('All');
     const [showArchived, setShowArchived] = useState(false);
-    const [viewLead, setViewLead] = useState<Lead | null>(null);
+    const [viewingLead, setViewingLead] = useState<Lead | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedLeadData, setEditedLeadData] = useState<Partial<Lead>>({});
+    const [editForm, setEditForm] = useState<Partial<Lead>>({});
 
     const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
     const [showBulkSuccess, setShowBulkSuccess] = useState(false);
@@ -153,8 +155,8 @@ export const Leads: React.FC = () => {
     };
 
     const handleOpenView = async (lead: Lead) => {
-        setViewLead(lead);
-        setEditedLeadData({ ...lead });
+        setViewingLead(lead);
+        setEditForm({ ...lead });
         setIsEditing(false);
         setActiveTab('profile');
         setBrowseHistory([]);
@@ -166,11 +168,57 @@ export const Leads: React.FC = () => {
         fetchDocuments(lead.id);
     };
 
+    const generateLeadSummary = (lead: Lead) => {
+        const doc = new jsPDF();
+        PDFBrandingService.addHeader(doc, `Lead Profile Summary: ${lead.name}`);
+
+        doc.setFontSize(12);
+        doc.setTextColor(11, 34, 64);
+        doc.setFont("helvetica", "bold");
+        doc.text("Personal Information", 14, 60);
+
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Email: ${lead.email || 'N/A'}`, 14, 70);
+        doc.text(`Phone: ${lead.phone || 'N/A'}`, 14, 77);
+        doc.text(`Source: ${lead.source || 'Direct'}`, 14, 84);
+        doc.text(`Created: ${new Date(lead.date).toLocaleDateString()}`, 14, 91);
+
+        doc.setFontSize(12);
+        doc.setTextColor(11, 34, 64);
+        doc.setFont("helvetica", "bold");
+        doc.text("Internal Assessment", 14, 110);
+
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Status: ${lead.status}`, 14, 120);
+        doc.text(`Product Interest: ${lead.interest}`, 14, 127);
+        doc.text(`Notes: ${lead.notes || 'None'}`, 14, 134, { maxWidth: 180 });
+
+        if (browseHistory.length > 0) {
+            doc.setFontSize(12);
+            doc.setTextColor(11, 34, 64);
+            doc.setFont("helvetica", "bold");
+            doc.text("Digital Footprint (Recent Activity)", 14, 160);
+
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            browseHistory.slice(0, 5).forEach((item, idx) => {
+                doc.text(`• [${new Date(item.viewed_at).toLocaleDateString()}] Viewed: ${item.title || item.path}`, 14, 170 + (idx * 7));
+            });
+        }
+
+        PDFBrandingService.addFooter(doc);
+        doc.save(`NHFG_Lead_${lead.name.replace(/\s+/g, '_')}.pdf`);
+    };
+
     const fetchHistory = async (visitorId: string) => {
         setLoadingContext(true);
         try {
             const token = localStorage.getItem('nhfg_jwt_token');
-            const res = await fetch(`/api/analytics/visitors/${visitorId}/history`, {
+            const res = await fetch(`/ api / analytics / visitors / ${visitorId}/history`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -200,9 +248,9 @@ export const Leads: React.FC = () => {
     };
 
     const handleSaveChanges = () => {
-        if (viewLead && editedLeadData) {
-            updateLead(viewLead.id, editedLeadData);
-            setViewLead(prev => prev ? ({ ...prev, ...editedLeadData } as Lead) : null);
+        if (viewingLead && editForm) {
+            updateLead(viewingLead.id, editForm);
+            setViewingLead(prev => prev ? ({ ...prev, ...editForm } as Lead) : null);
             setIsEditing(false);
         }
     };
@@ -384,7 +432,7 @@ export const Leads: React.FC = () => {
                 </div>
             </div>
 
-            {viewLead && (
+            {viewingLead && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-md p-6 animate-fade-in">
                     <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-5xl p-10 relative max-h-[90vh] overflow-y-auto border border-white/20">
                         <div className="flex justify-between items-center mb-10">
@@ -394,11 +442,11 @@ export const Leads: React.FC = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-3xl font-black text-[#0B2240]">Lead Detail Hub</h2>
-                                    <p className="text-slate-500 text-sm font-medium">{viewLead.name} • {viewLead.interest}</p>
+                                    <p className="text-slate-500 text-sm font-medium">{viewingLead.name} • {viewingLead.interest}</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => { setViewLead(null); setIsEditing(false); }} className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-all"><X className="h-5 w-5" /></button>
+                                <button onClick={() => { setViewingLead(null); setIsEditing(false); }} className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-all"><X className="h-5 w-5" /></button>
                             </div>
                         </div>
 
@@ -409,7 +457,7 @@ export const Leads: React.FC = () => {
                             </button>
                             <button onClick={() => setActiveTab('history')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
                                 Browse Identity
-                                {viewLead?.visitor_id && <span className="ml-2 h-2 w-2 bg-green-500 rounded-full inline-block animate-pulse"></span>}
+                                {viewingLead?.visitor_id && <span className="ml-2 h-2 w-2 bg-green-500 rounded-full inline-block animate-pulse"></span>}
                                 {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
                             </button>
                             <button onClick={() => setActiveTab('vault')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'vault' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -423,14 +471,14 @@ export const Leads: React.FC = () => {
                                 <div className="lg:col-span-1 space-y-6">
                                     <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
                                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Core Demographics</h3>
-                                        <DetailRow label="Full Name" value={editedLeadData.name} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, name: v })} />
-                                        <DetailRow label="Email" value={editedLeadData.email} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, email: v })} />
-                                        <DetailRow label="Phone" value={editedLeadData.phone} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, phone: v })} />
-                                        <DetailRow label="Potential Value ($)" value={editedLeadData.potentialValue} type="number" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, potentialValue: Number(v) })} />
-                                        <DetailRow label="Last Contact Date" value={editedLeadData.lastContactDate ? new Date(editedLeadData.lastContactDate).toISOString().split('T')[0] : ''} type="date" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, lastContactDate: v ? new Date(v).toISOString() : undefined })} />
+                                        <DetailRow label="Full Name" value={editForm.name} isEditing={isEditing} onChange={(v) => setEditForm({ ...editForm, name: v })} />
+                                        <DetailRow label="Email" value={editForm.email} isEditing={isEditing} onChange={(v) => setEditForm({ ...editForm, email: v })} />
+                                        <DetailRow label="Phone" value={editForm.phone} isEditing={isEditing} onChange={(v) => setEditForm({ ...editForm, phone: v })} />
+                                        <DetailRow label="Potential Value ($)" value={editForm.potentialValue} type="number" isEditing={isEditing} onChange={(v) => setEditForm({ ...editForm, potentialValue: Number(v) })} />
+                                        <DetailRow label="Last Contact Date" value={editForm.lastContactDate ? new Date(editForm.lastContactDate).toISOString().split('T')[0] : ''} type="date" isEditing={isEditing} onChange={(v) => setEditForm({ ...editForm, lastContactDate: v ? new Date(v).toISOString() : undefined })} />
                                         <div className="pt-4 border-t border-slate-200">
                                             <span className="block text-xs font-bold text-slate-400 uppercase mb-2">Priority Level</span>
-                                            <select className={`w-full p-2 rounded-xl border border-slate-200 font-bold text-xs ${editedLeadData.priority === 'High' ? 'bg-red-100 text-red-700' : editedLeadData.priority === 'Medium' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`} value={editedLeadData.priority || 'Low'} onChange={(e) => setEditedLeadData({ ...editedLeadData, priority: e.target.value as any })} disabled={!isEditing}>
+                                            <select className={`w-full p-2 rounded-xl border border-slate-200 font-bold text-xs ${editForm.priority === 'High' ? 'bg-red-100 text-red-700' : editForm.priority === 'Medium' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`} value={editForm.priority || 'Low'} onChange={(e) => setEditForm({ ...editForm, priority: e.target.value as any })} disabled={!isEditing}>
                                                 <option value="High">High Priority</option>
                                                 <option value="Medium">Medium Priority</option>
                                                 <option value="Low">Low Priority</option>
@@ -439,9 +487,9 @@ export const Leads: React.FC = () => {
                                     </div>
 
                                     <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl">
-                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Lead Score: {viewLead.score}</h3>
+                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Lead Score: {viewingLead.score}</h3>
                                         <div className="w-full bg-white/10 rounded-full h-2 mb-6">
-                                            <div className="bg-blue-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewLead.score}%` }}></div>
+                                            <div className="bg-blue-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewingLead.score}%` }}></div>
                                         </div>
                                         <p className="text-xs text-blue-100 font-medium leading-relaxed italic">"Probability of conversion is optimized. Direct call recommended within next 4 business hours."</p>
                                     </div>
@@ -453,7 +501,7 @@ export const Leads: React.FC = () => {
                                             <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">Administrative Summary</h3>
                                         </div>
                                         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 text-slate-700 text-sm leading-relaxed font-medium min-h-[150px] whitespace-pre-wrap">
-                                            {viewLead.notes ? viewLead.notes : (
+                                            {viewingLead.notes ? viewingLead.notes : (
                                                 <div className="text-center py-10">
                                                     <p className="text-slate-400 italic">No notes or interaction recorded yet. Unlock edit mode to add details.</p>
                                                 </div>
@@ -465,7 +513,7 @@ export const Leads: React.FC = () => {
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Administrative History</h3>
                                         </div>
-                                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm font-medium focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none text-slate-900" rows={6} placeholder="Add interaction history or legal DNC requests..." value={editedLeadData.notes || ''} onChange={(e) => setEditedLeadData({ ...editedLeadData, notes: e.target.value })} readOnly={!isEditing} />
+                                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm font-medium focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none text-slate-900" rows={6} placeholder="Add interaction history or legal DNC requests..." value={editForm.notes || ''} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} readOnly={!isEditing} />
                                     </div>
                                 </div>
                             </div>
@@ -473,7 +521,7 @@ export const Leads: React.FC = () => {
 
                         {activeTab === 'history' && (
                             <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl min-h-[400px] animate-fade-in">
-                                {!viewLead?.visitor_id ? (
+                                {!viewingLead?.visitor_id ? (
                                     <div className="flex flex-col items-center justify-center py-20 text-center">
                                         <div className="p-6 bg-slate-50 text-slate-300 rounded-full mb-4">
                                             <History size={48} />
@@ -488,7 +536,7 @@ export const Leads: React.FC = () => {
                                                 <MousePointer2 className="text-blue-500" /> Pre-Capture Browse Intent
                                             </h3>
                                             <span className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                                Linked ID: {viewLead.visitor_id.substring(0, 12)}...
+                                                Linked ID: {viewingLead.visitor_id.substring(0, 12)}...
                                             </span>
                                         </div>
 

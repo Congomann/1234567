@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Resource } from "../../types";
+import { jsPDF } from "jspdf";
+import { PDFBrandingService } from "../../services/pdfBrandingService";
 
 export const Resources: React.FC = () => {
   const {
@@ -123,6 +125,35 @@ export const Resources: React.FC = () => {
     }
   };
 
+  const generateBrandedPDF = (resource: Resource) => {
+    const doc = new jsPDF();
+    PDFBrandingService.addHeader(doc, resource.title);
+
+    doc.setFontSize(11);
+    doc.setTextColor(51, 65, 85);
+    doc.setFont("helvetica", "normal");
+
+    const content = resource.content || resource.description || "No preview available.";
+    const splitText = doc.splitTextToSize(content, 180);
+
+    // Check for page overflow
+    let cursorY = 60;
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    splitText.forEach((line: string) => {
+      if (cursorY > pageHeight - 30) {
+        doc.addPage();
+        PDFBrandingService.addHeader(doc, resource.title);
+        cursorY = 60;
+      }
+      doc.text(line, 14, cursorY);
+      cursorY += 7;
+    });
+
+    PDFBrandingService.addFooter(doc);
+    doc.save(`NHFG_${resource.title.replace(/\s+/g, '_')}.pdf`);
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,11 +186,10 @@ export const Resources: React.FC = () => {
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
-                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 ${
-                  activeFilter === f
+                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 ${activeFilter === f
                     ? "bg-[#0B2240] text-white shadow-lg"
                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 {f}
               </button>
@@ -247,15 +277,15 @@ export const Resources: React.FC = () => {
                     {/* Overlay for Video Types to Play Inline */}
                     {(resource.type === "YouTube" ||
                       resource.type === "Video") && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <button
-                          onClick={(e) => toggleInlinePlay(e, resource.id)}
-                          className="bg-red-600 text-white p-3 rounded-full opacity-80 group-hover:opacity-100 transition-all pointer-events-auto hover:scale-110 shadow-lg"
-                        >
-                          <PlayCircle className="h-8 w-8 fill-white text-red-600" />
-                        </button>
-                      </div>
-                    )}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <button
+                            onClick={(e) => toggleInlinePlay(e, resource.id)}
+                            className="bg-red-600 text-white p-3 rounded-full opacity-80 group-hover:opacity-100 transition-all pointer-events-auto hover:scale-110 shadow-lg"
+                          >
+                            <PlayCircle className="h-8 w-8 fill-white text-red-600" />
+                          </button>
+                        </div>
+                      )}
 
                     <div className="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-sm w-fit">
@@ -359,7 +389,7 @@ export const Resources: React.FC = () => {
                 {/* Main Content Area */}
                 <div className="lg:col-span-2 p-8 border-r border-slate-100">
                   {selectedResource.type === "YouTube" &&
-                  getYoutubeId(selectedResource.url) ? (
+                    getYoutubeId(selectedResource.url) ? (
                     <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg mb-6 bg-black">
                       <iframe
                         width="100%"
@@ -409,41 +439,51 @@ export const Resources: React.FC = () => {
                   {["PDF", "Link", "Article"].includes(
                     selectedResource.type,
                   ) && (
-                    <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                          {selectedResource.type === "PDF" ? (
-                            <FileText className="h-6 w-6 text-red-500" />
-                          ) : (
-                            <ExternalLink className="h-6 w-6 text-blue-500" />
-                          )}
+                      <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                            {selectedResource.type === "PDF" ? (
+                              <FileText className="h-6 w-6 text-red-500" />
+                            ) : (
+                              <ExternalLink className="h-6 w-6 text-blue-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              External Resource
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Opens in new tab
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900">
-                            External Resource
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            Opens in new tab
-                          </p>
+                        <div className="flex gap-4">
+                          {(selectedResource.content || selectedResource.type === 'Blog' || selectedResource.type === 'Article') && (
+                            <button
+                              onClick={() => generateBrandedPDF(selectedResource)}
+                              className="px-6 py-3 bg-white border border-blue-200 text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-md"
+                            >
+                              Download Branded PDF
+                            </button>
+                          )}
+                          <a
+                            href={selectedResource.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            download={
+                              ["PDF", "Image"].includes(selectedResource.type)
+                                ? selectedResource.title
+                                : undefined
+                            }
+                            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                          >
+                            {selectedResource.type === "PDF"
+                              ? "Download Original PDF"
+                              : "Visit Link"}
+                          </a>
                         </div>
                       </div>
-                      <a
-                        href={selectedResource.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        download={
-                          ["PDF", "Image"].includes(selectedResource.type)
-                            ? selectedResource.title
-                            : undefined
-                        }
-                        className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-                      >
-                        {selectedResource.type === "PDF"
-                          ? "Download PDF"
-                          : "Visit Link"}
-                      </a>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* Interaction Sidebar */}
