@@ -38,7 +38,8 @@ import {
     Landmark,
     Home,
     Monitor,
-    Activity
+    Activity,
+    Layout
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -66,7 +67,9 @@ const ADMIN_TOUR_STEPS = [
     { id: 'nav-client-reviews', title: 'Client Reviews', text: 'Moderate and approve testimonials before they go live.', targetId: 'nav-client-reviews', path: '/crm/admin/testimonials' },
     { id: 'nav-email-signature', title: 'Email Signature', text: 'Generate branded HTML signatures for the whole group.', targetId: 'nav-email-signature', path: '/crm/admin/signature' },
     { id: 'nav-api-integrations', title: 'API Integrations', text: 'Trace raw webhook data from Google and Meta Ads.', targetId: 'nav-api-integrations', path: '/crm/admin/marketing' },
-    { id: 'nav-analytics', title: 'User Analytics', text: 'Real-time tracking of website visitors, sessions, and behavior.', targetId: 'nav-analytics', path: '/crm/admin/analytics' }
+    { id: 'nav-analytics', title: 'User Analytics', text: 'Real-time tracking of website visitors, sessions, and behavior.', targetId: 'nav-analytics', path: '/crm/admin/analytics' },
+    { id: 'nav-commissions-recon', title: 'Commission Recon', text: 'Match carrier statements with client data to identify discrepancies.', targetId: 'nav-commissions-recon', path: '/crm/admin/commissions' },
+    { id: 'nav-landing-pages', title: 'Landing Pages', text: 'Create and deploy custom product-specific marketing pages.', targetId: 'nav-landing-pages', path: '/crm/admin/landing-pages' }
 ];
 
 interface CRMLayoutProps {
@@ -203,6 +206,8 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             admin.push({ path: '/crm/admin/signature', label: 'Email Signature', icon: PenTool, tourId: 'nav-email-signature' });
             admin.push({ path: '/crm/admin/marketing', label: 'API Integrations', icon: Webhook, tourId: 'nav-api-integrations' });
             admin.push({ path: '/crm/admin/analytics', label: 'User Analytics', icon: Activity, tourId: 'nav-analytics' });
+            admin.push({ path: '/crm/admin/commissions', label: 'Commission Recon', icon: LineChart, tourId: 'nav-commissions-recon' });
+            admin.push({ path: '/crm/admin/landing-pages', label: 'Landing Pages', icon: Layout, tourId: 'nav-landing-pages' });
         }
 
         return { main, vertical, shared, admin };

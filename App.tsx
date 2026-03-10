@@ -74,6 +74,8 @@ import { RealEstateAdmin } from './pages/admin/RealEstateAdmin';
 import { RealEstateCms } from './pages/admin/RealEstateCms';
 import { ProductCms } from './pages/admin/ProductCms';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
+import { CommissionRecon } from './pages/admin/CommissionRecon';
+import { LandingPageBuilder } from './pages/admin/LandingPageBuilder';
 import { AnalyticsTracker } from './components/AnalyticsTracker';
 
 /**
@@ -209,6 +211,8 @@ const App: React.FC = () => {
                 <Route path="admin/signature" element={<EmailSignature />} />
                 <Route path="admin/marketing" element={<MarketingIntegrations />} />
                 <Route path="admin/analytics" element={<AdminAnalytics />} />
+                <Route path="admin/commissions" element={<CommissionRecon />} />
+                <Route path="admin/landing-pages" element={<LandingPageBuilder />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

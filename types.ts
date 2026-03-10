@@ -145,6 +145,8 @@ export interface Lead {
     formId?: string;
     platform?: string;
   };
+  visitor_id?: string;
+  browseHistory?: any[];
 }
 
 export interface IntegrationLog {

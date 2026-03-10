@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AnalyticsService } from '../../services/analyticsService';
+import { Backend } from '../../services/apiBackend';
 
 interface DetailRowProps {
     label: string;
@@ -71,6 +73,10 @@ export const Leads: React.FC = () => {
     const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
     const [showBulkSuccess, setShowBulkSuccess] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof Lead, direction: 'asc' | 'desc' } | null>(null);
+    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'vault'>('profile');
+    const [browseHistory, setBrowseHistory] = useState<any[]>([]);
+    const [documents, setDocuments] = useState<any[]>([]);
+    const [loadingContext, setLoadingContext] = useState(false);
 
     const isAdvisor = user?.role === UserRole.ADVISOR;
     const isAdminOrManager = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER || user?.role === UserRole.SUB_ADMIN;
@@ -146,10 +152,51 @@ export const Leads: React.FC = () => {
         setTimeout(() => setShowBulkSuccess(false), 3000);
     };
 
-    const handleOpenView = (lead: Lead) => {
+    const handleOpenView = async (lead: Lead) => {
         setViewLead(lead);
         setEditedLeadData({ ...lead });
         setIsEditing(false);
+        setActiveTab('profile');
+        setBrowseHistory([]);
+        setDocuments([]);
+
+        if (lead.visitor_id) {
+            fetchHistory(lead.visitor_id);
+        }
+        fetchDocuments(lead.id);
+    };
+
+    const fetchHistory = async (visitorId: string) => {
+        setLoadingContext(true);
+        try {
+            const token = localStorage.getItem('nhfg_jwt_token');
+            const res = await fetch(`/api/analytics/visitors/${visitorId}/history`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setBrowseHistory(data);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoadingContext(false);
+        }
+    };
+
+    const fetchDocuments = async (leadId: string) => {
+        try {
+            const token = localStorage.getItem('nhfg_jwt_token');
+            const res = await fetch(`/api/leads/${leadId}/documents`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setDocuments(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleSaveChanges = () => {
@@ -355,56 +402,170 @@ export const Leads: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-1 space-y-6">
-                                <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
-                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Core Demographics</h3>
-                                    <DetailRow label="Full Name" value={editedLeadData.name} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, name: v })} />
-                                    <DetailRow label="Email" value={editedLeadData.email} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, email: v })} />
-                                    <DetailRow label="Phone" value={editedLeadData.phone} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, phone: v })} />
-                                    <DetailRow label="Potential Value ($)" value={editedLeadData.potentialValue} type="number" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, potentialValue: Number(v) })} />
-                                    <DetailRow label="Last Contact Date" value={editedLeadData.lastContactDate ? new Date(editedLeadData.lastContactDate).toISOString().split('T')[0] : ''} type="date" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, lastContactDate: v ? new Date(v).toISOString() : undefined })} />
-                                    <div className="pt-4 border-t border-slate-200">
-                                        <span className="block text-xs font-bold text-slate-400 uppercase mb-2">Priority Level</span>
-                                        <select className={`w-full p-2 rounded-xl border border-slate-200 font-bold text-xs ${editedLeadData.priority === 'High' ? 'bg-red-100 text-red-700' : editedLeadData.priority === 'Medium' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`} value={editedLeadData.priority || 'Low'} onChange={(e) => setEditedLeadData({ ...editedLeadData, priority: e.target.value as any })} disabled={!isEditing}>
-                                            <option value="High">High Priority</option>
-                                            <option value="Medium">Medium Priority</option>
-                                            <option value="Low">Low Priority</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl">
-                                    <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Lead Score: {viewLead.score}</h3>
-                                    <div className="w-full bg-white/10 rounded-full h-2 mb-6">
-                                        <div className="bg-blue-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewLead.score}%` }}></div>
-                                    </div>
-                                    <p className="text-xs text-blue-100 font-medium leading-relaxed italic">"Probability of conversion is optimized. Direct call recommended within next 4 business hours."</p>
-                                </div>
-                            </div>
-
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">Administrative Summary</h3>
-                                    </div>
-                                    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 text-slate-700 text-sm leading-relaxed font-medium min-h-[150px] whitespace-pre-wrap">
-                                        {viewLead.notes ? viewLead.notes : (
-                                            <div className="text-center py-10">
-                                                <p className="text-slate-400 italic">No notes or interaction recorded yet. Unlock edit mode to add details.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Administrative History</h3>
-                                    </div>
-                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm font-medium focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none text-slate-900" rows={6} placeholder="Add interaction history or legal DNC requests..." value={editedLeadData.notes || ''} onChange={(e) => setEditedLeadData({ ...editedLeadData, notes: e.target.value })} readOnly={!isEditing} />
-                                </div>
-                            </div>
+                        <div className="flex gap-4 mb-8 border-b border-slate-100 pb-2">
+                            <button onClick={() => setActiveTab('profile')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'profile' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                Lead Profile
+                                {activeTab === 'profile' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
+                            <button onClick={() => setActiveTab('history')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                Browse Identity
+                                {viewLead?.visitor_id && <span className="ml-2 h-2 w-2 bg-green-500 rounded-full inline-block animate-pulse"></span>}
+                                {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
+                            <button onClick={() => setActiveTab('vault')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'vault' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                Document Vault
+                                {activeTab === 'vault' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
                         </div>
+
+                        {activeTab === 'profile' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                                <div className="lg:col-span-1 space-y-6">
+                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
+                                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Core Demographics</h3>
+                                        <DetailRow label="Full Name" value={editedLeadData.name} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, name: v })} />
+                                        <DetailRow label="Email" value={editedLeadData.email} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, email: v })} />
+                                        <DetailRow label="Phone" value={editedLeadData.phone} isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, phone: v })} />
+                                        <DetailRow label="Potential Value ($)" value={editedLeadData.potentialValue} type="number" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, potentialValue: Number(v) })} />
+                                        <DetailRow label="Last Contact Date" value={editedLeadData.lastContactDate ? new Date(editedLeadData.lastContactDate).toISOString().split('T')[0] : ''} type="date" isEditing={isEditing} onChange={(v) => setEditedLeadData({ ...editedLeadData, lastContactDate: v ? new Date(v).toISOString() : undefined })} />
+                                        <div className="pt-4 border-t border-slate-200">
+                                            <span className="block text-xs font-bold text-slate-400 uppercase mb-2">Priority Level</span>
+                                            <select className={`w-full p-2 rounded-xl border border-slate-200 font-bold text-xs ${editedLeadData.priority === 'High' ? 'bg-red-100 text-red-700' : editedLeadData.priority === 'Medium' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`} value={editedLeadData.priority || 'Low'} onChange={(e) => setEditedLeadData({ ...editedLeadData, priority: e.target.value as any })} disabled={!isEditing}>
+                                                <option value="High">High Priority</option>
+                                                <option value="Medium">Medium Priority</option>
+                                                <option value="Low">Low Priority</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl">
+                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Lead Score: {viewLead.score}</h3>
+                                        <div className="w-full bg-white/10 rounded-full h-2 mb-6">
+                                            <div className="bg-blue-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewLead.score}%` }}></div>
+                                        </div>
+                                        <p className="text-xs text-blue-100 font-medium leading-relaxed italic">"Probability of conversion is optimized. Direct call recommended within next 4 business hours."</p>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">Administrative Summary</h3>
+                                        </div>
+                                        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 text-slate-700 text-sm leading-relaxed font-medium min-h-[150px] whitespace-pre-wrap">
+                                            {viewLead.notes ? viewLead.notes : (
+                                                <div className="text-center py-10">
+                                                    <p className="text-slate-400 italic">No notes or interaction recorded yet. Unlock edit mode to add details.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Administrative History</h3>
+                                        </div>
+                                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm font-medium focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none text-slate-900" rows={6} placeholder="Add interaction history or legal DNC requests..." value={editedLeadData.notes || ''} onChange={(e) => setEditedLeadData({ ...editedLeadData, notes: e.target.value })} readOnly={!isEditing} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'history' && (
+                            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl min-h-[400px] animate-fade-in">
+                                {!viewLead?.visitor_id ? (
+                                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                                        <div className="p-6 bg-slate-50 text-slate-300 rounded-full mb-4">
+                                            <History size={48} />
+                                        </div>
+                                        <h4 className="text-lg font-black text-slate-800">No Intelligence Node Found</h4>
+                                        <p className="text-slate-500 max-w-xs mx-auto mt-2 font-medium">This lead was entered manually or before the tracking pixel was deployed.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
+                                                <MousePointer2 className="text-blue-500" /> Pre-Capture Browse Intent
+                                            </h3>
+                                            <span className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                                Linked ID: {viewLead.visitor_id.substring(0, 12)}...
+                                            </span>
+                                        </div>
+
+                                        <div className="border border-slate-100 rounded-[2rem] overflow-hidden">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-slate-50">
+                                                    <tr>
+                                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Route / Page Title</th>
+                                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Timestamp</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-50">
+                                                    {browseHistory.map((hit, i) => (
+                                                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                                            <td className="px-8 py-4">
+                                                                <p className="text-xs font-black text-slate-700">{hit.title || 'Untitled Page'}</p>
+                                                                <p className="text-[10px] text-blue-500 font-mono mt-1">{hit.path}</p>
+                                                            </td>
+                                                            <td className="px-8 py-4 text-right">
+                                                                <p className="text-xs font-bold text-slate-500">{new Date(hit.viewed_at).toLocaleString()}</p>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                    {browseHistory.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan={2} className="px-8 py-10 text-center text-slate-400 italic">No page views recorded for this identity.</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'vault' && (
+                            <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100 shadow-xl min-h-[400px] animate-fade-in">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
+                                        <FileText className="text-blue-500" /> Digital Document Vault
+                                    </h3>
+                                    <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
+                                        + Request Signed Doc
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {documents.map((doc, i) => (
+                                        <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm group hover:shadow-md transition-all">
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                                                    <FileText size={24} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-black text-slate-800 truncate">{doc.title}</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc.category}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center pt-4 border-t border-slate-50">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${doc.status === 'Ready' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                    {doc.status}
+                                                </span>
+                                                <button className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-6 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group py-10">
+                                        <div className="p-4 bg-slate-100 rounded-full mb-3 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all">
+                                            <FileText size={20} />
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Drop file to upload</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="mt-10 pt-8 border-t border-slate-100 flex justify-end gap-4">
                             {!isEditing ? (

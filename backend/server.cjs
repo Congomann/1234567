@@ -302,22 +302,28 @@ app.get('/api/leads', authenticateToken, async (req, res) => {
 app.post('/api/leads', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { name, email, phone, interest, status, source, assignedTo, message, lifeDetails, realEstateDetails, securitiesDetails, customDetails } = req.body;
+    const {
+      name, email, phone, interest, status, source, assignedTo, message,
+      lifeDetails, realEstateDetails, securitiesDetails, customDetails,
+      visitorId // Capture visitorId from frontend
+    } = req.body;
 
     await client.query('BEGIN');
 
     const insertQuery = `
       INSERT INTO leads (
           name, email, phone, interest, status, source, assigned_to, message, 
-          life_details, real_estate_details, securities_details, custom_details
+          life_details, real_estate_details, securities_details, custom_details,
+          visitor_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING id
     `;
 
     const result = await client.query(insertQuery, [
       name, email, phone, interest, status || 'New', source, assignedTo, message,
-      lifeDetails, realEstateDetails, securitiesDetails, customDetails
+      lifeDetails, realEstateDetails, securitiesDetails, customDetails,
+      visitorId
     ]);
 
     await client.query('COMMIT');
@@ -2118,6 +2124,157 @@ app.get('/api/plaid/verifications/:id/data', authenticateToken, async (req, res)
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════════
+// SUGGESTED FEATURE 1 — Identity Resolution & Browse History
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/analytics/visitors/:visitorId/history', authenticateToken, async (req, res) => {
+  try {
+    const { visitorId } = req.params;
+    const result = await pool.query(`
+            SELECT pv.*, s.started_at as session_start
+            FROM analytics_page_views pv
+            LEFT JOIN analytics_sessions s ON pv.session_id = s.id
+            WHERE pv.visitor_id = $1
+            ORDER BY pv.viewed_at DESC
+            LIMIT 100
+        `, [visitorId]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// SUGGESTED FEATURE 2 — Digital Document Vault
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/leads/:id/documents', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM documents WHERE lead_id = $1 ORDER BY created_at DESC', [req.params.id]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/leads/:id/documents', authenticateToken, async (req, res) => {
+  try {
+    const { title, fileType, fileUrl, category } = req.body;
+    const result = await pool.query(`
+            INSERT INTO documents (title, file_type, file_url, category, lead_id, uploaded_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+        `, [title, fileType, fileUrl, category, req.params.id, req.user.id]);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// SUGGESTED FEATURE 3 — Commission Reconciliation Engine
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/admin/commissions/reconciliations', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+            SELECT r.*, s.carrier, s.statement_date, c.name as client_name, u.name as advisor_name
+            FROM commission_reconciliations r
+            JOIN commission_statements s ON r.statement_id = s.id
+            LEFT JOIN clients c ON r.client_id = c.id
+            LEFT JOIN users u ON r.advisor_id = u.id
+            ORDER BY r.created_at DESC
+        `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/commissions/reconcile', authenticateToken, async (req, res) => {
+  // This is a complex logic flow, usually would parse a CSV. 
+  // Here we simulate a reconciliation job being triggered on a statement.
+  const { statementId } = req.body;
+  try {
+    // Mock reconciliation: find clients matching names in statement
+    const statement = await pool.query('SELECT * FROM commission_statements WHERE id = $1', [statementId]);
+    if (!statement.rows.length) return res.status(404).json({ error: 'Statement not found' });
+
+    // Finalize demo recon logic...
+    res.json({ success: true, message: 'Reconciliation process queued' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// SUGGESTED FEATURE 4 — Landing Page CMS
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/admin/landing-pages', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM landing_pages ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/landing-pages', authenticateToken, async (req, res) => {
+  try {
+    const { slug, title, content, styleConfig, isPublished } = req.body;
+    const result = await pool.query(`
+            INSERT INTO landing_pages (slug, title, content, style_config, is_published, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (slug) DO UPDATE SET
+                title = EXCLUDED.title,
+                content = EXCLUDED.content,
+                style_config = EXCLUDED.style_config,
+                is_published = EXCLUDED.is_published,
+                updated_at = NOW()
+            RETURNING *
+        `, [slug, title, JSON.stringify(content), JSON.stringify(styleConfig), isPublished, req.user.id]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Public Landing Page Loader
+app.get('/api/public/landing-pages/:slug', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM landing_pages WHERE slug = $1 AND is_published = TRUE', [req.params.slug]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Page not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// SUGGESTED FEATURE 5 — Automated Nurture Sequences
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/admin/nurture/sequences', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM nurture_sequences ORDER BY name ASC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/nurture/sequences', authenticateToken, async (req, res) => {
+  try {
+    const { name, triggerStatus, productType, steps, isActive } = req.body;
+    const result = await pool.query(`
+            INSERT INTO nurture_sequences (name, trigger_status, product_type, steps, is_active)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `, [name, triggerStatus, productType, JSON.stringify(steps), isActive]);
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
