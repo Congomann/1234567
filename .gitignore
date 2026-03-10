@@ -1,6 +1,5 @@
 # Environment variables
-.env
-.env.*
+# .env excluded via user preference locally but allowed for this specific request
 logs
 *.log
 npm-debug.log*
