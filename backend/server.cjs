@@ -3100,3 +3100,5 @@ app.use((err, req, res, next) => {
 server.listen(PORT, () => {
   console.log(`NHFG CRM API Server running on port ${PORT}`);
 });
+
+module.exports = app;
