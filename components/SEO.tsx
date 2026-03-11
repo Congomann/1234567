@@ -38,27 +38,64 @@ export const SEO: React.FC<SEOProps> = ({ title, description }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const config = NHFG_SEO_CONFIG[location.pathname] || NHFG_SEO_CONFIG['/'];
-    
-    // Update Title
-    const finalTitle = title || config.title;
-    document.title = finalTitle;
+    const fetchLocalizedSEO = async (lat?: number, lon?: number) => {
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const query = searchParams.get('q') || '';
+        
+        let url = `/api/seo/localize?q=${encodeURIComponent(query)}`;
+        if (lat && lon) url += `&lat=${lat}&lon=${lon}`;
 
-    // Update Meta Description
-    const finalDescription = description || config.description;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', finalDescription);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('SEO Localization failed');
+        
+        const data = await response.json();
+        
+        // --- Apply Metadata ---
+        const finalTitle = title || data.title;
+        const finalDescription = description || data.description;
+        
+        document.title = finalTitle;
+        
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute('content', finalDescription);
+        }
+
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', finalTitle);
+
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.setAttribute('content', finalDescription);
+
+        // Update Keywords
+        const metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (metaKeywords && data.keywords) {
+          metaKeywords.setAttribute('content', data.keywords.join(', '));
+        }
+
+      } catch (err) {
+        const config = NHFG_SEO_CONFIG[location.pathname] || NHFG_SEO_CONFIG['/'];
+        document.title = title || config.title;
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute('content', description || config.description);
+        }
+      }
+    };
+
+    // Try to get precise location first
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchLocalizedSEO(pos.coords.latitude, pos.coords.longitude),
+        () => fetchLocalizedSEO(), // Fallback to IP if permission denied
+        { timeout: 5000 }
+      );
+    } else {
+      fetchLocalizedSEO();
     }
-
-    // Update OG Title/Description
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', finalTitle);
-
-    const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', finalDescription);
 
   }, [location.pathname, title, description]);
 
-  return null; // This component doesn't render anything
+  return null;
 };

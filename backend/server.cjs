@@ -8,6 +8,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const http = require('http');
 const WebSocket = require('ws');
+const https = require('https');
 require('dotenv').config();
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -2531,6 +2532,69 @@ app.post('/api/leads/:id/documents', authenticateToken, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 // SUGGESTED FEATURE 3 — Commission Reconciliation Engine
 // ════════════════════════════════════════════════════════════════════════════════
+// --- DYNAMIC SEO LOCALIZATION ---
+app.get('/api/seo/localize', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    let city = 'Your Area';
+    let region = '';
+
+    // If coordinates are provided, we could use reverse geocoding
+    // For now, prioritize IP-based lookup if no coords
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    const getLocationFromIP = () => {
+      return new Promise((resolve) => {
+        // Using a free, no-key-required API for demonstration
+        // Note: In high-traffic production, use a paid service or local DB
+        https.get(`https://ipapi.co/${ip}/json/`, (response) => {
+          let data = '';
+          response.on('data', (chunk) => data += chunk);
+          response.on('end', () => {
+            try {
+              const result = JSON.parse(data);
+              resolve({ 
+                city: result.city || 'Your Area', 
+                region: result.region || '' 
+              });
+            } catch (e) {
+              resolve({ city: 'Your Area', region: '' });
+            }
+          });
+        }).on('error', () => {
+          resolve({ city: 'Your Area', region: '' });
+        });
+      });
+    };
+
+    const location = await getLocationFromIP();
+    city = location.city;
+    region = location.region;
+
+    const keywords = [
+      "Life Insurance", "Annuities", "IUL", "Real Estate", 
+      "Mortgage", "Car Insurance", "Wealth Management"
+    ];
+
+    // Pick a primary keyword (could be randomized or based on search query)
+    const primaryKeyword = req.query.q || keywords[Math.floor(Math.random() * keywords.length)];
+
+    const title = `${primaryKeyword} in ${city}, ${region} | New Holland Financial Group`;
+    const description = `Looking for ${primaryKeyword.toLowerCase()} in ${city}? New Holland Financial Group provides top-rated protection and financial solutions near you. Fast approvals and expert advice in ${region}.`;
+
+    res.json({
+      title,
+      description,
+      city,
+      region,
+      keywords: [...keywords, city, region, "Alabama", "near me"]
+    });
+  } catch (error) {
+    console.error('SEO Localization Error:', error);
+    res.status(500).json({ error: 'Failed to localize SEO' });
+  }
+});
+
 app.get('/api/admin/commissions/reconciliations', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
