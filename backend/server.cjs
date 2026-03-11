@@ -765,38 +765,66 @@ app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, as
     const activationUrl = `${appUrl}/activate/${token}`;
 
     const welcomeHtml = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #1e3a5f;">Welcome to New Holland Financial Group!</h2>
-        <p>Hi ${application.full_name},</p>
-        <p>Your advisor account has been approved. We are excited to have you on the team!</p>
-        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Your company email address:</strong></p>
-          <p style="font-size: 18px; color: #2563eb; margin: 5px 0;">${companyEmail}</p>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          .bg-gradient { background: linear-gradient(135deg, #071930 0%, #0c2a50 100%); }
+          .btn { background: #2563eb; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 800; display: inline-block; font-size: 14px; letter-spacing: 0.5px; }
+          .container { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: auto; border-radius: 24px; overflow: hidden; background: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+          .content { padding: 48px; color: #1e293b; line-height: 1.6; }
+          .footer { padding: 32px; text-align: center; color: #94a3b8; font-size: 12px; background: #f8fafc; }
+          .header { padding: 48px; text-align: center; color: #ffffff; }
+        </style>
+      </head>
+      <body style="margin:0; padding:40px 0; background-color: #f1f5f9;">
+        <div class="container">
+          <div class="header bg-gradient">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;">Welcome to NHFG</h1>
+          </div>
+          <div class="content">
+            <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 800; color: #0f172a;">Elite Advisor Approval</h2>
+            <p>Hi ${application.full_name},</p>
+            <p>Congratulations. Your application to join the **New Holland Financial Group** has been officially approved by our administration team. We are thrilled to have you onboard.</p>
+            
+            <div style="background: #f1f5f9; padding: 24px; border-radius: 16px; margin: 32px 0;">
+              <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Assigned Corporate Identity</p>
+              <p style="font-size: 18px; color: #2563eb; margin: 8px 0; font-weight: 700;">${companyEmail}</p>
+            </div>
+
+            <p>To finalize your setup and gain access to the Advisor Terminal, please activate your account via the secure link below:</p>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${activationUrl}" class="btn">ACTIVATE ADVISOR PORTAL</a>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b;">Note: This secure activation link is strictly confidential and will expire in 24 hours.</p>
+          </div>
+          <div class="footer">
+            <p style="font-weight: 700; color: #475569; margin-bottom: 8px;">New Holland Financial Group</p>
+            <p style="margin: 0;">National Advisor Network & Fintech Solutions</p>
+          </div>
         </div>
-        <p>Please click the button below to activate your account and set your password. This link will expire in 24 hours.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${activationUrl}" style="background: #2563eb; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Activate My Account</a>
-        </div>
-        <p style="font-size: 12px; color: #64748b;">If the button doesn't work, copy and paste this link: <br> ${activationUrl}</p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-        <p style="font-size: 12px; color: #94a3b8; text-align: center;">New Holland Financial Group · Professional Advisor Network</p>
-      </div>
+      </body>
+      </html>
     `;
 
     try {
-      await sendEmail({
+      console.log(`[SMTP] Attempting welcome email to personal: ${application.personal_email}`);
+      const info = await sendEmail({
         to: application.personal_email,
-        subject: 'Welcome to NHFG — Account Activation Required',
+        subject: 'Official Welcome — New Holland Financial Group',
         html: welcomeHtml
       });
-      console.log(`[Email] Welcome email sent to: ${application.personal_email}`);
+      console.log(`[SMTP] Success! MessageID: ${info.messageId || 'Simulated'}`);
     } catch (mailErr) {
-      console.error('[Email] Failed to send welcome email:', mailErr.message);
-      // We don't fail the whole request here, but we log it. 
-      // In production, you might want to handle this more strictly.
+      console.error(`[SMTP] CRITICAL FAILURE: ${mailErr.message}`);
+      // Log full error for diagnostics
+      if (mailErr.stack) console.error(mailErr.stack);
     }
 
-    res.json({ success: true, message: 'Application approved and activation email sent.' });
+    res.json({ success: true, message: 'Application approved and activation email sent to personal address.' });
   } catch (err) {
     if (client) await client.query('ROLLBACK');
     console.error('[Onboarding] Approval error:', err.message);
