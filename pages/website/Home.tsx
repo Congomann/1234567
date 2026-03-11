@@ -265,7 +265,7 @@ export const Home: React.FC = () => {
                   >
                     {/* Render the list 3 times to ensure looping seamlessly fills screen */}
                     {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
-                      <div key={`${name}-${idx}`} className="h-12 flex-shrink-0 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100">
+                      <div key={`${name}-${idx}`} className="h-12 flex-shrink-0 flex items-center justify-center transition-all">
                         <img
                           src={
                             (url as string).startsWith("http") ||
