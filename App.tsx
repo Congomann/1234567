@@ -80,6 +80,7 @@ import { AnalyticsTracker } from './components/AnalyticsTracker';
 import AdvisorApplication from './pages/onboarding/AdvisorApplication';
 import AdminOnboarding from './pages/admin/AdminOnboarding';
 import ActivateAccount from './pages/onboarding/ActivateAccount';
+import { SEO } from './components/SEO';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -137,6 +138,7 @@ const App: React.FC = () => {
     <DataProvider>
       <ThemeProvider>
         <Router>
+          <SEO />
           <AnalyticsTracker />
           <Routes>
             {/* PUBLIC WEBSITE */}

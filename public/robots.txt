@@ -1,0 +1,6 @@
+
+User-agent: *
+Allow: /
+
+# Sitemap Location
+Sitemap: https://new-holland-financial.vercel.app/sitemap.xml
