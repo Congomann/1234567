@@ -278,7 +278,32 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_channel ON chat_messages(channel_id
 CREATE INDEX IF NOT EXISTS idx_bank_verif_status ON bank_verifications(status);
 
 -- 12. INITIAL SEED DATA (Administrator Account)
--- Password: password (SHA-256)
+-- Password: NewhollandAdmin@2026 (SHA-256)
 INSERT INTO users (id, email, name, role, password_hash)
-VALUES ('ba2e9046-e854-4d6f-9ec5-5ae1046003b2', 'sales@newhollandfinancial.com', 'NHFG Admin', 'Administrator', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+VALUES ('ba2e9046-e854-4d6f-9ec5-5ae1046003b2', 'info@newhollandfinancial.com', 'NHFG Admin', 'Administrator', 'b9e106daeb5faccfb28ffa5d7f7bb36ee622370c9197c386fcaedaa78507bb6f')
 ON CONFLICT (email) DO NOTHING;
+
+-- Seed: Company Settings
+INSERT INTO company_settings (id, data)
+VALUES ('main', '{
+  "phone": "(800) 555-0199",
+  "email": "contact@newholland.com",
+  "address": "123 Finance Way",
+  "city": "New York",
+  "state": "NY",
+  "zip": "10001",
+  "heroTitle": "Securing Your Future, Protecting Your Legacy.",
+  "heroSubtitle": "New Holland Financial Group provides comprehensive insurance and financial solutions.",
+  "heroBackgroundType": "image",
+  "heroBackgroundUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070",
+  "partners": {
+    "Root Insurance": "root.com",
+    "Aflac": "aflac.com",
+    "Transamerica": "transamerica.com",
+    "Combined Insurance": "combinedinsurance.com",
+    "Geico": "geico.com",
+    "Securico Life": "securico.com"
+  },
+  "partnerMarqueeSpeed": 30
+}')
+ON CONFLICT (id) DO NOTHING;

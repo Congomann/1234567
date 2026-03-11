@@ -9,8 +9,8 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const http = require('http');
 const WebSocket = require('ws');
 const https = require('https');
-require('dotenv').config();
-
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -994,9 +994,9 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 });
 
 // 6. Content Management System (Settings & Workflows)
-app.get('/api/settings', authenticateToken, async (req, res) => {
+app.get('/api/settings', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM company_settings WHERE id = 'global_config'");
+    const result = await pool.query("SELECT * FROM company_settings WHERE id = 'main'");
     if (result.rows.length > 0) {
       res.json([result.rows[0].data]);
     } else {
@@ -1012,7 +1012,7 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
     const settings = req.body;
     await pool.query(
       `INSERT INTO company_settings (id, data, updated_at) 
-       VALUES ('global_config', $1::jsonb, CURRENT_TIMESTAMP) 
+       VALUES ('main', $1::jsonb, CURRENT_TIMESTAMP) 
        ON CONFLICT (id) DO UPDATE SET data = $1::jsonb, updated_at = CURRENT_TIMESTAMP`,
       [JSON.stringify(settings)]
     );

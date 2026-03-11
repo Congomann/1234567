@@ -182,7 +182,7 @@ class NHFGBackend {
                 });
             } catch (e) { }
         }
-        await DB.save('settings', { ...settings, id: 'global_config' } as any);
+        await DB.save('settings', { ...settings, id: 'main' } as any);
     }
 
     async getLogs(): Promise<IntegrationLog[]> {

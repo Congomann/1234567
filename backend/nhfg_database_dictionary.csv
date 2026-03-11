@@ -1,0 +1,65 @@
+Table,Column,Type,Constraints_Default
+users,id,UUID,PRIMARY KEY DEFAULT uuid_generate_v4()
+users,email,VARCHAR(255),UNIQUE NOT NULL
+users,personal_email,VARCHAR(255),
+users,password_hash,VARCHAR(255),
+users,name,VARCHAR(255),NOT NULL
+users,role,VARCHAR(50),CHECK (role IN ('Administrator' 'Manager' 'Sub-Admin' 'Advisor' 'Client'))
+users,category,VARCHAR(50),DEFAULT 'Insurance & General'
+users,title,VARCHAR(100),
+users,phone,VARCHAR(50),
+users,avatar_url,TEXT,
+users,bio,TEXT,
+users,microsite_enabled,BOOLEAN,DEFAULT FALSE
+users,contract_level,NUMERIC(5,2),DEFAULT 50
+users,products_sold,JSONB,DEFAULT '[]'::jsonb
+users,license_states,TEXT[],
+users,onboarding_completed,BOOLEAN,DEFAULT FALSE
+users,created_at,TIMESTAMP,DEFAULT CURRENT_TIMESTAMP
+advisor_applications,id,UUID,PRIMARY KEY DEFAULT uuid_generate_v4()
+advisor_applications,full_name,VARCHAR(255),NOT NULL
+advisor_applications,personal_email,VARCHAR(255),UNIQUE NOT NULL
+advisor_applications,phone,VARCHAR(50),
+advisor_applications,license_info,TEXT,
+advisor_applications,experience,TEXT,
+advisor_applications,address,TEXT,
+advisor_applications,status,VARCHAR(50),DEFAULT 'pending_approval'
+advisor_applications,company_email,VARCHAR(255),
+advisor_applications,contract_level,NUMERIC(5,2),
+advisor_applications,authorized_products,JSONB,
+leads,id,UUID,PRIMARY KEY DEFAULT uuid_generate_v4()
+leads,name,VARCHAR(255),NOT NULL
+leads,email,VARCHAR(255),
+leads,phone,VARCHAR(50),
+leads,interest,VARCHAR(100),
+leads,status,VARCHAR(50),DEFAULT 'New'
+leads,score,INT,DEFAULT 50
+leads,qualification,VARCHAR(20),CHECK (Hot Warm Cold)
+leads,source,VARCHAR(100),
+leads,assigned_to,UUID,REFERENCES users(id)
+leads,message,TEXT,
+leads,notes,TEXT,
+leads,priority,VARCHAR(20),DEFAULT 'Low'
+leads,life_details,JSONB,
+leads,real_estate_details,JSONB,
+leads,securities_details,JSONB,
+leads,custom_details,JSONB,
+leads,created_at,TIMESTAMP,DEFAULT CURRENT_TIMESTAMP
+clients,id,UUID,PRIMARY KEY DEFAULT uuid_generate_v4()
+clients,advisor_id,UUID,REFERENCES users(id)
+clients,name,VARCHAR(255),NOT NULL
+clients,email,VARCHAR(255),
+clients,phone,VARCHAR(50),
+clients,product,VARCHAR(100),
+clients,policy_number,VARCHAR(100),
+clients,carrier,VARCHAR(100),
+clients,premium,NUMERIC(12,2),
+clients,renewal_date,DATE,
+clients,commission_amount,NUMERIC(12,2),
+bank_verifications,id,UUID,PRIMARY KEY DEFAULT uuid_generate_v4()
+bank_verifications,client_name,VARCHAR(255),NOT NULL
+bank_verifications,institution_name,VARCHAR(255),DEFAULT 'Pending'
+bank_verifications,account_mask,VARCHAR(10),DEFAULT '????'
+bank_verifications,status,VARCHAR(25),DEFAULT 'pending'
+bank_verifications,verification_method,VARCHAR(10),DEFAULT 'plaid'
+bank_verifications,balance_current,NUMERIC(15,2),

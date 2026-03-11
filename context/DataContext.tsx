@@ -195,7 +195,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       { id: 'business', title: 'Business & Professional Liability', description: "Protect your business assets, operations, and professional reputation with tailored commercial and E&O packages.", features: ['General Liability', "Worker's Comp", 'Professional Liability (E&O)', 'Cyber Liability'], image: "https://picsum.photos/600/400?random=2", icon: 'Briefcase', color: 'purple', link: '/business-insurance', isHidden: false, order: 3 },
       { id: 'auto', title: 'Auto Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "https://picsum.photos/600/400?random=6", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
       { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 }
-    ]
+    ],
+    partners: {
+      "Root Insurance": "root.com",
+      "Aflac": "aflac.com",
+      "Transamerica": "transamerica.com",
+      "Combined Insurance": "combinedinsurance.com",
+      "Geico": "geico.com",
+      "Securico Life": "securico.com"
+    },
+    partnerMarqueeSpeed: 30
   });
 
   const pushNotification = useCallback((title: string, message: string, type: 'info' | 'success' | 'warning' | 'alert' = 'info', resourceType?: any, relatedId?: string) => {
