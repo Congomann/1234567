@@ -12,7 +12,6 @@ import {
   Globe
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { ServiceAreas } from './ServiceAreas';
 
 // Custom TikTok Icon
 const TikTokIcon = ({ size, className }: { size?: number, className?: string }) => (
@@ -213,7 +212,6 @@ export const Footer: React.FC = () => {
 
         </div>
       </div>
-      <ServiceAreas />
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 text-center">
