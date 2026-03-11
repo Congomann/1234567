@@ -163,7 +163,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-3">
               <button 
                 onClick={handleAuthAction}
-                className="bg-white text-slate-900 hover:bg-blue-50 px-6 py-2.5 rounded-full text-[12px] font-black flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10 uppercase tracking-widest"
+                className="hidden lg:flex bg-white text-slate-900 hover:bg-blue-50 px-6 py-2.5 rounded-full text-[12px] font-black items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10 uppercase tracking-widest"
               >
                 <User size={14} className="opacity-70" /> 
                 {user ? (user.role === UserRole.CLIENT ? 'Portal' : 'Console') : 'Sign In'}
