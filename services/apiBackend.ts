@@ -174,13 +174,12 @@ class NHFGBackend {
 
     async saveSettings(settings: CompanySettings): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch(`${this.baseUrl}/settings`, {
-                    method: 'POST',
-                    headers: this.getAuthHeaders(),
-                    body: JSON.stringify(settings)
-                });
-            } catch (e) { }
+            const res = await fetch(`${this.baseUrl}/settings`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(settings)
+            });
+            await this.handleResponse(res);
         }
         await DB.save('settings', { ...settings, id: 'main' } as any);
     }

@@ -155,8 +155,8 @@ export const WebsiteSettings: React.FC = () => {
             }
 
             setIsUploading(true);
-            // Optimization for large files
-            if (file.size > 2 * 1024 * 1024) {
+            // Optimization for large files - Increase threshold to 20MB
+            if (file.size > 20 * 1024 * 1024) {
                 const objectUrl = URL.createObjectURL(file);
                 setNewResource(prev => ({ ...prev, url: objectUrl }));
                 setIsUploading(false);
