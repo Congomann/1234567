@@ -144,9 +144,9 @@ export const Login: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-500">
               Don't have an account?{' '}
-              <a href="#/signup" className="font-medium text-[#0A62A7] hover:text-blue-600">
+              <Link to="/signup" className="font-medium text-[#0A62A7] hover:text-blue-600">
                 Sign up
-              </a>
+              </Link>
             </p>
           </div>
         </div>

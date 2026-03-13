@@ -3,6 +3,7 @@ import { Shield, Users, Award, Heart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useData } from "../../context/DataContext";
 import { TestimonialsSection } from "../../components/TestimonialsSection";
+import { SEO } from "../../components/SEO";
 
 export const About: React.FC = () => {
   const { companySettings } = useData();
@@ -24,6 +25,7 @@ export const About: React.FC = () => {
 
   return (
     <div className="bg-white font-sans">
+      <SEO />
       {/* 1. About Hero Section */}
       <div className="relative bg-[#0B2240] py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>

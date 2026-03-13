@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, User, Mail, Phone, FileText, CheckCircle2, Loader2, Landmark } from 'lucide-react';
+import { SEO } from '../../components/SEO';
 
 export default function AdvisorApplication() {
     const [formData, setFormData] = useState({
@@ -63,6 +64,7 @@ export default function AdvisorApplication() {
 
     return (
         <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-6 selection:bg-blue-500/30">
+            <SEO />
             {/* Branded Background Elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />

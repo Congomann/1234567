@@ -4,6 +4,7 @@ import { useData } from "../../context/DataContext";
 import { UserRole } from "../../types";
 import { Link } from "react-router-dom";
 import { TestimonialsSection } from "../../components/TestimonialsSection";
+import { SEO } from "../../components/SEO";
 
 export const Advisors: React.FC = () => {
   const { allUsers } = useData();
@@ -182,6 +183,7 @@ export const Advisors: React.FC = () => {
 
   return (
     <div className="bg-white font-sans">
+      <SEO />
       {/* 1. Advisors Hero Section */}
       <div className="relative bg-[#0B2240] py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -222,7 +224,7 @@ export const Advisors: React.FC = () => {
                   {advisor.micrositeEnabled ? (
                     <CardContent advisor={advisor} slug={advisorSlug} />
                   ) : (
-                    <div className="opacity-70 cursor-not-allowed h-full grayscale">
+                    <div className="opacity-50 cursor-not-allowed h-full">
                       <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden h-full flex flex-col p-6">
                         <div className="h-48 bg-slate-200 rounded-xl mb-4"></div>
                         <h3 className="text-lg font-bold text-slate-400">

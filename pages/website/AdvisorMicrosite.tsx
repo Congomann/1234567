@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import { useData } from "../../context/DataContext";
+import { SEO } from "../../components/SEO";
 import { ProductType } from "../../types";
 import {
   Mail,
@@ -279,6 +280,10 @@ export const AdvisorMicrosite: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
+      <SEO 
+        title={`${advisor.name} | NHFG Licensed Advisor`} 
+        description={advisor.bio || `Connect with ${advisor.name}, a licensed financial professional at New Holland Financial Group.`}
+      />
       <div className="fixed top-24 left-4 z-40 md:left-8">
         <Link
           to="/advisors"

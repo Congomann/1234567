@@ -194,15 +194,17 @@ export const Footer: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3 group items-start">
-                <div className="flex-shrink-0 w-10 h-10 mt-0.5 bg-white/5 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 border border-white/5 group-hover:border-blue-500/50 shadow-lg group-hover:shadow-blue-900/20">
-                  <MapPin size={16} />
+              <div className="flex gap-4 group items-center">
+                <div className="flex-shrink-0 w-11 h-11 bg-white/5 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 border border-white/5 group-hover:border-blue-500/50 shadow-lg group-hover:shadow-blue-900/20">
+                  <MapPin size={18} />
                 </div>
-                <div>
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Visit Us</p>
-                  <p className="text-white/90 text-[13px] font-bold leading-relaxed">
-                    {companySettings.address}<br />
-                    {companySettings.city}, {companySettings.state} {companySettings.zip}
+                <div className="flex flex-col">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Visit Us</p>
+                  <p className="text-white font-bold text-[14px] leading-tight flex flex-col">
+                    {!companySettings.hideStreetAddress && (
+                      <span className="text-slate-400 text-[12px] font-medium mb-0.5">{companySettings.address}</span>
+                    )}
+                    <span>{companySettings.city}, {companySettings.state} {companySettings.zip}</span>
                   </p>
                 </div>
               </div>

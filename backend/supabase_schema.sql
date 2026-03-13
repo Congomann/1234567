@@ -252,6 +252,37 @@ CREATE TABLE IF NOT EXISTS company_settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS resources (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    url TEXT NOT NULL,
+    thumbnail TEXT,
+    content TEXT,
+    description TEXT,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
+    shares INT DEFAULT 0,
+    tags TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS testimonials (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    advisor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    client_name VARCHAR(255) NOT NULL,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'pending_edit')),
+    date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    edited_client_name VARCHAR(255),
+    edited_rating INT,
+    edited_review_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
@@ -307,3 +338,26 @@ VALUES ('main', '{
   "partnerMarqueeSpeed": 30
 }')
 ON CONFLICT (id) DO NOTHING;
+
+-- 10. AUTOMATION & WORKFLOWS
+CREATE TABLE IF NOT EXISTS workflows (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    trigger VARCHAR(100) NOT NULL,
+    actions JSONB DEFAULT '[]'::jsonb,
+    status VARCHAR(50) DEFAULT 'active',
+    impact VARCHAR(20) DEFAULT 'MEDIUM',
+    category VARCHAR(50) DEFAULT 'OPERATIONS',
+    executions_ytd INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS integration_config (
+    id VARCHAR(50) PRIMARY KEY DEFAULT 'main',
+    google_ads JSONB DEFAULT '{"enabled": false}'::jsonb,
+    meta_ads JSONB DEFAULT '{"enabled": false}'::jsonb,
+    tiktok_ads JSONB DEFAULT '{"enabled": false}'::jsonb,
+    linkedin_ads JSONB DEFAULT '{"enabled": false}'::jsonb,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

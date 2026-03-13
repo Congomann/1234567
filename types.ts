@@ -382,6 +382,7 @@ export interface CompanySettings {
   socialLinks?: SocialLink[];
   logoUrl?: string;
   hideLogo?: boolean;
+  hideStreetAddress?: boolean;
 
   // Theme & Branding
   themePrimaryColor?: string;

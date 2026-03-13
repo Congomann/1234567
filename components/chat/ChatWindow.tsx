@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { ChatInput } from './ChatInput';
 import { MessageBubble } from './MessageBubble';
-import { ChatAttachment } from '../../types';
+import { ChatAttachment, UserRole } from '../../types';
 import { Info, Users, X, Download, Maximize2 } from 'lucide-react';
 
 interface ChatWindowProps {
@@ -147,7 +147,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ activeId, type }) => {
         </div>
 
         {/* Composer */}
-        <ChatInput onSendMessage={handleSend} />
+        <ChatInput 
+          onSend={handleSend} 
+          userRole={user?.role as UserRole} 
+          isSubAdminInChannel={colleagues.some(c => c.role === 'Sub-Admin' && c.status === 'online')}
+          channelType={type === 'user' ? 'direct' : type === 'lead' ? 'case_chat' : 'group'}
+        />
 
         {/* File Preview Modal */}
         {previewFile && (

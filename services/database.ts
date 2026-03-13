@@ -2,7 +2,7 @@
 import { Lead, Client, User, CompanySettings, IntegrationLog, Workflow } from '../types';
 
 const DB_NAME = 'NHFG_Enterprise_DB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 /**
  * PRODUCTION DATABASE ENGINE
@@ -25,27 +25,12 @@ export class DatabaseEngine {
         const db = event.target.result;
         
         // Create Stores
-        if (!db.objectStoreNames.contains('leads')) {
-          db.createObjectStore('leads', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('clients')) {
-          db.createObjectStore('clients', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('users')) {
-          db.createObjectStore('users', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('settings')) {
-          db.createObjectStore('settings', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('logs')) {
-          db.createObjectStore('logs', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('workflows')) {
-          db.createObjectStore('workflows', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('events')) {
-          db.createObjectStore('events', { keyPath: 'id' });
-        }
+        const stores = ['leads', 'clients', 'users', 'settings', 'logs', 'workflows', 'events', 'resources', 'testimonials'];
+        stores.forEach(store => {
+          if (!db.objectStoreNames.contains(store)) {
+            db.createObjectStore(store, { keyPath: 'id' });
+          }
+        });
       };
     });
   }
@@ -57,6 +42,14 @@ export class DatabaseEngine {
   }
 
   // Generic CRUD
+  async get<T>(storeName: string, id: string): Promise<T | undefined> {
+    const store = await this.getStore(storeName);
+    return new Promise((resolve) => {
+      const request = store.get(id);
+      request.onsuccess = () => resolve(request.result);
+    });
+  }
+
   async getAll<T>(storeName: string): Promise<T[]> {
     const store = await this.getStore(storeName);
     return new Promise((resolve) => {

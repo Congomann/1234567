@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
@@ -11,6 +12,7 @@ const WebSocket = require('ws');
 const https = require('https');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+const storageService = require('./storageService.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -86,6 +88,13 @@ app.use((req, res, next) => {
   if (req.body && Object.keys(req.body).length > 0) {
     console.log('>>> [API Body]', JSON.stringify(req.body, null, 2));
   }
+  // Prevent stale data mismatches across devices
+  if (req.url.startsWith('/api')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+  }
   next();
 });
 
@@ -130,6 +139,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) {
     if (process.env.NODE_ENV === 'development') {
+      // Use the actual seed Admin UUID to avoid foreign key errors on localhost
       req.user = { id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2', role: 'Administrator' };
       return next();
     }
@@ -139,7 +149,7 @@ const authenticateToken = (req, res, next) => {
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) {
       if (process.env.NODE_ENV === 'development') {
-        req.user = { id: 'mock-user-id', role: 'Administrator' };
+        req.user = { id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2', role: 'Administrator' };
         return next();
       }
       return res.status(403).json({ error: 'Forbidden' });
@@ -228,6 +238,35 @@ const WebhookNormalizer = {
 };
 
 // --- API ROUTES ---
+
+// --- STORAGE & UPLOADS ---
+app.post('/api/upload', authenticateToken, async (req, res) => {
+  try {
+    const { filename, fileData } = req.body;
+    if (!filename || !fileData) {
+      return res.status(400).json({ error: 'Filename and fileData are required' });
+    }
+    const publicUrl = await storageService.saveFile(filename, fileData);
+    res.json({ url: publicUrl });
+  } catch (error) {
+    console.error('[API] Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload file' });
+  }
+});
+
+app.get('/api/storage/:filename', async (req, res) => {
+  try {
+    const filePath = await storageService.getFile(req.params.filename);
+    if (filePath && fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).json({ error: 'File not found' });
+    }
+  } catch (error) {
+    console.error('[API] Storage serve error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 /**
  * @openapi
@@ -533,6 +572,25 @@ app.post('/api/auth/login', async (req, res) => {
     } else {
       res.status(401).json({ error: 'User not found' });
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    const u = result.rows[0];
+    res.json({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      category: u.category,
+      avatar: u.avatar_url,
+      productsSold: u.products_sold
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1009,6 +1067,9 @@ app.get('/api/settings', async (req, res) => {
 });
 
 app.post('/api/settings', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
   try {
     const settings = req.body;
     await pool.query(
@@ -1033,6 +1094,9 @@ app.get('/api/workflows', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/workflows', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
   try {
     const workflow = req.body;
     const { id } = workflow;
@@ -1044,6 +1108,163 @@ app.post('/api/workflows', authenticateToken, async (req, res) => {
        ON CONFLICT (id) DO UPDATE SET data = $2, updated_at = CURRENT_TIMESTAMP`,
       [id, JSON.stringify(workflow)]
     );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6.2 Resources System
+app.get('/api/resources', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM resources ORDER BY created_at DESC');
+    res.json(result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      type: row.type,
+      url: row.url,
+      thumbnail: row.thumbnail,
+      content: row.content,
+      description: row.description,
+      likes: row.likes || 0,
+      dislikes: row.dislikes || 0,
+      shares: row.shares || 0,
+      tags: row.tags || [],
+      dateAdded: row.created_at
+    })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/resources', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+  const { title, type, url, thumbnail, description, content, tags } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO resources (title, type, url, thumbnail, description, content, tags)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [title, type, url, thumbnail, description, content, tags]
+    );
+    res.json({ success: true, resource: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/resources/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+  try {
+    await pool.query('DELETE FROM resources WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6.3 Testimonials System
+app.get('/api/testimonials', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM testimonials ORDER BY date DESC');
+    res.json(result.rows.map(row => ({
+      id: row.id,
+      advisorId: row.advisor_id,
+      clientName: row.client_name,
+      rating: row.rating,
+      reviewText: row.review_text,
+      status: row.status,
+      date: row.date,
+      editedClientName: row.edited_client_name,
+      editedRating: row.edited_rating,
+      editedReviewText: row.edited_review_text
+    })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/testimonials', async (req, res) => {
+  // Public submission (from microsite) or authenticated submission
+  const { advisorId, clientName, rating, reviewText } = req.body;
+  if (!advisorId || !clientName || !rating || !reviewText) {
+    return res.status(400).json({ error: 'Missing required testimonial fields' });
+  }
+  try {
+    await pool.query(
+      `INSERT INTO testimonials (advisor_id, client_name, rating, review_text, status)
+       VALUES ($1, $2, $3, $4, 'pending')`,
+      [advisorId, clientName, rating, reviewText]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/testimonials/:id/approve', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+  try {
+    const { status } = req.body; // e.g., 'approved'
+    if (status === 'approved') {
+        const item = await pool.query('SELECT * FROM testimonials WHERE id = $1', [req.params.id]);
+        if (item.rows.length > 0 && item.rows[0].status === 'pending_edit') {
+            // Apply edits
+            const t = item.rows[0];
+            await pool.query(
+                `UPDATE testimonials SET 
+                 client_name = COALESCE(edited_client_name, client_name),
+                 rating = COALESCE(edited_rating, rating),
+                 review_text = COALESCE(edited_review_text, review_text),
+                 status = 'approved',
+                 edited_client_name = NULL,
+                 edited_rating = NULL,
+                 edited_review_text = NULL
+                 WHERE id = $1`,
+                [req.params.id]
+            );
+        } else {
+            await pool.query("UPDATE testimonials SET status = 'approved' WHERE id = $1", [req.params.id]);
+        }
+    } else {
+        await pool.query("UPDATE testimonials SET status = $1 WHERE id = $1", [status, req.params.id]);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/testimonials/:id/edit', authenticateToken, async (req, res) => {
+  // Advisor requesting an edit
+  const { clientName, rating, reviewText } = req.body;
+  try {
+     await pool.query(
+       `UPDATE testimonials SET 
+        edited_client_name = $1,
+        edited_rating = $2,
+        edited_review_text = $3,
+        status = 'pending_edit'
+        WHERE id = $4`,
+       [clientName, rating, reviewText, req.params.id]
+     );
+     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/testimonials/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'Administrator') {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+  try {
+    await pool.query('DELETE FROM testimonials WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1084,8 +1305,10 @@ const initPlaid = () => {
     return;
   }
 
-  // Choose the secret based on the environment
-  const activeSecret = PLAID_ENV === 'production' ? PLAID_SECRET_PRODUCTION : PLAID_SECRET;
+  // Choose the secret based on the environment (fallback to PLAID_SECRET if PRODUCTION variant is missing)
+  const activeSecret = (PLAID_ENV === 'production') 
+    ? (PLAID_SECRET_PRODUCTION || PLAID_SECRET) 
+    : PLAID_SECRET;
 
   if (!activeSecret) {
     console.warn(`[Plaid] ⚠️  PLAID_SECRET${PLAID_ENV === 'production' ? '_PRODUCTION' : ''} not set for env: ${PLAID_ENV}.`);
@@ -2734,7 +2957,11 @@ app.get('/api/admin/landing-pages', authenticateToken, async (req, res) => {
 
 app.post('/api/admin/landing-pages', authenticateToken, async (req, res) => {
   try {
-    const { slug, title, content, styleConfig, isPublished } = req.body;
+    const { slug, title, content, style_config, is_published } = req.body;
+    console.log(`[LandingPage] Save Request: ${slug}`);
+    
+    if (!slug) return res.status(400).json({ error: 'Slug is required' });
+
     const result = await pool.query(`
             INSERT INTO landing_pages (slug, title, content, style_config, is_published, created_by)
             VALUES ($1, $2, $3, $4, $5, $6)
@@ -2745,7 +2972,9 @@ app.post('/api/admin/landing-pages', authenticateToken, async (req, res) => {
                 is_published = EXCLUDED.is_published,
                 updated_at = NOW()
             RETURNING *
-        `, [slug, title, JSON.stringify(content), JSON.stringify(styleConfig), isPublished, req.user.id]);
+        `, [slug, title, JSON.stringify(content), JSON.stringify(style_config), is_published || false, req.user.id]);
+    
+    console.log(`[LandingPage] Saved successfully: ${slug}`);
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -3126,8 +3355,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error', details: err.message });
 });
 
-server.listen(PORT, () => {
-  console.log(`NHFG CRM API Server running on port ${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`NHFG CRM API Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

@@ -14,11 +14,7 @@ const USE_REAL_BACKEND = true;
 class NHFGBackend {
 
     private get baseUrl(): string {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        if (isLocal) {
-            return 'http://localhost:3001/api';
-        }
-        return `${window.location.origin}/api`;
+        return '/api';
     }
 
     private getAuthHeaders(): HeadersInit {
@@ -30,10 +26,15 @@ class NHFGBackend {
         return headers;
     }
 
-    private async handleResponse(res: Response) {
+    private async handleResponse(res: Response, silent = false) {
         if (res.status === 401) {
-            this.logout();
-            window.location.href = '#/login';
+            if (!silent) {
+                const hasToken = localStorage.getItem('nhfg_jwt_token');
+                if (hasToken) {
+                    this.logout();
+                    window.location.href = '/login';
+                }
+            }
             throw new Error('Session expired');
         }
 
@@ -87,6 +88,18 @@ class NHFGBackend {
     }
 
     // --- AUTHENTICATION ---
+
+    async getCurrentUser(): Promise<User | null> {
+        if (!USE_REAL_BACKEND || !localStorage.getItem('nhfg_jwt_token')) return null;
+        try {
+            const res = await fetch(`${this.baseUrl}/auth/me`, {
+                headers: this.getAuthHeaders()
+            });
+            return await this.handleResponse(res, true);
+        } catch (e) {
+            return null;
+        }
+    }
 
     async login(email: string, password?: string): Promise<User | null> {
         if (!USE_REAL_BACKEND) return null;
@@ -234,6 +247,114 @@ class NHFGBackend {
         await DB.delete('events', id);
     }
 
+    // --- LANDING PAGES ---
+
+    async getLandingPages(): Promise<any[]> {
+        return this.apiRequest<any[]>(`${this.baseUrl}/admin/landing-pages`, { headers: this.getAuthHeaders() }, 'landing_pages');
+    }
+
+    async saveLandingPage(page: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch(`${this.baseUrl}/admin/landing-pages`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(page)
+            });
+            await this.handleResponse(res);
+        }
+        await DB.save('landing_pages', page);
+    }
+
+    // --- RESOURCES ---
+
+    async getResources(): Promise<any[]> {
+        return this.apiRequest<any[]>(`${this.baseUrl}/resources`, { headers: this.getAuthHeaders() }, 'resources');
+    }
+
+    async saveResource(resource: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/resources`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(resource)
+                });
+            } catch (e) { }
+        }
+        await DB.save('resources', { ...resource, id: resource.id || crypto.randomUUID() });
+    }
+
+    async deleteResource(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/resources/${id}`, {
+                    method: 'DELETE',
+                    headers: this.getAuthHeaders()
+                });
+            } catch (e) { }
+        }
+        await DB.delete('resources', id);
+    }
+
+    // --- TESTIMONIALS ---
+
+    async getTestimonials(): Promise<any[]> {
+        return this.apiRequest<any[]>(`${this.baseUrl}/testimonials`, { headers: this.getAuthHeaders() }, 'testimonials');
+    }
+
+    async saveTestimonial(testimonial: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/testimonials`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(testimonial)
+                });
+            } catch (e) { }
+        }
+        await DB.save('testimonials', { ...testimonial, id: testimonial.id || crypto.randomUUID() });
+    }
+
+    async approveTestimonial(id: string, status: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/testimonials/${id}/approve`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify({ status })
+                });
+            } catch (e) { }
+        }
+        const t = await DB.get<any>('testimonials', id);
+        if (t) await DB.save('testimonials', { ...t, status });
+    }
+
+    async requestTestimonialEdit(id: string, edits: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/testimonials/${id}/edit`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(edits)
+                });
+            } catch (e) { }
+        }
+        const t = await DB.get<any>('testimonials', id);
+        if (t) await DB.save('testimonials', { ...t, ...edits, status: 'pending_edit' });
+    }
+
+    async deleteTestimonial(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/testimonials/${id}`, {
+                    method: 'DELETE',
+                    headers: this.getAuthHeaders()
+                });
+            } catch (e) { }
+        }
+        await DB.delete('testimonials', id);
+    }
+
     // --- GENERIC HTTP METHODS ---
     async get<T>(path: string): Promise<T> {
         const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -249,7 +370,12 @@ class NHFGBackend {
             body: JSON.stringify(body)
         };
         const res = await fetch(url, options);
-        return this.handleResponse(res);
+        return await this.handleResponse(res);
+    }
+
+    async uploadFile(filename: string, fileData: string): Promise<string> {
+        const data = await this.post<{ url: string }>('/upload', { filename, fileData });
+        return data.url;
     }
 
 

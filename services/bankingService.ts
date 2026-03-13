@@ -18,12 +18,7 @@
  *  6. saveManual()          → backend validates routing # (ABA checksum) + saves
  */
 
-const BASE_URL = (() => {
-  const isLocal =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  return isLocal ? 'http://localhost:3001/api' : `${window.location.origin}/api`;
-})();
+const BASE_URL = '/api';
 
 
 const getHeaders = (): HeadersInit => {

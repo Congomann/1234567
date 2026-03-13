@@ -31,6 +31,10 @@ const NHFG_SEO_CONFIG: Record<string, { title: string; description: string }> = 
   '/contact': {
     title: 'Contact Us | New Holland Financial Group',
     description: 'Get in touch with the NHFG team for support, partnership opportunities, or general inquiries.'
+  },
+  '/advisors': {
+    title: 'Expert Financial Advisors | New Holland Financial Group',
+    description: 'Meet our team of licensed financial advisors specializing in life insurance, real estate, and investment strategies.'
   }
 };
 
@@ -73,6 +77,17 @@ export const SEO: React.FC<SEOProps> = ({ title, description }) => {
         if (metaKeywords && data.keywords) {
           metaKeywords.setAttribute('content', data.keywords.join(', '));
         }
+
+        // --- Canonical URL ---
+        const primaryDomain = 'https://www.newhollandfinancial.com';
+        const canonicalUrl = `${primaryDomain}${location.pathname}`;
+        let canonicalTag = document.querySelector('link[rel="canonical"]');
+        if (!canonicalTag) {
+          canonicalTag = document.createElement('link');
+          canonicalTag.setAttribute('rel', 'canonical');
+          document.head.appendChild(canonicalTag);
+        }
+        canonicalTag.setAttribute('href', canonicalUrl);
 
       } catch (err) {
         const config = NHFG_SEO_CONFIG[location.pathname] || NHFG_SEO_CONFIG['/'];

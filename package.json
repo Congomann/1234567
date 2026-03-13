@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "db:init": "chmod +x local_setup.sh && ./local_setup.sh",
+    "server:local": "node backend/server.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
@@ -37,6 +39,7 @@
     "swagger-ui-express": "^5.0.1",
     "tailwind-merge": "^2.2.1",
     "twilio": "^5.12.2",
+    "webdav": "^5.9.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {

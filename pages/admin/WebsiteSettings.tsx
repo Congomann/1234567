@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
-import { CompanySettings, Resource, ProductType, SocialLink } from '../../types';
+import { Resource, ProductType, SocialLink, CompanySettings } from '../../types';
+import { Backend } from '../../services/apiBackend';
 import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2 } from 'lucide-react';
 
 export const WebsiteSettings: React.FC = () => {
@@ -33,17 +34,25 @@ export const WebsiteSettings: React.FC = () => {
         setSettingsForm(companySettings);
     }, [companySettings]);
 
-    const handleSettingsSave = (e: React.FormEvent) => {
+    const handleSettingsSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        updateCompanySettings(settingsForm);
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
+        const success = await updateCompanySettings(settingsForm);
+        if (success) {
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+        } else {
+            alert("Failed to save settings. Please check your connection.");
+        }
     };
 
-    const handlePartnersSave = () => {
-        updateCompanySettings(settingsForm);
-        setPartnersSaved(true);
-        setTimeout(() => setPartnersSaved(false), 3000);
+    const handlePartnersSave = async () => {
+        const success = await updateCompanySettings(settingsForm);
+        if (success) {
+            setPartnersSaved(true);
+            setTimeout(() => setPartnersSaved(false), 3000);
+        } else {
+            alert("Failed to save partners.");
+        }
     };
 
     const handleResourceSubmit = (e: React.FormEvent) => {
@@ -101,52 +110,55 @@ export const WebsiteSettings: React.FC = () => {
         setUploadError('');
         const file = e.target.files?.[0];
         if (file) {
+            setIsUploading(true);
             const isVideo = file.type.startsWith('video/');
-            const isImage = file.type.startsWith('image/');
-
-            if (!isVideo && !isImage) {
-                setUploadError('Please upload a valid image or video file.');
-                return;
-            }
-
-            if (file.size > 250 * 1024 * 1024) { // 250MB Limit
-                setUploadError('File size too large (>250MB).');
-                return;
-            }
-
-            if (isVideo) {
-                const video = document.createElement('video');
-                video.preload = 'metadata';
-                video.onloadedmetadata = function () {
-                    window.URL.revokeObjectURL(video.src);
-                    if (video.duration > 300) { // 300 seconds = 5 minutes
-                        setUploadError('Video duration exceeds 5 minutes limit.');
-                        return;
-                    }
-                    readFile(file, true);
-                }
-                video.onerror = function () {
-                    setUploadError('Invalid video file.');
-                }
-                video.src = URL.createObjectURL(file);
-            } else {
-                readFile(file, false);
-            }
-        }
-    };
-
-    const handleResourceThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewResource(prev => ({ ...prev, thumbnail: reader.result as string }));
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                try {
+                    const storageUrl = await Backend.uploadFile(file.name, base64);
+                    if (settingsForm.heroBackgroundType === 'video' && isVideo) {
+                        setSettingsForm(prev => ({
+                            ...prev,
+                            heroVideoPlaylist: [...(prev.heroVideoPlaylist || []), storageUrl]
+                        }));
+                    } else {
+                        setSettingsForm(prev => ({
+                            ...prev,
+                            heroBackgroundUrl: storageUrl,
+                            heroBackgroundType: isVideo ? 'video' : 'image'
+                        }));
+                    }
+                } catch (err) {
+                    console.error("Upload failed:", err);
+                    readFile(file, isVideo); // Fallback to base64
+                }
+                setIsUploading(false);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleResourceFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleResourceThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setIsUploading(true);
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                try {
+                    const storageUrl = await Backend.uploadFile(file.name, base64);
+                    setNewResource(prev => ({ ...prev, thumbnail: storageUrl }));
+                } catch (err) {
+                    setNewResource(prev => ({ ...prev, thumbnail: base64 }));
+                }
+                setIsUploading(false);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleResourceFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 1024 * 1024 * 1024) {
@@ -155,17 +167,19 @@ export const WebsiteSettings: React.FC = () => {
             }
 
             setIsUploading(true);
-            // Optimization for large files - Increase threshold to 20MB
-            if (file.size > 20 * 1024 * 1024) {
-                const objectUrl = URL.createObjectURL(file);
-                setNewResource(prev => ({ ...prev, url: objectUrl }));
-                setIsUploading(false);
-                return;
-            }
-
+            
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewResource(prev => ({ ...prev, url: reader.result as string }));
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                try {
+                    // Always try to upload to backend storage for resources
+                    const storageUrl = await Backend.uploadFile(file.name, base64);
+                    setNewResource(prev => ({ ...prev, url: storageUrl }));
+                } catch (err) {
+                    console.error("Upload failed, falling back to local base64:", err);
+                    // Fallback to local base64 if upload fails (for offline dev)
+                    setNewResource(prev => ({ ...prev, url: base64 }));
+                }
                 setIsUploading(false);
             };
             reader.readAsDataURL(file);
@@ -200,12 +214,20 @@ export const WebsiteSettings: React.FC = () => {
         }
     };
 
-    const handlePartnerLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setIsUploading(true);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewPartner(prev => ({ ...prev, value: reader.result as string }));
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                try {
+                    const storageUrl = await Backend.uploadFile(file.name, base64);
+                    setNewPartner(prev => ({ ...prev, value: storageUrl }));
+                } catch (err) {
+                    setNewPartner(prev => ({ ...prev, value: base64 }));
+                }
+                setIsUploading(false);
             };
             reader.readAsDataURL(file);
         }
@@ -514,12 +536,20 @@ export const WebsiteSettings: React.FC = () => {
                                                 type="file"
                                                 className="hidden"
                                                 accept="image/*"
-                                                onChange={(e) => {
+                                                onChange={async (e) => {
                                                     const file = e.target.files?.[0];
                                                     if (file) {
+                                                        setIsUploading(true);
                                                         const reader = new FileReader();
-                                                        reader.onloadend = () => {
-                                                            setSettingsForm(prev => ({ ...prev, logoUrl: reader.result as string }));
+                                                        reader.onloadend = async () => {
+                                                            const base64 = reader.result as string;
+                                                            try {
+                                                                const storageUrl = await Backend.uploadFile(file.name, base64);
+                                                                setSettingsForm(prev => ({ ...prev, logoUrl: storageUrl }));
+                                                            } catch (err) {
+                                                                setSettingsForm(prev => ({ ...prev, logoUrl: base64 }));
+                                                            }
+                                                            setIsUploading(false);
                                                         };
                                                         reader.readAsDataURL(file);
                                                     }
@@ -914,8 +944,19 @@ export const WebsiteSettings: React.FC = () => {
                     {/* Address Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Street Address</label>
-                            <div className="relative">
+                            <div className="flex justify-between items-center mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 uppercase">Street Address</label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        checked={settingsForm.hideStreetAddress || false}
+                                        onChange={e => setSettingsForm({ ...settingsForm, hideStreetAddress: e.target.checked })}
+                                    />
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Hide Street (Show City/State only)</span>
+                                </label>
+                            </div>
+                            <div className={`relative transition-opacity duration-300 ${settingsForm.hideStreetAddress ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                 <input
                                     type="text"

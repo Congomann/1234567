@@ -18,6 +18,7 @@ import {
     Search,
     Clock
 } from 'lucide-react';
+import { useData } from '../../context/DataContext';
 
 interface LandingPage {
     id: string;
@@ -32,8 +33,8 @@ interface LandingPage {
 }
 
 export const LandingPageBuilder: React.FC = () => {
-    const [pages, setPages] = useState<LandingPage[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { landingPages, saveLandingPage } = useData();
+    const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'editor'>('list');
     const [currentPage, setCurrentPage] = useState<Partial<LandingPage>>({
@@ -44,48 +45,19 @@ export const LandingPageBuilder: React.FC = () => {
         style_config: { primary_color: '#0A62A7', font_family: 'Inter, sans-serif', show_pixel: true }
     });
 
-    const fetchPages = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('nhfg_jwt_token');
-            const res = await fetch('/api/admin/landing-pages', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setPages(data);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchPages();
-    }, []);
+    // Removed local fetch as it's now handled by DataContext bootstrap
 
     const handleSave = async () => {
+        if (!currentPage.slug) return alert('Slug is required');
+        
         setIsSaving(true);
-        try {
-            const token = localStorage.getItem('nhfg_jwt_token');
-            const res = await fetch('/api/admin/landing-pages', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(currentPage)
-            });
-            if (res.ok) {
-                setViewMode('list');
-                fetchPages();
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsSaving(false);
+        const success = await saveLandingPage(currentPage);
+        setIsSaving(false);
+        
+        if (success) {
+            setViewMode('list');
+        } else {
+            alert('Failed to save campaign. Check console for details.');
         }
     };
 
@@ -125,7 +97,7 @@ export const LandingPageBuilder: React.FC = () => {
 
             {viewMode === 'list' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {pages.map(page => (
+                    {landingPages.map((page: any) => (
                         <div key={page.id} className="bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm group hover:shadow-2xl transition-all relative overflow-hidden">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="p-4 bg-blue-50 text-blue-600 rounded-3xl transition-colors group-hover:bg-blue-600 group-hover:text-white">
@@ -162,7 +134,7 @@ export const LandingPageBuilder: React.FC = () => {
                         </div>
                     ))}
 
-                    {pages.length === 0 && (
+                    {landingPages.length === 0 && (
                         <div className="lg:col-span-3 py-32 flex flex-col items-center opacity-30">
                             <Layout size={64} className="mb-4" />
                             <p className="text-xs font-black uppercase tracking-[0.2em]">No campaign pages deployed</p>

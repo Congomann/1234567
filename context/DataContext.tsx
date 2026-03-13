@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, Task, TaskPriority } from '../types';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
@@ -57,7 +57,9 @@ interface DataContextType {
   assignLeads: (leadIds: string[], advisorId: string, priority?: string, notes?: string) => void;
   updateClient: (id: string, data: Partial<Client>) => void;
   updateUser: (id: string, data: Partial<User>) => void;
-  updateCompanySettings: (settings: CompanySettings) => void;
+  updateCompanySettings: (settings: CompanySettings) => Promise<boolean>;
+  landingPages: any[];
+  saveLandingPage: (page: any) => Promise<boolean>;
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
   completeOnboarding: (signatureData?: string) => void;
@@ -158,6 +160,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+  const [landingPages, setLandingPages] = useState<any[]>([]);
+  const bootstrapFinished = useRef(false);
   const [applications, setApplications] = useState<Application[]>([]);
   const [properties, setProperties] = useState<PropertyListing[]>([]);
   const [transactions, setTransactions] = useState<EscrowTransaction[]>([]);
@@ -168,6 +172,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [integrationConfig, setIntegrationConfig] = useState<IntegrationConfig>({ googleAds: { enabled: true, webhookUrl: '', developerToken: '' }, metaAds: { enabled: false, verifyToken: '', accessToken: '' }, tiktokAds: { enabled: false, webhookUrl: '', accessToken: '' }, linkedinAds: { enabled: false, pollingInterval: 300, accessToken: '' } });
   const [integrationLogs, setIntegrationLogs] = useState<IntegrationLog[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [processingLeads, setProcessingLeads] = useState<ProcessingState[]>([]);
 
   const [automationMetrics, setAutomationMetrics] = useState<AutomationMetrics>({
@@ -176,7 +181,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    phone: '(800) 555-0199', email: 'contact@newholland.com', address: '123 Finance Way', city: 'New York', state: 'NY', zip: '10001',
+    phone: '(800) 555-0199', email: 'contact@newholland.com', address: '123 Finance Way', city: 'New York', state: 'NY', zip: '10001', hideStreetAddress: false,
     heroBackgroundType: 'image', heroBackgroundUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070',
     heroTitle: 'Securing Your Future', heroSubtitle: 'Comprehensive financial solutions for every stage of life.',
     footerDescription: 'Providing tailored insurance solutions that secure financial peace of mind for individuals, families, and businesses.',
@@ -196,14 +201,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       { id: 'auto', title: 'Auto Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "https://picsum.photos/600/400?random=6", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
       { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 }
     ],
-    partners: {
-      "Root Insurance": "root.com",
-      "Aflac": "aflac.com",
-      "Transamerica": "transamerica.com",
-      "Combined Insurance": "combinedinsurance.com",
-      "Geico": "geico.com",
-      "Securico Life": "securico.com"
-    },
+    partners: {},
     partnerMarqueeSpeed: 30
   });
 
@@ -290,6 +288,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const bootstrap = async () => {
+      // 1. Try to restore Backend session first
+      const backendUser = await Backend.getCurrentUser();
+      if (backendUser) {
+        setUser(backendUser);
+      }
+
       const [storedLeads, storedUsers, storedClients, storedSettings, storedWorkflows, storedEvents] = await Promise.all([
         Backend.getLeads(), Backend.getUsers(), Backend.getClients(), Backend.getSettings(), Backend.getWorkflows(), Backend.getEvents()
       ]);
@@ -307,10 +311,27 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const storedTestimonials = localStorage.getItem('nhfg_testimonials');
       if (storedTestimonials) setTestimonials(JSON.parse(storedTestimonials));
+
+      const [storedResources, backendTestimonials, backendLandingPages] = await Promise.all([
+        Backend.getResources(), Backend.getTestimonials(), Backend.getLandingPages()
+      ]);
+      if (storedResources && storedResources.length > 0) setResources(storedResources);
+      if (backendTestimonials && backendTestimonials.length > 0) setTestimonials(backendTestimonials);
+      if (backendLandingPages && backendLandingPages.length > 0) setLandingPages(backendLandingPages);
+      
+      console.log("[Bootstrap] Data loaded successfully:", { 
+        users: storedUsers.length, 
+        settings: !!storedSettings, 
+        landingPages: backendLandingPages.length 
+      });
+
+      bootstrapFinished.current = true;
     };
     bootstrap();
   }, []);
 
+  // Removed localStorage sync for tasks/testimonials in favor of backend
+  /* 
   useEffect(() => {
     localStorage.setItem('nhfg_tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -318,6 +339,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     localStorage.setItem('nhfg_testimonials', JSON.stringify(testimonials));
   }, [testimonials]);
+  */
 
 
   const updateLeadStatus = useCallback((id: string, status: LeadStatus, analysis?: string) => { updateLead(id, { status, aiAnalysis: analysis }); }, [updateLead]);
@@ -406,7 +428,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (userDoc.exists()) {
             setUser(userDoc.data() as User);
           } else {
-            // Fallback if user is in Auth but not Firestore
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'User',
@@ -421,22 +442,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.error("Error fetching user profile", e);
         }
       } else {
-        // Only clear user if not using a mock user (handled by login fallback)
-        // Actually, for security, we should probably clear it. 
-        // But to keep demo working, we might need to be careful.
-        // For now, let's assume if firebase says no user, there is no user.
-        // But wait, if I logged in via mock, firebaseUser is null.
-        // So I shouldn't force setUser(null) if I have a mock user logged in?
-        // The mock login sets 'user' state. onAuthStateChanged fires on mount.
-        // If I am logged in via mock, firebaseUser is null.
-        // So this will clear my mock user.
-        // I should only clear if I was previously logged in via Firebase?
-        // Or I should migrate mock users to Firebase?
-        // Let's just set user to null if firebaseUser is null, effectively disabling mock persistence across reloads unless I use local storage for mock.
-        // The original code didn't seem to persist mock user across reloads except maybe via Backend?
-        // Backend used localStorage 'nhfg_jwt_token'.
-        // Let's stick to Firebase as the source of truth.
-        setUser(null);
+        // Only clear if bootstrap is done AND no backend token exists (to persist internal admin/JWT logins)
+        if (bootstrapFinished.current && !localStorage.getItem('nhfg_jwt_token')) {
+          setUser(null);
+        }
       }
     });
     return () => unsubscribe();
@@ -467,7 +476,35 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return updated;
     });
   };
-  const updateCompanySettings = (s: CompanySettings) => { setCompanySettings(s); Backend.saveSettings(s); };
+  const updateCompanySettings = async (s: CompanySettings) => { 
+    setCompanySettings(s); 
+    try {
+      await Backend.saveSettings(s); 
+      return true;
+    } catch (e) {
+      console.error("[DataContext] Failed to save settings:", e);
+      return false;
+    }
+  };
+
+  const saveLandingPage = async (page: any) => {
+    try {
+      await Backend.saveLandingPage(page);
+      setLandingPages(prev => {
+        const index = prev.findIndex(p => p.slug === page.slug);
+        if (index >= 0) {
+          const newPages = [...prev];
+          newPages[index] = page;
+          return newPages;
+        }
+        return [...prev, page];
+      });
+      return true;
+    } catch (e) {
+      console.error("[DataContext] Failed to save landing page:", e);
+      return false;
+    }
+  };
   const markNotificationRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   const clearNotifications = () => setNotifications([]);
   const completeOnboarding = (signatureData?: string) => { if (user) updateUser(user.id, { onboardingCompleted: true }); };
@@ -477,26 +514,40 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const dislikeResource = () => { };
   const shareResource = () => { };
   const addResourceComment = () => { };
-  const addResource = (r: Partial<Resource>) => { };
-  const deleteResource = (id: string) => { };
+  const addResource = (r: Partial<Resource>) => {
+    const newRes = { ...r, id: crypto.randomUUID(), dateAdded: new Date().toISOString(), likes: 0, dislikes: 0, shares: 0, comments: [] } as Resource;
+    setResources(prev => [...prev, newRes]);
+    Backend.saveResource(newRes);
+    pushNotification('Resource Added', `New resource "${newRes.title}" is now available.`, 'success');
+  };
+
+  const deleteResource = (id: string) => {
+    setResources(prev => prev.filter(r => r.id !== id));
+    Backend.deleteResource(id);
+  };
 
   const addTestimonial = (testimonial: Omit<Testimonial, 'id' | 'status' | 'date'>) => {
-    setTestimonials(prev => [...prev, { ...testimonial, id: crypto.randomUUID(), status: 'pending', date: new Date().toISOString() } as Testimonial]);
+    const newT = { ...testimonial, id: crypto.randomUUID(), status: 'pending', date: new Date().toISOString() } as Testimonial;
+    setTestimonials(prev => [...prev, newT]);
+    Backend.saveTestimonial(newT);
   };
   const approveTestimonial = (id: string) => {
     setTestimonials(prev => prev.map(t => t.id === id ? { ...t, status: 'approved' } : t));
+    Backend.approveTestimonial(id, 'approved');
   };
   const deleteTestimonial = (id: string) => {
     setTestimonials(prev => prev.filter(t => t.id !== id));
+    Backend.deleteTestimonial(id);
   };
   const submitTestimonialEdit = (id: string, edits: Partial<Testimonial>) => {
     setTestimonials(prev => prev.map(t => t.id === id ? {
       ...t,
       status: 'pending_edit',
-      editedClientName: edits.clientName,
-      editedRating: edits.rating,
-      editedReviewText: edits.reviewText
+      editedClientName: edits.clientName || t.editedClientName,
+      editedRating: edits.rating || t.editedRating,
+      editedReviewText: edits.reviewText || t.editedReviewText
     } : t));
+    Backend.requestTestimonialEdit(id, edits);
   };
   const approveTestimonialEdit = (id: string) => {
     setTestimonials(prev => prev.map(t => t.id === id ? {
@@ -509,6 +560,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       editedRating: undefined,
       editedReviewText: undefined
     } : t));
+    Backend.approveTestimonial(id, 'approved');
   };
   const rejectTestimonialEdit = (id: string) => {
     setTestimonials(prev => prev.map(t => t.id === id ? {
@@ -518,6 +570,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       editedRating: undefined,
       editedReviewText: undefined
     } : t));
+    Backend.approveTestimonial(id, 'approved'); // Reverts to approved by clearing edits
   };
 
   const addCallback = (r: any) => { };
@@ -719,12 +772,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <DataContext.Provider value={{
       user, allUsers, leads, clients, tasks, metrics: { totalRevenue: 1250000, activeClients: 450, pendingLeads: 12, monthlyPerformance: [], totalCommission: 85000 },
       automationMetrics, workflows, processingLeads,
-      notifications, chatMessages, companySettings, resources: [], commissions: [], events, testimonials,
+      notifications, chatMessages, companySettings, resources, commissions: [], events, testimonials,
       availableCarriers: [], colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
       addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
+      landingPages, saveLandingPage,
       addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,
       assignCarriers, markChatRead, editChatMessage, deleteChatMessage, sendChatMessage, submitJobApplication, updateJobApplicationStatus,
       updateApplicationStatus, updateTransactionStatus, addPortfolio, updatePortfolio, deletePortfolio, addComplianceDoc,
