@@ -62,6 +62,39 @@ export const AdminUsers: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-white/40 backdrop-blur-md rounded-[2rem] p-6 border border-white/50 shadow-sm">
+                    <div className="flex justify-between items-end mb-2">
+                        <div>
+                            <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Sub-Admin Capacity</span>
+                            <span className="text-xl font-black text-[#0B2240]">{allUsers.filter(u => u.role === UserRole.SUB_ADMIN && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 50</span></span>
+                        </div>
+                        <Shield className="h-8 w-8 text-blue-100" />
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-blue-500 rounded-full transition-all duration-1000" 
+                            style={{ width: `${(allUsers.filter(u => u.role === UserRole.SUB_ADMIN && !u.deletedAt).length / 50) * 100}%` }}
+                        />
+                    </div>
+                </div>
+                <div className="bg-white/40 backdrop-blur-md rounded-[2rem] p-6 border border-white/50 shadow-sm">
+                    <div className="flex justify-between items-end mb-2">
+                        <div>
+                            <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Advisors Provisioned</span>
+                            <span className="text-xl font-black text-[#0B2240]">{allUsers.filter(u => u.role === UserRole.ADVISOR && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 150</span></span>
+                        </div>
+                        <Briefcase className="h-8 w-8 text-purple-100" />
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-purple-500 rounded-full transition-all duration-1000" 
+                            style={{ width: `${(allUsers.filter(u => u.role === UserRole.ADVISOR && !u.deletedAt).length / 150) * 100}%` }}
+                        />
+                    </div>
+                </div>
+            </div>
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4">
                 <div>
                     <h1 className="text-sm font-black text-slate-800 tracking-tight">{showArchived ? 'Archived Terminal' : 'Active Terminal'}</h1>

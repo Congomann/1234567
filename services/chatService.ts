@@ -8,6 +8,7 @@ export interface ChatChannel {
     case_id?: string;
     product_type?: string;
     members?: string[];
+    member_count?: number;
     last_message?: string;
 }
 

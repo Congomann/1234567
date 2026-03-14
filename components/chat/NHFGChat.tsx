@@ -5,7 +5,7 @@ import { UserRole } from '../../types';
 import { chatService, ChatChannel, ChatMessage } from '../../services/chatService';
 import { Backend } from '../../services/apiBackend';
 import { ChatInput } from './ChatInput';
-import { Search, Hash, Users, MessageSquare, Pin, File as FileIcon, Clock, Filter, ChevronLeft, Bell, Info, ShieldCheck, Activity, Trash2, ShieldAlert } from 'lucide-react';
+import { Search, Hash, Users, MessageSquare, Pin, File as FileIcon, Clock, Filter, ChevronLeft, Bell, Info, ShieldCheck, Activity, Trash2, ShieldAlert, Plus } from 'lucide-react';
 
 export const NHFGChat: React.FC = () => {
     const { user, allUsers } = useData();
@@ -95,8 +95,8 @@ export const NHFGChat: React.FC = () => {
     };
 
     const handleCreateChannel = async () => {
-        if (!['Administrator', 'Manager'].includes(user?.role || '')) {
-            alert("Only Admins or Managers can create group channels.");
+        if (!['Administrator', 'Manager', 'Sub-Admin'].includes(user?.role || '')) {
+            alert("Insufficient permissions to create group channels.");
             return;
         }
         const name = prompt("Enter Channel Name (e.g., IUL Advisors):");
@@ -115,7 +115,23 @@ export const NHFGChat: React.FC = () => {
         }
     };
 
-    const isAdmin = ['Administrator', 'Manager'].includes(user?.role || '');
+    const handleInviteMember = async () => {
+        if (!activeChannelId) return;
+        const input = prompt("Enter Member Email or User ID to invite:");
+        if (!input) return;
+
+        try {
+            const payload = input.includes('@') ? { email: input } : { userId: input };
+            await Backend.post(`/chat/channels/${activeChannelId}/invite`, payload);
+            alert(`Invitation sent to ${input}`);
+            loadChannels(); // Refresh member lists
+        } catch (err) {
+            console.error('Invite failed', err);
+            alert("Failed to send invite. Limit of 50 members may have been reached.");
+        }
+    };
+
+    const isAdmin = ['Administrator', 'Manager', 'Sub-Admin'].includes(user?.role || '');
 
     return (
         <div className="h-full flex bg-slate-50/50 rounded-[3rem] overflow-hidden border border-slate-200 shadow-xl relative backdrop-blur-3xl">
@@ -202,12 +218,22 @@ export const NHFGChat: React.FC = () => {
                                     <h3 className="text-xl font-black text-[#0B2240] tracking-tighter leading-tight">{activeChannel.name}</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Discussion • {messages.length} Events Logged</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            {activeChannel.member_count || 1} {activeChannel.member_count === 1 ? 'Member' : 'Members'} • {messages.length} Events Logged
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4">
+                                {activeChannel.type !== 'direct' && (
+                                    <button 
+                                        onClick={handleInviteMember}
+                                        className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                                    >
+                                        <Plus size={14} /> Invite External
+                                    </button>
+                                )}
                                 <button className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:text-blue-600 transition-colors"><Pin size={18} /></button>
                                 <button className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:text-blue-600 transition-colors"><Search size={18} /></button>
                                 <button className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:text-blue-600 transition-colors"><Info size={18} /></button>

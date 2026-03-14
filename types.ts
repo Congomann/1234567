@@ -47,7 +47,8 @@ export enum UserRole {
   MANAGER = 'Manager',
   SUB_ADMIN = 'Sub-Admin',
   ADVISOR = 'Advisor',
-  CLIENT = 'Client'
+  CLIENT = 'Client',
+  EXTERNAL = 'External'
 }
 
 export enum AdvisorCategory {

@@ -612,6 +612,23 @@ app.post('/api/users', authenticateToken, async (req, res) => {
     return res.status(403).json({ error: 'Forbidden: Admin access only' });
   }
 
+  const { role, id } = req.body;
+
+  // Enforce capacity limits for new users (not updates)
+  if (!id) {
+    if (role === 'Sub-Admin') {
+      const countRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Sub-Admin'");
+      if (parseInt(countRes.rows[0].count) >= 50) {
+        return res.status(400).json({ error: 'Capacity Reached: Maximum 50 Sub-Admin accounts allowed.' });
+      }
+    } else if (role === 'Advisor') {
+      const countRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Advisor'");
+      if (parseInt(countRes.rows[0].count) >= 150) {
+        return res.status(400).json({ error: 'Capacity Reached: Maximum 150 Advisor accounts allowed.' });
+      }
+    }
+  }
+
   const client = await pool.connect();
   try {
     const { id, email, name, role, category, title, phone, avatar, bio, micrositeEnabled, productsSold, licenseStates, onboardingCompleted, password } = req.body;
@@ -3111,35 +3128,46 @@ const isRestrictedMessage = (senderRole, receiverRole, content) => {
  */
 app.get('/api/chat/channels', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT c.*, 
-       (SELECT json_agg(u.name) FROM chat_channel_members cm 
-        JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
-       (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message
-       FROM chat_channels c
-       JOIN chat_channel_members cm ON c.id = cm.channel_id
-       WHERE cm.user_id = $1`,
-      [req.user.id]
-    );
+    let result;
+    if (['Administrator', 'Manager'].includes(req.user.role)) {
+      // Oversight Role: All channels
+      result = await pool.query(
+        `SELECT c.*, 
+         (SELECT json_agg(u.name) FROM chat_channel_members cm 
+          JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
+         (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message,
+         (SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = c.id) as member_count
+         FROM chat_channels c
+         ORDER BY (SELECT MAX(created_at) FROM chat_messages WHERE channel_id = c.id) DESC NULLS LAST`
+      );
+    } else {
+      // Standard Role: Only joined channels
+      result = await pool.query(
+        `SELECT c.*, 
+         (SELECT json_agg(u.name) FROM chat_channel_members cm 
+          JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
+         (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message,
+         (SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = c.id) as member_count
+         FROM chat_channels c
+         JOIN chat_channel_members cm ON c.id = cm.channel_id
+         WHERE cm.user_id = $1
+         ORDER BY (SELECT MAX(created_at) FROM chat_messages WHERE channel_id = c.id) DESC NULLS LAST`,
+        [req.user.id]
+      );
+    }
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-/**
- * @swagger
- * /api/chat/channels:
- *   post:
- *     summary: Create a new chat channel (Admin/Manager only)
- */
 app.post('/api/chat/channels', authenticateToken, async (req, res) => {
   try {
     const { name, type, product_type } = req.body;
 
-    // Authorization check
-    if (!['Administrator', 'Manager'].includes(req.user.role)) {
-      return res.status(403).json({ error: 'Only Admins and Managers can create group channels.' });
+    // Authorization check: Administrator, Manager, and now Sub-Admin allowed
+    if (!['Administrator', 'Manager', 'Sub-Admin'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Insufficient permissions to create channels.' });
     }
 
     const channelRes = await pool.query(
@@ -3165,8 +3193,60 @@ app.post('/api/chat/channels', authenticateToken, async (req, res) => {
         [channel.id]
       );
     }
-
     res.json(channel);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/chat/channels/{id}/invite:
+ *   post:
+ *     summary: Invite a user to a channel (Up to 50 members)
+ */
+app.post('/api/chat/channels/:id/invite', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { userId, email, name } = req.body;
+
+  try {
+    // 1. Check current member count
+    const countRes = await pool.query('SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = $1', [id]);
+    if (parseInt(countRes.rows[0].count) >= 50) {
+      return res.status(400).json({ error: 'Channel is full. Maximum 50 members allowed.' });
+    }
+
+    let targetUserId = userId;
+
+    // 2. Handle external email invitation
+    if (!targetUserId && email) {
+      const userRes = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+      if (userRes.rows.length > 0) {
+        targetUserId = userRes.rows[0].id;
+      } else {
+        // Create a basic External user account
+        const newId = crypto.randomUUID();
+        const externalUser = await pool.query(
+          `INSERT INTO users (id, email, name, role, category)
+           VALUES ($1, $2, $3, 'External', 'Admin') RETURNING id`,
+          [newId, email, name || email.split('@')[0]]
+        );
+        targetUserId = externalUser.rows[0].id;
+        console.log(`[Chat] Created external user for invite: ${email}`);
+      }
+    }
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'User info required for invitation.' });
+    }
+
+    // 3. Add to channel
+    await pool.query(
+      'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [id, targetUserId]
+    );
+
+    res.json({ success: true, userId: targetUserId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
