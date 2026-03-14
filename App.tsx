@@ -11,6 +11,8 @@ import { RealEstate } from './pages/website/RealEstate';
 import { Mortgage } from './pages/website/Mortgage';
 import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
+import { GroupBenefits } from './pages/website/GroupBenefits';
+import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
 import { Securities } from './pages/website/Securities';
 import { Advisors } from './pages/website/Advisors';
 import { About } from './pages/website/About';
@@ -149,7 +151,9 @@ const App: React.FC = () => {
             <Route path="/real-estate" element={<PublicLayout><RealEstate /></PublicLayout>} />
             <Route path="/mortgage" element={<PublicLayout><Mortgage /></PublicLayout>} />
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
+            <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
+            <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
             <Route path="/advisor/:slug" element={<PublicLayout><AdvisorMicrosite /></PublicLayout>} />
