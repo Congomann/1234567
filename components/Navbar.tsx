@@ -73,6 +73,7 @@ export const Navbar: React.FC = () => {
     { label: 'Mortgage', path: '/mortgage', type: ProductType.MORTGAGE },
     { label: 'Business Insurance', path: '/business-insurance', type: ProductType.BUSINESS },
     { label: 'Auto Insurance', path: '/auto-insurance', type: ProductType.AUTO },
+    { label: 'Group Benefits', path: '/group-benefits', type: ProductType.BUSINESS },
     { label: 'Securities', path: '/securities', type: ProductType.SECURITIES },
     { label: 'Real Estate', path: '/real-estate', type: ProductType.REAL_ESTATE },
   ].filter(link => !hiddenProducts.includes(link.type));
@@ -91,6 +92,7 @@ export const Navbar: React.FC = () => {
     { label: 'Products', path: '/products' },
     { label: 'Real Estate', path: '/real-estate' },
     { label: 'Advisors', path: '/advisors' },
+    { label: 'Investments', path: '/investments' },
     { label: 'Resources', path: '/resources' },
     { label: 'About Us', path: '/about' },
   ];
