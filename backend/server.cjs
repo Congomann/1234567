@@ -3562,21 +3562,25 @@ app.post('/api/admin/landing-pages', authenticateToken, async (req, res) => {
     
     if (!slug) return res.status(400).json({ error: 'Slug is required' });
 
-    const result = await pool.query(`
-            INSERT INTO landing_pages (slug, title, content, style_config, is_published, created_by)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            ON CONFLICT (slug) DO UPDATE SET
-                title = EXCLUDED.title,
-                content = EXCLUDED.content,
-                style_config = EXCLUDED.style_config,
-                is_published = EXCLUDED.is_published,
-                updated_at = NOW()
-            RETURNING *
-        `, [slug, title, JSON.stringify(content), JSON.stringify(style_config), is_published || false, req.user.id]);
+    const { data, error } = await (await req.supabaseQuery('landing_pages'))
+      .upsert({
+        slug,
+        title,
+        content: content || {},
+        style_config: style_config || {},
+        is_published: is_published || false,
+        created_by: req.user.id,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'slug' })
+      .select()
+      .single();
+
+    if (error) throw error;
     
     console.log(`[LandingPage] Saved successfully: ${slug}`);
-    res.json(result.rows[0]);
+    res.json(data);
   } catch (err) {
+    console.error('Landing Page Save Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -3584,9 +3588,19 @@ app.post('/api/admin/landing-pages', authenticateToken, async (req, res) => {
 // Public Landing Page Loader
 app.get('/api/public/landing-pages/:slug', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM landing_pages WHERE slug = $1 AND is_published = TRUE', [req.params.slug]);
-    if (!result.rows.length) return res.status(404).json({ error: 'Page not found' });
-    res.json(result.rows[0]);
+    const { data, error } = await supabase
+      .from('landing_pages')
+      .select('*')
+      .eq('slug', req.params.slug)
+      .eq('is_published', true)
+      .single();
+      
+    if (error || !data) return res.status(404).json({ error: 'Page not found' });
+
+    // Assuming we want to increment view count
+    await supabase.rpc('increment_landing_page_views', { page_id: data.id }).catch(() => {});
+
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

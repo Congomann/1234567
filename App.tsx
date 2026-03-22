@@ -16,6 +16,7 @@ import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
 import { Securities } from './pages/website/Securities';
 import { Advisors } from './pages/website/Advisors';
 import { About } from './pages/website/About';
+import { CampaignLandingPage } from './pages/website/CampaignLandingPage';
 import { Resources } from './pages/website/Resources';
 import { Contact } from './pages/website/Contact';
 import { Login } from './pages/Login';
@@ -158,6 +159,7 @@ const App: React.FC = () => {
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
             <Route path="/advisor/:slug" element={<PublicLayout><AdvisorMicrosite /></PublicLayout>} />
+            <Route path="/campaign/:slug" element={<PublicLayout><CampaignLandingPage /></PublicLayout>} />
             <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
