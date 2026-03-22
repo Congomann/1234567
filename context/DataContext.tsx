@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
-import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, Task, TaskPriority } from '../types';
+import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, Task, TaskPriority, AccessLog, UserDocument, Interaction, UserPreference } from '../types';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -46,13 +46,17 @@ interface DataContextType {
   integrationConfig: IntegrationConfig;
   workflows: Workflow[];
   processingLeads: ProcessingState[];
+  accessLogs: AccessLog[];
+  documents: UserDocument[];
+  interactions: Interaction[];
+  userPreferences: UserPreference | null;
 
   signup: (email: string, password: string, name: string, role?: UserRole) => Promise<boolean>;
   login: (email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
   logout: () => void;
   addLead: (lead: Partial<Lead>, assignTo?: string) => void;
-  updateLeadStatus: (id: string, status: LeadStatus, analysis?: string) => void;
+  updateLeadStatus: (id: string, status: LeadStatus | string, analysis?: string) => void;
   updateLead: (id: string, data: Partial<Lead>) => void;
   assignLeads: (leadIds: string[], advisorId: string, priority?: string, notes?: string) => void;
   updateClient: (id: string, data: Partial<Client>) => void;
@@ -120,6 +124,12 @@ interface DataContextType {
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   reorderTasks: (sourceIndex: number, targetIndex: number) => void;
+
+  // New platform methods
+  logInteraction: (data: Partial<Interaction>) => Promise<void>;
+  fetchInteractions: (leadId?: string, clientId?: string) => Promise<void>;
+  saveDoc: (doc: Partial<UserDocument>) => Promise<void>;
+  updatePreferences: (prefs: Partial<UserPreference>) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -174,6 +184,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [processingLeads, setProcessingLeads] = useState<ProcessingState[]>([]);
+  const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
+  const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [userPreferences, setUserPreferences] = useState<UserPreference | null>(null);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const logout = useCallback(async () => {
+    try {
+        await signOut(auth);
+        await Backend.logout();
+    } catch (e) {}
+    setUser(null);
+    window.location.href = '/login';
+  }, []);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    
+    idleTimerRef.current = setTimeout(() => {
+      console.log("[Auth] Inactivity timeout reached. Logging out.");
+      logout();
+    }, 10 * 60 * 1000); 
+  }, [logout]);
+
+  useEffect(() => {
+    if (!user) return;
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    const handleActivity = () => resetInactivityTimer();
+    events.forEach(ev => window.addEventListener(ev, handleActivity));
+    resetInactivityTimer();
+    return () => {
+      events.forEach(ev => window.removeEventListener(ev, handleActivity));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [user, resetInactivityTimer]);
 
   const [automationMetrics, setAutomationMetrics] = useState<AutomationMetrics>({
     executions: 2087,
@@ -202,7 +247,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 }
     ],
     partners: {},
-    partnerMarqueeSpeed: 30
+    partnerMarqueeSpeed: 30,
+    leadStatuses: ['New', 'Contacted', 'Unavailable', 'Proposal', 'Approved', 'Closed', 'Lost', 'Assigned']
   });
 
   const pushNotification = useCallback((title: string, message: string, type: 'info' | 'success' | 'warning' | 'alert' = 'info', resourceType?: any, relatedId?: string) => {
@@ -211,7 +257,29 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
 
+  const calculateLeadScore = (lead: Partial<Lead>): number => {
+    let score = 30; // Base score
+    
+    // Source Weighting
+    if (lead.source?.includes('Google')) score += 25;
+    if (lead.source?.includes('Referral')) score += 40;
+    if (lead.source?.includes('LinkedIn')) score += 20;
+
+    // Interest Weighting
+    if (lead.interest === ProductType.REAL_ESTATE) score += 15;
+    if (lead.interest === ProductType.IUL) score += 10;
+    if (lead.interest === ProductType.INVESTMENT) score += 20;
+
+    // Data Completeness
+    if (lead.phone && lead.phone !== 'N/A') score += 10;
+    if (lead.email && !lead.email.includes('gmail') && !lead.email.includes('outlook')) score += 10;
+    if (lead.message && lead.message.length > 50) score += 5;
+
+    return Math.min(score, 100);
+  };
+
   const addLead = useCallback(async (leadData: Partial<Lead>, assignTo?: string) => {
+    const score = calculateLeadScore(leadData);
     const newLead: Lead = {
       id: crypto.randomUUID(),
       name: leadData.name || 'Website Inquiry',
@@ -221,18 +289,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       message: leadData.message || '',
       date: new Date().toISOString(),
       status: assignTo ? LeadStatus.ASSIGNED : LeadStatus.NEW,
-      score: 85,
-      qualification: 'Hot',
+      score,
+      qualification: score > 80 ? 'Hot' : score > 50 ? 'Warm' : 'Cold',
       source: leadData.source || 'Website',
       assignedTo: assignTo,
       notes: leadData.notes || '',
       isArchived: false,
-      priority: 'Low',
+      priority: score > 75 ? 'High' : 'Medium',
       ...leadData,
     };
     await Backend.saveLead(newLead);
     setLeads(prev => [newLead, ...prev]);
-    pushNotification('New Lead Received', `Inquiry from ${newLead.name}.`, 'success', 'lead', newLead.id);
+    pushNotification('New Lead Received', `Inquiry from ${newLead.name}. Score: ${score}`, 'success', 'lead', newLead.id);
   }, [pushNotification]);
 
   const updateLead = useCallback(async (id: string, data: Partial<Lead>) => {
@@ -319,6 +387,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (backendTestimonials && backendTestimonials.length > 0) setTestimonials(backendTestimonials);
       if (backendLandingPages && backendLandingPages.length > 0) setLandingPages(backendLandingPages);
       
+      // Load new platform modules
+      if (user) {
+        Backend.getInteractions().then(setInteractions);
+        Backend.getDocuments().then(setDocuments);
+        Backend.getPreferences().then(setUserPreferences);
+        if (user.role === UserRole.ADMIN) {
+          Backend.getAccessLogs().then(setAccessLogs);
+        }
+      }
+
       console.log("[Bootstrap] Data loaded successfully:", { 
         users: storedUsers.length, 
         settings: !!storedSettings, 
@@ -330,19 +408,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     bootstrap();
   }, []);
 
-  // Removed localStorage sync for tasks/testimonials in favor of backend
-  /* 
+
+  // --- Inactivity Tracking ---
   useEffect(() => {
-    localStorage.setItem('nhfg_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    if (!user) return;
 
-  useEffect(() => {
-    localStorage.setItem('nhfg_testimonials', JSON.stringify(testimonials));
-  }, [testimonials]);
-  */
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    const handleActivity = () => resetInactivityTimer();
+
+    events.forEach(event => window.addEventListener(event, handleActivity));
+    resetInactivityTimer();
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, handleActivity));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [user, resetInactivityTimer]);
 
 
-  const updateLeadStatus = useCallback((id: string, status: LeadStatus, analysis?: string) => { updateLead(id, { status, aiAnalysis: analysis }); }, [updateLead]);
+  const updateLeadStatus = useCallback((id: string, status: LeadStatus | string, analysis?: string) => { 
+    updateLead(id, { status, aiAnalysis: analysis }); 
+    
+    // Automation: Create follow-up task when contacted
+    if (status.toString().toLowerCase() === 'contacted') {
+      const lead = leads.find(l => l.id === id);
+      if (lead) {
+        addTask({
+          title: `Follow-up with ${lead.name} regarding ${lead.interest}`,
+          priority: TaskPriority.HIGH,
+          completed: false,
+          advisorId: lead.assignedTo || 'admin-main',
+          dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+      }
+    }
+  }, [updateLead, leads]);
 
   const login = async (email: string, password?: string) => {
     const cleanEmail = email.trim().toLowerCase();
@@ -414,38 +514,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = async () => {
-    await signOut(auth);
-    Backend.logout();
-    setUser(null);
-  };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            setUser(userDoc.data() as User);
-          } else {
-            const newUser: User = {
-              id: firebaseUser.uid,
-              name: firebaseUser.displayName || 'User',
-              email: firebaseUser.email || '',
-              role: UserRole.CLIENT,
-              category: AdvisorCategory.ADMIN,
-              onboardingCompleted: false
-            };
-            setUser(newUser);
-          }
-        } catch (e) {
-          console.error("Error fetching user profile", e);
-        }
-      } else {
-        // Only clear if bootstrap is done AND no backend token exists (to persist internal admin/JWT logins)
-        if (bootstrapFinished.current && !localStorage.getItem('nhfg_jwt_token')) {
-          setUser(null);
-        }
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) setUser(userDoc.data() as User);
+      } else if (localStorage.getItem('nhfg_access_token')) {
+        const internalUser = await Backend.getCurrentUser();
+        if (internalUser) setUser(internalUser);
       }
     });
     return () => unsubscribe();
@@ -736,6 +812,30 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     Backend.saveWorkflow(newWorkflow);
     pushNotification('Workflow Deployed', `New logic engine node "${newWorkflow.name}" is now operational.`, 'success');
   };
+
+  const logInteraction = async (data: Partial<Interaction>) => {
+    await Backend.saveInteraction(data);
+    Backend.getInteractions(data.leadId, data.clientId).then(setInteractions);
+  };
+
+  const fetchInteractions = async (leadId?: string, clientId?: string) => {
+    const data = await Backend.getInteractions(leadId, clientId);
+    setInteractions(data);
+  };
+
+  const saveDoc = async (doc: Partial<UserDocument>) => {
+    const newDoc = { ...doc, id: doc.id || crypto.randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as UserDocument;
+    await Backend.saveDocument(newDoc);
+    Backend.getDocuments(doc.clientId).then(setDocuments);
+    pushNotification('Document Secured', `File "${newDoc.title}" uploaded successfully.`, 'success');
+  };
+
+  const updatePreferences = async (prefs: Partial<UserPreference>) => {
+    const updated = { ...userPreferences, ...prefs } as UserPreference;
+    setUserPreferences(updated);
+    await Backend.savePreferences(updated);
+  };
+
   const toggleWorkflow = (id: string) => {
     setWorkflows(prev => prev.map(wf => {
       if (wf.id === id) {
@@ -774,6 +874,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       automationMetrics, workflows, processingLeads,
       notifications, chatMessages, companySettings, resources, commissions: [], events, testimonials,
       availableCarriers: [], colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
+      accessLogs, documents, interactions, userPreferences,
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
@@ -784,7 +885,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateApplicationStatus, updateTransactionStatus, addPortfolio, updatePortfolio, deletePortfolio, addComplianceDoc,
       updateFeeStatus, addAdvisoryFee, updateAdvisoryFee, deleteAdvisoryFee, addLoanApplication, updateLoanApplication, deleteLoanApplication,
       addProperty, updateProperty, deleteProperty, addWorkflow, toggleWorkflow, triggerPulse, properties, transactions,
-      addTask, toggleTask, deleteTask, reorderTasks
+      addTask, toggleTask, deleteTask, reorderTasks,
+      logInteraction, fetchInteractions, saveDoc, updatePreferences
     }}>
       {children}
     </DataContext.Provider>

@@ -5,7 +5,8 @@ import { Search, Archive, Mail, Phone, FileText, Inbox as InboxIcon, Clock, Phon
 import { LeadStatus, UserRole } from '../../types';
 
 export const Inbox: React.FC = () => {
-  const { leads, updateLeadStatus, user } = useData();
+  const { leads, updateLeadStatus, user, companySettings } = useData();
+  const leadStatuses = companySettings.leadStatuses || Object.values(LeadStatus);
   
   // --- Inquiries State ---
   const [filterType, setFilterType] = useState<'new' | 'active' | 'closed'>('new');
@@ -21,9 +22,10 @@ export const Inbox: React.FC = () => {
   });
 
   const filteredLeads = myLeads.filter(lead => {
-      if (filterType === 'new') return lead.status === LeadStatus.NEW || lead.status === LeadStatus.ASSIGNED;
-      if (filterType === 'active') return lead.status === LeadStatus.CONTACTED || lead.status === LeadStatus.PROPOSAL;
-      if (filterType === 'closed') return lead.status === LeadStatus.CLOSED || lead.status === LeadStatus.LOST;
+      const status = lead.status.toString();
+      if (filterType === 'new') return status === LeadStatus.NEW || status === LeadStatus.ASSIGNED || status === leadStatuses[0];
+      if (filterType === 'active') return status === LeadStatus.CONTACTED || status === LeadStatus.PROPOSAL || (status !== LeadStatus.NEW && status !== LeadStatus.CLOSED && status !== LeadStatus.LOST);
+      if (filterType === 'closed') return status === LeadStatus.CLOSED || status === LeadStatus.LOST;
       return false;
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -77,9 +79,9 @@ export const Inbox: React.FC = () => {
                         <InboxIcon className="h-5 w-5 mr-3" />
                         New Requests
                     </span>
-                    {myLeads.filter(l => l.status === 'New' || l.status === 'Assigned').length > 0 && (
+                    {myLeads.filter(l => l.status === LeadStatus.NEW || l.status === LeadStatus.ASSIGNED || l.status === leadStatuses[0]).length > 0 && (
                         <span className="text-[10px] font-black bg-blue-600 text-white px-2 py-1 rounded-full shadow-sm">
-                            {myLeads.filter(l => l.status === 'New' || l.status === 'Assigned').length}
+                            {myLeads.filter(l => l.status === LeadStatus.NEW || l.status === LeadStatus.ASSIGNED || l.status === leadStatuses[0]).length}
                         </span>
                     )}
                 </button>
@@ -92,9 +94,9 @@ export const Inbox: React.FC = () => {
                         <Clock className="h-5 w-5 mr-3" />
                         In Progress
                     </span>
-                    {myLeads.filter(l => l.status === 'Contacted' || l.status === 'Proposal').length > 0 && (
+                    {myLeads.filter(l => l.status === LeadStatus.CONTACTED || l.status === LeadStatus.PROPOSAL).length > 0 && (
                         <span className="text-[10px] font-black bg-orange-500 text-white px-2 py-1 rounded-full shadow-sm">
-                            {myLeads.filter(l => l.status === 'Contacted' || l.status === 'Proposal').length}
+                            {myLeads.filter(l => l.status === LeadStatus.CONTACTED || l.status === LeadStatus.PROPOSAL).length}
                         </span>
                     )}
                 </button>
@@ -168,7 +170,7 @@ export const Inbox: React.FC = () => {
                                     value={selectedLead.status}
                                     onChange={(e) => updateLeadStatus(selectedLead.id, e.target.value as LeadStatus)}
                                 >
-                                    {Object.values(LeadStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                                    {leadStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
                                 <ChevronDown className="h-3 w-3 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
                             </div>

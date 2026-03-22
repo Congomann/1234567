@@ -13,6 +13,8 @@ const https = require('https');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const storageService = require('./storageService.cjs');
+const encryptionService = require('./encryptionService.cjs');
+const notificationService = require('./notificationService.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -132,31 +134,126 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
 
 const pool = new Pool(poolConfig);
 
+// --- HELPERS ---
+
+const logAccess = async (userId, action, req, metadata = {}) => {
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ua = req.headers['user-agent'];
+    await supabase.from('access_logs').insert({
+      user_id: userId,
+      action,
+      ip_address: ip,
+      user_agent: ua,
+      metadata
+    });
+  } catch (err) {
+    console.error('[logAccess Error]', err);
+  }
+};
+
+// --- Helper: Plaid Usage Logging ---
+const logPlaidUsage = async (advisorId, action, status, metadata = {}) => {
+  try {
+    await supabase.from('plaid_usage_logs').insert({
+      advisor_id: advisorId,
+      action,
+      status,
+      metadata
+    });
+  } catch (err) {
+    console.error('[logPlaidUsage Error]', err);
+  }
+};
+
+const checkAdvisorBilling = async (req, res, next) => {
+  // Admins can always use Plaid (company billed)
+  if (req.user.role === 'Administrator') return next();
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM advisor_billing WHERE user_id = $1 AND billing_status = 'active'",
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(402).json({
+        error: 'Billing Required',
+        message: 'A valid billing method is required to use bank verification services. Please attach a card in your profile settings.'
+      });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Billing check failed' });
+  }
+};
+
+const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Access Denied: Insufficient Permissions' });
+    }
+    next();
+  };
+};
+
+// --- JWT Helpers ---
+const generateAccessToken = (user) => {
+  return jwt.sign(
+    { sub: user.email, id: user.id, role: user.role },
+    SECRET_KEY,
+    { expiresIn: '10m' } // Short-lived access token
+  );
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    { sub: user.email, id: user.id, role: user.role },
+    SECRET_KEY,
+    { expiresIn: '7d' } // Long-lived refresh token
+  );
+};
+
 // --- JWT Middleware ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) {
-    if (process.env.NODE_ENV === 'development') {
-      // Use the actual seed Admin UUID to avoid foreign key errors on localhost
-      req.user = { id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2', role: 'Administrator' };
-      return next();
-    }
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication token missing' });
   }
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) {
-      if (process.env.NODE_ENV === 'development') {
-        req.user = { id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2', role: 'Administrator' };
-        return next();
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
+    req.user = decoded;
+
+    // Helper to query Supabase directly via SDK (Handles RLS transparently)
+    req.supabaseQuery = async (table) => {
+      return supabase.from(table);
+    };
+
+    // Standard Postgres Query Helper (with RLS context)
+    req.dbQuery = async (text, params) => {
+      const client = await pool.connect();
+      try {
+        await client.query(
+          "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
+          [req.user.id, req.user.role]
+        );
+        return await client.query(text, params);
+      } finally {
+        client.release();
       }
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-    req.user = user;
+    };
+
     next();
-  });
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+    }
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
 };
 
 // --- HELPER: WEBHOOK NORMALIZERS ---
@@ -247,6 +344,10 @@ app.post('/api/upload', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Filename and fileData are required' });
     }
     const publicUrl = await storageService.saveFile(filename, fileData);
+    
+    // AUDIT LOG: File Upload
+    await logAccess(req.user.id, `File Upload: ${filename}`, req);
+    
     res.json({ url: publicUrl });
   } catch (error) {
     console.error('[API] Upload error:', error);
@@ -258,7 +359,30 @@ app.get('/api/storage/:filename', async (req, res) => {
   try {
     const filePath = await storageService.getFile(req.params.filename);
     if (filePath && fs.existsSync(filePath)) {
-      res.sendFile(filePath);
+      // READ ENCRYPTED FILE
+      const encryptedData = fs.readFileSync(filePath, 'utf8');
+      
+      try {
+        // TRY TO DECRYPT (FOR NEW ENCRYPTED FILES)
+        const decryptedBuffer = encryptionService.decrypt(encryptedData);
+        
+        // Determine content type based on extension
+        const ext = path.extname(req.params.filename).toLowerCase();
+        const mimeTypes = {
+          '.pdf': 'application/pdf',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.mp4': 'video/mp4',
+          '.txt': 'text/plain'
+        };
+        res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+        res.end(decryptedBuffer);
+      } catch (e) {
+        // FALLBACK FOR LEGACY UNENCRYPTED FILES
+        console.log(`[Storage] Legacy file detected or decryption failed: ${req.params.filename}`);
+        res.sendFile(filePath);
+      }
     } else {
       res.status(404).json({ error: 'File not found' });
     }
@@ -299,27 +423,35 @@ app.get('/api/storage/:filename', async (req, res) => {
  *                   items:
  *                     type: object
  *                     properties:
- *                       month:
- *                         type: string
- *                         description: The month of the performance data (e.g., 'Jan').
- *                       revenue:
- *                         type: number
- *                         description: Total revenue generated in this month.
- *                       leads:
- *                         type: integer
- *                         description: Number of leads acquired in this month.
  */
 // 1. Dashboard Metrics
 app.get('/api/dashboard/metrics', authenticateToken, async (req, res) => {
   try {
-    const revenueQuery = await pool.query('SELECT SUM(premium) as total FROM clients');
-    const clientsQuery = await pool.query('SELECT COUNT(*) as count FROM clients');
-    const leadsQuery = await pool.query("SELECT COUNT(*) as count FROM leads WHERE status = 'New'");
+    const isAdvisor = req.user.role === 'Advisor';
+    
+    // 1. Total Revenue (Sum of premiums)
+    let revenueQuery = (await req.supabaseQuery('clients')).select('premium');
+    if (isAdvisor) revenueQuery = revenueQuery.eq('advisor_id', req.user.id);
+    const { data: revenueData } = await revenueQuery;
+    const totalRevenue = revenueData?.reduce((sum, row) => sum + (parseFloat(row.premium) || 0), 0) || 0;
+
+    // 2. Active Clients Count
+    let clientsQuery = (await req.supabaseQuery('clients')).select('*', { count: 'exact', head: true });
+    if (isAdvisor) clientsQuery = clientsQuery.eq('advisor_id', req.user.id);
+    const { count: activeClients } = await clientsQuery;
+
+    // 3. Pending Leads Count
+    let leadsQuery = (await req.supabaseQuery('leads'))
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'New')
+      .eq('is_archived', false);
+    if (isAdvisor) leadsQuery = leadsQuery.eq('assigned_to', req.user.id);
+    const { count: pendingLeads } = await leadsQuery;
 
     res.json({
-      totalRevenue: parseFloat(revenueQuery.rows[0].total || 0),
-      activeClients: parseInt(clientsQuery.rows[0].count),
-      pendingLeads: parseInt(leadsQuery.rows[0].count),
+      totalRevenue,
+      activeClients: activeClients || 0,
+      pendingLeads: pendingLeads || 0,
       monthlyPerformance: [
         { month: 'Jan', revenue: 45000, leads: 24 },
         { month: 'Feb', revenue: 52000, leads: 30 },
@@ -335,20 +467,21 @@ app.get('/api/dashboard/metrics', authenticateToken, async (req, res) => {
 // 2. Leads Management
 app.get('/api/leads', authenticateToken, async (req, res) => {
   try {
-    const { advisorId } = req.query;
-    let query = 'SELECT * FROM leads WHERE is_archived = false';
-    const params = [];
+    let query = (await req.supabaseQuery('leads'))
+      .select('*')
+      .eq('is_archived', false)
+      .order('created_at', { ascending: false });
 
-    if (advisorId) {
-      query += ' AND (assigned_to = $1 OR assigned_to IS NULL)';
-      params.push(advisorId);
+    // Manual RLS: Advisors only see their assigned leads
+    if (req.user.role === 'Advisor') {
+      query = query.eq('assigned_to', req.user.id);
     }
 
-    query += ' ORDER BY created_at DESC';
-    const result = await pool.query(query, params);
+    const { data, error } = await query;
+    if (error) throw error;
 
     // Convert snake_case DB to camelCase for frontend
-    const leads = result.rows.map(row => ({
+    const leads = data.map(row => ({
       id: row.id,
       name: row.name,
       email: row.email,
@@ -370,39 +503,121 @@ app.get('/api/leads', authenticateToken, async (req, res) => {
 
     res.json(leads);
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error('Error fetching leads:', err);
+    res.status(500).json({ error: 'Failed to fetch leads: ' + err.message });
   }
 });
 
+const calculateLeadScore = (lead) => {
+  let score = 50; // Base score
+  
+  // Interest-based weight
+  const highValue = ['Real Estate', 'Securities', 'Business Insurance', 'Group Benefits', 'Investment Showcase'];
+  if (highValue.includes(lead.interest)) score += 20;
+  if (lead.interest === 'Life Insurance') score += 10;
+  
+  // Engagement/Data Quality
+  if (lead.email && !lead.email.includes('example.com') && lead.email !== 'Not Provided') score += 10;
+  if (lead.phone && lead.phone !== 'N/A') score += 5;
+  if (lead.message && lead.message.length > 50) score += 15;
+  else if (lead.message) score += 5;
+  
+  // Source weight
+  if (lead.source === 'Referral') score += 15;
+  if (lead.source?.includes('ads')) score += 5;
+  
+  // Activity signals
+  if (lead.lifeDetails || lead.realEstateDetails || lead.securitiesDetails) score += 10;
+  
+  return Math.min(100, score);
+};
+
+const createAutomatedTask = async (leadId, title, assignedTo) => {
+  try {
+    const date = new Date().toISOString().split('T')[0];
+    await pool.query(
+      'INSERT INTO events (title, date, time, type, status, creator_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      [title, date, '09:00', 'task', 'scheduled', assignedTo]
+    );
+  } catch (err) {
+    console.error('[Automation] Failed to create task:', err.message);
+  }
+};
+
 app.post('/api/leads', authenticateToken, async (req, res) => {
-  const client = await pool.connect();
   try {
     const {
-      name, email, phone, interest, status, source, assignedTo, message,
-      lifeDetails, realEstateDetails, securitiesDetails, customDetails,
-      visitorId // Capture visitorId from frontend
-    } = req.body;
-
-    await client.query('BEGIN');
-
-    const insertQuery = `
-      INSERT INTO leads (
-          name, email, phone, interest, status, source, assigned_to, message, 
-          life_details, real_estate_details, securities_details, custom_details,
-          visitor_id
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING id
-    `;
-
-    const result = await client.query(insertQuery, [
-      name, email, phone, interest, status || 'New', source, assignedTo, message,
+      id, name, email, phone, interest, status, source, assignedTo, message,
       lifeDetails, realEstateDetails, securitiesDetails, customDetails,
       visitorId
-    ]);
+    } = req.body;
+
+    const score = calculateLeadScore(req.body);
+    const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
+
+    const leadData = {
+      name,
+      email,
+      phone,
+      interest,
+      status: status || 'New',
+      source: source || 'Web Form',
+      assigned_to: assignedTo,
+      message,
+      life_details: lifeDetails,
+      real_estate_details: realEstateDetails,
+      securities_details: securitiesDetails,
+      custom_details: customDetails,
+      visitor_id: visitorId,
+      score,
+      qualification,
+      updated_at: new Date().toISOString()
+    };
+
+    let result;
+    if (id) {
+      // HANDLE UPDATE (UPSERT)
+      const { data: oldData, error: fetchError } = await (await req.supabaseQuery('leads'))
+        .select('status, assigned_to')
+        .eq('id', id)
+        .single();
+      
+      const { data, error } = await (await req.supabaseQuery('leads'))
+        .update(leadData)
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+      result = { rows: data };
+
+      // AUTOMATION: Status change tasks
+      if (oldData && oldData.status !== status) {
+        // TRIGGER NOTIFICATION
+        await notificationService.triggerStatusChange(req.body, status);
+        
+        if (status === 'Contacted') {
+          await createAutomatedTask(id, `Follow up: Consultation with ${name}`, assignedTo || oldData.assigned_to);
+        } else if (status === 'Proposal') {
+          await createAutomatedTask(id, `Action: Build proposal for ${name}`, assignedTo || oldData.assigned_to);
+        }
+      }
+    } else {
+      // HANDLE NEW INSERT
+      result = await client.query(insertQuery, [
+        name, email, phone, interest, status || 'New', source || 'Web Form', assignedTo, message,
+        lifeDetails, realEstateDetails, securitiesDetails, customDetails, visitorId,
+        score, qualification
+      ]);
+
+      // AUTOMATION: New lead task & Notification
+      if (result.rows[0]) {
+        await createAutomatedTask(result.rows[0].id, `Review new inquiry: ${name}`, assignedTo);
+        await notificationService.triggerNewLead(req.body);
+      }
+    }
 
     await client.query('COMMIT');
-    res.status(201).json({ id: result.rows[0].id, success: true });
+    res.status(id ? 200 : 201).json({ id: result.rows[0].id, success: true, score, qualification });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ error: err.message });
@@ -504,8 +719,8 @@ const processWebhookIngestion = async (req, res, platform) => {
         date: result.rows[0].created_at || new Date().toISOString()
       };
 
-      // 5. Broadcast to realtime CRM clients
-      broadcast({ type: 'NEW_LEAD', payload: newLeadObj });
+      // 6. Notify 
+      await notificationService.triggerNewLead(newLeadObj);
 
       res.status(200).json({ success: true, message: 'Lead normalized and ingested' });
     } else {
@@ -537,27 +752,42 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email) return res.status(400).json({ error: 'Email is required' });
 
   try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL', [email]);
-    if (result.rows.length > 0) {
-      const u = result.rows[0];
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .is('deleted_at', null)
+      .single();
 
-      // Simple SHA-256 comparison for the provided internal password
+    if (userData) {
+      const u = userData;
       const hash = crypto.createHash('sha256').update(password || '').digest('hex');
-
-      // If the user has a password_hash, check it. Otherwise (for demo/fallback), allow if it's the default 'password'
       const isValid = u.password_hash ? (u.password_hash === hash) : (password === 'password');
 
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const token = jwt.sign(
-        { sub: u.email, id: u.id, role: u.role },
-        SECRET_KEY,
-        { expiresIn: '30d' }
-      );
+      const accessToken = generateAccessToken(u);
+      const refreshToken = generateRefreshToken(u);
+
+      // Store refresh token in DB
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      const { error: tokenError } = await supabase
+        .from('refresh_tokens')
+        .insert({
+          user_id: u.id,
+          token: refreshToken,
+          expires_at: expiresAt.toISOString()
+        });
+
+      if (tokenError) throw tokenError;
+
       res.json({
-        access_token: token,
+        access_token: accessToken,
+        refresh_token: refreshToken,
         token_type: 'bearer',
         user: {
           id: u.id,
@@ -565,13 +795,73 @@ app.post('/api/auth/login', async (req, res) => {
           email: u.email,
           role: u.role,
           category: u.category,
-          avatar: u.avatar_url,
+          avatar: u.avatar,
           productsSold: u.products_sold
         }
       });
+
+      await logAccess(u.id, 'User Login', req);
     } else {
       res.status(401).json({ error: 'User not found' });
     }
+  } catch (err) {
+    console.error('Login Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/refresh', async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) return res.status(400).json({ error: 'Refresh token is required' });
+
+  try {
+    // 1. Verify token in DB
+    const { data: tokenData, error: tokenError } = await supabase
+      .from('refresh_tokens')
+      .select('*')
+      .eq('token', refresh_token)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (tokenError || !tokenData) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+
+    const { user_id } = tokenData;
+
+    // 2. Verify JWT signature (synchronous check)
+    try {
+      const decoded = jwt.verify(refresh_token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
+      
+      // 3. Fetch user to get latest role
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user_id)
+        .single();
+
+      if (userError || !userData) return res.status(404).json({ error: 'User not found' });
+      const u = userData;
+
+      // 4. Generate new access token
+      const accessToken = generateAccessToken(u);
+      res.json({ access_token: accessToken });
+    } catch (jwtErr) {
+      return res.status(401).json({ error: 'Invalid refresh token signature' });
+    }
+  } catch (err) {
+    console.error('Refresh Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/logout', async (req, res) => {
+  const { refresh_token } = req.body;
+  try {
+    if (refresh_token) {
+      await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refresh_token]);
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -579,19 +869,24 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
-    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-    const u = result.rows[0];
+    const { data: userData, error: userError } = await (await req.supabaseQuery('users'))
+      .select('*')
+      .eq('id', req.user.id)
+      .single();
+
+    if (userError || !userData) return res.status(404).json({ error: 'User not found' });
+    const u = userData;
     res.json({
       id: u.id,
       name: u.name,
       email: u.email,
       role: u.role,
       category: u.category,
-      avatar: u.avatar_url,
+      avatar: u.avatar,
       productsSold: u.products_sold
     });
   } catch (err) {
+    console.error('Me Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -599,86 +894,267 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 // 4.5 Users Management
 app.get('/api/users', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, email, name, role, category, title, phone, avatar, bio, microsite_enabled as "micrositeEnabled", products_sold as "productsSold", license_states as "licenseStates", onboarding_completed as "onboardingCompleted", created_at as "createdAt", deleted_at as "deletedAt" FROM users ORDER BY name ASC');
+    const { data, error } = await (await req.supabaseQuery('users'))
+      .select('id, email, name, role, category, title, phone, avatar, bio, microsite_enabled, products_sold, license_states, onboarding_completed, created_at, deleted_at')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+
+    // Convert snake_case DB to camelCase for frontend
+    const users = data.map(u => ({
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      category: u.category,
+      title: u.title,
+      phone: u.phone,
+      avatar: u.avatar,
+      bio: u.bio,
+      micrositeEnabled: u.microsite_enabled,
+      productsSold: u.products_sold,
+      licenseStates: u.license_states,
+      onboardingCompleted: u.onboarding_completed,
+      createdAt: u.created_at,
+      deletedAt: u.deleted_at
+    }));
+
+    res.json(users);
+  } catch (err) {
+    console.error('Users Retrieval Error:', err);
+    res.status(500).json({ error: 'Failed to fetch users: ' + err.message });
+  }
+});
+
+app.post('/api/users', authenticateToken, async (req, res) => {
+  const { role, id } = req.body;
+  const isSelf = id === req.user.id;
+  
+  // STRICT PERMISSION: Only Admin can manage OTHER users
+  if (req.user.role !== 'Administrator' && !isSelf) {
+    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  }
+
+  // Enforce capacity limits for new users (not updates)
+  if (!id) {
+    if (role === 'Sub-Admin') {
+      const { count } = await (await req.supabaseQuery('users')).select('*', { count: 'exact', head: true }).eq('role', 'Sub-Admin');
+      if (count >= 50) return res.status(400).json({ error: 'Capacity Reached: Maximum 50 Sub-Admin accounts allowed.' });
+    } else if (role === 'Advisor') {
+      const { count } = await (await req.supabaseQuery('users')).select('*', { count: 'exact', head: true }).eq('role', 'Advisor');
+      if (count >= 150) return res.status(400).json({ error: 'Capacity Reached: Maximum 150 Advisor accounts allowed.' });
+    }
+  }
+
+  try {
+    const { email, name, category, title, phone, avatar, bio, micrositeEnabled, productsSold, licenseStates, onboardingCompleted, password } = req.body;
+    
+    let passwordHash = undefined;
+    if (password) {
+      passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    }
+
+    const userId = id || crypto.randomUUID();
+    
+    // Convert camelCase frontend payload to snake_case DB columns
+    const userData = {
+      id: userId,
+      email,
+      name,
+      role: role || 'Advisor', // Fallback role
+      category,
+      title,
+      phone,
+      avatar,
+      bio,
+      microsite_enabled: micrositeEnabled || false,
+      products_sold: productsSold || [],
+      license_states: licenseStates || [],
+      onboarding_completed: onboardingCompleted || false,
+      updated_at: new Date().toISOString()
+    };
+    
+    if (passwordHash) userData.password_hash = passwordHash;
+
+    const { error: userError } = await (await req.supabaseQuery('users'))
+      .upsert(userData)
+      .eq('id', userId);
+
+    if (userError) throw userError;
+
+    // Log user creation/update
+    await logAccess(req.user.id, `User ${id ? 'Updated' : 'Created'}: ${email || name}`, req);
+
+    res.json({ id: userId, success: true });
+  } catch (err) {
+    console.error('User Upsert Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- PLATFORM MODULES (Phase 1-Phase 7) ---
+
+/**
+ * @swagger
+ * /api/admin/access-logs:
+ *   get:
+ *     summary: Retrieve system-wide access logs (Admin only)
+ */
+app.get('/api/admin/access-logs', authenticateToken, authorizeRoles('Administrator'), async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT al.*, u.name as "userName" 
+      FROM access_logs al 
+      LEFT JOIN users u ON al.user_id = u.id 
+      ORDER BY al.created_at DESC 
+      LIMIT 200
+    `);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/users', authenticateToken, async (req, res) => {
-  // STRICT PERMISSION: Only Admin can manage users
-  if (req.user.role !== 'Administrator') {
-    return res.status(403).json({ error: 'Forbidden: Admin access only' });
-  }
-
-  const { role, id } = req.body;
-
-  // Enforce capacity limits for new users (not updates)
-  if (!id) {
-    if (role === 'Sub-Admin') {
-      const countRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Sub-Admin'");
-      if (parseInt(countRes.rows[0].count) >= 50) {
-        return res.status(400).json({ error: 'Capacity Reached: Maximum 50 Sub-Admin accounts allowed.' });
-      }
-    } else if (role === 'Advisor') {
-      const countRes = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Advisor'");
-      if (parseInt(countRes.rows[0].count) >= 150) {
-        return res.status(400).json({ error: 'Capacity Reached: Maximum 150 Advisor accounts allowed.' });
-      }
-    }
-  }
-
-  const client = await pool.connect();
+/**
+ * @swagger
+ * /api/documents:
+ *   get:
+ *     summary: Retrieve documents based on permissions
+ *   post:
+ *     summary: Upload or update document metadata
+ */
+app.get('/api/documents', authenticateToken, async (req, res) => {
   try {
-    const { id, email, name, role, category, title, phone, avatar, bio, micrositeEnabled, productsSold, licenseStates, onboardingCompleted, password } = req.body;
+    const { clientId } = req.query;
+    let query = 'SELECT * FROM documents WHERE deleted_at IS NULL';
+    const params = [];
 
-    await client.query('BEGIN');
-
-    let passwordHash = null;
-    if (password) {
-      passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    // RBAC: Advisors see their own or shared, Admins see all
+    if (req.user.role !== 'Administrator' && req.user.role !== 'Manager') {
+      const pIndex = params.push(req.user.id);
+      query += ` AND (owner_id = $${pIndex} OR access_permissions->'users' ? $${pIndex})`;
     }
 
-    const upsertQuery = `
-      INSERT INTO users (
-        id, email, name, role, category, title, phone, avatar, bio, 
-        microsite_enabled, products_sold, license_states, onboarding_completed, password_hash
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      ON CONFLICT (id) DO UPDATE SET
-        email = EXCLUDED.email,
-        name = EXCLUDED.name,
-        role = EXCLUDED.role,
-        category = EXCLUDED.category,
-        title = EXCLUDED.title,
-        phone = EXCLUDED.phone,
-        avatar = EXCLUDED.avatar,
-        bio = EXCLUDED.bio,
-        microsite_enabled = EXCLUDED.microsite_enabled,
-        products_sold = EXCLUDED.products_sold,
-        license_states = EXCLUDED.license_states,
-        onboarding_completed = EXCLUDED.onboarding_completed,
-        password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash)
-      RETURNING id
-    `;
+    if (clientId) {
+      const pIndex = params.push(clientId);
+      query += ` AND client_id = $${pIndex}`;
+    }
 
-    const userId = id || crypto.randomUUID();
-    const result = await client.query(upsertQuery, [
-      userId, email, name, role, category, title, phone, avatar, bio,
-      micrositeEnabled || false, productsSold || [], licenseStates || [], onboardingCompleted || false,
-      passwordHash
-    ]);
-
-    await client.query('COMMIT');
-    res.json({ id: result.rows[0].id, success: true });
+    const result = await pool.query(query, params);
+    res.json(result.rows);
   } catch (err) {
-    await client.query('ROLLBACK');
     res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
   }
 });
+
+app.post('/api/documents', authenticateToken, async (req, res) => {
+  try {
+    const { id, title, file_path, file_type, file_size, category, client_id, access_permissions } = req.body;
+    const upsertQuery = `
+      INSERT INTO documents (id, owner_id, client_id, title, file_path, file_type, file_size, category, access_permissions)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        category = EXCLUDED.category,
+        access_permissions = EXCLUDED.access_permissions,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING id
+    `;
+    const docId = id || crypto.randomUUID();
+    await pool.query(upsertQuery, [
+      docId, req.user.id, client_id, title, file_path, file_type, file_size, category, JSON.stringify(access_permissions || { roles: ['Administrator', 'Manager'] })
+    ]);
+    res.json({ id: docId, success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/interactions:
+ *   get:
+ *     summary: Retrieve interaction history for lead or client
+ *   post:
+ *     summary: Log a new client/lead interaction
+ */
+app.get('/api/interactions', authenticateToken, async (req, res) => {
+  try {
+    const { leadId, clientId } = req.query;
+    let query = 'SELECT i.*, u.name as "authorName" FROM interaction_history i LEFT JOIN users u ON i.author_id = u.id WHERE 1=1';
+    const params = [];
+
+    if (leadId) {
+      params.push(leadId);
+      query += ` AND lead_id = $${params.length}`;
+    }
+    if (clientId) {
+      params.push(clientId);
+      query += ` AND client_id = $${params.length}`;
+    }
+
+    query += ' ORDER BY created_at DESC';
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/interactions', authenticateToken, async (req, res) => {
+  try {
+    const { lead_id, client_id, type, content, metadata } = req.body;
+    await pool.query(
+      'INSERT INTO interaction_history (lead_id, client_id, author_id, type, content, metadata) VALUES ($1, $2, $3, $4, $5, $6)',
+      [lead_id, client_id, req.user.id, type, content, JSON.stringify(metadata || {})]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/preferences:
+ *   get:
+ *     summary: Get current authenticated user preferences
+ *   post:
+ *     summary: Update notification and UI preferences
+ */
+app.get('/api/preferences', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM user_preferences WHERE user_id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.json({ email_notifications: true, sms_alerts: false, push_notifications: true, theme: 'light', timezone: 'UTC' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/preferences', authenticateToken, async (req, res) => {
+  try {
+    const { email_notifications, sms_alerts, push_notifications, theme, timezone } = req.body;
+    const upsertQuery = `
+      INSERT INTO user_preferences (user_id, email_notifications, sms_alerts, push_notifications, theme, timezone)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (user_id) DO UPDATE SET
+        email_notifications = EXCLUDED.email_notifications,
+        sms_alerts = EXCLUDED.sms_alerts,
+        push_notifications = EXCLUDED.push_notifications,
+        theme = EXCLUDED.theme,
+        timezone = EXCLUDED.timezone,
+        updated_at = CURRENT_TIMESTAMP
+    `;
+    await pool.query(upsertQuery, [req.user.id, email_notifications, sms_alerts, push_notifications, theme, timezone]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -772,9 +1248,14 @@ app.get('/api/admin/onboarding/applications', authenticateToken, async (req, res
     return res.status(403).json({ error: 'Access denied.' });
   }
   try {
-    const result = await pool.query('SELECT * FROM advisor_applications ORDER BY created_at DESC');
-    res.json(result.rows);
+    const { data, error } = await (await req.supabaseQuery('advisor_applications'))
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data || []);
   } catch (err) {
+    console.error('Applications Retrieval Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -794,51 +1275,63 @@ app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, as
 
   if (!companyEmail) return res.status(400).json({ error: 'Company email is required for approval.' });
 
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    // 1. Get application details from Supabase
+    const { data: application, error: appError } = await (await req.supabaseQuery('advisor_applications'))
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    // 1. Get application details
-    const appRes = await client.query('SELECT * FROM advisor_applications WHERE id = $1', [id]);
-    if (appRes.rows.length === 0) throw new Error('Application not found.');
-    const application = appRes.rows[0];
+    if (appError || !application) throw new Error('Application not found.');
 
     // 2. Update application status
-    await client.query(
-      'UPDATE advisor_applications SET status = $1, company_email = $2, contract_level = $3, authorized_products = $4, updated_at = NOW() WHERE id = $5',
-      ['approved', companyEmail, contractLevel || 50, JSON.stringify(productsSold || []), id]
-    );
+    const { error: updateAppError } = await (await req.supabaseQuery('advisor_applications'))
+      .update({
+        status: 'approved',
+        company_email: companyEmail,
+        contract_level: contractLevel || 50,
+        authorized_products: productsSold || [],
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (updateAppError) throw updateAppError;
 
     // 3. Create/Update user account (Status: pending_activation)
-    // Map application data to user record
     const passwordHash = tempPassword ? crypto.createHash('sha256').update(tempPassword).digest('hex') : null;
-    const userRes = await client.query(
-      `INSERT INTO users (name, email, personal_email, role, status, password_hash, contract_level, products_sold)
-       VALUES ($1, $2, $3, 'Advisor', 'pending_activation', $4, $5, $6)
-       ON CONFLICT (email) DO UPDATE SET 
-         personal_email = EXCLUDED.personal_email,
-         status = 'pending_activation',
-         contract_level = EXCLUDED.contract_level,
-         products_sold = EXCLUDED.products_sold,
-         password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash)
-       RETURNING id`,
-      [application.full_name, companyEmail, application.personal_email, passwordHash, contractLevel || 50, JSON.stringify(productsSold || [])]
-    );
-    const userId = userRes.rows[0].id;
+    const { data: userData, error: userError } = await (await req.supabaseQuery('users'))
+      .upsert({
+        name: application.full_name,
+        email: companyEmail,
+        personal_email: application.personal_email,
+        role: 'Advisor',
+        status: 'pending_activation',
+        password_hash: passwordHash,
+        contract_level: contractLevel || 50,
+        products_sold: productsSold || []
+      })
+      .select('id')
+      .single();
 
-    // 4. Generate activation token
+    if (userError) throw userError;
+    const userId = userData.id;
+
+    // 4. Generate activation token in Supabase
     const token = crypto.randomBytes(48).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    await client.query(
-      'INSERT INTO activation_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
-      [userId, token, expiresAt]
-    );
+    const { error: tokenError } = await (await req.supabaseQuery('activation_tokens'))
+      .insert({
+        user_id: userId,
+        token: token,
+        expires_at: expiresAt.toISOString()
+      });
 
-    await client.query('COMMIT');
+    if (tokenError) throw tokenError;
 
     // 5. Send Welcome Email
     const appUrl = process.env.APP_URL || 'http://localhost:5173';
     const activationUrl = `${appUrl}/activate/${token}`;
+    // ... (rest of the email logic remains same)
 
     const welcomeHtml = `
       <!DOCTYPE html>
@@ -997,7 +1490,8 @@ app.get('/api/events', authenticateToken, async (req, res) => {
       meetingLink: row.meeting_link,
       participants: row.participants,
       creatorId: row.creator_id,
-      creatorName: row.creator_name
+      creatorName: row.creator_name,
+      visibility: row.visibility
     }));
     res.json(events);
   } catch (err) {
@@ -1007,27 +1501,28 @@ app.get('/api/events', authenticateToken, async (req, res) => {
 
 app.post('/api/events', authenticateToken, async (req, res) => {
   try {
-    const { id, title, date, time, endTime, type, status, description, hasGoogleMeet, meetingLink, participants, creatorId, creatorName } = req.body;
+    const { id, title, date, time, endTime, type, status, description, hasGoogleMeet, meetingLink, participants, creatorId, creatorName, visibility } = req.body;
 
     const upsertQuery = `
       INSERT INTO events (
         id, title, date, time, end_time, type, status, description, 
-        has_google_meet, meeting_link, participants, creator_id, creator_name
+        has_google_meet, meeting_link, participants, creator_id, creator_name, visibility
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title, date = EXCLUDED.date, time = EXCLUDED.time,
         end_time = EXCLUDED.end_time, type = EXCLUDED.type, status = EXCLUDED.status,
         description = EXCLUDED.description, has_google_meet = EXCLUDED.has_google_meet,
         meeting_link = EXCLUDED.meeting_link, participants = EXCLUDED.participants,
         creator_id = EXCLUDED.creator_id, creator_name = EXCLUDED.creator_name,
+        visibility = EXCLUDED.visibility,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id
     `;
 
     const result = await pool.query(upsertQuery, [
       id, title, date, time, endTime, type, status || 'scheduled', description,
-      hasGoogleMeet || false, meetingLink, JSON.stringify(participants || []), creatorId, creatorName
+      hasGoogleMeet || false, meetingLink, JSON.stringify(participants || []), creatorId, creatorName, visibility || 'public'
     ]);
 
     res.status(200).json({ id: result.rows[0].id, success: true });
@@ -1072,13 +1567,19 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 // 6. Content Management System (Settings & Workflows)
 app.get('/api/settings', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM company_settings WHERE id = 'main'");
-    if (result.rows.length > 0) {
-      res.json([result.rows[0].data]);
+    const { data, error } = await supabase
+      .from('company_settings')
+      .select('data')
+      .eq('id', 'main')
+      .single();
+
+    if (data) {
+      res.json([data.data]);
     } else {
       res.json([]);
     }
   } catch (err) {
+    console.error('Settings Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -1089,14 +1590,17 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
   }
   try {
     const settings = req.body;
-    await pool.query(
-      `INSERT INTO company_settings (id, data, updated_at) 
-       VALUES ('main', $1::jsonb, CURRENT_TIMESTAMP) 
-       ON CONFLICT (id) DO UPDATE SET data = $1::jsonb, updated_at = CURRENT_TIMESTAMP`,
-      [JSON.stringify(settings)]
-    );
+    const { error } = await (await req.supabaseQuery('company_settings'))
+      .upsert({
+        id: 'main',
+        data: settings,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) throw error;
     res.json({ success: true });
   } catch (err) {
+    console.error('Save Settings Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -2221,7 +2725,7 @@ const buildVerificationEmail = (clientName, verifyUrl, customMessage, advisorNam
 // ENDPOINT 9 — Advisor sends verification link to client (email / SMS / both)
 // POST /api/plaid/send-link
 // ════════════════════════════════════════════════════════════════════════════════
-app.post('/api/plaid/send-link', authenticateToken, async (req, res) => {
+app.post('/api/plaid/send-link', authenticateToken, checkAdvisorBilling, async (req, res) => {
   const {
     clientName, clientEmail, clientPhone,
     sendVia = 'email',        // 'email' | 'sms' | 'both'
@@ -2304,6 +2808,50 @@ app.post('/api/plaid/send-link', authenticateToken, async (req, res) => {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // ENDPOINT 10 — Client opens link → get link_token (PUBLIC — no auth required)
+// --- Advisor Billing API ---
+app.post('/api/advisor/billing', authenticateToken, async (req, res) => {
+  const { paymentMethodId, stripeCustomerId } = req.body;
+  if (!paymentMethodId) return res.status(400).json({ error: 'Payment method is required' });
+
+  try {
+    await pool.query(
+      `INSERT INTO advisor_billing (user_id, stripe_customer_id, payment_method_id, billing_status, updated_at)
+       VALUES ($1, $2, $3, 'active', NOW())
+       ON CONFLICT (user_id) DO UPDATE SET 
+         stripe_customer_id = EXCLUDED.stripe_customer_id,
+         payment_method_id = EXCLUDED.payment_method_id,
+         billing_status = 'active',
+         updated_at = NOW()`,
+      [req.user.id, stripeCustomerId || `mock_cus_${req.user.id}`, paymentMethodId]
+    );
+    res.json({ success: true, message: 'Billing method attached successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/advisor/billing', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM advisor_billing WHERE user_id = $1', [req.user.id]);
+    res.json(result.rows[0] || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/plaid/usage-logs', authenticateToken, async (req, res) => {
+  try {
+    const query = req.user.role === 'Administrator' ? 
+      'SELECT l.*, u.name as advisor_name FROM plaid_usage_logs l JOIN users u ON l.advisor_id = u.id ORDER BY created_at DESC' :
+      'SELECT * FROM plaid_usage_logs WHERE advisor_id = $1 ORDER BY created_at DESC';
+    const params = req.user.role === 'Administrator' ? [] : [req.user.id];
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/plaid/client-verify/:token
 // ════════════════════════════════════════════════════════════════════════════════
 app.get('/api/plaid/client-verify/:token', async (req, res) => {
@@ -2320,6 +2868,20 @@ app.get('/api/plaid/client-verify/:token', async (req, res) => {
     if (!linkRow.rows.length) return res.status(404).json({ error: 'Verification link not found or expired' });
 
     const link = linkRow.rows[0];
+    
+    // Check Advisor Billing for the link creator
+    if (link.created_by) {
+        const advisorBilling = await pool.query(
+            "SELECT * FROM advisor_billing WHERE user_id = $1 AND billing_status = 'active'",
+            [link.created_by]
+        );
+        if (advisorBilling.rows.length === 0) {
+            return res.status(402).json({ 
+                error: 'Service Suspended', 
+                message: 'This verification link is temporarily inactive due to an advisor billing issue.' 
+            });
+        }
+    }
     if (link.is_used) return res.status(410).json({ error: 'This verification link has already been used.' });
     if (new Date(link.expires_at) < new Date()) return res.status(410).json({ error: 'This verification link has expired. Please ask your advisor to send a new one.' });
 
@@ -2380,6 +2942,7 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
     if (!plaidClient) return res.status(503).json({ error: 'Plaid not configured on server' });
 
     const verificationId = link.verification_id;
+    const advisorId = link.created_by;
 
     // ── A: Exchange public_token ─────────────────────────────────────────────
     const exchRes = await plaidClient.itemPublicTokenExchange({ public_token: publicToken });
@@ -2392,6 +2955,8 @@ app.post('/api/plaid/client-verify/:token/complete', async (req, res) => {
       institutionName = itemRes.data.item.institution_name || null;
       authMethodFromItem = itemRes.data.item.auth_method || null;
     } catch (_) { }
+
+    await logPlaidUsage(advisorId, 'Exchange Token', 'Success', { institution_name: institutionName });
 
     // ── C: /auth/get → routing + account numbers ────────────────────────────
     const authRes = await plaidClient.authGet({ access_token });
@@ -2930,44 +3495,62 @@ app.get('/api/seo/localize', async (req, res) => {
 
 app.get('/api/admin/commissions/reconciliations', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(`
-            SELECT r.*, s.carrier, s.statement_date, c.name as client_name, u.name as advisor_name
-            FROM commission_reconciliations r
-            JOIN commission_statements s ON r.statement_id = s.id
-            LEFT JOIN clients c ON r.client_id = c.id
-            LEFT JOIN users u ON r.advisor_id = u.id
-            ORDER BY r.created_at DESC
-        `);
-    res.json(result.rows);
+    const { data, error } = await (await req.supabaseQuery('commission_reconciliations'))
+      .select(`
+        *,
+        statement:commission_statements(carrier, statement_date),
+        client:clients(name),
+        advisor:users(name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Flatten data for frontend if needed (Frontend expects client_name, advisor_name, carrier, etc.)
+    const flattened = data.map(r => ({
+      ...r,
+      carrier: r.statement?.carrier,
+      statement_date: r.statement?.statement_date,
+      client_name: r.client?.name,
+      advisor_name: r.advisor?.name
+    }));
+
+    res.json(flattened);
   } catch (err) {
+    console.error('Commissions Retrieval Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.post('/api/admin/commissions/reconcile', authenticateToken, async (req, res) => {
-  // This is a complex logic flow, usually would parse a CSV. 
-  // Here we simulate a reconciliation job being triggered on a statement.
   const { statementId } = req.body;
   try {
-    // Mock reconciliation: find clients matching names in statement
-    const statement = await pool.query('SELECT * FROM commission_statements WHERE id = $1', [statementId]);
-    if (!statement.rows.length) return res.status(404).json({ error: 'Statement not found' });
+    const { data: statement, error } = await (await req.supabaseQuery('commission_statements'))
+      .select('*')
+      .eq('id', statementId)
+      .single();
+
+    if (error || !statement) return res.status(404).json({ error: 'Statement not found' });
 
     // Finalize demo recon logic...
-    res.json({ success: true, message: 'Reconciliation process queued' });
+    res.json({ success: true, message: 'Reconciliation process queued in Supabase' });
   } catch (err) {
+    console.error('Reconciliation Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ════════════════════════════════════════════════════════════════════════════════
-// SUGGESTED FEATURE 4 — Landing Page CMS
-// ════════════════════════════════════════════════════════════════════════════════
+// --- Landing Page CMS ---
 app.get('/api/admin/landing-pages', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM landing_pages ORDER BY created_at DESC');
-    res.json(result.rows);
+    const { data, error } = await (await req.supabaseQuery('landing_pages'))
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data || []);
   } catch (err) {
+    console.error('Landing Pages Retrieval Error:', err);
     res.status(500).json({ error: err.message });
   }
 });

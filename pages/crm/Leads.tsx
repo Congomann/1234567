@@ -63,7 +63,7 @@ const PriorityBadge = ({ priority }: { priority?: string }) => {
 };
 
 export const Leads: React.FC = () => {
-    const { leads, updateLeadStatus, updateLead, user, allUsers } = useData();
+    const { leads, updateLeadStatus, updateLead, user, allUsers, interactions, logInteraction, fetchInteractions, documents, saveDoc, companySettings } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
     const [sourceFilter, setSourceFilter] = useState<string>('All');
@@ -72,13 +72,14 @@ export const Leads: React.FC = () => {
     const [viewingLead, setViewingLead] = useState<Lead | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<Partial<Lead>>({});
+    const [interactionForm, setInteractionForm] = useState({ content: '', type: 'Note' as any });
+    const [isSubmittingInteraction, setIsSubmittingInteraction] = useState(false);
 
     const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
     const [showBulkSuccess, setShowBulkSuccess] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof Lead, direction: 'asc' | 'desc' } | null>(null);
-    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'underwriting' | 'vault'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'timeline' | 'underwriting' | 'vault'>('profile');
     const [browseHistory, setBrowseHistory] = useState<any[]>([]);
-    const [documents, setDocuments] = useState<any[]>([]);
     const [loadingContext, setLoadingContext] = useState(false);
 
     const isAdvisor = user?.role === UserRole.ADVISOR;
@@ -161,12 +162,28 @@ export const Leads: React.FC = () => {
         setIsEditing(false);
         setActiveTab('profile');
         setBrowseHistory([]);
-        setDocuments([]);
 
         if (lead.visitor_id) {
             fetchHistory(lead.visitor_id);
         }
-        fetchDocuments(lead.id);
+        fetchInteractions(lead.id);
+    };
+
+    const handleAddInteraction = async () => {
+        if (!viewingLead || !interactionForm.content) return;
+        setIsSubmittingInteraction(true);
+        try {
+            await logInteraction({
+                leadId: viewingLead.id,
+                type: interactionForm.type,
+                content: interactionForm.content,
+                authorId: user?.id,
+                authorName: user?.name
+            });
+            setInteractionForm({ content: '', type: 'Note' });
+        } finally {
+            setIsSubmittingInteraction(false);
+        }
     };
 
     const generateLeadSummary = (lead: Lead) => {
@@ -219,7 +236,7 @@ export const Leads: React.FC = () => {
         setLoadingContext(true);
         try {
             const token = localStorage.getItem('nhfg_jwt_token');
-            const res = await fetch(`/ api / analytics / visitors / ${visitorId}/history`, {
+            const res = await fetch(`/api/analytics/visitors/${visitorId}/history`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -233,19 +250,19 @@ export const Leads: React.FC = () => {
         }
     };
 
-    const fetchDocuments = async (leadId: string) => {
-        try {
-            const token = localStorage.getItem('nhfg_jwt_token');
-            const res = await fetch(`/api/leads/${leadId}/documents`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setDocuments(data);
-            }
-        } catch (err) {
-            console.error(err);
-        }
+    const handleDocumentUpload = () => {
+        if (!viewingLead) return;
+        const title = prompt('Document Title:');
+        if (!title) return;
+        
+        saveDoc({
+            title,
+            leadId: viewingLead.id,
+            category: 'Underwriting',
+            fileType: 'application/pdf',
+            fileSize: 1024 * 512,
+            ownerId: user?.id || 'system'
+        } as any);
     };
 
     const handleSaveChanges = () => {
@@ -257,16 +274,21 @@ export const Leads: React.FC = () => {
     };
 
 
-    const statusColors: any = {
-        [LeadStatus.NEW]: 'bg-blue-100 text-blue-800',
-        [LeadStatus.CONTACTED]: 'bg-yellow-100 text-yellow-800',
-        [LeadStatus.UNAVAILABLE]: 'bg-orange-100 text-orange-800',
-        [LeadStatus.PROPOSAL]: 'bg-purple-100 text-purple-800',
-        [LeadStatus.APPROVED]: 'bg-green-100 text-green-800',
-        [LeadStatus.CLOSED]: 'bg-gray-100 text-gray-800',
-        [LeadStatus.LOST]: 'bg-red-100 text-red-700',
-        [LeadStatus.ASSIGNED]: 'bg-indigo-100 text-indigo-800',
+    const getStatusColor = (status: string) => {
+        const colors: any = {
+            [LeadStatus.NEW]: 'bg-blue-100 text-blue-800',
+            [LeadStatus.CONTACTED]: 'bg-yellow-100 text-yellow-800',
+            [LeadStatus.UNAVAILABLE]: 'bg-orange-100 text-orange-800',
+            [LeadStatus.PROPOSAL]: 'bg-purple-100 text-purple-800',
+            [LeadStatus.APPROVED]: 'bg-green-100 text-green-800',
+            [LeadStatus.CLOSED]: 'bg-gray-100 text-gray-800',
+            [LeadStatus.LOST]: 'bg-red-100 text-red-700',
+            [LeadStatus.ASSIGNED]: 'bg-indigo-100 text-indigo-800',
+        };
+        return colors[status] || 'bg-slate-100 text-slate-700 border border-slate-200';
     };
+
+    const leadStatuses = companySettings.leadStatuses || Object.values(LeadStatus);
 
     return (
         <div className="space-y-8 relative">
@@ -337,7 +359,7 @@ export const Leads: React.FC = () => {
                         <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <select className="w-full bg-white text-slate-900 border border-slate-200 rounded-[2rem] pl-10 pr-10 py-4 text-sm font-bold focus:ring-2 focus:ring-[#0A62A7] cursor-pointer appearance-none shadow-sm" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
                             <option value="All">All Status</option>
-                            {Object.values(LeadStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                            {leadStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                     </div>
@@ -371,6 +393,9 @@ export const Leads: React.FC = () => {
                                 <th className="px-8 py-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Lead Profile</th>
                                 <th className="px-8 py-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Interest</th>
                                 <th className="px-8 py-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Priority</th>
+                                <th className="px-8 py-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
+                                    Score {sortConfig?.key === 'score' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                                </th>
                                 <th className="px-8 py-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('source')}>
                                     Source {sortConfig?.key === 'source' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
@@ -402,6 +427,29 @@ export const Leads: React.FC = () => {
                                     <td className="px-8 py-6 whitespace-nowrap"><span className="text-xs font-bold text-slate-700 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">{lead.interest}</span></td>
                                     <td className="px-8 py-6 whitespace-nowrap"><PriorityBadge priority={lead.priority} /></td>
                                     <td className="px-8 py-6 whitespace-nowrap">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative h-10 w-10 flex items-center justify-center">
+                                                <svg className="h-10 w-10 -rotate-90">
+                                                    <circle className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="transparent" r="16" cx="20" cy="20" />
+                                                    <circle 
+                                                        className={lead.score > 75 ? 'text-blue-500' : lead.score > 40 ? 'text-amber-500' : 'text-slate-400'} 
+                                                        strokeWidth="3" 
+                                                        strokeDasharray={100} 
+                                                        strokeDashoffset={100 - lead.score} 
+                                                        strokeLinecap="round" 
+                                                        stroke="currentColor" 
+                                                        fill="transparent" 
+                                                        r="16" cx="20" cy="20" 
+                                                    />
+                                                </svg>
+                                                <span className="absolute text-[10px] font-black text-slate-900">{lead.score}</span>
+                                            </div>
+                                            <span className={`text-[9px] font-black uppercase tracking-tighter ${lead.score > 75 ? 'text-blue-600' : 'text-slate-400'}`}>
+                                                {lead.qualification}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6 whitespace-nowrap">
                                         <div className="flex flex-col">
                                             <span className="text-xs font-black text-blue-600 uppercase tracking-tighter">{lead.source || 'Direct'}</span>
                                             <span className="text-[10px] text-slate-400 font-bold">{new Date(lead.date).toLocaleDateString()}</span>
@@ -415,8 +463,12 @@ export const Leads: React.FC = () => {
                                     </td>
                                     <td className="px-8 py-6 whitespace-nowrap">
                                         <div className="relative">
-                                            <select className={`text-xs font-bold border-none rounded-full px-4 py-2 cursor-pointer appearance-none pr-8 ${statusColors[lead.status] || 'bg-slate-100'}`} value={lead.status} onChange={(e) => updateLeadStatus(lead.id, e.target.value as LeadStatus)}>
-                                                {Object.values(LeadStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                                            <select 
+                                                className={`text-xs font-bold border-none rounded-full px-4 py-2 cursor-pointer appearance-none pr-8 ${getStatusColor(lead.status)}`} 
+                                                value={lead.status} 
+                                                onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                                            >
+                                                {leadStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none opacity-50" />
                                         </div>
@@ -461,6 +513,10 @@ export const Leads: React.FC = () => {
                                 {viewingLead?.visitor_id && <span className="ml-2 h-2 w-2 bg-green-500 rounded-full inline-block animate-pulse"></span>}
                                 {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
                             </button>
+                            <button onClick={() => setActiveTab('timeline')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'timeline' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                Activity Log
+                                {activeTab === 'timeline' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
                             <button onClick={() => setActiveTab('underwriting')} className={`pb-4 px-2 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === 'underwriting' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
                                 Underwriting
                                 {activeTab === 'underwriting' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
@@ -491,12 +547,30 @@ export const Leads: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl">
-                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Lead Score: {viewingLead.score}</h3>
-                                        <div className="w-full bg-white/10 rounded-full h-2 mb-6">
-                                            <div className="bg-blue-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewingLead.score}%` }}></div>
+                                    <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                                            <Sparkles size={48} />
                                         </div>
-                                        <p className="text-xs text-blue-100 font-medium leading-relaxed italic">"Probability of conversion is optimized. Direct call recommended within next 4 business hours."</p>
+                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Neural Lead Score: {viewingLead.score}</h3>
+                                        <div className="w-full bg-white/10 rounded-full h-2 mb-6">
+                                            <div className="bg-gradient-to-r from-blue-400 to-emerald-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewingLead.score}%` }}></div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <p className="text-xs text-blue-100 font-medium leading-relaxed italic">
+                                                {viewingLead.score > 80 ? "Strategic Priority: High conversion probability detected based on source quality and data completeness." : 
+                                                 viewingLead.score > 50 ? "Developmental Lead: Moderate intent profiles found. Scheduled follow-up recommended." : 
+                                                 "Cold Node: Minimal initial engagement signals. Place in long-term nurture sequence."}
+                                            </p>
+                                            <div className="pt-4 border-t border-white/10">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Activity size={14} className="text-emerald-400" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Automated Chain Active</span>
+                                                </div>
+                                                <p className="text-[10px] text-white/40 leading-tight">
+                                                    Task generation enabled. Follow-ups will be auto-triggered on "Contacted" status change.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -578,6 +652,77 @@ export const Leads: React.FC = () => {
                             </div>
                         )}
 
+                        {activeTab === 'timeline' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100">
+                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Log New Interaction</h3>
+                                    <div className="flex gap-4 mb-4">
+                                        {(['Call', 'Email', 'Meeting', 'Note', 'SMS'] as const).map(type => (
+                                            <button 
+                                                key={type} 
+                                                onClick={() => setInteractionForm({ ...interactionForm, type })} 
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${interactionForm.type === type ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="relative">
+                                        <textarea 
+                                            className="w-full bg-white border border-slate-200 rounded-[2rem] p-6 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none min-h-[120px]" 
+                                            placeholder={`Summarize the ${interactionForm.type.toLowerCase()}...`}
+                                            value={interactionForm.content}
+                                            onChange={e => setInteractionForm({ ...interactionForm, content: e.target.value })}
+                                        />
+                                        <button 
+                                            onClick={handleAddInteraction}
+                                            disabled={isSubmittingInteraction || !interactionForm.content}
+                                            className="absolute bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+                                        >
+                                            {isSubmittingInteraction ? 'Logging...' : 'Log Activity'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-4">Historical Timeline</h3>
+                                    <div className="bg-white/50 backdrop-blur-sm border border-slate-100 rounded-[3rem] overflow-hidden">
+                                        {interactions.length === 0 ? (
+                                            <div className="p-20 text-center text-slate-400 italic">No interactions logged yet for this lead.</div>
+                                        ) : (
+                                            <div className="divide-y divide-slate-50">
+                                                {interactions.map((event, i) => (
+                                                    <div key={i} className="p-8 hover:bg-slate-50/50 transition-colors flex gap-6">
+                                                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                                                            event.type === 'Call' ? 'bg-green-100 text-green-600' :
+                                                            event.type === 'Email' ? 'bg-blue-100 text-blue-600' :
+                                                            event.type === 'Meeting' ? 'bg-purple-100 text-purple-600' :
+                                                            'bg-slate-100 text-slate-600'
+                                                        }`}>
+                                                            {event.type === 'Call' ? <Phone size={20} /> :
+                                                             event.type === 'Email' ? <Mail size={20} /> :
+                                                             event.type === 'Meeting' ? <Calendar size={20} /> :
+                                                             <MessageSquare size={20} />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{event.type}</span>
+                                                                    <h4 className="text-xs font-bold text-slate-900 mt-0.5">{event.authorName}</h4>
+                                                                </div>
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase">{new Date(event.createdAt).toLocaleString()}</span>
+                                                            </div>
+                                                            <p className="text-sm text-slate-600 leading-relaxed font-medium">{event.content}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === 'underwriting' && viewingLead && (
                             <div className="animate-fade-in">
                                 <CaseChat caseId={viewingLead.id} clientName={viewingLead.name} />
@@ -596,7 +741,7 @@ export const Leads: React.FC = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {documents.map((doc, i) => (
+                                    {documents.filter(d => d.leadId === viewingLead.id).map((doc, i) => (
                                         <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm group hover:shadow-md transition-all">
                                             <div className="flex items-center gap-4 mb-4">
                                                 <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
@@ -608,15 +753,18 @@ export const Leads: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center pt-4 border-t border-slate-50">
-                                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${doc.status === 'Ready' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                                    {doc.status}
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-green-100 text-green-700`}>
+                                                    Ready
                                                 </span>
                                                 <button className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
                                             </div>
                                         </div>
                                     ))}
 
-                                    <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-6 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group py-10">
+                                    <div 
+                                        onClick={handleDocumentUpload}
+                                        className="border-2 border-dashed border-slate-200 rounded-[2rem] p-6 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group py-10"
+                                    >
                                         <div className="p-4 bg-slate-100 rounded-full mb-3 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all">
                                             <FileText size={20} />
                                         </div>

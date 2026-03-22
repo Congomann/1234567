@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createClient } = require('webdav');
+const encryptionService = require('./encryptionService.cjs');
  
 /**
  * StorageService handles file persistence.
@@ -29,22 +30,26 @@ class StorageService {
     }
  
     async saveFile(filename, base64Data) {
+        // ENCRYPTION AT REST: Encrypt the buffer before any persistence
+        const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
+        const encryptedData = encryptionService.encrypt(buffer);
+        const encryptedBuffer = Buffer.from(encryptedData);
+
         if (this.mode === 'owncloud' && this.client) {
             try {
-                return await this.saveToOwnCloud(filename, base64Data);
+                return await this.saveToOwnCloud(filename, encryptedBuffer);
             } catch (error) {
                 console.error('[Storage] ownCloud save failed, falling back to local:', error);
-                return this.saveLocal(filename, base64Data);
+                return this.saveLocal(filename, encryptedBuffer);
             }
         }
-        return this.saveLocal(filename, base64Data);
+        return this.saveLocal(filename, encryptedBuffer);
     }
  
-    async saveLocal(filename, base64Data) {
+    async saveLocal(filename, buffer) {
         try {
             const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
             const filePath = path.join(this.baseDir, cleanName);
-            const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
             fs.writeFileSync(filePath, buffer);
             return `/api/storage/${cleanName}`;
         } catch (error) {
@@ -53,23 +58,15 @@ class StorageService {
         }
     }
  
-    async saveToOwnCloud(filename, base64Data) {
+    async saveToOwnCloud(filename, buffer) {
         try {
             const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-            const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
             
             console.log(`[Storage] Uploading ${cleanName} to ownCloud...`);
             await this.client.putFileContents(`/${cleanName}`, buffer);
             
-            // For ownCloud, we still route through our backend to mask the credentials/URL 
-            // OR we can return the direct link if it's public. 
-            // For security and simplicity, we'll continue using our local proxy route 
-            // but we need a way to serve FROM ownCloud.
-            // For now, let's just save it locally too so it's instantly serveable, 
-            // or modify the storage route to fetch from ownCloud.
-            
             // Quick approach: Save locally AND to cloud.
-            await this.saveLocal(filename, base64Data);
+            await this.saveLocal(filename, buffer);
             return `/api/storage/${cleanName}`;
         } catch (error) {
             console.error('[Storage] ownCloud PUT error:', error);

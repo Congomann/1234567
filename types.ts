@@ -89,6 +89,8 @@ export interface User {
   calendarUrl?: string;
   onboardingCompleted?: boolean;
   password?: string;
+  permissions?: string[];
+  lastLogin?: string;
 }
 
 export interface LifeDetails {
@@ -117,7 +119,7 @@ export interface Lead {
   interest: ProductType;
   message: string;
   date: string;
-  status: LeadStatus;
+  status: LeadStatus | string;
   aiAnalysis?: string;
   score: number;
   qualification: 'Hot' | 'Warm' | 'Cold';
@@ -148,6 +150,64 @@ export interface Lead {
   };
   visitor_id?: string;
   browseHistory?: any[];
+  assignedAt?: string;
+  completedAt?: string;
+}
+
+export type InteractionType = 'Call' | 'Email' | 'Meeting' | 'Note' | 'SMS' | 'Status Change';
+
+export interface Interaction {
+  id: string;
+  leadId?: string;
+  clientId?: string;
+  authorId: string;
+  authorName: string;
+  type: InteractionType;
+  content: string;
+  metadata?: any;
+  createdAt: string;
+}
+
+export interface AccessLog {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  ipAddress?: string;
+  userAgent?: string;
+  metadata?: any;
+  createdAt: string;
+}
+
+export interface UserDocument {
+  id: string;
+  ownerId: string;
+  clientId?: string;
+  leadId?: string;
+  title: string;
+  filePath: string;
+  fileType: string;
+  fileSize: number;
+  category: string;
+  version: number;
+  isEncrypted: boolean;
+  accessPermissions: {
+    roles: UserRole[];
+    users?: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+}
+
+export interface UserPreference {
+  userId: string;
+  emailNotifications: boolean;
+  smsAlerts: boolean;
+  pushNotifications: boolean;
+  theme: 'light' | 'dark' | 'system';
+  timezone: string;
+  compactView?: boolean;
 }
 
 export interface IntegrationLog {
@@ -389,6 +449,9 @@ export interface CompanySettings {
   themePrimaryColor?: string;
   themeSecondaryColor?: string;
   themeStructure?: 'default' | 'modern' | 'minimal' | 'bold' | 'ios' | 'macos' | 'material' | 'neumorphic';
+
+  // CRM Customization
+  leadStatuses?: string[];
 
   // Real Estate Portal Specifics
   realEstateAbout?: string;

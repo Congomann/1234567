@@ -35,6 +35,22 @@ const NHFG_SEO_CONFIG: Record<string, { title: string; description: string }> = 
   '/advisors': {
     title: 'Expert Financial Advisors | New Holland Financial Group',
     description: 'Meet our team of licensed financial advisors specializing in life insurance, real estate, and investment strategies.'
+  },
+  '/group-benefits': {
+    title: 'Group Benefits & Employee Insurance | NHFG',
+    description: 'Comprehensive group benefits solutions for businesses, including health, dental, vision, and retirement programs.'
+  },
+  '/auto-insurance': {
+    title: 'Auto & Commercial Vehicle Insurance | NHFG',
+    description: 'Protect your vehicles with NHFG auto insurance. Coverage for personal cars, commercial fleets, and specialty vehicles.'
+  },
+  '/investments': {
+    title: 'Investment Products & Wealth Management | NHFG',
+    description: 'Grow and protect your wealth with our curated investment strategies, securities, and professional wealth management.'
+  },
+  '/securities': {
+    title: 'Securities & Market Analysis | NHFG',
+    description: 'Access advanced securities analysis and professional market insights from New Holland Financial Group.'
   }
 };
 

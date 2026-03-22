@@ -18,7 +18,7 @@ class NHFGBackend {
     }
 
     private getAuthHeaders(): HeadersInit {
-        const token = localStorage.getItem('nhfg_jwt_token');
+        const token = localStorage.getItem('nhfg_access_token');
         const headers: HeadersInit = { 'Content-Type': 'application/json' };
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -26,10 +26,21 @@ class NHFGBackend {
         return headers;
     }
 
-    private async handleResponse(res: Response, silent = false) {
+    private async handleResponse(res: Response, silent = false, originalRequest?: () => Promise<any>): Promise<any> {
         if (res.status === 401) {
+            const data = await res.clone().json().catch(() => ({}));
+            
+            // If it's a token expiration and we have a retry function
+            if (data.code === 'TOKEN_EXPIRED' && originalRequest) {
+                console.log('[Backend] Access token expired, attempting refresh...');
+                const refreshed = await this.refreshTokens();
+                if (refreshed) {
+                    return originalRequest();
+                }
+            }
+
             if (!silent) {
-                const hasToken = localStorage.getItem('nhfg_jwt_token');
+                const hasToken = localStorage.getItem('nhfg_access_token');
                 if (hasToken) {
                     this.logout();
                     window.location.href = '/login';
@@ -64,13 +75,38 @@ class NHFGBackend {
         return res.json();
     }
 
+    private async refreshTokens(): Promise<boolean> {
+        const refreshToken = localStorage.getItem('nhfg_refresh_token');
+        if (!refreshToken) return false;
+
+        try {
+            const res = await fetch(`${this.baseUrl}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshToken })
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('nhfg_access_token', data.access_token);
+                return true;
+            }
+        } catch (e) {
+            console.error('[Backend] Refresh failed:', e);
+        }
+        
+        this.logout();
+        return false;
+    }
+
     // Helper to wrap API calls with IndexedDB fallback
     private async apiRequest<T>(url: string, options: RequestInit, fallbackStore: string): Promise<T> {
         if (!USE_REAL_BACKEND) return DB.getAll<any>(fallbackStore) as any;
 
         try {
-            const res = await fetch(url, options);
-            return await this.handleResponse(res);
+            const executeRequest = () => fetch(url, { ...options, headers: this.getAuthHeaders() });
+            const res = await executeRequest();
+            return await this.handleResponse(res, false, () => this.apiRequest(url, options, fallbackStore));
         } catch (e: any) {
             const isNetworkError = e instanceof TypeError;
             const isNotFound = e.message.includes('404') || e.message.toLowerCase().includes('not found');
@@ -81,6 +117,7 @@ class NHFGBackend {
             } else {
                 // Real logic or server-side error (500, 403, etc.)
                 console.error(`[Backend] API Error: ${e.message}`);
+                if (e.message === 'Session expired') throw e;
             }
 
             return DB.getAll<any>(fallbackStore) as any;
@@ -90,12 +127,12 @@ class NHFGBackend {
     // --- AUTHENTICATION ---
 
     async getCurrentUser(): Promise<User | null> {
-        if (!USE_REAL_BACKEND || !localStorage.getItem('nhfg_jwt_token')) return null;
+        if (!USE_REAL_BACKEND || !localStorage.getItem('nhfg_access_token')) return null;
         try {
             const res = await fetch(`${this.baseUrl}/auth/me`, {
                 headers: this.getAuthHeaders()
             });
-            return await this.handleResponse(res, true);
+            return await this.handleResponse(res, true, () => this.getCurrentUser());
         } catch (e) {
             return null;
         }
@@ -111,19 +148,28 @@ class NHFGBackend {
             });
             const data = await this.handleResponse(res);
             if (data.access_token) {
-                localStorage.setItem('nhfg_jwt_token', data.access_token);
+                localStorage.setItem('nhfg_access_token', data.access_token);
+                localStorage.setItem('nhfg_refresh_token', data.refresh_token);
             }
             return data.user;
         } catch (e: any) {
-            if (!(e instanceof TypeError) && !e.message.includes('404')) {
-                console.warn(`[Backend] Login API Exception: ${e.message}`);
-            }
+            console.warn(`[Backend] Login API Exception: ${e.message}`);
             return null;
         }
     }
 
-    logout() {
-        localStorage.removeItem('nhfg_jwt_token');
+    async logout() {
+        const refreshToken = localStorage.getItem('nhfg_refresh_token');
+        if (refreshToken && USE_REAL_BACKEND) {
+            fetch(`${this.baseUrl}/auth/logout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshToken })
+            }).catch(() => {});
+        }
+        localStorage.removeItem('nhfg_access_token');
+        localStorage.removeItem('nhfg_refresh_token');
+        localStorage.removeItem('nhfg_jwt_token'); // Clean up old token if exists
     }
 
     // --- ENTITY MANAGEMENT ---
@@ -378,6 +424,68 @@ class NHFGBackend {
         return data.url;
     }
 
+    // --- ACCESS LOGS ---
+    async getAccessLogs(): Promise<any[]> {
+        return this.apiRequest<any[]>(`${this.baseUrl}/admin/access-logs`, { headers: this.getAuthHeaders() }, 'access_logs');
+    }
+
+    // --- DOCUMENTS ---
+    async getDocuments(clientId?: string): Promise<any[]> {
+        const url = clientId ? `${this.baseUrl}/documents?clientId=${clientId}` : `${this.baseUrl}/documents`;
+        return this.apiRequest<any[]>(url, { headers: this.getAuthHeaders() }, 'documents');
+    }
+
+    async saveDocument(doc: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/documents`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(doc)
+                });
+            } catch (e) { }
+        }
+        await DB.save('documents', doc);
+    }
+
+    // --- INTERACTIONS ---
+    async getInteractions(leadId?: string, clientId?: string): Promise<any[]> {
+        let url = `${this.baseUrl}/interactions?`;
+        if (leadId) url += `leadId=${leadId}&`;
+        if (clientId) url += `clientId=${clientId}`;
+        return this.apiRequest<any[]>(url, { headers: this.getAuthHeaders() }, 'interactions');
+    }
+
+    async saveInteraction(interaction: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/interactions`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(interaction)
+                });
+            } catch (e) { }
+        }
+        await DB.save('interactions', interaction);
+    }
+
+    // --- PREFERENCES ---
+    async getPreferences(): Promise<any> {
+        return this.apiRequest<any>(`${this.baseUrl}/preferences`, { headers: this.getAuthHeaders() }, 'preferences');
+    }
+
+    async savePreferences(prefs: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(`${this.baseUrl}/preferences`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(prefs)
+                });
+            } catch (e) { }
+        }
+        await DB.save('preferences', prefs);
+    }
 
 }
 

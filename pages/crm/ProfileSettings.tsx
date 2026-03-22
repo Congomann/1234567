@@ -230,18 +230,47 @@ export const ProfileSettings: React.FC = () => {
                 <Globe className="h-5 w-5 text-blue-600" /> Public Profile Settings
             </h3>
             
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div>
-                    <p className="font-bold text-slate-700">Advisor Microsite Status</p>
-                    <p className="text-xs text-slate-500">Public visibility of your personal advisor page.</p>
+            <div className="flex flex-col gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-bold text-slate-700">Advisor Microsite Status</p>
+                        <p className="text-xs text-slate-500">Public visibility of your personal advisor page.</p>
+                    </div>
+                    
+                    <button 
+                        type="button"
+                        onClick={() => setFormData({ ...formData, micrositeEnabled: !formData.micrositeEnabled })}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.micrositeEnabled ? 'bg-green-500' : 'bg-slate-300'}`}
+                    >
+                        <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.micrositeEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${formData.micrositeEnabled ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-500'}`}>
-                        {formData.micrositeEnabled ? 'Online' : 'Disabled'}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase border border-slate-200 px-2 py-1 rounded bg-white">Admin Managed</span>
-                </div>
+
+                {formData.micrositeEnabled && user && (
+                    <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-500 uppercase">Shareable Link</p>
+                            <a 
+                                href={`${window.location.origin}/advisor/${user.name.toLowerCase().replace(/ /g, '-')}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-blue-600 hover:underline mt-1 block"
+                            >
+                                {`${window.location.origin}/advisor/${user.name.toLowerCase().replace(/ /g, '-')}`}
+                            </a>
+                        </div>
+                        <button 
+                            type="button"
+                            onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/advisor/${user.name.toLowerCase().replace(/ /g, '-')}`);
+                                alert("Link copied to clipboard!");
+                            }}
+                            className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                            Copy Link
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
 

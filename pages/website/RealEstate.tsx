@@ -123,111 +123,113 @@ export const RealEstate: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-      {/* Hero Section */}
-      <div className="relative bg-[#0B2240] pt-48 pb-24 overflow-hidden rounded-b-[4rem] shadow-2xl">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-amber-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-fade-in">
-          <span className="px-4 py-2 rounded-full bg-amber-500/20 text-amber-300 font-black text-[10px] uppercase tracking-[0.3em] border border-amber-500/30 mb-6 inline-block">
-            {viewMode === "buyers"
-              ? "Finding Your Future"
-              : viewMode === "sellers"
-                ? "Listing Excellence"
-                : viewMode === "resources"
-                  ? "Industry Intel"
-                  : viewMode === "about"
-                    ? "Our Legacy"
-                    : "Premier Real Estate"}
+      {/* Premium Hero Section */}
+      <div className="relative bg-[#0B2240] pt-56 pb-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-amber-500/10 rounded-full mix-blend-overlay filter blur-[120px] animate-pulse"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <span className="px-5 py-2 rounded-full bg-amber-500/10 text-amber-400 font-black text-[10px] uppercase tracking-[0.4em] border border-amber-500/20 mb-10 inline-block">
+            {viewMode === "home" ? "The NHFG Portfolio" : 
+             viewMode === "buyers" ? "The Acquisition Journey" :
+             viewMode === "sellers" ? "Strategic Divestment" : 
+             "Premier Real Estate"}
           </span>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none uppercase">
-            {viewMode === "buyers"
-              ? "Home Buying Process"
-              : viewMode === "sellers"
-                ? "Strategic Listing Process"
-                : viewMode === "properties"
-                  ? "Exclusive Listings"
-                  : viewMode === "resources"
-                    ? "Strategic Hub"
-                    : viewMode === "about"
-                      ? "Our Story"
-                      : "The NHFG Experience"}
+          <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none uppercase">
+            {viewMode === "home" ? "Market Mastery." : 
+             viewMode === "buyers" ? "Find Your Legacy." :
+             viewMode === "sellers" ? "Maximize Value." : 
+             "NHFG Estates."}
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto font-medium leading-relaxed opacity-80 uppercase tracking-widest text-[11px]">
-            {viewMode === "buyers"
-              ? "Strategic roadmap to your next property acquisition."
-              : viewMode === "sellers"
-                ? "From market analysis to closing, we maximize your ROI."
-                : viewMode === "resources"
-                  ? "Professional tools for the sophisticated market participant."
-                  : "Unrivaled expertise in surrounding residential markets."}
+          <p className="text-xl text-blue-100/70 max-w-3xl mx-auto font-medium leading-relaxed uppercase tracking-[0.2em] text-[12px]">
+            Institutional-grade expertise in high-net-worth residential and commercial markets.
           </p>
+          
+          <div className="mt-12 flex flex-wrap justify-center gap-4">
+             {["properties", "buyers", "sellers", "resources", "about"].map((view) => (
+                <Link
+                  key={view}
+                  to={`/real-estate?view=${view}`}
+                  className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    viewMode === view 
+                    ? "bg-amber-500 text-slate-900 shadow-xl" 
+                    : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                  }`}
+                >
+                  {view}
+                </Link>
+             ))}
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         {/* HOME VIEW (OVERVIEW) */}
         {viewMode === "home" && (
-          <div className="space-y-32 animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-4xl font-black text-[#0B2240] uppercase tracking-tighter mb-6">
-                  Unrivaled Presence
-                </h2>
-                <p className="text-slate-600 text-lg leading-relaxed mb-8">
-                  {companySettings.realEstateAbout}
-                </p>
-                <div className="flex gap-4">
-                  <Link
-                    to="/real-estate?view=buyers"
-                    className="px-8 py-4 bg-[#0B2240] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-slate-800 transition-all"
-                  >
-                    Buy a Home
-                  </Link>
-                  <Link
-                    to="/real-estate?view=sellers"
-                    className="px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-full font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
-                  >
-                    Sell a Home
-                  </Link>
+          <div className="space-y-40 animate-fade-in">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-[4rem] opacity-20 blur-2xl group-hover:opacity-30 transition-opacity"></div>
+                <div className="relative rounded-[3.5rem] overflow-hidden shadow-2xl h-[500px]">
+                  <img
+                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                    alt="Luxury Estate"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B2240] via-transparent to-transparent"></div>
+                  <div className="absolute bottom-12 left-12 right-12">
+                     <span className="text-amber-400 font-black text-[10px] uppercase tracking-widest mb-2 block">Featured Opportunity</span>
+                     <h3 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">The Greenwich Collection</h3>
+                  </div>
                 </div>
               </div>
-              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl h-[400px]">
-                <img
-                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000"
-                  className="w-full h-full object-cover"
-                  alt="Modern Home"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B2240]/80 to-transparent"></div>
-                <div className="absolute bottom-10 left-10 text-white">
-                  <p className="text-3xl font-black tracking-tighter">
-                    Experts with Years of Experience
-                  </p>
+
+              <div className="space-y-10">
+                <h2 className="text-5xl font-black text-[#0B2240] uppercase tracking-tighter leading-tight">
+                  Unrivaled <br />Market Presence.
+                </h2>
+                <p className="text-slate-500 text-lg leading-relaxed font-medium">
+                  {companySettings.realEstateAbout}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    to="/real-estate?view=properties"
+                    className="px-10 py-5 bg-[#0B2240] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                  >
+                    Explore Inventory <ArrowRight size={16} />
+                  </Link>
+                  <Link
+                    to="/real-estate?view=about"
+                    className="px-10 py-5 bg-white border border-slate-200 text-[#0B2240] rounded-full font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center"
+                  >
+                    Our Philosophy
+                  </Link>
                 </div>
               </div>
             </div>
 
             {/* FREE MOVING TRAILER CTA */}
-            <div className="bg-[#0B2240] rounded-[4rem] p-12 lg:p-20 text-white relative overflow-hidden group">
-              <div className="absolute -right-20 -bottom-20 opacity-10 group-hover:scale-110 transition-transform duration-1000 rotate-12">
-                <Truck size={400} />
+            <div className="bg-[#0B2240] rounded-[5rem] p-16 lg:p-32 text-white relative overflow-hidden group shadow-3xl">
+              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-amber-500/10 to-transparent"></div>
+              <div className="absolute -right-20 -bottom-20 opacity-5 group-hover:scale-110 transition-transform duration-[2000ms] rotate-12">
+                <Truck size={600} />
               </div>
-              <div className="max-w-3xl relative z-10">
-                <span className="bg-amber-500/20 text-amber-300 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 inline-block border border-amber-500/30">
-                  Client Exclusive
+              <div className="max-w-4xl relative z-10">
+                <span className="bg-amber-500/20 text-amber-300 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.4em] mb-10 inline-block border border-amber-500/20">
+                  Exclusive White Glove Service
                 </span>
-                <h3 className="text-4xl lg:text-6xl font-black mb-8 leading-tight tracking-tighter uppercase">
-                  Check out our FREE moving trailer!
+                <h3 className="text-5xl lg:text-7xl font-black mb-10 leading-[0.9] tracking-tighter uppercase">
+                  Logistics <br /> <span className="text-amber-500">Mastered.</span>
                 </h3>
-                <p className="text-blue-100 text-lg mb-10 font-medium leading-relaxed">
-                  Available to all our home buyers and sellers. We take care of
-                  the transition so you can focus on the destination.
+                <p className="text-blue-100/70 text-xl mb-12 font-medium leading-relaxed max-w-2xl">
+                  Complimentary access to our professional moving fleet for all clients. 
+                  Because your transition should be as seamless as your acquisition.
                 </p>
                 <Link
                   to="/real-estate?view=contact"
-                  className="bg-white text-[#0B2240] px-12 py-5 rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-amber-50 transition-all flex items-center gap-3 w-fit"
+                  className="bg-white text-[#0B2240] px-14 py-6 rounded-full font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-amber-50 transition-all flex items-center gap-3 w-fit group/btn hover:scale-105 active:scale-95"
                 >
-                  Reserve for your move <ArrowRight size={16} />
+                  Reserve Your Move <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -236,64 +238,64 @@ export const RealEstate: React.FC = () => {
 
         {/* BUYERS VIEW */}
         {viewMode === "buyers" && (
-          <div className="space-y-24 animate-fade-in">
-            <div className="text-center max-w-3xl mx-auto space-y-6">
-              <h2 className="text-5xl font-black text-[#0B2240] tracking-tighter uppercase">
-                Where do I start?
+          <div className="space-y-32 animate-fade-in">
+            <div className="text-center max-w-4xl mx-auto">
+              <h2 className="text-6xl font-black text-[#0B2240] tracking-tighter uppercase leading-none mb-6">
+                The Acquisition <br /><span className="text-amber-600">Blueprint.</span>
               </h2>
-              <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
-                Your Home Buying Process
+              <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-sm">
+                Strategic Steps to Your Next Legacy Property
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  title: "Get Pre-Approved",
-                  desc: "Your first step! We connect you with trusted local lenders to understand your buying power and strengthen your offer.",
+                  title: "Capital Readiness",
+                  desc: "Strategic coordination with elite lending partners to establish your maximum acquisition power and deal structure.",
                   icon: Landmark,
                 },
                 {
-                  title: "Property Search",
-                  desc: "We listen to your needs and search the entire MLS and beyond to find the best matches, providing full market context.",
+                  title: "Market Intelligence",
+                  desc: "Deep-dive analysis of MLS and off-market 'pocket' listings, filtered through our proprietary value-assessment matrix.",
                   icon: Search,
                 },
                 {
-                  title: "Showings & Hunting",
-                  desc: "We schedule tours, advise on pros/cons of each property, and educate you throughout the process.",
+                  title: "Private Showings",
+                  desc: "Curated walkthroughs with executive-level commentary on structural integrity, architectural value, and future appreciation.",
                   icon: DoorOpen,
                 },
                 {
-                  title: "Negotiations",
-                  desc: "We negotiate the best possible terms, detail every aspect of the offer in writing, and ensure all disclosures are completed correctly.",
+                  title: "Strategic Negotiation",
+                  desc: "Precision bidding and contract structuring designed to win in competitive markets while protecting your capital.",
                   icon: FileText,
                 },
                 {
-                  title: "Facilitate Process",
-                  desc: "We guide you every step, creatively resolving any inspection, appraisal, or title issues to get to closing.",
+                  title: "Asset Validation",
+                  desc: "Meticulous oversight of inspections, appraisals, and title clears to ensure your investment is structurally and legally sound.",
                   icon: CheckCircle2,
                 },
                 {
-                  title: "Get to Closing!",
-                  desc: "We handle all paperwork, finalize figures, and are by your side to celebrate a successful closing.",
+                  title: "Portfolio Integration",
+                  desc: "Finalizing the luxury acquisition and integrating the asset into your lifestyle or investment portfolio.",
                   icon: Key,
                 },
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col h-full relative overflow-hidden"
+                  className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-8 text-slate-50 font-black text-6xl opacity-20 pointer-events-none group-hover:text-blue-50 transition-colors">
-                    0{i + 1}
+                  <div className="absolute top-0 right-0 p-10 text-slate-100 font-black text-8xl opacity-10 group-hover:text-amber-500/10 transition-colors pointer-events-none">
+                    {i + 1}
                   </div>
-                  <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
-                    <step.icon size={28} />
+                  <div className="h-20 w-20 bg-slate-50 text-[#0B2240] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
+                    <step.icon size={32} />
                   </div>
                   <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tighter uppercase">
                     {step.title}
                   </h3>
-                  <p className="text-slate-500 text-sm leading-relaxed font-medium flex-1">
-                    {step.desc}
+                  <p className="text-slate-500 text-sm leading-relaxed font-medium flex-1 italic">
+                    "{step.desc}"
                   </p>
                 </div>
               ))}
@@ -303,66 +305,66 @@ export const RealEstate: React.FC = () => {
 
         {/* SELLERS VIEW */}
         {viewMode === "sellers" && (
-          <div className="space-y-24 animate-fade-in">
-            <div className="text-center max-w-3xl mx-auto space-y-6">
-              <h2 className="text-5xl font-black text-[#0B2240] tracking-tighter uppercase">
-                Where do I start?
+          <div className="space-y-32 animate-fade-in">
+            <div className="text-center max-w-4xl mx-auto">
+              <h2 className="text-6xl font-black text-[#0B2240] tracking-tighter uppercase leading-none mb-6">
+                Institutional <br /><span className="text-amber-600">Liquidity.</span>
               </h2>
-              <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
-                Your Home Selling Process
+              <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-sm">
+                Engineering the Maximum Yield for Your Sale
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {[
                 {
-                  title: "Preparing Your Home to Sell",
-                  desc: "We advise on key repairs, improvements, cleaning, decluttering, and staging to maximize appeal and value.",
+                  title: "Asset Optimization",
+                  desc: "Architectural staging and high-impact repairs directed by our design specialists to maximize emotional appeal and appraisal value.",
                   icon: Hammer,
                 },
                 {
-                  title: "Pricing to Sell",
-                  desc: "We perform a Competitive Market Analysis (CMA) to recommend a strategic price for a timely sale that meets appraisal value.",
+                  title: "Yield Analysis",
+                  desc: "Proprietary market modeling to identify the 'Optimal Exit Price'—balancing time-on-market with maximum ROI.",
                   icon: DollarSign,
                 },
                 {
-                  title: "Paperwork & Listing",
-                  desc: "We manage all required state disclosures and legal paperwork, protecting you from liabilities with our expertise.",
+                  title: "Legal Structuring",
+                  desc: "Comprehensive disclosure management and contract preparation to insulate you from post-sale liability.",
                   icon: FileText,
                 },
                 {
-                  title: "Marketing Your Property",
-                  desc: "Multi-channel dominance: Online (MLS, Zillow, 30+ sites), Local (Buyer's Guide Magazine, Electronic signs), and Team Power networking.",
+                  title: "Global Visibility",
+                  desc: "Dominant omni-channel marketing: Elite digital syndication, prestige print media, and private network distributions.",
                   icon: Globe,
                 },
                 {
-                  title: "Negotiations",
-                  desc: "Your agent negotiates the best price and ensures all terms (dates, contingencies, personal property) are agreed upon in writing.",
+                  title: "Contract Mastery",
+                  desc: "Aggressive representation throughout the negotiation phase to maintain price integrity and favorable terms.",
                   icon: Briefcase,
                 },
                 {
-                  title: "Closing",
-                  desc: "We coordinate dates, finalize figures, manage legal paperwork, and celebrate with you at closing.",
+                  title: "Exit & Closing",
+                  desc: "Seamless logistical coordination, final figure verification, and successful capital transfer.",
                   icon: CheckCircle,
                 },
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="flex flex-col md:flex-row gap-10 bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-lg transition-all items-center"
+                  className="flex flex-col md:flex-row gap-12 bg-white p-12 rounded-[4.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all items-center group relative overflow-hidden"
                 >
-                  <div className="h-20 w-20 bg-amber-50 text-amber-600 rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner">
-                    <step.icon size={32} />
+                  <div className="absolute top-0 right-0 p-8 text-slate-50 font-black text-9xl opacity-10 group-hover:text-amber-500/5 transition-opacity pointer-events-none">
+                    0{i + 1}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter">
+                  <div className="h-24 w-24 bg-amber-50 text-amber-600 rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                    <step.icon size={40} />
+                  </div>
+                  <div className="flex-1 relative z-10">
+                    <h3 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tighter">
                       {step.title}
                     </h3>
-                    <p className="text-slate-500 font-medium leading-relaxed">
-                      {step.desc}
+                    <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-3xl italic">
+                      "{step.desc}"
                     </p>
-                  </div>
-                  <div className="text-7xl font-black text-slate-50 opacity-10 group-hover:opacity-20 transition-opacity">
-                    0{i + 1}
                   </div>
                 </div>
               ))}
@@ -372,7 +374,16 @@ export const RealEstate: React.FC = () => {
 
         {/* RESOURCES VIEW (Dynamic from CMS) */}
         {viewMode === "resources" && (
-          <div className="space-y-12 animate-fade-in">
+          <div className="space-y-20 animate-fade-in">
+             <div className="text-center max-w-4xl mx-auto">
+              <h2 className="text-6xl font-black text-[#0B2240] tracking-tighter uppercase leading-none mb-6">
+                Strategic <br /><span className="text-amber-600">Intel.</span>
+              </h2>
+              <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-sm">
+                Proprietary Tools for the Sophisticated Investor
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {companySettings.realEstateResources?.map((res) => (
                 <a
@@ -380,71 +391,114 @@ export const RealEstate: React.FC = () => {
                   href={res.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col h-full"
+                  className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
                 >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-all">
-                      <FileText size={24} />
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="p-5 bg-slate-50 text-[#0B2240] rounded-[1.5rem] group-hover:bg-[#0B2240] group-hover:text-white transition-all shadow-inner">
+                      <FileText size={28} />
                     </div>
-                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
+                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-4 py-1.5 rounded-full border border-amber-100">
                       {res.type}
                     </span>
                   </div>
-                  <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">
+                  <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase tracking-tighter">
                     {res.title}
                   </h3>
-                  <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8 flex-1">
-                    {res.description}
+                  <p className="text-slate-500 text-sm font-medium leading-relaxed mb-10 flex-1 italic">
+                    "{res.description}"
                   </p>
-                  <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.2em] group-hover:translate-x-2 transition-transform">
-                    Access Resource <ArrowRight size={14} />
+                  <div className="flex items-center gap-3 text-[#0B2240] font-black text-[10px] uppercase tracking-[0.2em] group-hover:translate-x-2 transition-transform">
+                    Initialize Access <ArrowRight size={16} />
                   </div>
                 </a>
               ))}
               {(!companySettings.realEstateResources ||
                 companySettings.realEstateResources.length === 0) && (
-                <div className="col-span-full py-32 text-center text-slate-300 italic">
-                  No specialized resources currently available.
+                <div className="col-span-full py-40 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
+                  <FileText className="h-16 w-16 mx-auto mb-6 text-slate-200" />
+                  <h3 className="text-2xl font-black text-slate-300 uppercase tracking-widest">
+                    Archives Building
+                  </h3>
+                  <p className="text-slate-400 mt-2 font-bold uppercase text-[10px] tracking-widest">
+                    New resources are currently being indexed. Check back soon.
+                  </p>
                 </div>
               )}
             </div>
           </div>
         )}
 
+        {/* ABOUT VIEW */}
+        {viewMode === "about" && (
+          <div className="space-y-40 animate-fade-in pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="space-y-12">
+                <h2 className="text-7xl font-black text-[#0B2240] tracking-tighter uppercase leading-[0.85]">
+                  Our <br /><span className="text-amber-600">DNA.</span>
+                </h2>
+                <div className="space-y-6 text-slate-500 text-xl font-medium leading-relaxed italic border-l-4 border-amber-500 pl-10">
+                  <p>
+                    New Holland Financial Group was founded on the principle that real estate isn't just about square footage—it's about the life lived within it and the legacy it builds.
+                  </p>
+                  <p>
+                    We operate at the intersection of traditional real estate and modern financial engineering, providing our clients with a distinct advantage in complex markets.
+                  </p>
+                </div>
+              </div>
+              <div className="relative rounded-[4rem] overflow-hidden shadow-3xl h-[600px] border-[16px] border-white">
+                 <img
+                    src="https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&q=80&w=1200"
+                    className="w-full h-full object-cover"
+                    alt="Legacy Building"
+                  />
+                  <div className="absolute inset-0 bg-[#0B2240]/20"></div>
+              </div>
+            </div>
+
+            <div className="bg-slate-900 rounded-[5rem] p-16 lg:p-32 text-center relative overflow-hidden">
+               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+              <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.5em] mb-12">Institutional Standards</h3>
+              <p className="text-3xl lg:text-5xl font-black text-white max-w-5xl mx-auto leading-tight tracking-tighter uppercase">
+                "We don't just find houses; we secure the <span className="text-amber-500">foundation</span> of your wealth."
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* CONTACT VIEW */}
         {viewMode === "contact" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 animate-fade-in">
-            <div className="space-y-10">
-              <h2 className="text-5xl font-black text-[#0B2240] tracking-tighter uppercase leading-none">
-                Let's Connect
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 animate-fade-in items-center">
+            <div className="space-y-12">
+              <h2 className="text-7xl font-black text-[#0B2240] tracking-tighter uppercase leading-[0.85] mb-8">
+                Request <br /><span className="text-amber-600">Consultation.</span>
               </h2>
-              <p className="text-xl text-slate-600 leading-relaxed font-medium">
+              <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-lg">
                 {companySettings.realEstateContactCta}
               </p>
 
-              <div className="space-y-6">
-                <div className="flex gap-4 items-center group">
-                  <div className="p-4 bg-white shadow-lg rounded-2xl border border-slate-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <Smartphone size={24} />
+              <div className="space-y-8">
+                <div className="flex gap-6 items-center group">
+                  <div className="p-5 bg-white shadow-xl rounded-[2rem] border border-slate-50 text-[#0B2240] group-hover:bg-[#0B2240] group-hover:text-white transition-all transform group-hover:scale-110">
+                    <Smartphone size={28} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
-                      Primary Line
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1">
+                      Direct Private Line
                     </p>
-                    <p className="text-xl font-black text-[#0B2240]">
+                    <p className="text-2xl font-black text-[#0B2240]">
                       {companySettings.phone}
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-4 items-center group">
-                  <div className="p-4 bg-white shadow-lg rounded-2xl border border-slate-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <Mail size={24} />
+                <div className="flex gap-6 items-center group">
+                  <div className="p-5 bg-white shadow-xl rounded-[2rem] border border-slate-50 text-[#0B2240] group-hover:bg-[#0B2240] group-hover:text-white transition-all transform group-hover:scale-110">
+                    <Mail size={28} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
-                      General Inbox
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1">
+                      Encryption Secured Email
                     </p>
-                    <p className="text-xl font-black text-[#0B2240]">
+                    <p className="text-2xl font-black text-[#0B2240]">
                       {companySettings.email}
                     </p>
                   </div>
@@ -452,44 +506,64 @@ export const RealEstate: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-2xl border border-slate-100">
+            <div className="bg-white rounded-[4rem] p-12 lg:p-16 shadow-3xl border border-slate-100 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16"></div>
               {formSubmitted ? (
-                <div className="text-center py-20">
-                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                    <CheckCircle2 size={40} />
+                <div className="text-center py-24">
+                  <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                    <CheckCircle2 size={48} />
                   </div>
-                  <h3 className="text-3xl font-black text-slate-900">
-                    Request Sent
+                  <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">
+                    Transmission Sent.
                   </h3>
-                  <p className="text-slate-500 mt-2 font-medium">
-                    An expert advisor will reach out to you shortly.
+                  <p className="text-slate-500 mt-4 font-medium italic">
+                    "A senior executive advisor will contact you within 4 business hours."
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleContactSubmit} className="space-y-6">
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
-                      Name
-                    </label>
-                    <input
-                      required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                      placeholder="John Doe"
-                      value={contactForm.name}
-                      onChange={(e) =>
-                        setContactForm({ ...contactForm, name: e.target.value })
-                      }
-                    />
+                <form onSubmit={handleContactSubmit} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Full Name
+                      </label>
+                      <input
+                        required
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner"
+                        placeholder="ALEXANDER VANCE"
+                        value={contactForm.name}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Direct Phone
+                      </label>
+                      <input
+                        required
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner"
+                        placeholder="+1 (555) 000-0000"
+                        value={contactForm.phone}
+                        onChange={(e) =>
+                          setContactForm({
+                            ...contactForm,
+                            phone: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
-                      Email
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                      Secure Email
                     </label>
                     <input
                       type="email"
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                      placeholder="john@example.com"
+                      className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner"
+                      placeholder="OFFICE@VANCECAPITAL.COM"
                       value={contactForm.email}
                       onChange={(e) =>
                         setContactForm({
@@ -500,30 +574,13 @@ export const RealEstate: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
-                      Phone
-                    </label>
-                    <input
-                      required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                      placeholder="(555) 555-5555"
-                      value={contactForm.phone}
-                      onChange={(e) =>
-                        setContactForm({
-                          ...contactForm,
-                          phone: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
-                      Message
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                      Inquiry Narrative
                     </label>
                     <textarea
                       rows={4}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] p-6 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none shadow-inner resize-none"
-                      placeholder="How can we help you?"
+                      className="w-full bg-slate-50 border border-transparent rounded-[2.5rem] p-8 text-sm font-medium focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner resize-none"
+                      placeholder="DESCRIBE YOUR OBJECTIVES..."
                       value={contactForm.message}
                       onChange={(e) =>
                         setContactForm({
@@ -535,9 +592,9 @@ export const RealEstate: React.FC = () => {
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-5 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-slate-800 transition-all"
+                    className="w-full py-6 bg-[#0B2240] text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                   >
-                    Submit Strategy Request
+                    Establish Connection <ArrowRight size={16} />
                   </button>
                 </form>
               )}
@@ -547,23 +604,21 @@ export const RealEstate: React.FC = () => {
 
         {/* PROPERTIES VIEW */}
         {viewMode === "properties" && (
-          <div className="space-y-12 animate-fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8 border-b border-slate-100 pb-10">
-              <div>
-                <h2 className="text-4xl font-black text-[#0B2240] tracking-tight uppercase">
-                  {typeFilter ? `${typeFilter} Inventory` : "Our Listings"}
+          <div className="space-y-20 animate-fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-12 border-b border-slate-100 pb-16">
+              <div className="max-w-2xl">
+                 <span className="text-amber-600 font-black text-[10px] uppercase tracking-[0.4em] mb-4 block">Active Markets</span>
+                <h2 className="text-6xl font-black text-[#0B2240] tracking-tighter uppercase leading-none">
+                  Listing <br />Inventory.
                 </h2>
-                <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2">
-                  Premier Residential Markets
-                </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {["All", "Residential", "Acreage", "Commercial", "Land"].map(
                   (filter) => (
                     <Link
                       key={filter}
                       to={`/real-estate?view=properties${filter === "All" ? "" : `&type=${filter}`}`}
-                      className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${typeFilter === filter || (!typeFilter && filter === "All") ? "bg-[#0B2240] text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                      className={`px-8 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${typeFilter === filter || (!typeFilter && filter === "All") ? "bg-[#0B2240] text-white shadow-xl" : "bg-slate-50 text-slate-400 hover:bg-slate-100"}`}
                     >
                       {filter}
                     </Link>
@@ -573,67 +628,67 @@ export const RealEstate: React.FC = () => {
             </div>
 
             {filteredProperties.length === 0 ? (
-              <div className="text-center py-40 bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
-                <HomeIcon className="h-16 w-16 mx-auto mb-6 text-slate-200" />
-                <h3 className="text-2xl font-black text-slate-300 uppercase tracking-widest leading-none">
-                  No Current Listings
+              <div className="text-center py-48 bg-slate-50 rounded-[5rem] border-2 border-dashed border-slate-200">
+                <HomeIcon className="h-20 w-20 mx-auto mb-8 text-slate-200" />
+                <h3 className="text-3xl font-black text-slate-300 uppercase tracking-widest leading-none">
+                  No Active Exposure.
                 </h3>
-                <p className="text-slate-400 mt-2 font-bold uppercase text-[10px] tracking-widest">
-                  Adjust filters or contact an advisor for pocket listings.
+                <p className="text-slate-400 mt-4 font-bold uppercase text-[12px] tracking-widest">
+                  Adjust filters or establish a connection for private vault access.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {filteredProperties.map((prop) => (
                   <div
                     key={prop.id}
-                    className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer overflow-hidden transform hover:-translate-y-2 flex flex-col h-full"
+                    className="bg-white rounded-[4rem] border border-slate-50 shadow-sm hover:shadow-3xl transition-all duration-700 group cursor-pointer overflow-hidden transform hover:-translate-y-4 flex flex-col h-full"
                     onClick={() => setSelectedProperty(prop)}
                   >
-                    <div className="h-72 relative overflow-hidden bg-slate-200">
+                    <div className="h-[450px] relative overflow-hidden">
                       <img
                         src={prop.image}
                         alt={prop.address}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]"
                       />
-                      <div className="absolute top-6 left-6 bg-slate-900/80 backdrop-blur-xl text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute top-8 left-8 bg-[#0B2240]/60 backdrop-blur-2xl text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10">
                         {prop.type}
                       </div>
-                      <div className="absolute bottom-6 right-6 bg-white text-[#0B2240] px-6 py-3 rounded-2xl text-2xl font-black shadow-2xl">
+                      <div className="absolute bottom-8 right-8 bg-white text-[#0B2240] px-8 py-4 rounded-[2rem] text-3xl font-black shadow-2xl">
                         ${prop.price.toLocaleString()}
                       </div>
                     </div>
-                    <div className="p-8 flex-1 flex flex-col">
-                      <h4 className="text-xl font-black text-slate-900 mb-2 leading-tight uppercase tracking-tighter">
+                    <div className="p-12 flex-1 flex flex-col">
+                      <h4 className="text-3xl font-black text-slate-900 mb-4 leading-[0.9] uppercase tracking-tighter">
                         {prop.address}
                       </h4>
-                      <p className="text-slate-500 text-xs font-bold flex items-center gap-1.5 mb-8">
-                        <MapPin className="h-4 w-4 text-blue-500" /> {prop.city}
+                      <p className="text-slate-400 text-xs font-black flex items-center gap-2 mb-10 uppercase tracking-widest">
+                        <MapPin className="h-4 w-4 text-amber-500" /> {prop.city}
                         , {prop.state}
                       </p>
 
-                      <div className="grid grid-cols-3 gap-3 mb-8">
-                        <div className="text-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group-hover:bg-blue-50 transition-all">
-                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      <div className="grid grid-cols-3 gap-4 mb-2">
+                        <div className="text-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100 group-hover:bg-amber-50 transition-all">
+                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1">
                             Beds
                           </span>
-                          <span className="font-black text-slate-800 text-lg">
+                          <span className="font-black text-[#0B2240] text-xl">
                             {prop.bedrooms}
                           </span>
                         </div>
-                        <div className="text-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group-hover:bg-blue-50 transition-all">
-                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <div className="text-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100 group-hover:bg-amber-50 transition-all">
+                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1">
                             Baths
                           </span>
-                          <span className="font-black text-slate-800 text-lg">
+                          <span className="font-black text-[#0B2240] text-xl">
                             {prop.bathrooms}
                           </span>
                         </div>
-                        <div className="text-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group-hover:bg-blue-50 transition-all">
-                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <div className="text-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100 group-hover:bg-amber-50 transition-all">
+                          <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 mt-1">
                             Sq Ft
                           </span>
-                          <span className="font-black text-slate-800 text-lg">
+                          <span className="font-black text-[#0B2240] text-xl">
                             {prop.sqft?.toLocaleString()}
                           </span>
                         </div>

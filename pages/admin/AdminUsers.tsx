@@ -6,11 +6,13 @@ import { Trash2, Plus, Search, Edit2, Shield, Globe, Power, PowerOff, X, Check, 
 import { Link } from 'react-router-dom';
 
 export const AdminUsers: React.FC = () => {
-    const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser } = useData();
+    const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser, accessLogs } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [showArchived, setShowArchived] = useState(false);
+    const [viewMode, setViewMode] = useState<'users' | 'logs'>('users');
+    const [selectedUserLogs, setSelectedUserLogs] = useState<string | null>(null);
 
     const initialFormData: Partial<User & { password?: string }> = {
         name: '',
@@ -108,9 +110,15 @@ export const AdminUsers: React.FC = () => {
                 <div className="flex gap-3 mt-4 md:mt-0">
                     <button
                         onClick={() => setShowArchived(!showArchived)}
-                        className={`px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest shadow-sm transition-all flex items-center gap-2 border ${showArchived ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                        className={`px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest shadow-sm transition-all flex items-center gap-2 border ${showArchived ? 'bg-orange-100 text-slate-700 border-slate-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <Archive className="h-3 w-3" /> {showArchived ? 'Active Users' : 'Archived'}
+                    </button>
+                    <button
+                        onClick={() => setViewMode(viewMode === 'users' ? 'logs' : 'users')}
+                        className={`px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest shadow-sm transition-all flex items-center gap-2 border ${viewMode === 'logs' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                    >
+                        <Shield className="h-3 w-3" /> {viewMode === 'logs' ? 'User Feed' : 'Access Logs'}
                     </button>
                     {!showArchived && (
                         <button
@@ -127,14 +135,15 @@ export const AdminUsers: React.FC = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                     type="text"
-                    placeholder={showArchived ? "Search archived users..." : "Search terminal users..."}
+                    placeholder={viewMode === 'logs' ? "Search activity logs..." : (showArchived ? "Search archived users..." : "Search terminal users...")}
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 bg-white/50 backdrop-blur-sm border border-slate-200 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                 />
             </div>
 
-            <div className="space-y-px bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden">
+            {viewMode === 'users' ? (
+                <div className="space-y-px bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden">
                 {filteredUsers.map((user, idx) => {
                     const isEven = idx % 2 === 0;
                     // Generate slug for advisor preview link
@@ -215,7 +224,33 @@ export const AdminUsers: React.FC = () => {
                         </div>
                     );
                 })}
-            </div>
+                </div>
+            ) : (
+                <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl overflow-hidden overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                        <thead>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="p-6 font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
+                                <th className="p-6 font-black text-slate-400 uppercase tracking-widest">User</th>
+                                <th className="p-6 font-black text-slate-400 uppercase tracking-widest">Action</th>
+                                <th className="p-6 font-black text-slate-400 uppercase tracking-widest">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {accessLogs.filter(log => !searchTerm || log.userName.toLowerCase().includes(searchTerm.toLowerCase()) || log.action.toLowerCase().includes(searchTerm.toLowerCase())).map((log, idx) => (
+                                <tr key={log.id} className={`${idx % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/20'} border-b border-slate-100 last:border-b-0 hover:bg-white transition-colors`}>
+                                    <td className="p-6 font-medium text-slate-500">{new Date(log.createdAt).toLocaleString()}</td>
+                                    <td className="p-6 font-bold text-slate-900">{log.userName}</td>
+                                    <td className="p-6">
+                                        <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-wider">{log.action}</span>
+                                    </td>
+                                    <td className="p-6 font-mono text-[10px] text-slate-400">{log.ipAddress}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Edit User Modal - Mastering Microsite Visibility */}
             {editingUser && (
@@ -235,6 +270,48 @@ export const AdminUsers: React.FC = () => {
                                     <div>
                                         <label className="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Email</label>
                                         <input className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1">Granular Node Permissions</label>
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {(editingUser.permissions || []).map(perm => (
+                                                <span key={perm} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm group/perm">
+                                                    {perm}
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setEditingUser({
+                                                            ...editingUser,
+                                                            permissions: editingUser.permissions?.filter(p => p !== perm)
+                                                        })}
+                                                        className="hover:text-red-200 transition-colors"
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </span>
+                                            ))}
+                                            {(!editingUser.permissions || editingUser.permissions.length === 0) && (
+                                                <span className="text-[10px] text-slate-400 italic">No custom nodes assigned. Base role inheritance active.</span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['view_reports', 'manage_leads', 'export_data', 'approve_signatures', 'edit_crm_config', 'billing_access'].map(p => {
+                                                const isAssigned = editingUser.permissions?.includes(p);
+                                                if (isAssigned) return null;
+                                                return (
+                                                    <button
+                                                        key={p}
+                                                        type="button"
+                                                        onClick={() => setEditingUser({
+                                                            ...editingUser,
+                                                            permissions: [...(editingUser.permissions || []), p]
+                                                        })}
+                                                        className="px-3 py-1.5 bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-slate-200 border-dashed"
+                                                    >
+                                                        + {p.replace(/_/g, ' ')}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

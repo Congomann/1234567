@@ -6,7 +6,7 @@ import {
     Users, Wallet, TrendingUp, Activity, ArrowUpRight,
     MonitorCheck, BarChart3, ShieldAlert, Cpu, ArrowRight,
     Search, Bell, LayoutGrid, Webhook, Bug, RefreshCw, MessageSquarePlus, ChevronRight, AlertCircle, Clock, Info, Server, Globe, Zap, ShieldCheck,
-    FileText, GripVertical, CheckCircle2, Trash2, Plus
+    FileText, GripVertical, CheckCircle2, Trash2, Plus, Phone, Mail, Calendar
 } from 'lucide-react';
 import { UserRole, LeadStatus, TaskPriority, Task } from '../../types';
 
@@ -25,12 +25,23 @@ const MetricCard = ({ title, value, subtext, icon: Icon, colorClass, trend, onCl
             <p className="text-5xl font-black text-slate-900 tracking-tighter mb-2">{value}</p>
             <div className="flex items-center gap-2">
                 {trend && (
-                    <span className={`text-xs font-black flex items-center ${trend.includes('OK') || trend.includes('UP') || trend.includes('100%') ? 'text-green-500' : 'text-orange-500'}`}>
+                    <span className={`text-xs font-black flex items-center ${trend.includes('OK') || trend.includes('UP') || trend.includes('100%') || trend.includes('OPTIMAL') ? 'text-green-500' : 'text-orange-500'}`}>
                         {trend}
                     </span>
                 )}
                 <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{subtext}</span>
             </div>
+            {title === "Hot Leads" && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Daily Conversion Goal</span>
+                        <span className="text-[9px] font-black text-blue-600">85%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-blue-600 h-full rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
+                    </div>
+                </div>
+            )}
         </div>
     </div>
 );
@@ -164,7 +175,7 @@ const TaskList = () => {
 };
 
 export const Dashboard: React.FC = () => {
-    const { user, metrics, notifications, markNotificationRead, allUsers, leads, jobApplications } = useData();
+    const { user, metrics, notifications, markNotificationRead, allUsers, leads, jobApplications, events, interactions } = useData();
     const navigate = useNavigate();
 
     const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.SUB_ADMIN;
@@ -172,8 +183,8 @@ export const Dashboard: React.FC = () => {
     const advisorStats = [
         { title: "Total Clients", value: metrics.activeClients || "450", subtext: "Managed Accounts", icon: Users, colorClass: "bg-blue-50 text-blue-600", trend: "+12%", route: "/crm/clients" },
         { title: "Earnings YTD", value: `$${(metrics.totalCommission / 1000).toFixed(1)}k`, subtext: "Net Commission", icon: Wallet, colorClass: "bg-green-50 text-green-600", trend: "OPTIMAL", route: "/crm/commissions" },
-        { title: "Pipeline Score", value: "84/100", subtext: "Lead Quality", icon: TrendingUp, colorClass: "bg-purple-50 text-purple-600", trend: "+8.2%", route: "/crm/leads" },
-        { title: "Active Projects", value: "12", subtext: "Current Focus", icon: Activity, colorClass: "bg-orange-50 text-orange-600", route: "/crm/calendar" }
+        { title: "Hot Leads", value: leads.filter(l => l.qualification === 'Hot').length, subtext: "High Conversion Potential", icon: TrendingUp, colorClass: "bg-purple-50 text-purple-600", trend: "ACTION REQ", route: "/crm/leads" },
+        { title: "Pipeline Value", value: `$${(leads.length * 2.5).toFixed(1)}k`, subtext: "Estimated Value", icon: Activity, colorClass: "bg-orange-50 text-orange-600", route: "/crm/leads" }
     ];
 
     const adminStats = [
@@ -211,7 +222,7 @@ export const Dashboard: React.FC = () => {
             icon: ShieldCheck,
             colorClass: "bg-purple-50 text-purple-600",
             trend: "AES-256",
-            route: "/crm/legal"
+            route: "/crm/admin/access-logs"
         }
     ];
 
@@ -309,32 +320,76 @@ export const Dashboard: React.FC = () => {
                                     icon={Bug}
                                     type="alert"
                                 />
-                                <LogItem
-                                    title="Terms of Use Update"
-                                    desc="Admin modified Step 2 of the Onboarding Flow. Action logged by Master-UID-1."
-                                    time="4h ago"
-                                    icon={FileText}
-                                    type="info"
-                                />
                             </>
                         ) : (
-                            notifications.slice(0, 6).map((n) => (
-                                <div key={n.id} onClick={() => handleActivityClick(n)} className="p-6 bg-white/60 rounded-[2rem] border border-white/80 hover:shadow-md transition-all cursor-pointer group flex items-start gap-4">
-                                    <div className={`p-2 rounded-xl border ${getPriorityColor(n.type)}`}>
-                                        <Bell size={16} />
+                            <div className="space-y-8">
+                                <section>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upcoming Consultations</h4>
+                                        <button onClick={() => navigate('/crm/calendar')} className="text-[9px] font-black text-blue-600 uppercase hover:underline">View Calendar</button>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-slate-700">{n.title}</p>
-                                        <p className="text-xs text-slate-500 mt-1 font-medium">{n.message}</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {events
+                                            .filter(e => e.type === 'meeting' && new Date(e.date) >= new Date())
+                                            .slice(0, 4)
+                                            .map(event => (
+                                                <div key={event.id} className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
+                                                            {new Date(event.date).getDate()}
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-sm font-bold text-slate-800 truncate">{event.title}</p>
+                                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{event.time} • {event.type}</p>
+                                                        </div>
+                                                        {event.meetingLink && (
+                                                            <a href={event.meetingLink} target="_blank" rel="noreferrer" className="p-2 bg-slate-900 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                                                                <MonitorCheck size={14} />
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        {events.filter(e => e.type === 'meeting' && new Date(e.date) >= new Date()).length === 0 && (
+                                            <div className="col-span-2 p-8 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                                                <p className="text-xs text-slate-400 italic font-medium">No consultations scheduled for today.</p>
+                                            </div>
+                                        )}
                                     </div>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                            ))
-                        )}
-                        {!isAdmin && notifications.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-20 opacity-20">
-                                <Activity size={80} />
-                                <p className="mt-4 font-black uppercase tracking-widest">Feed clear</p>
+                                </section>
+
+                                <section>
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Recent Client Engagement</h4>
+                                    <div className="space-y-3">
+                                        {interactions.slice(0, 5).map((interaction, idx) => (
+                                            <div key={idx} className="p-4 bg-white/60 rounded-2xl border border-white/80 flex items-center gap-4 group hover:bg-white transition-all">
+                                                <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                                                    interaction.type === 'Call' ? 'bg-emerald-100 text-emerald-600' :
+                                                    interaction.type === 'Email' ? 'bg-blue-100 text-blue-600' :
+                                                    interaction.type === 'Meeting' ? 'bg-purple-100 text-purple-600' :
+                                                    'bg-slate-100 text-slate-600'
+                                                }`}>
+                                                    {interaction.type === 'Call' ? <Phone size={16} /> :
+                                                     interaction.type === 'Email' ? <Mail size={16} /> :
+                                                     interaction.type === 'Meeting' ? <Calendar size={16} /> :
+                                                     <MessageSquarePlus size={16} />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-bold text-slate-800 truncate">{interaction.content}</p>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                                        {interaction.type} with Client • {interaction.authorName || 'System'}
+                                                    </p>
+                                                </div>
+                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+                                                    {new Date(interaction.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {interactions.length === 0 && (
+                                            <p className="text-xs text-slate-400 italic font-medium">No recent interactions logged.</p>
+                                        )}
+                                    </div>
+                                </section>
                             </div>
                         )}
                     </div>
@@ -384,8 +439,33 @@ export const Dashboard: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-[#B7BDC5]/40 backdrop-blur-md p-10 rounded-[3rem] shadow-sm border border-white/50 min-h-[480px]">
-                            <TaskList />
+                        <div className="space-y-6">
+                            <div className="bg-[#B7BDC5]/40 backdrop-blur-md p-10 rounded-[3rem] shadow-sm border border-white/50 min-h-[480px]">
+                                <TaskList />
+                            </div>
+                            
+                            <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Hot Lead Pipeline</h4>
+                                <div className="space-y-3">
+                                    {leads.filter(l => l.qualification === 'Hot').slice(0, 3).map(lead => (
+                                        <div key={lead.id} onClick={() => navigate('/crm/leads')} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-300 transition-all cursor-pointer flex items-center justify-between group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-black text-[10px]">
+                                                    {lead.name[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-bold text-slate-800">{lead.name}</p>
+                                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{lead.score}% Score</p>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-500 transition-all" />
+                                        </div>
+                                    ))}
+                                    {leads.filter(l => l.qualification === 'Hot').length === 0 && (
+                                        <p className="text-[10px] text-slate-400 italic font-medium">No urgent leads in pipeline.</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
 

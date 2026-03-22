@@ -83,6 +83,7 @@ import AdvisorApplication from './pages/onboarding/AdvisorApplication';
 import AdminOnboarding from './pages/admin/AdminOnboarding';
 import ActivateAccount from './pages/onboarding/ActivateAccount';
 import { SEO } from './components/SEO';
+import { AccessLogs } from './pages/admin/AccessLogs';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -220,6 +221,7 @@ const App: React.FC = () => {
                 <Route path="admin/testimonials" element={<AdminTestimonials />} />
                 <Route path="admin/signature" element={<EmailSignature />} />
                 <Route path="admin/marketing" element={<MarketingIntegrations />} />
+                <Route path="admin/access-logs" element={<AccessLogs />} />
                 <Route path="admin/analytics" element={<AdminAnalytics />} />
                 <Route path="admin/commissions" element={<CommissionRecon />} />
                 <Route path="admin/landing-pages" element={<LandingPageBuilder />} />

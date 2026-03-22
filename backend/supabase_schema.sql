@@ -85,7 +85,6 @@ CREATE TABLE IF NOT EXISTS leads (
 CREATE TABLE IF NOT EXISTS clients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     advisor_id UUID REFERENCES users(id),
-    user_id UUID REFERENCES users(id), 
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(50),
@@ -361,3 +360,84 @@ CREATE TABLE IF NOT EXISTS integration_config (
     linkedin_ads JSONB DEFAULT '{"enabled": false}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+-- 1. ACCESS LOGS (Security & Audit)
+CREATE TABLE IF NOT EXISTS access_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. DOCUMENTS (Secure Document Management)
+CREATE TABLE IF NOT EXISTS documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
+    lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    file_path TEXT NOT NULL,
+    file_type VARCHAR(100),
+    file_size BIGINT,
+    category VARCHAR(50) DEFAULT 'General',
+    version INT DEFAULT 1,
+    is_encrypted BOOLEAN DEFAULT FALSE,
+    access_permissions JSONB DEFAULT '{"roles": ["Administrator", "Manager"]}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+-- 3. INTERACTION HISTORY (CRM Engagement)
+CREATE TABLE IF NOT EXISTS interaction_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
+    client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+    author_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    type VARCHAR(50) CHECK (type IN ('Call', 'Email', 'Meeting', 'Note', 'SMS', 'Status Change')),
+    content TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. NOTIFICATIONS (Unified System)
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipient_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(20) DEFAULT 'info' CHECK (type IN ('info', 'success', 'warning', 'alert')),
+    resource_type VARCHAR(50),
+    resource_id UUID,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. USER PREFERENCES (Notification / UI settings)
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    email_notifications BOOLEAN DEFAULT TRUE,
+    sms_alerts BOOLEAN DEFAULT FALSE,
+    push_notifications BOOLEAN DEFAULT TRUE,
+    theme VARCHAR(20) DEFAULT 'light',
+    timezone VARCHAR(50) DEFAULT 'UTC',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. SCHEDULER (Consultation Scheduler)
+ALTER TABLE events ADD COLUMN IF NOT EXISTS end_time VARCHAR(50);
+ALTER TABLE events ADD COLUMN IF NOT EXISTS meeting_link TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES clients(id);
+ALTER TABLE events ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence JSONB;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) DEFAULT 'public';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS creator_name VARCHAR(255);
+ALTER TABLE events ADD COLUMN IF NOT EXISTS has_google_meet BOOLEAN DEFAULT FALSE;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS participants JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+
+-- 7. SECURITY ENHANCEMENTS (RBAC Granular)
+-- For now, we use a metadata column in users for fine-grained permissions if needed
+ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '[]'::jsonb;

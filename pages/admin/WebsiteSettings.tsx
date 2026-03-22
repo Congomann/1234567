@@ -367,6 +367,46 @@ export const WebsiteSettings: React.FC = () => {
         if (p.length > 1) return { label: p[0].trim(), address: p.slice(1).join(':').trim() };
         return { label: '', address: e.trim() };
     });
+    
+    // CRM Customization Helpers
+    const handleAddStatus = () => {
+        const current = settingsForm.leadStatuses || [];
+        setSettingsForm(prev => ({
+            ...prev,
+            leadStatuses: [...current, 'New Stage']
+        }));
+    };
+
+    const handleRemoveStatus = (index: number) => {
+        const current = [...(settingsForm.leadStatuses || [])];
+        current.splice(index, 1);
+        setSettingsForm(prev => ({ ...prev, leadStatuses: current }));
+    };
+
+    const handleStatusChange = (index: number, value: string) => {
+        const current = [...(settingsForm.leadStatuses || [])];
+        current[index] = value;
+        setSettingsForm(prev => ({ ...prev, leadStatuses: current }));
+    };
+
+    const handleMoveStatus = (index: number, direction: 'up' | 'down') => {
+        const current = [...(settingsForm.leadStatuses || [])];
+        if (direction === 'up' && index > 0) {
+            [current[index], current[index - 1]] = [current[index - 1], current[index]];
+        } else if (direction === 'down' && index < current.length - 1) {
+            [current[index], current[index + 1]] = [current[index + 1], current[index]];
+        }
+        setSettingsForm(prev => ({ ...prev, leadStatuses: current }));
+    };
+
+    const handleResetStatuses = () => {
+        if (window.confirm('Reset lead stages to system defaults?')) {
+            setSettingsForm(prev => ({
+                ...prev,
+                leadStatuses: ['New', 'Contacted', 'Unavailable', 'Proposal', 'Approved', 'Closed', 'Lost', 'Assigned']
+            }));
+        }
+    };
 
     return (
         <div className="space-y-8 pb-10">
@@ -1012,6 +1052,90 @@ export const WebsiteSettings: React.FC = () => {
                 </form>
             </div>
 
+            {/* CRM Customization Section */}
+            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold text-[#0B2240] flex items-center gap-2">
+                        <Layout className="h-5 w-5 text-blue-600" />
+                        CRM Lead Customization
+                    </h2>
+                    <button 
+                        onClick={handleResetStatuses}
+                        className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
+                    >
+                        Reset to Defaults
+                    </button>
+                </div>
+
+                <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-sm font-black text-[#0B2240] uppercase tracking-wide">Lead Lifecycle Stages</h3>
+                            <p className="text-xs text-slate-500 mt-1">Define the workflow stages for your leads. These will appear in the Leads Database.</p>
+                        </div>
+                        <button 
+                            onClick={handleAddStatus}
+                            className="bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" /> Add Stage
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {(settingsForm.leadStatuses || []).map((status, index) => (
+                            <div key={index} className="flex items-center gap-3 animate-fade-in group">
+                                <div className="flex flex-col gap-1">
+                                    <button 
+                                        onClick={() => handleMoveStatus(index, 'up')}
+                                        disabled={index === 0}
+                                        className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"
+                                    >
+                                        <Plus className="h-3 w-3 rotate-45 scale-75" />
+                                    </button>
+                                    <div className="h-1 w-1 bg-slate-300 rounded-full mx-auto"></div>
+                                    <button 
+                                        onClick={() => handleMoveStatus(index, 'down')}
+                                        disabled={index === (settingsForm.leadStatuses?.length || 0) - 1}
+                                        className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"
+                                    >
+                                        <Plus className="h-3 w-3 -rotate-45 scale-75" />
+                                    </button>
+                                </div>
+                                
+                                <input 
+                                    type="text" 
+                                    value={status} 
+                                    onChange={(e) => handleStatusChange(index, e.target.value)}
+                                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0B2240] focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                                />
+
+                                <button 
+                                    onClick={() => handleRemoveStatus(index)}
+                                    className="p-3 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))}
+                        
+                        {(settingsForm.leadStatuses || []).length === 0 && (
+                            <div className="text-center py-10 bg-white/50 rounded-2xl border-2 border-dashed border-slate-200">
+                                <p className="text-sm text-slate-400 italic">No custom stages defined. Add your first stage above.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+                        <button 
+                            onClick={handleSettingsSave}
+                            className="bg-[#0B2240] text-white px-8 py-3 rounded-full font-bold text-sm shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2"
+                        >
+                            <Save className="h-4 w-4" /> Update CRM Stages
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Partner Management Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="flex justify-between items-center mb-6">
@@ -1145,133 +1269,131 @@ export const WebsiteSettings: React.FC = () => {
             </div>
 
             {/* Add Resource Modal */}
-            {
-                isResourceModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/50 backdrop-blur-sm p-4">
-                        <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
-                            <h2 className="text-xl font-bold text-[#0B2240] mb-6">Add New Resource</h2>
-                            <form onSubmit={handleResourceSubmit} className="space-y-4">
+            {isResourceModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-xl font-bold text-[#0B2240] mb-6">Add New Resource</h2>
+                        <form onSubmit={handleResourceSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Title</label>
+                                <input
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
+                                    value={newResource.title}
+                                    onChange={e => setNewResource({ ...newResource, title: e.target.value })}
+                                    placeholder="e.g. Life Insurance Guide"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Type</label>
+                                <select
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
+                                    value={newResource.type}
+                                    onChange={e => setNewResource({ ...newResource, type: e.target.value as any })}
+                                >
+                                    <option value="PDF">PDF Document</option>
+                                    <option value="Video">Direct Video (MP4)</option>
+                                    <option value="YouTube">YouTube Video</option>
+                                    <option value="Link">External Link</option>
+                                    <option value="Article">Article</option>
+                                    <option value="Blog">Blog Post</option>
+                                    <option value="Image">Image</option>
+                                </select>
+                            </div>
+
+                            {(['PDF', 'Image', 'Video'].includes(newResource.type || '')) && (
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Title</label>
-                                    <input
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
-                                        value={newResource.title}
-                                        onChange={e => setNewResource({ ...newResource, title: e.target.value })}
-                                        placeholder="e.g. Life Insurance Guide"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Type</label>
-                                    <select
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
-                                        value={newResource.type}
-                                        onChange={e => setNewResource({ ...newResource, type: e.target.value as any })}
-                                    >
-                                        <option value="PDF">PDF Document</option>
-                                        <option value="Video">Direct Video (MP4)</option>
-                                        <option value="YouTube">YouTube Video</option>
-                                        <option value="Link">External Link</option>
-                                        <option value="Article">Article</option>
-                                        <option value="Blog">Blog Post</option>
-                                        <option value="Image">Image</option>
-                                    </select>
-                                </div>
-
-                                {(['PDF', 'Image', 'Video'].includes(newResource.type || '')) && (
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Upload File</label>
-                                        <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
-                                            <input
-                                                type="file"
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                accept={newResource.type === 'PDF' ? '.pdf' : newResource.type === 'Image' ? 'image/*' : 'video/*'}
-                                                onChange={handleResourceFileUpload}
-                                            />
-                                            {isUploading ? (
-                                                <div className="flex items-center justify-center gap-2 text-blue-600 font-bold">
-                                                    <Loader2 className="h-5 w-5 animate-spin" /> Uploading...
-                                                </div>
-                                            ) : newResource.url && newResource.url.startsWith('data:') ? (
-                                                <div className="text-green-600 font-bold flex items-center justify-center gap-2">
-                                                    <CheckCircle2 className="h-5 w-5" /> File Ready
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <Upload className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                                                    <p className="text-sm font-medium text-slate-600">Click to upload or drag and drop</p>
-                                                    <p className="text-xs text-slate-400 mt-1">Max 250MB (Demo)</p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {(['Video', 'Blog', 'YouTube'].includes(newResource.type || '')) && (
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cover Image / Thumbnail</label>
-                                        <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
-                                            <input
-                                                type="file"
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                accept="image/*"
-                                                onChange={handleResourceThumbnailUpload}
-                                            />
-                                            {newResource.thumbnail ? (
-                                                <img src={newResource.thumbnail} alt="Thumbnail" className="h-20 mx-auto object-cover rounded-lg" />
-                                            ) : (
-                                                <span className="text-xs text-slate-500 font-bold flex items-center justify-center gap-2"><ImageIcon className="h-4 w-4" /> Upload Cover Image</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
-                                        {newResource.type === 'YouTube' ? 'YouTube URL' :
-                                            newResource.type === 'Blog' ? 'External Blog URL (Optional)' : 'Resource URL'}
-                                    </label>
-                                    <input
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
-                                        value={newResource.url}
-                                        onChange={e => setNewResource({ ...newResource, url: e.target.value })}
-                                        placeholder={newResource.type === 'YouTube' ? 'https://youtube.com/watch?v=...' : 'https://...'}
-                                        disabled={isUploading}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
-                                    <textarea
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none"
-                                        rows={3}
-                                        value={newResource.description}
-                                        onChange={e => setNewResource({ ...newResource, description: e.target.value })}
-                                    />
-                                </div>
-
-                                {newResource.type === 'Blog' && (
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Blog Content</label>
-                                        <textarea
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none resize-none h-40"
-                                            placeholder="Write your article here..."
-                                            value={newResource.content}
-                                            onChange={e => setNewResource({ ...newResource, content: e.target.value })}
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Upload File</label>
+                                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            accept={newResource.type === 'PDF' ? '.pdf' : newResource.type === 'Image' ? 'image/*' : 'video/*'}
+                                            onChange={handleResourceFileUpload}
                                         />
+                                        {isUploading ? (
+                                            <div className="flex items-center justify-center gap-2 text-blue-600 font-bold">
+                                                <Loader2 className="h-5 w-5 animate-spin" /> Uploading...
+                                            </div>
+                                        ) : newResource.url && newResource.url.startsWith('data:') ? (
+                                            <div className="text-green-600 font-bold flex items-center justify-center gap-2">
+                                                <CheckCircle2 className="h-5 w-5" /> File Ready
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <Upload className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                                                <p className="text-sm font-medium text-slate-600">Click to upload or drag and drop</p>
+                                                <p className="text-xs text-slate-400 mt-1">Max 250MB (Demo)</p>
+                                            </>
+                                        )}
                                     </div>
-                                )}
-
-                                <div className="pt-4 flex gap-3">
-                                    <button type="button" onClick={() => setIsResourceModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
-                                    <button type="submit" disabled={isUploading} className="flex-1 py-3 rounded-xl font-bold bg-[#0A62A7] text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20 disabled:opacity-50">
-                                        {isUploading ? 'Uploading...' : 'Add Resource'}
-                                    </button>
                                 </div>
-                            </form>
-                        </div>
+                            )}
+
+                            {(['Video', 'Blog', 'YouTube'].includes(newResource.type || '')) && (
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cover Image / Thumbnail</label>
+                                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            accept="image/*"
+                                            onChange={handleResourceThumbnailUpload}
+                                        />
+                                        {newResource.thumbnail ? (
+                                            <img src={newResource.thumbnail} alt="Thumbnail" className="h-20 mx-auto object-cover rounded-lg" />
+                                        ) : (
+                                            <span className="text-xs text-slate-500 font-bold flex items-center justify-center gap-2"><ImageIcon className="h-4 w-4" /> Upload Cover Image</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                                    {newResource.type === 'YouTube' ? 'YouTube URL' :
+                                        newResource.type === 'Blog' ? 'External Blog URL (Optional)' : 'Resource URL'}
+                                </label>
+                                <input
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none"
+                                    value={newResource.url}
+                                    onChange={e => setNewResource({ ...newResource, url: e.target.value })}
+                                    placeholder={newResource.type === 'YouTube' ? 'https://youtube.com/watch?v=...' : 'https://...'}
+                                    disabled={isUploading}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] outline-none resize-none"
+                                    rows={3}
+                                    value={newResource.description}
+                                    onChange={e => setNewResource({ ...newResource, description: e.target.value })}
+                                />
+                            </div>
+
+                            {newResource.type === 'Blog' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Blog Content</label>
+                                    <textarea
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none resize-none h-40"
+                                        placeholder="Write your article here..."
+                                        value={newResource.content}
+                                        onChange={e => setNewResource({ ...newResource, content: e.target.value })}
+                                    />
+                                </div>
+                            )}
+
+                            <div className="pt-4 flex gap-3">
+                                <button type="button" onClick={() => setIsResourceModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                                <button type="submit" disabled={isUploading} className="flex-1 py-3 rounded-xl font-bold bg-[#0A62A7] text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20 disabled:opacity-50">
+                                    {isUploading ? 'Uploading...' : 'Add Resource'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 };
