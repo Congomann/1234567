@@ -361,46 +361,39 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(backendUser);
         }
 
-      const [storedLeads, storedUsers, storedClients, storedSettings, storedWorkflows, storedEvents] = await Promise.all([
-        Backend.getLeads(), Backend.getUsers(), Backend.getClients(), Backend.getSettings(), Backend.getWorkflows(), Backend.getEvents()
+      const wrapped = async (fn: () => Promise<any>, setter: (val: any) => void) => {
+        try {
+          const val = await fn();
+          if (val) setter(val);
+        } catch (e) {
+          console.error(`[Bootstrap] Segment failed:`, e);
+        }
+      };
+
+      await Promise.all([
+        wrapped(() => Backend.getLeads(), setLeads),
+        wrapped(() => Backend.getUsers(), (users) => setAllUsers(users.length > 0 ? [...INITIAL_USERS, ...users.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS)),
+        wrapped(() => Backend.getClients(), setClients),
+        wrapped(() => Backend.getSettings(), (s) => s && setCompanySettings(s)),
+        wrapped(() => Backend.getWorkflows(), (w) => w && w.length > 0 && setWorkflows(w)),
+        wrapped(() => Backend.getEvents(), (e) => e && e.length > 0 && setEvents(e)),
+        wrapped(() => Backend.getResources(), setResources),
+        wrapped(() => Backend.getTestimonials(), setTestimonials),
+        wrapped(() => Backend.getLandingPages(), setLandingPages)
       ]);
-      setAllUsers(storedUsers.length > 0 ? [...INITIAL_USERS, ...storedUsers.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS);
-      setLeads(storedLeads);
-      setClients(storedClients);
-      if (storedSettings) setCompanySettings(storedSettings);
-      if (storedWorkflows && storedWorkflows.length > 0) setWorkflows(storedWorkflows);
-      if (storedEvents && storedEvents.length > 0) setEvents(storedEvents);
-      const storedMetrics = localStorage.getItem('nhfg_automation_metrics');
-      if (storedMetrics) setAutomationMetrics(JSON.parse(storedMetrics));
-
-      const storedTasks = localStorage.getItem('nhfg_tasks');
-      if (storedTasks) setTasks(JSON.parse(storedTasks));
-
-      const storedTestimonials = localStorage.getItem('nhfg_testimonials');
-      if (storedTestimonials) setTestimonials(JSON.parse(storedTestimonials));
-
-      const [storedResources, backendTestimonials, backendLandingPages] = await Promise.all([
-        Backend.getResources(), Backend.getTestimonials(), Backend.getLandingPages()
-      ]);
-      if (storedResources && storedResources.length > 0) setResources(storedResources);
-      if (backendTestimonials && backendTestimonials.length > 0) setTestimonials(backendTestimonials);
-      if (backendLandingPages && backendLandingPages.length > 0) setLandingPages(backendLandingPages);
       
-      // Load new platform modules
-      if (user) {
-        Backend.getInteractions().then(setInteractions);
-        Backend.getDocuments().then(setDocuments);
-        Backend.getPreferences().then(setUserPreferences);
-        if (user.role === UserRole.ADMIN) {
-          Backend.getAccessLogs().then(setAccessLogs);
+      // Load user-specific platform modules
+      if (user || backendUser) {
+        const u = user || backendUser;
+        wrapped(() => Backend.getInteractions(), setInteractions);
+        wrapped(() => Backend.getDocuments(), setDocuments);
+        wrapped(() => Backend.getPreferences(), setUserPreferences);
+        if (u?.role === UserRole.ADMIN) {
+          wrapped(() => Backend.getAccessLogs(), setAccessLogs);
         }
       }
 
-      console.log("[Bootstrap] Data loaded successfully:", { 
-        users: storedUsers.length, 
-        settings: !!storedSettings, 
-        landingPages: backendLandingPages.length 
-      });
+      console.log("[Bootstrap] Data segments initialized.");
       } catch (err) {
         console.error("Bootstrap error:", err);
       } finally {
@@ -499,15 +492,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  useEffect(() => {
-    const checkSession = async () => {
-      if (localStorage.getItem('nhfg_access_token')) {
-        const internalUser = await Backend.getCurrentUser();
-        if (internalUser) setUser(internalUser);
-      }
-    };
-    checkSession();
-  }, []);
+
 
   const addEvent = (e: Partial<CalendarEvent>) => {
     const newEvent = { ...e, id: crypto.randomUUID() } as CalendarEvent;

@@ -64,7 +64,7 @@ export const MarketingIntegrations: React.FC = () => {
         }
 
         try {
-            await fetch(`http://localhost:3001/api/webhooks/${randomPlatform}`, {
+            await fetch(`/api/webhooks/${randomPlatform}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

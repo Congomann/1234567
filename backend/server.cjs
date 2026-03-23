@@ -218,9 +218,11 @@ const generateRefreshToken = (user) => {
 // --- JWT Middleware ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
+  console.log(`[AUTH] Header: ${authHeader ? 'SENT (Length: ' + authHeader.length + ')' : 'MISSING'}`);
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.warn('[AUTH] Missing token for request:', req.originalUrl);
     return res.status(401).json({ error: 'Authentication token missing' });
   }
 
@@ -1263,21 +1265,32 @@ app.post('/api/onboarding/apply', async (req, res) => {
   if (!personalEmail) return res.status(400).json({ error: 'Missing field: personalEmail' });
 
   try {
-    const result = await pool.query(
-      `INSERT INTO advisor_applications (full_name, personal_email, phone, license_info, experience, address)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [fullName, personalEmail, phone, licenseInfo, experience, address]
-    );
+    const { data, error } = await supabaseAdmin
+      .from('advisor_applications')
+      .insert([{
+        full_name: fullName,
+        personal_email: personalEmail,
+        phone,
+        license_info: licenseInfo,
+        experience,
+        address
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(400).json({ error: 'An application with this email already exists.' });
+      }
+      throw error;
+    }
 
     // Notify Admin/Manager
-    broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: result.rows[0] });
+    broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: data });
 
     console.log(`[Onboarding] New application from: ${fullName}`);
     res.status(201).json({ success: true, message: 'Application submitted successfully.' });
   } catch (err) {
-    if (err.code === '23505') {
-      return res.status(400).json({ error: 'An application with this email already exists.' });
-    }
     console.error('[Onboarding] Application error:', err.message);
     res.status(500).json({ error: err.message });
   }
@@ -2041,10 +2054,33 @@ const migratePlaidTables = async () => {
 
     console.log('[DB] ✅ Plaid tables ready');
   } catch (err) {
+    console.error('[DB] CRITICAL Plaid migration failure:', err);
     console.warn('[DB] Plaid migration warning:', err.message);
   }
 };
 migratePlaidTables();
+
+// ── Auth Migrations (Ensure refresh_tokens table exists) ──────────────────
+const migrateAuthTables = async () => {
+  try {
+    console.log('[DB] Starting Auth migration...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT UNIQUE NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        revoked_at TIMESTAMPTZ
+      )
+    `);
+    console.log('[DB] ✅ Auth tables ready');
+  } catch (err) {
+    console.error('[DB] CRITICAL Auth migration failure:', err);
+    console.warn('[DB] Auth migration warning:', err.message);
+  }
+};
+migrateAuthTables();
 
 // ════════════════════════════════════════════════════════════════════════════════
 // ENDPOINT 2 — Create Link Token
@@ -2365,38 +2401,23 @@ app.post('/api/plaid/auth/refresh/:verificationId', authenticateToken, async (re
 app.get('/api/plaid/verifications', authenticateToken, async (req, res) => {
   try {
     const { search, status, limit = 100, offset = 0 } = req.query;
-    const params = [];
-    let where = 'WHERE 1=1';
+    let query = supabase.from('bank_verifications').select('*', { count: 'exact' });
 
     if (search) {
-      params.push(`% ${search}% `);
-      where += ` AND(bv.client_name ILIKE $${params.length} OR bv.institution_name ILIKE $${params.length} OR bv.account_mask ILIKE $${params.length})`;
+      query = query.or(`client_name.ilike.%${search}%,institution_name.ilike.%${search}%,account_mask.ilike.%${search}%`);
     }
     if (status && status !== 'all') {
-      params.push(status);
-      where += ` AND bv.status = $${params.length} `;
+      query = query.eq('status', status.toLowerCase());
     }
 
-    const query = `
-SELECT
-bv.id, bv.client_name, bv.client_email, bv.client_phone,
-  bv.institution_name, bv.account_name, bv.account_mask, bv.account_type,
-  bv.account_holder_type, bv.routing_number, bv.wire_routing,
-  bv.status, bv.verification_method, bv.auth_method, bv.plaid_verification_status,
-  bv.name_match, bv.name_match_score, bv.account_active,
-  bv.has_numbers_match, bv.is_numbers_match_verified,
-  bv.has_prior_returns, bv.account_num_format, bv.draft_risk,
-  bv.verified_at, bv.verified_by, bv.notes, bv.created_at
-      FROM bank_verifications bv ${where}
-      ORDER BY bv.created_at DESC
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
-`;
-    params.push(parseInt(limit, 10), parseInt(offset, 10));
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit, 10) - 1);
 
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
-    console.error('[Plaid] list verifications error:', err.message);
+    console.error('[API] Error fetching verifications:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -2410,26 +2431,35 @@ app.patch('/api/plaid/verifications/:id', authenticateToken, async (req, res) =>
   const { status, notes } = req.body;
   const allowed = ['pending', 'verified', 'failed', 'micro_deposit'];
 
-  if (!allowed.includes(status))
-    return res.status(400).json({ error: `status must be one of: ${allowed.join(', ')} ` });
+  if (status && !allowed.includes(status))
+    return res.status(400).json({ error: `status must be one of: ${allowed.join(', ')}` });
 
   try {
-    const result = await pool.query(
-      `UPDATE bank_verifications
-       SET status = $1::text,
-           notes = COALESCE($2, notes),
-           verified_at = CASE WHEN $1::text = 'verified' THEN NOW()         ELSE verified_at END,
-           verified_by = CASE WHEN $1::text = 'verified' THEN $3::VARCHAR    ELSE verified_by END,
-           updated_at = NOW()
-       WHERE id = $4::uuid
-       RETURNING * `,
-      [status, notes || null, req.user?.id || null, id]
-    );
-    if (!result.rows.length) return res.status(404).json({ error: 'Verification not found' });
-    const record = result.rows[0];
-    broadcast({ type: 'BANK_VERIFICATION_UPDATED', payload: record });
-    return res.json(record);
+    const updateData = {};
+    if (status) {
+      updateData.status = status;
+      if (status === 'verified') {
+        updateData.verified_at = new Date().toISOString();
+        updateData.verified_by = req.user?.id || null;
+      }
+    }
+    if (notes !== undefined) updateData.notes = notes;
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('bank_verifications')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Verification not found' });
+
+    broadcast({ type: 'BANK_VERIFICATION_UPDATED', payload: data });
+    return res.json(data);
   } catch (err) {
+    console.error('[API] Error updating verification:', err);
     res.status(500).json({ error: err.message });
   }
 });

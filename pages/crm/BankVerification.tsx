@@ -239,7 +239,7 @@ const PlaidSetupModal: React.FC<{
 
         const token = localStorage.getItem('nhfg_access_token');
         try {
-            const res = await fetch('http://localhost:3001/api/plaid/send-link', {
+            const res = await fetch('/api/plaid/send-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                 body: JSON.stringify({

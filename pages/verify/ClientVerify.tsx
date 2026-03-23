@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePlaidLink } from 'react-plaid-link';
 
-const API = ((import.meta as any).env.VITE_API_URL || '').replace(/\/$/, '') || (window.location.origin.includes(':5173') ? 'http://localhost:3001/api' : `${window.location.origin.replace(':3000', ':3001')}/api`);
+const API = '/api';
 
 interface LinkData {
     clientName: string;
