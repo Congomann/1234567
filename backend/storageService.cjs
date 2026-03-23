@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const { createClient } = require('webdav');
+// WebDAV is an ES module, it must be loaded dynamically in CommonJS.
+let createClientAsync = null;
 const encryptionService = require('./encryptionService.cjs');
  
 /**
@@ -24,10 +25,13 @@ class StorageService {
  
         if (this.mode === 'owncloud' && this.owncloudUrl) {
             console.log(`[Storage] Initializing ownCloud client at ${this.owncloudUrl}`);
-            this.client = createClient(this.owncloudUrl, {
-                username: this.owncloudUser,
-                password: this.owncloudPass
-            });
+            this.clientPromise = import('webdav').then(({ createClient }) => {
+                this.client = createClient(this.owncloudUrl, {
+                    username: this.owncloudUser,
+                    password: this.owncloudPass
+                });
+                return this.client;
+            }).catch(e => console.error('[Storage] Failed to load webdav module:', e));
         }
     }
  
@@ -37,8 +41,9 @@ class StorageService {
         const encryptedData = encryptionService.encrypt(buffer);
         const encryptedBuffer = Buffer.from(encryptedData);
 
-        if (this.mode === 'owncloud' && this.client) {
+        if (this.mode === 'owncloud' && this.clientPromise) {
             try {
+                if (!this.client) await this.clientPromise;
                 return await this.saveToOwnCloud(filename, encryptedBuffer);
             } catch (error) {
                 console.error('[Storage] ownCloud save failed, falling back to local:', error);
@@ -86,8 +91,9 @@ class StorageService {
         }
 
         // 2. If missing locally but in ownCloud mode, fetch from cloud
-        if (this.mode === 'owncloud' && this.client) {
+        if (this.mode === 'owncloud' && this.clientPromise) {
             try {
+                if (!this.client) await this.clientPromise;
                 console.log(`[Storage] Local miss for ${cleanName}, fetching from ownCloud...`);
                 const buffer = await this.client.getFileContents(`/${cleanName}`);
                 fs.writeFileSync(filePath, buffer); // Cache locally for next time
