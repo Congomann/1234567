@@ -1817,6 +1817,8 @@ app.delete('/api/testimonials/:id', authenticateToken, async (req, res) => {
 
 let plaidClient = null;
 let PlaidEnvs = null;   // PlaidEnvironments — cached after first require
+const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+PlaidEnvs = PlaidEnvironments;
 
 const initPlaid = () => {
   const { PLAID_CLIENT_ID, PLAID_SECRET, PLAID_SECRET_PRODUCTION, PLAID_ENV } = process.env;
@@ -1837,8 +1839,7 @@ const initPlaid = () => {
   }
 
   try {
-    const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
-    PlaidEnvs = PlaidEnvironments;
+    // Module is now required at the top level for Vercel NFT compatibility
 
     const envMap = {
       sandbox: PlaidEnvironments.sandbox,

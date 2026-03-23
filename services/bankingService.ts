@@ -40,22 +40,34 @@ const apiFetch = async <T>(
       headers: { ...getHeaders(), ...(opts.headers || {}) },
     });
 
+    const text = await res.text();
+
     if (!res.ok) {
       let msg = `HTTP ${res.status}`;
       try {
-        const body = await res.json();
+        const body = JSON.parse(text);
         msg = body.error || body.message || body.hint || msg;
-      } catch { /* non-JSON body */ }
+      } catch {
+        console.error('[BankVerification] Non-JSON error response:', text.slice(0, 200));
+        if (text.includes('Vercel Security Checkpoint')) msg = 'Vercel Security/WAF blocked the request.';
+        else msg += ': Vercel returned HTML or text. See console.';
+      }
       return { data: null, error: msg };
     }
 
-    const data: T = await res.json();
-    return { data, error: null };
+    try {
+      if (!text) return { data: {} as T, error: null };
+      const data: T = JSON.parse(text);
+      return { data, error: null };
+    } catch {
+      console.error('[BankVerification] Expected JSON, but Vercel returned HTML:', text.slice(0, 300));
+      return { data: null, error: 'API returned HTML instead of JSON. Check Vercel logs or WAF settings.' };
+    }
   } catch (err: any) {
-    const isOffline = err instanceof TypeError;
+    console.error('[BankVerification] Fetch failed entirely:', err);
     return {
       data: null,
-      error: isOffline ? 'Backend offline — check that the server is running.' : err.message,
+      error: 'Backend offline — unable to fetch from server.',
     };
   }
 };
