@@ -811,6 +811,52 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  const { email, password, name, role } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
+  try {
+    const { data: existing } = await supabase.from('users').select('id').eq('email', email).maybeSingle();
+    if (existing) return res.status(400).json({ error: 'Email already in use' });
+
+    const hash = crypto.createHash('sha256').update(password).digest('hex');
+    const newUser = {
+      name: name || email.split('@')[0],
+      email: email.toLowerCase().trim(),
+      password_hash: hash,
+      role: role || 'Client',
+      status: 'active'
+    };
+
+    const { data: u, error: insertError } = await supabase.from('users').insert(newUser).select().single();
+    if (insertError) throw insertError;
+
+    const accessToken = generateAccessToken(u);
+    const refreshToken = generateRefreshToken(u);
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await supabase.from('refresh_tokens').insert({ user_id: u.id, token: refreshToken, expires_at: expiresAt.toISOString() });
+
+    res.status(201).json({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      token_type: 'bearer',
+      user: { id: u.id, name: u.name, email: u.email, role: u.role }
+    });
+  } catch (err) {
+    console.error('Registration Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email } = req.body;
+  console.log(`Password reset requested for ${email}`);
+  // Minimal stub. Production would integrate SendGrid/Postmark here.
+  res.json({ message: 'If the email exists, a reset link will be sent shortly.' });
+});
+
 app.post('/api/auth/refresh', async (req, res) => {
   const { refresh_token } = req.body;
   if (!refresh_token) return res.status(400).json({ error: 'Refresh token is required' });

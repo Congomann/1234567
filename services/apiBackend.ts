@@ -158,6 +158,42 @@ class NHFGBackend {
         }
     }
 
+    async register(email: string, password?: string, name?: string, role?: string): Promise<User | null> {
+        if (!USE_REAL_BACKEND) return null;
+        try {
+            const res = await fetch(`${this.baseUrl}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: password || 'password', name, role })
+            });
+            const data = await this.handleResponse(res);
+            if (data.access_token) {
+                localStorage.setItem('nhfg_access_token', data.access_token);
+                localStorage.setItem('nhfg_refresh_token', data.refresh_token);
+            }
+            return data.user;
+        } catch (e: any) {
+            console.warn(`[Backend] Register API Exception: ${e.message}`);
+            return null;
+        }
+    }
+
+    async resetPassword(email: string): Promise<boolean> {
+        if (!USE_REAL_BACKEND) return false;
+        try {
+            const res = await fetch(`${this.baseUrl}/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            await this.handleResponse(res);
+            return true;
+        } catch (e: any) {
+            console.warn(`[Backend] Reset Password API Exception: ${e.message}`);
+            return false;
+        }
+    }
+
     async logout() {
         const refreshToken = localStorage.getItem('nhfg_refresh_token');
         if (refreshToken && USE_REAL_BACKEND) {

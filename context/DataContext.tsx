@@ -1,9 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Lead, Client, DashboardMetrics, ProductType, LeadStatus, User, UserRole, Notification, CalendarEvent, ChatMessage, AdvisorCategory, CompanySettings, Resource, Carrier, AdvisorAssignment, Testimonial, Application, ApplicationStatus, IntegrationConfig, IntegrationLog, LoanApplication, Colleague, PropertyListing, EscrowTransaction, ClientPortfolio, ComplianceDocument, AdvisoryFee, JobApplication, Workflow, WorkflowTrigger, Task, TaskPriority, AccessLog, UserDocument, Interaction, UserPreference } from '../types';
-import { auth, db } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Backend } from '../services/apiBackend';
 import { socketService } from '../services/socketService';
 
@@ -194,7 +191,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = useCallback(async () => {
     try {
-        await signOut(auth);
         await Backend.logout();
     } catch (e) {}
     setUser(null);
@@ -467,53 +463,35 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.warn("[DataContext] Backend login trace:", e);
     }
 
-    // 2. ATTEMPT FIREBASE AUTH (Public/Hybrid)
-    try {
-      await signInWithEmailAndPassword(auth, cleanEmail, password || '');
+    // LEGACY MOCK FALLBACK (Demo/Dev)
+    const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
+    if (found) {
+      console.log("Backend login failed, falling back to mock user:", cleanEmail);
+      setUser(found);
       return true;
-    } catch (error: any) {
-      // 3. LEGACY MOCK FALLBACK (Demo/Dev)
-      const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
-      if (found) {
-        console.log("Firebase login failed, falling back to mock user:", cleanEmail);
-        setUser(found);
-        return true;
-      }
-
-      console.error("Login failed across all gateways", error);
-      if (error.code === 'auth/operation-not-allowed') {
-        pushNotification('Login Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
-      }
-      return false;
     }
+
+    pushNotification('Login Error', 'Invalid credentials or API unreachable.', 'alert');
+    return false;
   };
 
   const signup = async (email: string, password: string, name: string, role: UserRole = UserRole.CLIENT) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const newUser: User = {
-        id: userCredential.user.uid,
-        name,
-        email,
-        role,
-        category: AdvisorCategory.ADMIN, // Default category
-        onboardingCompleted: false
-      };
-      await setDoc(doc(db, 'users', newUser.id), newUser);
-      setUser(newUser);
-      return true;
+      const newUser = await Backend.register(email, password, name, role);
+      if (newUser) {
+        setUser(newUser);
+        return true;
+      }
+      return false;
     } catch (error: any) {
       console.error("Signup failed", error);
-      if (error.code === 'auth/operation-not-allowed') {
-        pushNotification('Signup Error', 'Email/Password sign-in is disabled. Please enable it in the Firebase Console.', 'alert');
-      }
       return false;
     }
   };
 
   const resetPassword = async (email: string) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await Backend.resetPassword(email);
       return true;
     } catch (error) {
       console.error("Password reset failed", error);
@@ -522,16 +500,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (userDoc.exists()) setUser(userDoc.data() as User);
-      } else if (localStorage.getItem('nhfg_access_token')) {
+    const checkSession = async () => {
+      if (localStorage.getItem('nhfg_access_token')) {
         const internalUser = await Backend.getCurrentUser();
         if (internalUser) setUser(internalUser);
       }
-    });
-    return () => unsubscribe();
+    };
+    checkSession();
   }, []);
 
   const addEvent = (e: Partial<CalendarEvent>) => {
