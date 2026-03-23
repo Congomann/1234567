@@ -35,17 +35,7 @@ export default defineConfig(({ mode }) => {
         outDir: 'dist',
         sourcemap: false,
         chunkSizeWarningLimit: 2000,
-        rollupOptions: {
-          output: {
-            manualChunks(id) {
-              if (id.includes('node_modules')) {
-                if (id.includes('lucide-react')) return 'vendor-ui';
-                if (id.includes('react')) return 'vendor-core';
-                return 'vendor-libs';
-              }
-            }
-          }
-        }
+        rollupOptions: {}
       }
     };
 });
