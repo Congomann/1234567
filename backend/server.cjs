@@ -824,8 +824,7 @@ app.post('/api/auth/register', async (req, res) => {
       name: name || email.split('@')[0],
       email: email.toLowerCase().trim(),
       password_hash: hash,
-      role: role || 'Client',
-      status: 'active'
+      role: role || 'Client'
     };
 
     const { data: u, error: insertError } = await supabase.from('users').insert(newUser).select().single();
