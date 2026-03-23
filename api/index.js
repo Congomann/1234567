@@ -1,6 +1,14 @@
-import app from '../backend/server.cjs';
-
-// Vercel handles the listening part for us, but our server.cjs
-// has a server.listen() block at the bottom. 
-// When imported as a module, we just need to export default the app.
-export default app;
+export default async function(req, res) {
+  try {
+    const mod = await import('../backend/server.cjs');
+    const app = mod.default || mod;
+    return app(req, res);
+  } catch (err) {
+    console.error("Boot error:", err);
+    return res.status(500).json({ 
+      error: err.message, 
+      stack: String(err.stack),
+      type: 'BOOT_CRASH'
+    });
+  }
+}
