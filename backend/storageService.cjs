@@ -10,7 +10,9 @@ const encryptionService = require('./encryptionService.cjs');
  */
 class StorageService {
     constructor() {
-        this.baseDir = path.join(__dirname, 'uploads');
+        // Use /tmp if deployed on Vercel Serverless (read-only filesystem), else local
+        const isVercel = !!process.env.VERCEL;
+        this.baseDir = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
         if (!fs.existsSync(this.baseDir)) {
             fs.mkdirSync(this.baseDir, { recursive: true });
         }
