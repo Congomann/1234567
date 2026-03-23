@@ -93,8 +93,16 @@ import { AccessLogs } from './pages/admin/AccessLogs';
  */
 
 const ProtectedCRMRoute: React.FC = () => {
-  const { user } = useData();
+  const { user, isLoading } = useData();
   const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+      </div>
+    );
+  }
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -116,14 +124,18 @@ const ProtectedCRMRoute: React.FC = () => {
 };
 
 const ManagerRoute: React.FC = () => {
-  const { user } = useData();
+  const { user, isLoading } = useData();
+  
+  if (isLoading) return null;
   // PERMISSIONS: Allows Administrators and Managers to access user management and onboarding.
   if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.MANAGER) return <Navigate to="/crm/dashboard" replace />;
   return <Outlet />;
 };
 
 const SuperAdminRoute: React.FC = () => {
-  const { user } = useData();
+  const { user, isLoading } = useData();
+  
+  if (isLoading) return null;
   // PERMISSIONS: Restricting high-level configuration to Administrators only.
   if (user?.role !== UserRole.ADMIN) return <Navigate to="/crm/dashboard" replace />;
   return <Outlet />;

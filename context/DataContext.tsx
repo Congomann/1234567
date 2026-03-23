@@ -19,6 +19,7 @@ interface ProcessingState {
 
 interface DataContextType {
   user: User | null;
+  isLoading: boolean;
   allUsers: User[];
   leads: Lead[];
   clients: Client[];
@@ -161,6 +162,7 @@ const MOCK_TASKS: Task[] = [
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>(INITIAL_USERS);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -356,11 +358,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const bootstrap = async () => {
-      // 1. Try to restore Backend session first
-      const backendUser = await Backend.getCurrentUser();
-      if (backendUser) {
-        setUser(backendUser);
-      }
+      try {
+        // 1. Try to restore Backend session first
+        const backendUser = await Backend.getCurrentUser();
+        if (backendUser) {
+          setUser(backendUser);
+        }
 
       const [storedLeads, storedUsers, storedClients, storedSettings, storedWorkflows, storedEvents] = await Promise.all([
         Backend.getLeads(), Backend.getUsers(), Backend.getClients(), Backend.getSettings(), Backend.getWorkflows(), Backend.getEvents()
@@ -402,8 +405,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         settings: !!storedSettings, 
         landingPages: backendLandingPages.length 
       });
-
-      bootstrapFinished.current = true;
+      } catch (err) {
+        console.error("Bootstrap error:", err);
+      } finally {
+        setIsLoading(false);
+        bootstrapFinished.current = true;
+      }
     };
     bootstrap();
   }, []);
@@ -870,7 +877,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <DataContext.Provider value={{
-      user, allUsers, leads, clients, tasks, metrics: { totalRevenue: 1250000, activeClients: 450, pendingLeads: 12, monthlyPerformance: [], totalCommission: 85000 },
+      user, isLoading, allUsers, leads, clients, tasks, metrics: { totalRevenue: 1250000, activeClients: 450, pendingLeads: 12, monthlyPerformance: [], totalCommission: 85000 },
       automationMetrics, workflows, processingLeads,
       notifications, chatMessages, companySettings, resources, commissions: [], events, testimonials,
       availableCarriers: [], colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
