@@ -205,7 +205,7 @@ class NHFGBackend {
         }
         localStorage.removeItem('nhfg_access_token');
         localStorage.removeItem('nhfg_refresh_token');
-        localStorage.removeItem('nhfg_jwt_token'); // Clean up old token if exists
+        localStorage.removeItem('nhfg_access_token'); // Clean up old token if exists
     }
 
     // --- ENTITY MANAGEMENT ---

@@ -237,7 +237,7 @@ const PlaidSetupModal: React.FC<{
         if (!validateInfo()) return;
         setSending(true);
 
-        const token = localStorage.getItem('nhfg_jwt_token');
+        const token = localStorage.getItem('nhfg_access_token');
         try {
             const res = await fetch('http://localhost:3001/api/plaid/send-link', {
                 method: 'POST',

@@ -42,7 +42,7 @@ export const CommissionRecon: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('nhfg_jwt_token');
+            const token = localStorage.getItem('nhfg_access_token');
             const res = await fetch('/api/admin/commissions/reconciliations', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });

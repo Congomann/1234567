@@ -47,7 +47,7 @@ export const AdminAnalytics: React.FC = () => {
 
     const fetchStats = async () => {
         try {
-            const token = localStorage.getItem('nhfg_jwt_token');
+            const token = localStorage.getItem('nhfg_access_token');
             const res = await fetch('/api/admin/analytics/stats', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });

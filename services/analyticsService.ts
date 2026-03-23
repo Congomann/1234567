@@ -89,7 +89,7 @@ export const AnalyticsService = {
     deleteUserData: async (visitorId: string) => {
         // This is usually called from Admin Portal on behalf of a user request
         try {
-            const token = localStorage.getItem('nhfg_jwt_token');
+            const token = localStorage.getItem('nhfg_access_token');
             const response = await fetch(`/api/admin/analytics/visitors/${visitorId}`, {
                 method: 'DELETE',
                 headers: {

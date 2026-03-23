@@ -235,7 +235,7 @@ export const Leads: React.FC = () => {
     const fetchHistory = async (visitorId: string) => {
         setLoadingContext(true);
         try {
-            const token = localStorage.getItem('nhfg_jwt_token');
+            const token = localStorage.getItem('nhfg_access_token');
             const res = await fetch(`/api/analytics/visitors/${visitorId}/history`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
