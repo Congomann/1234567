@@ -118,8 +118,24 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
 } else {
   // Standard TCP Connection (Localhost or External IP)
   // Supports Vercel/Supabase standard environment variable names
-  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
+  let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
   
+  // Auto-heal Supabase Pooler Tenancy issues (e.g. Vercel env variable missing project ref)
+  if (connectionString && connectionString.includes('pooler.supabase.com')) {
+    try {
+      const dbUrl = new URL(connectionString);
+      const sbUrl = process.env.SUPABASE_URL;
+      const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
+      if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
+        dbUrl.username = `${dbUrl.username}.${projectRef}`;
+        connectionString = dbUrl.toString();
+        console.log(`[DB] Auto-healed Supabase connection pooler string with project ref: ${projectRef}`);
+      }
+    } catch (e) {
+      console.error('[DB] Failed to parse DATABASE_URL for auto-healing:', e.message);
+    }
+  }
+
   if (!connectionString && process.env.NODE_ENV === 'production') {
     console.error('[DB] CRITICAL: No database connection string found in environment variables.');
   }
