@@ -10,12 +10,20 @@ const DB_VERSION = 3;
  */
 export class DatabaseEngine {
   private db: IDBDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    if (this.db) return Promise.resolve();
+    if (this.initPromise) return this.initPromise;
+
+    this.initPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onerror = () => reject('Database failed to open');
+      request.onerror = () => {
+        this.initPromise = null;
+        reject('Database failed to open');
+      };
+      
       request.onsuccess = () => {
         this.db = request.result;
         resolve();
