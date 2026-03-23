@@ -15,6 +15,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const storageService = require('./storageService.cjs');
 const encryptionService = require('./encryptionService.cjs');
 const notificationService = require('./notificationService.cjs');
+const supabase = require('./supabaseClient.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
