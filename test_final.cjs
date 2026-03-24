@@ -2,9 +2,9 @@ const { Client } = require('pg');
 
 const config = {
   user: 'postgres.boylqkqyclzayrupbrbd',
-  host: 'aws-0-us-east-2.pooler.supabase.com',
+  host: 'aws-1-us-east-2.pooler.supabase.com',
   database: 'postgres',
-  password: 'Congomani@2027', // LITERALLY no encoding here
+  password: '2027Newholand', // LITERALLY no encoding here
   port: 6543,
   ssl: { rejectUnauthorized: false },
   connectionTimeoutMillis: 10000,

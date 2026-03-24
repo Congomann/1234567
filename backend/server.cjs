@@ -2120,6 +2120,10 @@ app.post('/api/plaid/create-link-token', authenticateToken, async (req, res) => 
       products,
       country_codes: countryCodes,
       language: 'en',
+      auth: {
+        auth_type_select_enabled: true,
+        automated_microdeposits_enabled: true,
+      },
       ...(process.env.PLAID_WEBHOOK_URL ? { webhook: process.env.PLAID_WEBHOOK_URL } : {}),
     };
 
@@ -2232,8 +2236,26 @@ app.post('/api/plaid/exchange-token', authenticateToken, async (req, res) => {
 
     const routingNumber = achEntry.routing || null;
     const wireRouting = achEntry.wire_routing || null;
-    const isActive = (targetAcct?.balances?.current ?? null) !== null;
-    const nameMatch = nameMatchScore != null ? nameMatchScore >= 70 : true;
+    let isActive = (targetAcct?.balances?.current ?? null) !== null;
+    let nameMatch = nameMatchScore != null ? nameMatchScore >= 70 : false;
+
+    // ── Explicitly Check Identity for Name Match ────────────────────────────────
+    try {
+      const idRes = await plaidClient.identityGet({ access_token });
+      const names = idRes.data.accounts?.flatMap(a => a.owners?.flatMap(o => o.names)) || [];
+      const cNameLower = clientName.toLowerCase().split(' ')[0]; // Match first name loosely
+      if (names.some(n => n?.toLowerCase().includes(cNameLower))) {
+        nameMatch = true;
+      }
+      
+      // Also confirm the account is fully active by checking auth / balances explicitly if not found
+      if (!isActive) {
+         const authCheck = await plaidClient.authGet({ access_token });
+         if (authCheck.data.accounts && authCheck.data.accounts.length > 0) isActive = true;
+      }
+    } catch (e) {
+      console.log('[Plaid API Secondary Check]', e.response?.data?.error_message || e.message);
+    }
 
     const draftRisk = computeDraftRisk(insights, plaidVerifStatus, hasPriorReturns, authMethodFromItem);
 
@@ -2640,6 +2662,36 @@ app.post('/api/plaid/webhook', async (req, res) => {
       console.log(`[Plaid Webhook] ⏰ Verification expired — item: ${item_id}`);
     }
 
+    // TRANSACTIONS / SYNC_UPDATES_AVAILABLE or INITIAL_UPDATE
+    if (webhook_type === 'TRANSACTIONS' && (webhook_code === 'SYNC_UPDATES_AVAILABLE' || webhook_code === 'INITIAL_UPDATE' || webhook_code === 'HISTORICAL_UPDATE' || webhook_code === 'DEFAULT_UPDATE')) {
+      if (plaidClient && access_token) {
+        try {
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          const endDate = new Date();
+
+          const transRes = await plaidClient.transactionsGet({
+            access_token,
+            start_date: startDate.toISOString().split('T')[0],
+            end_date: endDate.toISOString().split('T')[0],
+            options: { count: 100, offset: 0 }
+          });
+
+          if (transRes.data.transactions && transRes.data.transactions.length > 0) {
+            await pool.query(
+              `UPDATE bank_verifications 
+               SET transactions_7d = $1::jsonb 
+               WHERE plaid_item_id = $2`,
+              [JSON.stringify(transRes.data.transactions), plaidItemDbId]
+            );
+            console.log(`[Plaid Webhook] ✅ Saved ${transRes.data.transactions.length} 7-day transactions for item: ${item_id}`);
+          }
+        } catch (e) {
+          console.error('[Plaid Transaction fetch error]', e.response?.data || e.message);
+        }
+      }
+    }
+
     // AUTH / DEFAULT_UPDATE — routing numbers changed; re-fetch auth immediately
     if (webhook_type === 'AUTH' && webhook_code === 'DEFAULT_UPDATE') {
       const changedAccountIds = Object.keys(account_ids_with_updated_auth || {});
@@ -2992,6 +3044,10 @@ app.get('/api/plaid/client-verify/:token', async (req, res) => {
         products,
         country_codes: countryCodes,
         language: 'en',
+        auth: {
+          auth_type_select_enabled: true,
+          automated_microdeposits_enabled: true,
+        },
       });
       linkToken = linkResp.data.link_token;
     }

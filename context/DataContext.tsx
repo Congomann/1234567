@@ -193,6 +193,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
         await Backend.logout();
     } catch (e) {}
+    localStorage.removeItem('nhfg_mock_user_id');
     setUser(null);
     window.location.href = '/login';
   }, []);
@@ -359,6 +360,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const backendUser = await Backend.getCurrentUser();
         if (backendUser) {
           setUser(backendUser);
+        } else {
+          // Restore mock session if present
+          const mockId = localStorage.getItem('nhfg_mock_user_id');
+          if (mockId) {
+            const mockUser = INITIAL_USERS.find(u => u.id === mockId);
+            if (mockUser) setUser(mockUser);
+          }
         }
 
       const wrapped = async (fn: () => Promise<any>, setter: (val: any) => void) => {
@@ -461,6 +469,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (found) {
       console.log("Backend login failed, falling back to mock user:", cleanEmail);
       setUser(found);
+      localStorage.setItem('nhfg_mock_user_id', found.id);
       return true;
     }
 
