@@ -1007,13 +1007,11 @@ app.post('/api/auth/logout', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const { data: userData, error: userError } = await (await req.supabaseQuery('users'))
-      .select('*')
-      .eq('id', req.user.id)
-      .single();
+    const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const u = rows[0];
 
-    if (userError || !userData) return res.status(404).json({ error: 'User not found' });
-    const u = userData;
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    
     res.json({
       id: u.id,
       name: u.name,
