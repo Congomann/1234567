@@ -276,11 +276,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return Math.min(score, 100);
   };
-
   const addLead = useCallback(async (leadData: Partial<Lead>, assignTo?: string) => {
     const score = calculateLeadScore(leadData);
     const newLead: Lead = {
-      id: crypto.randomUUID(),
+      id: leadData.id || crypto.randomUUID(),
       name: leadData.name || 'Website Inquiry',
       email: leadData.email || 'Not Provided',
       phone: leadData.phone || 'N/A',
@@ -297,10 +296,24 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       priority: score > 75 ? 'High' : 'Medium',
       ...leadData,
     };
-    await Backend.saveLead(newLead);
-    setLeads(prev => [newLead, ...prev]);
-    pushNotification('New Lead Received', `Inquiry from ${newLead.name}. Score: ${score}`, 'success', 'lead', newLead.id);
-  }, [pushNotification]);
+    
+    if (user && user.id && !INITIAL_USERS.find(u => u.id === user.id)) {
+        try {
+            await Backend.saveLead(newLead);
+            setLeads(prev => [newLead, ...prev]);
+            pushNotification('New Lead Received', `Inquiry from ${newLead.name}. Score: ${score}`, 'success', 'lead', newLead.id);
+        } catch (err) {
+            console.error('[DataContext] Auth lead save failed, falling back to public:', err);
+            await Backend.savePublicLead(leadData);
+        }
+    } else {
+        // Public submission or mock user
+        const res = await Backend.savePublicLead(leadData);
+        if (res.success) {
+            pushNotification('Inquiry Submitted', `Thank you ${leadData.name}, we will contact you shortly.`, 'success');
+        }
+    }
+  }, [user, pushNotification]);
 
   const updateLead = useCallback(async (id: string, data: Partial<Lead>) => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, ...data } : l));
@@ -562,10 +575,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const completeOnboarding = (signatureData?: string) => { if (user) updateUser(user.id, { onboardingCompleted: true }); };
   const updateIntegrationConfig = (c: Partial<IntegrationConfig>) => setIntegrationConfig(prev => ({ ...prev, ...c }));
   const getAdvisorAssignments = () => [];
-  const likeResource = () => { };
-  const dislikeResource = () => { };
-  const shareResource = () => { };
-  const addResourceComment = () => { };
+  const likeResource = async (id: string) => { 
+    const res = await Backend.likeResource(id);
+    if (res.success) {
+      setResources(prev => prev.map(r => r.id === id ? { ...r, likes: res.likes } : r));
+    }
+  };
+  const dislikeResource = async (id: string) => { 
+    const res = await Backend.dislikeResource(id);
+    if (res.success) {
+      setResources(prev => prev.map(r => r.id === id ? { ...r, dislikes: res.dislikes } : r));
+    }
+  };
+  const shareResource = (id: string) => { 
+    // Just increment local if we don't have a backend endpoint yet for sharing count
+    setResources(prev => prev.map(r => r.id === id ? { ...r, shares: (r.shares || 0) + 1 } : r));
+  };
+  const addResourceComment = async (id: string, text: string, userName: string) => { 
+    const res = await Backend.addResourceComment(id, text, userName);
+    if (res.success) {
+      setResources(prev => prev.map(r => r.id === id ? { ...r, comments: res.comments } : r));
+    }
+  };
   const addResource = (r: Partial<Resource>) => {
     const newRes = { ...r, id: crypto.randomUUID(), dateAdded: new Date().toISOString(), likes: 0, dislikes: 0, shares: 0, comments: [] } as Resource;
     setResources(prev => [...prev, newRes]);
@@ -625,7 +656,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     Backend.approveTestimonial(id, 'approved'); // Reverts to approved by clearing edits
   };
 
-  const addCallback = (r: any) => { };
+  const addCallback = async (r: any) => { 
+    try {
+      await Backend.saveCallback(r);
+      pushNotification('Request Received', 'We will call you back shortly.', 'success');
+    } catch (e) {
+      console.error('[DataContext] Callback failed:', e);
+    }
+  };
   const handleAdvisorLeadAction = (id: string, a: string) => { };
   const addAdvisor = (data: Partial<User>) => {
     const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;

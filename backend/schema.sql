@@ -263,4 +263,76 @@ CREATE TABLE analytics_page_views (
 
 CREATE INDEX idx_analytics_visitor_id ON analytics_visitors(visitor_id);
 CREATE INDEX idx_analytics_page_views_visitor ON analytics_page_views(visitor_id);
-CREATE INDEX idx_analytics_sessions_visitor ON analytics_sessions(visitor_id);
+-- ADVISOR APPLICATIONS (Join Our Team)
+CREATE TABLE advisor_applications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name VARCHAR(255) NOT NULL,
+    personal_email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(50),
+    license_info TEXT,
+    experience TEXT,
+    address TEXT,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RESOURCES (Media Hub)
+CREATE TABLE resources (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL, -- PDF, Video, YouTube, Article, etc.
+    url TEXT NOT NULL,
+    thumbnail TEXT,
+    description TEXT,
+    content TEXT,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
+    shares INT DEFAULT 0,
+    tags TEXT[],
+    comments JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TESTIMONIALS
+CREATE TABLE testimonials (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_name VARCHAR(255) NOT NULL,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    product VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected
+    date DATE DEFAULT CURRENT_DATE,
+    edited_client_name VARCHAR(255),
+    edited_rating INT,
+    edited_review_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ADVISOR BILLING (Stripe/Payment info)
+CREATE TABLE advisor_billing (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    billing_status VARCHAR(50) DEFAULT 'active',
+    plan_name VARCHAR(100),
+    amount NUMERIC(12, 2),
+    next_billing_date DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TASKS (Management & Automations)
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    advisor_id UUID REFERENCES users(id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority VARCHAR(20) DEFAULT 'Medium',
+    completed BOOLEAN DEFAULT FALSE,
+    due_date DATE,
+    related_lead_id UUID REFERENCES leads(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_tasks_advisor ON tasks(advisor_id);
+CREATE INDEX idx_tasks_lead ON tasks(related_lead_id);
+CREATE INDEX idx_testimonials_status ON testimonials(status);
+CREATE INDEX idx_resources_type ON resources(type);

@@ -124,7 +124,7 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
   if (connectionString && connectionString.includes('pooler.supabase.com')) {
     try {
       const dbUrl = new URL(connectionString);
-      const sbUrl = process.env.SUPABASE_URL;
+      const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
       const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
       if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
         dbUrl.username = `${dbUrl.username}.${projectRef}`;
@@ -644,8 +644,82 @@ app.post('/api/leads', authenticateToken, async (req, res) => {
     client.release();
   }
 });
+ 
+// 2.5 Public Lead Ingestion (No Auth Required)
+app.post('/api/leads/public', async (req, res) => {
+  const { name, email, phone, interest, message, source, visitorId } = req.body;
+  
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Missing required fields: name and email' });
+  }
 
-// 2.5 API Trace Logs
+  try {
+    const score = calculateLeadScore(req.body);
+    const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
+
+    const query = `
+      INSERT INTO public.leads (name, email, phone, interest, message, source, visitor_id, score, qualification, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *
+    `;
+    const result = await pool.query(query, [
+      name, 
+      email, 
+      phone, 
+      interest || 'Life Insurance', 
+      message, 
+      source || 'Public Web Form', 
+      visitorId, 
+      score, 
+      qualification, 
+      'New'
+    ]);
+    const data = result.rows[0];
+
+    // Broadcast to advisors in the CRM
+    broadcast({ type: 'NEW_LEAD', payload: data });
+
+    // Automation: Create an initial task for the internal admin
+    try {
+      await pool.query(
+        "INSERT INTO public.tasks (title, priority, completed, related_lead_id) VALUES ($1, $2, $3, $4)",
+        [`Review public inquiry: ${name}`, 'Medium', false, data.id]
+      );
+    } catch (taskErr) {
+      console.error('[Public Lead] Failed to create task:', taskErr.message);
+    }
+
+    res.status(201).json({ id: data.id, success: true, score, qualification });
+  } catch (err) {
+    console.error('[Public Lead] error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2.6 Consultation Callback Requests
+app.post('/api/callbacks', async (req, res) => {
+  const { name, phone, timeRequested, email, productType } = req.body;
+  if (!name || !phone) return res.status(400).json({ error: 'Name and Phone required' });
+
+  try {
+    const query = `
+      INSERT INTO public.callbacks (name, phone, time_requested, product_type)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    const result = await pool.query(query, [name, phone, timeRequested, productType]);
+    const data = result.rows[0];
+
+    broadcast({ type: 'NEW_CALLBACK_REQUEST', payload: data });
+    console.log(`[Callbacks] New request from: ${name}`);
+    res.status(201).json({ success: true, id: data.id });
+  } catch (err) {
+    console.error('[Callbacks] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2.7 API Trace Logs
 app.get('/api/logs', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM integration_logs ORDER BY created_at DESC LIMIT 50');
@@ -1281,25 +1355,13 @@ app.post('/api/onboarding/apply', async (req, res) => {
   if (!personalEmail) return res.status(400).json({ error: 'Missing field: personalEmail' });
 
   try {
-    const { data, error } = await supabaseAdmin
-      .from('advisor_applications')
-      .insert([{
-        full_name: fullName,
-        personal_email: personalEmail,
-        phone,
-        license_info: licenseInfo,
-        experience,
-        address
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        return res.status(400).json({ error: 'An application with this email already exists.' });
-      }
-      throw error;
-    }
+    const query = `
+      INSERT INTO public.advisor_applications (full_name, personal_email, phone, license_info, experience, address)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `;
+    const result = await pool.query(query, [fullName, personalEmail, phone, licenseInfo, experience, address]);
+    const data = result.rows[0];
 
     // Notify Admin/Manager
     broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: data });
@@ -1307,6 +1369,9 @@ app.post('/api/onboarding/apply', async (req, res) => {
     console.log(`[Onboarding] New application from: ${fullName}`);
     res.status(201).json({ success: true, message: 'Application submitted successfully.' });
   } catch (err) {
+    if (err.code === '23505') {
+       return res.status(400).json({ error: 'An application with this email already exists.' });
+    }
     console.error('[Onboarding] Application error:', err.message);
     res.status(500).json({ error: err.message });
   }
@@ -1713,7 +1778,7 @@ app.post('/api/workflows', authenticateToken, async (req, res) => {
 // 6.2 Resources System
 app.get('/api/resources', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM resources ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM public.resources ORDER BY created_at DESC');
     res.json(result.rows.map(row => ({
       id: row.id,
       title: row.title,
@@ -1745,6 +1810,54 @@ app.post('/api/resources', authenticateToken, async (req, res) => {
       [title, type, url, thumbnail, description, content, tags]
     );
     res.json({ success: true, resource: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Resource Interactions (Public)
+app.post('/api/resources/:id/like', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('UPDATE resources SET likes = COALESCE(likes, 0) + 1 WHERE id = $1 RETURNING likes', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Resource not found' });
+    res.json({ success: true, likes: result.rows[0].likes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/resources/:id/dislike', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('UPDATE resources SET dislikes = COALESCE(dislikes, 0) + 1 WHERE id = $1 RETURNING dislikes', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Resource not found' });
+    res.json({ success: true, dislikes: result.rows[0].dislikes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/resources/:id/comment', async (req, res) => {
+  const { id } = req.params;
+  const { text, userName } = req.body;
+  if (!text) return res.status(400).json({ error: 'Comment text required' });
+
+  try {
+    const comment = {
+      id: crypto.randomUUID(),
+      user: userName || 'Guest',
+      text,
+      date: new Date().toISOString()
+    };
+    
+    const result = await pool.query(
+      "UPDATE resources SET comments = COALESCE(comments, '[]'::jsonb) || $1::jsonb WHERE id = $2 RETURNING comments",
+      [JSON.stringify([comment]), id]
+    );
+    
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Resource not found' });
+    res.json({ success: true, comments: result.rows[0].comments });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
