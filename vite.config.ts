@@ -6,12 +6,17 @@ export default defineConfig(({ mode }) => {
     // Load env from the backend directory where we moved it
     const env = loadEnv(mode, path.resolve(__dirname, 'backend'), '');
     return {
+      root: path.resolve(__dirname),
       server: {
-        port: 3000,
-        host: '0.0.0.0',
+        port: 3020,
+        host: '127.0.0.1',
+        fs: {
+          strict: true,
+          allow: [path.resolve(__dirname)],
+        },
         proxy: {
           '/api': {
-            target: 'http://localhost:3001',
+            target: 'http://127.0.0.1:3021',
             changeOrigin: true,
             secure: false,
           },

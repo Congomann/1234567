@@ -297,7 +297,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ...leadData,
     };
     
-    if (user && user.id && !INITIAL_USERS.find(u => u.id === user.id)) {
+    if (user && !INITIAL_USERS.find(u => u.id === user.id)) {
         try {
             await Backend.saveLead(newLead);
             setLeads(prev => [newLead, ...prev]);
@@ -305,12 +305,20 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('[DataContext] Auth lead save failed, falling back to public:', err);
             await Backend.savePublicLead(leadData);
+            pushNotification('Inquiry Submitted', `Thank you ${leadData.name}, we will contact you shortly.`, 'success');
         }
     } else {
         // Public submission or mock user
-        const res = await Backend.savePublicLead(leadData);
-        if (res.success) {
-            pushNotification('Inquiry Submitted', `Thank you ${leadData.name}, we will contact you shortly.`, 'success');
+        try {
+          const res = await Backend.savePublicLead(leadData);
+          if (res.success) {
+              pushNotification('Inquiry Submitted', `Thank you ${leadData.name}, we will contact you shortly.`, 'success');
+          }
+        } catch (e) {
+          console.error('[DataContext] Public lead submission failed:', e);
+          // Local fallback
+          setLeads(prev => [newLead, ...prev]);
+          pushNotification('Inquiry Submitted (Offline)', `Thank you ${leadData.name}, we saved your request locally.`, 'warning');
         }
     }
   }, [user, pushNotification]);
@@ -658,10 +666,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addCallback = async (r: any) => { 
     try {
-      await Backend.saveCallback(r);
-      pushNotification('Request Received', 'We will call you back shortly.', 'success');
+      const res = await Backend.saveCallback(r);
+      if (res.success) {
+        pushNotification('Request Received', 'We will call you back shortly.', 'success');
+      }
     } catch (e) {
       console.error('[DataContext] Callback failed:', e);
+      pushNotification('Callback Error', 'Failed to send request. Please try again.', 'alert');
     }
   };
   const handleAdvisorLeadAction = (id: string, a: string) => { };

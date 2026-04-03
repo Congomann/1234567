@@ -228,6 +228,14 @@ class NHFGBackend {
         await DB.save('leads', { ...lead, id: lead.id || crypto.randomUUID() } as Lead);
     }
 
+    async savePublicLead(lead: Partial<Lead>): Promise<any> {
+        return this.post('/leads/public', lead);
+    }
+
+    async saveCallback(callback: any): Promise<any> {
+        return this.post('/callbacks', callback);
+    }
+
     async getClients(): Promise<Client[]> {
         return this.apiRequest<Client[]>(`${this.baseUrl}/clients`, { headers: this.getAuthHeaders() }, 'clients');
     }
@@ -376,6 +384,18 @@ class NHFGBackend {
             } catch (e) { }
         }
         await DB.delete('resources', id);
+    }
+
+    async likeResource(id: string): Promise<any> {
+        return this.post(`/resources/${id}/like`, {});
+    }
+
+    async dislikeResource(id: string): Promise<any> {
+        return this.post(`/resources/${id}/dislike`, {});
+    }
+
+    async addResourceComment(id: string, text: string, userName?: string): Promise<any> {
+        return this.post(`/resources/${id}/comment`, { text, userName });
     }
 
     // --- TESTIMONIALS ---

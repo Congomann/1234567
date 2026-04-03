@@ -2225,18 +2225,25 @@ app.post('/api/plaid/create-link-token', authenticateToken, async (req, res) => 
     const products = (process.env.PLAID_PRODUCTS || 'auth').split(',').map(s => s.trim());
     const countryCodes = (process.env.PLAID_COUNTRY_CODES || 'US').split(',').map(s => s.trim());
 
+    // For production Plaid, request only auth product to avoid product conflicts
+    const authProducts = ['auth'];
+    const identityProducts = products.filter(p => p !== 'auth');
+
     const linkRequest = {
       user: { client_user_id: userId || req.user?.id || 'nhfg-user' },
       client_name: 'New Holland Financial Group',
-      products,
+      products: authProducts,
       country_codes: countryCodes,
       language: 'en',
-      auth: {
-        auth_type_select_enabled: true,
-        automated_microdeposits_enabled: true,
-      },
       ...(process.env.PLAID_WEBHOOK_URL ? { webhook: process.env.PLAID_WEBHOOK_URL } : {}),
     };
+
+    // Add additional products if configured (not as base products for auth flow)
+    if (identityProducts.length > 0) {
+      linkRequest.additional_consented_products = identityProducts.filter(p =>
+        ['identity', 'transactions', 'investments'].includes(p)
+      );
+    }
 
     const response = await plaidClient.linkTokenCreate(linkRequest);
     console.log(`[Plaid] link_token created — expires: ${response.data.expiration} `);
@@ -2350,22 +2357,34 @@ app.post('/api/plaid/exchange-token', authenticateToken, async (req, res) => {
     let isActive = (targetAcct?.balances?.current ?? null) !== null;
     let nameMatch = nameMatchScore != null ? nameMatchScore >= 70 : false;
 
-    // ── Explicitly Check Identity for Name Match ────────────────────────────────
+    // ── Step D: Explicitly Check Identity for Name Match ────────────────────────────────
     try {
       const idRes = await plaidClient.identityGet({ access_token });
-      const names = idRes.data.accounts?.flatMap(a => a.owners?.flatMap(o => o.names)) || [];
-      const cNameLower = clientName.toLowerCase().split(' ')[0]; // Match first name loosely
-      if (names.some(n => n?.toLowerCase().includes(cNameLower))) {
-        nameMatch = true;
+      const accounts = idRes.data.accounts || [];
+      const allNames = accounts.flatMap(a => a.owners?.flatMap(o => o.names)) || [];
+      
+      // Robust Name Matching: Check if any owner name contains the CRM client name (case insensitive)
+      const cNameLower = clientName.toLowerCase();
+      const firstName = cNameLower.split(' ')[0];
+      const lastName = cNameLower.split(' ').slice(-1)[0];
+      
+      const foundMatch = allNames.some(name => {
+        const n = name?.toLowerCase() || '';
+        return n.includes(cNameLower) || (n.includes(firstName) && n.includes(lastName));
+      });
+
+      if (foundMatch) {
+         nameMatch = true;
+         nameMatchScore = 100; // Force full match if found in identity
       }
       
-      // Also confirm the account is fully active by checking auth / balances explicitly if not found
-      if (!isActive) {
-         const authCheck = await plaidClient.authGet({ access_token });
-         if (authCheck.data.accounts && authCheck.data.accounts.length > 0) isActive = true;
-      }
+      // Confirm account is active via balance check
+      const targetIdAcct = accounts.find(a => a.account_id === accountId) || accounts[0];
+      isActive = (targetIdAcct?.balances?.current ?? null) !== null;
+      
     } catch (e) {
-      console.log('[Plaid API Secondary Check]', e.response?.data?.error_message || e.message);
+      const pd = e.response?.data;
+      console.log('[Plaid Identity Check] Failed or Not Supported:', pd?.error_message || e.message);
     }
 
     const draftRisk = computeDraftRisk(insights, plaidVerifStatus, hasPriorReturns, authMethodFromItem);
@@ -2540,6 +2559,62 @@ app.post('/api/plaid/auth/refresh/:verificationId', authenticateToken, async (re
     const pd = err.response?.data;
     console.error('[Plaid] auth refresh error:', pd || err.message);
     res.status(500).json({ error: pd?.error_message || err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ENDPOINT — Plaid Webhook
+// ════════════════════════════════════════════════════════════════════════════════
+app.post('/api/plaid/webhook', async (req, res) => {
+  const { webhook_type, webhook_code, item_id, error } = req.body;
+  console.log(`[Plaid Webhook] Type: ${webhook_type} | Code: ${webhook_code} | Item: ${item_id}`);
+
+  // Immediate 200 OK to Plaid
+  res.json({ received: true });
+
+  if (error) {
+    console.error(`[Plaid Webhook] Error:`, error);
+    return;
+  }
+
+  // Handle transaction updates
+  if (webhook_type === 'TRANSACTIONS') {
+    try {
+      // Find the access_token for this item_id
+      const itemRow = await pool.query('SELECT access_token FROM plaid_items WHERE item_id = $1', [item_id]);
+      if (!itemRow.rows.length) return;
+      const { access_token } = itemRow.rows[0];
+
+      // Fetch last 7 days of transactions
+      const now = new Date();
+      const endDate = now.toISOString().split('T')[0];
+      const startDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+
+      console.log(`[Plaid Webhook] Fetching transactions from ${startDate} to ${endDate}`);
+      
+      const transRes = await plaidClient.transactionsGet({
+        access_token,
+        start_date: startDate,
+        end_date: endDate,
+        options: { count: 100 }
+      });
+
+      const transactions = transRes.data.transactions || [];
+      
+      // Update bank_verifications record
+      await pool.query(
+        `UPDATE bank_verifications bv
+         SET transactions_7d = $1,
+             updated_at = NOW()
+         FROM plaid_items pi
+         WHERE pi.id = bv.plaid_item_id AND pi.item_id = $2`,
+        [JSON.stringify(transactions), item_id]
+      );
+
+      console.log(`[Plaid Webhook] Successfully synced ${transactions.length} transactions for item ${item_id}`);
+    } catch (err) {
+      console.error('[Plaid Webhook] Processing failed:', err.response?.data || err.message);
+    }
   }
 });
 

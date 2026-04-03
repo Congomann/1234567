@@ -461,13 +461,25 @@ const PlaidSetupModal: React.FC<{
 
 // ─── Manual ACH Form ──────────────────────────────────────────────────────────
 
+/** ABA checksum — same algorithm as the backend validateABA() */
+const validateABA = (n: string): boolean => {
+    if (!n || n.length !== 9 || !/^\d{9}$/.test(n)) return false;
+    const d = n.split('').map(Number);
+    const sum = 3 * (d[0] + d[3] + d[6])
+              + 7 * (d[1] + d[4] + d[7])
+              + 1 * (d[2] + d[5] + d[8]);
+    return sum % 10 === 0;
+};
+
 const ManualForm: React.FC<{
     onSave: (record: VerificationRecord) => void;
     onError: (m: string) => void;
     onClose: () => void;
 }> = ({ onSave, onError, onClose }) => {
     const [showAcct, setShowAcct] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [form, setForm] = useState<{
         clientName: string; clientEmail: string; clientPhone: string;
         institutionName: string; routingNumber: string;
@@ -481,18 +493,29 @@ const ManualForm: React.FC<{
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    // Real-time routing number status
+    const routingStatus = (() => {
+        if (!form.routingNumber) return null;
+        if (!/^\d{9}$/.test(form.routingNumber)) return 'format';
+        if (!validateABA(form.routingNumber)) return 'invalid';
+        return 'valid';
+    })();
+
     const validate = () => {
         const e: Record<string, string> = {};
         if (!form.clientName.trim()) e.clientName = 'Required';
         if (!form.institutionName.trim()) e.institutionName = 'Required';
-        if (!/^\d{9}$/.test(form.routingNumber)) e.routingNumber = 'Must be exactly 9 digits';
-        if (form.accountNumber.length < 4) e.accountNumber = 'Too short';
-        if (form.accountNumber !== form.confirmAccount) e.confirmAccount = "Doesn't match";
+        if (routingStatus !== 'valid') e.routingNumber =
+            routingStatus === 'format' ? 'Must be exactly 9 digits' : 'Routing number fails ABA checksum — verify and try again';
+        if (form.accountNumber.length < 4) e.accountNumber = 'Account number must be at least 4 digits';
+        if (!/^\d+$/.test(form.accountNumber)) e.accountNumber = 'Must contain digits only';
+        if (form.accountNumber !== form.confirmAccount) e.confirmAccount = "Numbers don't match — re-enter carefully";
         setErrors(e);
         return !Object.keys(e).length;
     };
 
     const handleSubmit = async () => {
+        setSubmitError(null);
         if (!validate()) return;
         setSaving(true);
 
@@ -512,7 +535,7 @@ const ManualForm: React.FC<{
         setSaving(false);
 
         if (error || !data) {
-            onError(error || 'Failed to save verification');
+            setSubmitError(error || 'Failed to save verification. Please try again.');
             return;
         }
 
@@ -520,124 +543,266 @@ const ManualForm: React.FC<{
         onClose();
     };
 
-    const field = (label: string, key: string, type = 'text', ph = '') => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
-            <input
-                type={type} placeholder={ph}
-                value={(form as any)[key]}
-                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                style={{ padding: '9px 12px', border: `1.5px solid ${errors[key] ? '#f43f5e' : '#e5e7eb'}`, borderRadius: 8, fontSize: 13, outline: 'none', width: '100%', boxSizing: 'border-box' as any }}
-            />
-            {errors[key] && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors[key]}</span>}
-        </div>
-    );
+    const inputStyle = (key: string): React.CSSProperties => ({
+        padding: '9px 12px',
+        border: `1.5px solid ${errors[key] ? '#f43f5e' : '#e5e7eb'}`,
+        borderRadius: 8,
+        fontSize: 13,
+        outline: 'none',
+        width: '100%',
+        boxSizing: 'border-box',
+        transition: 'border-color 0.15s',
+        background: errors[key] ? '#fff8f8' : '#fff',
+    });
 
     return (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
             <motion.div
                 initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                 onClick={e => e.stopPropagation()}
-                style={{ width: 580, background: '#fff', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' }}
+                style={{ width: 600, background: '#fff', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.25)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
             >
-                <div style={{ padding: '22px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                {/* Header */}
+                <div style={{ padding: '20px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
                     <div>
-                        <p style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>Manual ACH Verification</p>
-                        <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>Enter client banking details — ABA routing checksum validated server-side</p>
+                        <p style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>Manual ACH Verification</p>
+                        <p style={{ fontSize: 12, color: '#6b7280', marginTop: 3 }}>Enter client banking details · ABA routing checksum validated in real-time</p>
                     </div>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}><XCircle size={20} /></button>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 4 }}><XCircle size={22} /></button>
                 </div>
 
-                <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {/* Client Info */}
-                    <p style={{ fontSize: 11, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1 }}>Client Information</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        {field('Full Name *', 'clientName', 'text', 'John Doe')}
-                        {field('Email', 'clientEmail', 'email', 'john@email.com')}
-                        {field('Phone', 'clientPhone', 'tel', '(504) 555-0100')}
-                    </div>
+                {/* Scrollable body */}
+                <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 18, overflowY: 'auto', flex: 1 }}>
 
-                    <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-
-                    {/* Bank Info */}
-                    <p style={{ fontSize: 11, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1 }}>Banking Details</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        {field('Institution Name *', 'institutionName', 'text', 'Chase Bank')}
-                        {field('Routing Number *', 'routingNumber', 'text', '021000021')}
-                    </div>
-
-                    {/* Account type */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Account Type</label>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            {(['checking', 'savings'] as const).map(t => (
-                                <button key={t} onClick={() => setForm(f => ({ ...f, accountType: t }))} style={{
-                                    flex: 1, padding: '9px', border: `2px solid ${form.accountType === t ? '#3b82f6' : '#e5e7eb'}`,
-                                    borderRadius: 8, background: form.accountType === t ? '#eff6ff' : '#fff',
-                                    color: form.accountType === t ? '#1d4ed8' : '#6b7280',
-                                    fontWeight: 600, fontSize: 13, cursor: 'pointer', textTransform: 'capitalize',
-                                }}>{t}</button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Account numbers */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Account Number *</label>
-                            <div style={{ position: 'relative' }}>
+                    {/* ── Client Information ── */}
+                    <div>
+                        <p style={{ fontSize: 10.5, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 12 }}>Client Information</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            {/* Full Name */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, gridColumn: '1 / -1' }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Full Name *</label>
                                 <input
-                                    type={showAcct ? 'text' : 'password'} placeholder="Full account number"
-                                    value={form.accountNumber}
-                                    onChange={e => setForm(f => ({ ...f, accountNumber: e.target.value }))}
-                                    style={{ width: '100%', padding: '9px 36px 9px 12px', border: `1.5px solid ${errors.accountNumber ? '#f43f5e' : '#e5e7eb'}`, borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                                    type="text" placeholder="John Doe"
+                                    value={form.clientName}
+                                    onChange={e => setForm(f => ({ ...f, clientName: e.target.value }))}
+                                    style={inputStyle('clientName')}
                                 />
-                                <button onClick={() => setShowAcct(s => !s)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}>
-                                    {showAcct ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </button>
+                                {errors.clientName && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.clientName}</span>}
                             </div>
-                            {errors.accountNumber && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.accountNumber}</span>}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Confirm Account *</label>
-                            <input
-                                type="password" placeholder="Re-enter account number"
-                                value={form.confirmAccount}
-                                onChange={e => setForm(f => ({ ...f, confirmAccount: e.target.value }))}
-                                style={{ padding: '9px 12px', border: `1.5px solid ${errors.confirmAccount ? '#f43f5e' : '#e5e7eb'}`, borderRadius: 8, fontSize: 13, outline: 'none' }}
-                            />
-                            {errors.confirmAccount && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.confirmAccount}</span>}
+                            {/* Email */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Email</label>
+                                <input
+                                    type="email" placeholder="john@email.com"
+                                    value={form.clientEmail}
+                                    onChange={e => setForm(f => ({ ...f, clientEmail: e.target.value }))}
+                                    style={inputStyle('clientEmail')}
+                                />
+                            </div>
+                            {/* Phone */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Phone</label>
+                                <input
+                                    type="tel" placeholder="(504) 555-0100"
+                                    value={form.clientPhone}
+                                    onChange={e => setForm(f => ({ ...f, clientPhone: e.target.value }))}
+                                    style={inputStyle('clientPhone')}
+                                />
+                            </div>
                         </div>
                     </div>
 
+                    <div style={{ height: 1, background: '#f1f5f9' }} />
+
+                    {/* ── Banking Details ── */}
+                    <div>
+                        <p style={{ fontSize: 10.5, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 12 }}>Banking Details</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            {/* Institution */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Bank / Institution *</label>
+                                <input
+                                    type="text" placeholder="Bank of America"
+                                    value={form.institutionName}
+                                    onChange={e => setForm(f => ({ ...f, institutionName: e.target.value }))}
+                                    style={inputStyle('institutionName')}
+                                />
+                                {errors.institutionName && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.institutionName}</span>}
+                            </div>
+
+                            {/* Routing Number with real-time ABA check */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                    Routing Number (ABA) *
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="text" placeholder="021000021"
+                                        maxLength={9}
+                                        value={form.routingNumber}
+                                        onChange={e => {
+                                            const v = e.target.value.replace(/\D/g, '').slice(0, 9);
+                                            setForm(f => ({ ...f, routingNumber: v }));
+                                            if (errors.routingNumber) setErrors(prev => ({ ...prev, routingNumber: '' }));
+                                        }}
+                                        style={{
+                                            ...inputStyle('routingNumber'),
+                                            paddingRight: 32,
+                                            borderColor: routingStatus === 'valid' ? '#10b981' : routingStatus === 'invalid' ? '#f43f5e' : errors.routingNumber ? '#f43f5e' : '#e5e7eb',
+                                            background: routingStatus === 'valid' ? '#f0fdf4' : routingStatus === 'invalid' ? '#fff8f8' : '#fff',
+                                        }}
+                                    />
+                                    {/* Inline ABA status icon */}
+                                    {form.routingNumber.length > 0 && (
+                                        <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 14 }}>
+                                            {routingStatus === 'valid' ? '✅' : routingStatus === 'invalid' ? '❌' : '…'}
+                                        </span>
+                                    )}
+                                </div>
+                                {/* Real-time routing feedback */}
+                                {routingStatus === 'valid' && (
+                                    <span style={{ fontSize: 11, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <CheckCircle2 size={11} /> Valid ABA routing number
+                                    </span>
+                                )}
+                                {routingStatus === 'invalid' && (
+                                    <span style={{ fontSize: 11, color: '#f43f5e', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <AlertCircle size={11} /> Fails ABA checksum — check the number
+                                    </span>
+                                )}
+                                {errors.routingNumber && routingStatus !== 'invalid' && (
+                                    <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.routingNumber}</span>
+                                )}
+                            </div>
+
+                            {/* Account Type */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, gridColumn: '1 / -1' }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Account Type</label>
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    {(['checking', 'savings'] as const).map(t => (
+                                        <button key={t} onClick={() => setForm(f => ({ ...f, accountType: t }))} style={{
+                                            flex: 1, padding: '10px',
+                                            border: `2px solid ${form.accountType === t ? '#3b82f6' : '#e5e7eb'}`,
+                                            borderRadius: 8,
+                                            background: form.accountType === t ? '#eff6ff' : '#fff',
+                                            color: form.accountType === t ? '#1d4ed8' : '#6b7280',
+                                            fontWeight: 700, fontSize: 13, cursor: 'pointer', textTransform: 'capitalize',
+                                            transition: 'all 0.15s',
+                                        }}>
+                                            {t === 'checking' ? '🏦 Checking' : '💰 Savings'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Account Number */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Account Number *</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type={showAcct ? 'text' : 'password'}
+                                        placeholder="Full account number"
+                                        value={form.accountNumber}
+                                        inputMode="numeric"
+                                        onChange={e => setForm(f => ({ ...f, accountNumber: e.target.value }))}
+                                        style={{ ...inputStyle('accountNumber'), paddingRight: 36 }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAcct(s => !s)}
+                                        style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
+                                    >
+                                        {showAcct ? <EyeOff size={15} /> : <Eye size={15} />}
+                                    </button>
+                                </div>
+                                {errors.accountNumber && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.accountNumber}</span>}
+                            </div>
+
+                            {/* Confirm Account Number */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Confirm Account *</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type={showConfirm ? 'text' : 'password'}
+                                        placeholder="Re-enter account number"
+                                        value={form.confirmAccount}
+                                        inputMode="numeric"
+                                        onChange={e => setForm(f => ({ ...f, confirmAccount: e.target.value }))}
+                                        style={{
+                                            ...inputStyle('confirmAccount'),
+                                            paddingRight: 36,
+                                            borderColor: form.confirmAccount && form.accountNumber && form.confirmAccount === form.accountNumber
+                                                ? '#10b981'
+                                                : errors.confirmAccount ? '#f43f5e' : '#e5e7eb',
+                                            background: form.confirmAccount && form.accountNumber && form.confirmAccount === form.accountNumber
+                                                ? '#f0fdf4' : errors.confirmAccount ? '#fff8f8' : '#fff',
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirm(s => !s)}
+                                        style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
+                                    >
+                                        {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                                    </button>
+                                </div>
+                                {form.confirmAccount && form.accountNumber && form.confirmAccount === form.accountNumber && (
+                                    <span style={{ fontSize: 11, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <CheckCircle2 size={11} /> Account numbers match
+                                    </span>
+                                )}
+                                {errors.confirmAccount && <span style={{ fontSize: 11, color: '#f43f5e' }}>{errors.confirmAccount}</span>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notes */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Notes (optional)</label>
                         <textarea
-                            placeholder="Any relevant notes for the verification team..."
+                            placeholder="Any notes for the verification team (e.g. client confirmed via phone on 4/3/26)..."
                             value={form.notes}
                             onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                             rows={2}
-                            style={{ padding: '9px 12px', border: '1.5px solid #e5e7eb', borderRadius: 8, fontSize: 13, outline: 'none', resize: 'vertical' }}
+                            style={{ padding: '9px 12px', border: '1.5px solid #e5e7eb', borderRadius: 8, fontSize: 13, outline: 'none', resize: 'vertical', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
                         />
                     </div>
 
+                    {/* Security Note */}
                     <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '10px 14px', display: 'flex', gap: 8 }}>
                         <Info size={15} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
-                        <p style={{ fontSize: 12, color: '#92400e', lineHeight: 1.5 }}>
-                            Manual entries go into <strong>Micro-Deposit</strong> status. Routing number is validated using the
-                            ABA mod-10 checksum. <strong>Only the last 4 digits</strong> of the account number are stored — the full number is never saved.
+                        <p style={{ fontSize: 12, color: '#92400e', lineHeight: 1.6, margin: 0 }}>
+                            Manual entries go into <strong>Micro-Deposit</strong> status pending confirmation. The routing number is validated using the ABA mod-10 checksum.{' '}
+                            <strong>Only the last 4 digits</strong> of the account number are stored — the full number is <em>never</em> saved to the database.
                         </p>
                     </div>
 
-                    <button onClick={handleSubmit} disabled={saving} style={{
-                        width: '100%', padding: '13px',
-                        background: saving ? '#e5e7eb' : 'linear-gradient(135deg,#0C2340,#1e40af)',
-                        color: saving ? '#9ca3af' : '#fff',
-                        border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700,
-                        cursor: saving ? 'not-allowed' : 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    }}>
-                        {saving ? <><Loader2 size={16} className="animate-spin" /> Saving…</> : <><Landmark size={16} /> Submit for Verification</>}
+                    {/* Inline submit error */}
+                    {submitError && (
+                        <div style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 10, padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                            <AlertTriangle size={15} color="#f43f5e" style={{ flexShrink: 0, marginTop: 2 }} />
+                            <p style={{ fontSize: 12, color: '#9f1239', margin: 0, lineHeight: 1.5 }}>{submitError}</p>
+                        </div>
+                    )}
+
+                    {/* Submit button */}
+                    <button
+                        onClick={handleSubmit}
+                        disabled={saving}
+                        style={{
+                            width: '100%', padding: '13px',
+                            background: saving ? '#e5e7eb' : 'linear-gradient(135deg,#0C2340,#1e40af)',
+                            color: saving ? '#9ca3af' : '#fff',
+                            border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700,
+                            cursor: saving ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            transition: 'opacity 0.15s',
+                        }}
+                    >
+                        {saving
+                            ? <><Loader2 size={16} className="animate-spin" /> Submitting…</>
+                            : <><Landmark size={16} /> Submit Manual Verification</>
+                        }
                     </button>
                 </div>
             </motion.div>
