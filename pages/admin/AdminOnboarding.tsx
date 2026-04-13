@@ -387,14 +387,17 @@ function ApplicationCard({ app, isSelected, onClick }: { app: Application, isSel
 }
 
 function StatusBadge({ status }: { status: Application['status'] }) {
-    const config = {
+    const config: Record<string, { bg: string, dot: string, text: string, color: string }> = {
         pending_approval: { bg: 'bg-amber-100', dot: 'bg-amber-500', text: 'Pending', color: 'text-amber-700' },
         approved: { bg: 'bg-emerald-100', dot: 'bg-emerald-500', text: 'Approved', color: 'text-emerald-700' },
         rejected: { bg: 'bg-red-100', dot: 'bg-red-500', text: 'Rejected', color: 'text-red-700' },
         info_requested: { bg: 'bg-blue-100', dot: 'bg-blue-500', text: 'Clarify', color: 'text-blue-700' },
     };
 
-    const { bg, dot, text, color } = config[status];
+    // Normalize: lowercase and replace spaces with underscores to match keys
+    const normalized = (status || '').toString().toLowerCase().trim().replace(/\s+/g, '_');
+    const safeStatus = config[normalized] ? normalized : 'pending_approval';
+    const { bg, dot, text, color } = config[safeStatus];
 
     return (
         <div className={`${bg} ${color} text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5`}>

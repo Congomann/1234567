@@ -448,7 +448,13 @@ export interface CompanySettings {
   // Theme & Branding
   themePrimaryColor?: string;
   themeSecondaryColor?: string;
+  themeAccentColor?: string;
   themeStructure?: 'default' | 'modern' | 'minimal' | 'bold' | 'ios' | 'macos' | 'material' | 'neumorphic';
+
+  // Plaid Integration 
+  plaidClientId?: string;
+  plaidSecret?: string;
+  plaidEnv?: 'sandbox' | 'development' | 'production';
 
   // CRM Customization
   leadStatuses?: string[];

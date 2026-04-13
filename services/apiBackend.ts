@@ -18,7 +18,7 @@ class NHFGBackend {
     }
 
     private getAuthHeaders(): HeadersInit {
-        const token = localStorage.getItem('nhfg_access_token');
+        const token = localStorage.getItem('nhfg_access_token') || localStorage.getItem('token');
         const headers: HeadersInit = { 'Content-Type': 'application/json' };
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -277,12 +277,16 @@ class NHFGBackend {
 
     async saveSettings(settings: CompanySettings): Promise<void> {
         if (USE_REAL_BACKEND) {
-            const res = await fetch(`${this.baseUrl}/settings`, {
-                method: 'POST',
-                headers: this.getAuthHeaders(),
-                body: JSON.stringify(settings)
-            });
-            await this.handleResponse(res);
+            try {
+                const res = await fetch(`${this.baseUrl}/settings`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(settings)
+                });
+                await this.handleResponse(res);
+            } catch (e) {
+                console.warn('[API] Real backend offline for saveSettings. Falling back to local DB.', e);
+            }
         }
         await DB.save('settings', { ...settings, id: 'main' } as any);
     }
@@ -345,12 +349,16 @@ class NHFGBackend {
 
     async saveLandingPage(page: any): Promise<void> {
         if (USE_REAL_BACKEND) {
-            const res = await fetch(`${this.baseUrl}/admin/landing-pages`, {
-                method: 'POST',
-                headers: this.getAuthHeaders(),
-                body: JSON.stringify(page)
-            });
-            await this.handleResponse(res);
+            try {
+                const res = await fetch(`${this.baseUrl}/admin/landing-pages`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(page)
+                });
+                await this.handleResponse(res);
+            } catch (e) {
+                console.warn('[API] Real backend offline for saveLandingPage. Falling back to local DB.', e);
+            }
         }
         await DB.save('landing_pages', page);
     }
@@ -541,6 +549,78 @@ class NHFGBackend {
             } catch (e) { }
         }
         await DB.save('preferences', prefs);
+    }
+    
+    // --- TASKS ---
+    async getTasks(): Promise<any[]> {
+        return this.apiRequest<any[]>( `${this.baseUrl}/tasks`, { headers: this.getAuthHeaders() }, 'tasks' );
+    }
+    
+    async saveTask(task: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch( `${this.baseUrl}/tasks`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(task)
+                });
+            } catch (e) { }
+        }
+        await DB.save('tasks', task);
+    }
+    
+    async deleteTask(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch( `${this.baseUrl}/tasks/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            } catch (e) {}
+        }
+        await DB.delete('tasks', id);
+    }
+
+    // --- PORTFOLIOS ---
+    async getPortfolios(): Promise<any[]> {
+        return this.apiRequest<any[]>( `${this.baseUrl}/portfolios`, { headers: this.getAuthHeaders() }, 'portfolios' );
+    }
+
+    async savePortfolio(portfolio: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch( `${this.baseUrl}/portfolios`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(portfolio)
+                });
+            } catch (e) { }
+        }
+        await DB.save('portfolios', portfolio);
+    }
+
+    // --- APPLICATIONS / POLICIES ---
+    async getApplications(): Promise<any[]> {
+        return this.apiRequest<any[]>( `${this.baseUrl}/applications`, { headers: this.getAuthHeaders() }, 'applications' );
+    }
+
+    async saveApplication(application: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch( `${this.baseUrl}/applications`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(application)
+                });
+            } catch (e) { }
+        }
+        await DB.save('applications', application);
+    }
+
+    async deleteClient(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch( `${this.baseUrl}/clients/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            } catch (e) {}
+        }
+        await DB.delete('clients', id);
     }
 
 }

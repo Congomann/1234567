@@ -11,7 +11,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     if (['Sold', 'Closed'].includes(status)) color = 'bg-blue-100 text-blue-700';
     if (['Cancelled', 'Off Market', 'Withdrawn'].includes(status)) color = 'bg-red-100 text-red-700';
     
-    return <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${color}`}>{status}</span>;
+    return <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${color}`}>{status || 'Pending'}</span>;
 };
 
 // --- 1. Property Pipeline ---

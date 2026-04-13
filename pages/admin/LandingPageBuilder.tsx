@@ -16,7 +16,9 @@ import {
     CloudIcon,
     ArrowUpRight,
     Search,
-    Clock
+    Clock,
+    Package,
+    Edit2
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
@@ -33,7 +35,7 @@ interface LandingPage {
 }
 
 export const LandingPageBuilder: React.FC = () => {
-    const { landingPages, saveLandingPage } = useData();
+    const { landingPages, saveLandingPage, companySettings } = useData();
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'editor'>('list');
@@ -169,6 +171,46 @@ export const LandingPageBuilder: React.FC = () => {
                         </section>
 
                         <section className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm space-y-6">
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Package size={14} /> Product Integration</h3>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Advertised Product (Optional)</label>
+                                <select 
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={currentPage.content?.linked_product_id || ''}
+                                    onChange={e => {
+                                        const productId = e.target.value;
+                                        const product = companySettings.customProducts?.find(p => p.id === productId);
+                                        if (product) {
+                                            setCurrentPage(prev => ({
+                                                ...prev,
+                                                title: prev.title === 'New Landing Page' ? `${product.title} Promo Flyer` : prev.title,
+                                                content: {
+                                                    ...prev.content,
+                                                    linked_product_id: product.id,
+                                                    product_title: product.title,
+                                                    product_description: product.description,
+                                                    product_image: product.image,
+                                                    product_features: product.features || []
+                                                }
+                                            }));
+                                        } else {
+                                            setCurrentPage(prev => ({
+                                                ...prev,
+                                                content: { ...prev.content, linked_product_id: '' }
+                                            }));
+                                        }
+                                    }}
+                                >
+                                    <option value="">No Product Selected</option>
+                                    {(companySettings.customProducts || []).map(p => (
+                                        <option key={p.id} value={p.id}>{p.title}</option>
+                                    ))}
+                                </select>
+                                <p className="text-[9px] text-slate-400 font-medium mt-3">Selecting a product will automatically configure the Flyer Mockup below.</p>
+                            </div>
+                        </section>
+
+                        <section className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm space-y-6">
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Palette size={14} /> Visual Identity</h3>
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Accent Branding Color</label>
@@ -197,29 +239,68 @@ export const LandingPageBuilder: React.FC = () => {
 
                                 <div className="pt-8">
                                     <div className="inline-flex gap-4 p-2 bg-slate-50 rounded-[2.5rem]">
-                                        <div className="px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-widest text-white shadow-xl" style={{ backgroundColor: currentPage.style_config?.primary_color }}>
-                                            <input className="bg-transparent border-0 outline-none text-center w-full" value={currentPage.content?.cta_text} onChange={e => setCurrentPage({ ...currentPage, content: { ...currentPage.content, cta_text: e.target.value } })} />
+                                        <div className="px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-widest text-white shadow-xl flex items-center justify-center gap-3 cursor-text group" style={{ backgroundColor: currentPage.style_config?.primary_color }}>
+                                            <Edit2 className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                            <input className="bg-transparent border-0 outline-none w-32 placeholder-white/70" placeholder="Button Text..." value={currentPage.content?.cta_text} onChange={e => setCurrentPage({ ...currentPage, content: { ...currentPage.content, cta_text: e.target.value } })} />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-20 pt-10 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-10 opacity-30 pointer-events-none select-none">
-                                <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] flex items-center gap-4">
-                                    <FileText size={40} />
-                                    <div>
-                                        <div className="h-3 w-32 bg-slate-200 rounded-full mb-2"></div>
-                                        <div className="h-2 w-24 bg-slate-100 rounded-full"></div>
+                            {currentPage.content?.linked_product_id ? (
+                                <div className="mt-16 pt-10 border-t border-slate-100 animate-fade-in">
+                                    <label className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] block mb-6">Promoted Product Flyer Mockup</label>
+                                    <div className="bg-slate-50 rounded-[3rem] p-8 border border-slate-200">
+                                        {currentPage.content?.product_image && (
+                                            <div className="h-64 w-full rounded-[2rem] overflow-hidden mb-8 shadow-sm">
+                                                <img src={currentPage.content.product_image} alt="Product Flyer Hero" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <input 
+                                            className="text-3xl font-black text-slate-900 border-b-2 border-transparent hover:border-slate-200 focus:border-blue-500 w-full outline-none py-2 transition-all bg-transparent mb-4" 
+                                            value={currentPage.content?.product_title || ''} 
+                                            onChange={e => setCurrentPage({ ...currentPage, content: { ...currentPage.content, product_title: e.target.value } })} 
+                                        />
+                                        <textarea 
+                                            className="text-base font-medium text-slate-500 border-b-2 border-transparent hover:border-slate-200 focus:border-blue-500 w-full outline-none py-2 transition-all resize-none bg-transparent mb-8" 
+                                            rows={4} 
+                                            value={currentPage.content?.product_description || ''} 
+                                            onChange={e => setCurrentPage({ ...currentPage, content: { ...currentPage.content, product_description: e.target.value } })} 
+                                        />
+                                        
+                                        {(currentPage.content?.product_features?.length > 0) && (
+                                            <div>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-4">Key Benefits</p>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {currentPage.content.product_features.map((feat: string, idx: number) => (
+                                                        <div key={idx} className="flex items-start gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                                                            <div className="mt-1 h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: currentPage.style_config?.primary_color }}></div>
+                                                            <p className="text-sm font-bold text-slate-700">{feat}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] flex items-center gap-4">
-                                    <Activity size={40} />
-                                    <div>
-                                        <div className="h-3 w-32 bg-slate-200 rounded-full mb-2"></div>
-                                        <div className="h-2 w-24 bg-slate-100 rounded-full"></div>
+                            ) : (
+                                <div className="mt-20 pt-10 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-10 opacity-30 pointer-events-none select-none">
+                                    <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] flex items-center gap-4">
+                                        <FileText size={40} />
+                                        <div>
+                                            <div className="h-3 w-32 bg-slate-200 rounded-full mb-2"></div>
+                                            <div className="h-2 w-24 bg-slate-100 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] flex items-center gap-4">
+                                        <Activity size={40} />
+                                        <div>
+                                            <div className="h-3 w-32 bg-slate-200 rounded-full mb-2"></div>
+                                            <div className="h-2 w-24 bg-slate-100 rounded-full"></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </section>
                     </div>
                 </div>

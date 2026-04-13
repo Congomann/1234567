@@ -63,9 +63,10 @@ export const Onboarding: React.FC = () => {
     };
 
     const StatusBadge = ({ status }: { status: string }) => {
-        switch (status) {
-            case 'Approved': return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">Approved</span>;
-            case 'Rejected': return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold uppercase">Rejected</span>;
+        const normalized = (status || '').toLowerCase();
+        switch (normalized) {
+            case 'approved': return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">Approved</span>;
+            case 'rejected': return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold uppercase">Rejected</span>;
             default: return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold uppercase">Pending Review</span>;
         }
     };

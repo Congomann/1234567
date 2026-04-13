@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { UserRole, LeadStatus, TaskPriority, Task } from '../../types';
 
+import ClientRiskDashboard from './ClientRiskDashboard';
+
 const MetricCard = ({ title, value, subtext, icon: Icon, colorClass, trend, onClick }: any) => (
     <div
         onClick={onClick}
@@ -260,6 +262,10 @@ export const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 )}
+            </div>
+
+            <div className="mb-6">
+                <ClientRiskDashboard />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

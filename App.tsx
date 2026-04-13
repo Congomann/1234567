@@ -79,6 +79,7 @@ import { ProductCms } from './pages/admin/ProductCms';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { CommissionRecon } from './pages/admin/CommissionRecon';
 import { LandingPageBuilder } from './pages/admin/LandingPageBuilder';
+import AdvisorRoutingPage from './pages/admin/AdvisorRoutingPage';
 import { AnalyticsTracker } from './components/AnalyticsTracker';
 import AdvisorApplication from './pages/onboarding/AdvisorApplication';
 import AdminOnboarding from './pages/admin/AdminOnboarding';
@@ -239,6 +240,7 @@ const App: React.FC = () => {
                 <Route path="admin/analytics" element={<AdminAnalytics />} />
                 <Route path="admin/commissions" element={<CommissionRecon />} />
                 <Route path="admin/landing-pages" element={<LandingPageBuilder />} />
+                <Route path="admin/routing" element={<AdvisorRoutingPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

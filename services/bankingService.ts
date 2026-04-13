@@ -22,7 +22,7 @@ const BASE_URL = '/api';
 
 
 const getHeaders = (): HeadersInit => {
-  const token = localStorage.getItem('nhfg_access_token');
+  const token = localStorage.getItem('nhfg_access_token') || localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -237,6 +237,7 @@ export const BankVerificationService = {
       client_phone?: string;
       institution_name?: string;
       routing_number?: string;
+      account_mask?: string;
       notes?: string;
     }
   ): Promise<{ data: VerificationRecord | null; error: string | null }> => {

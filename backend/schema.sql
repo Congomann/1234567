@@ -18,8 +18,20 @@ CREATE TABLE users (
     products_sold TEXT[], -- Array of strings e.g. ['Life Insurance', 'Real Estate']
     license_states TEXT[],
     onboarding_completed BOOLEAN DEFAULT FALSE,
+    personal_email VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'active',
+    contract_level NUMERIC(5,2),
+    authorized_products TEXT[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE activation_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- LEADS (Unified Table for all verticals)
@@ -221,6 +233,50 @@ CREATE INDEX idx_bank_verifications_client ON bank_verifications(client_name);
 CREATE INDEX idx_bank_verifications_status ON bank_verifications(status);
 CREATE INDEX idx_plaid_items_item_id ON plaid_items(item_id);
 
+-- ── PLAID RISK ENGINE ──────────────────────────────────────────────────────────
+
+-- USERS BANK CONNECTION
+CREATE TABLE bank_accounts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  access_token TEXT NOT NULL,
+  bank_name TEXT,
+  account_mask TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- BALANCES
+CREATE TABLE balances (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  current_balance NUMERIC,
+  last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TRANSACTIONS
+CREATE TABLE transactions_plaid (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  amount NUMERIC,
+  name TEXT,
+  category TEXT,
+  date DATE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RISK SCORE
+CREATE TABLE risk_scores (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  score TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_bank_accounts_user_id ON bank_accounts(user_id);
+CREATE INDEX idx_balances_user_id ON balances(user_id);
+CREATE INDEX idx_transactions_plaid_user_id ON transactions_plaid(user_id);
+CREATE INDEX idx_risk_scores_user_id ON risk_scores(user_id);
+
 
 -- ── ANALYTICS ────────────────────────────────────────────────────────────────
 -- Track unique visitors
@@ -272,8 +328,12 @@ CREATE TABLE advisor_applications (
     license_info TEXT,
     experience TEXT,
     address TEXT,
-    status VARCHAR(50) DEFAULT 'pending',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    status VARCHAR(50) DEFAULT 'pending_approval',
+    company_email VARCHAR(255),
+    contract_level NUMERIC(5,2),
+    authorized_products JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- RESOURCES (Media Hub)
@@ -336,3 +396,19 @@ CREATE INDEX idx_tasks_advisor ON tasks(advisor_id);
 CREATE INDEX idx_tasks_lead ON tasks(related_lead_id);
 CREATE INDEX idx_testimonials_status ON testimonials(status);
 CREATE INDEX idx_resources_type ON resources(type);
+
+-- ── CAMPAIGN PAGE ENGINE ──────────────────────────────────────────────────
+CREATE TABLE landing_pages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content JSONB DEFAULT '{}'::jsonb,
+    style_config JSONB DEFAULT '{}'::jsonb,
+    is_published BOOLEAN DEFAULT FALSE,
+    views INT DEFAULT 0,
+    leads_count INT DEFAULT 0,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_landing_pages_slug ON landing_pages(slug);

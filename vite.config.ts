@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     return {
       root: path.resolve(__dirname),
       server: {
-        port: 3020,
+        port: Number(process.env.PORT) || 3020,
         host: '127.0.0.1',
         fs: {
           strict: true,
@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
         },
         proxy: {
           '/api': {
-            target: 'http://127.0.0.1:3021',
+            target: `http://127.0.0.1:3122`,
             changeOrigin: true,
             secure: false,
           },

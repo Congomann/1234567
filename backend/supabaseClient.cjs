@@ -1,6 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://boylqkqyclzayrupbrbd.supabase.co';
 // Use SERVICE_ROLE_KEY if available (production), otherwise fallback to ANON_KEY

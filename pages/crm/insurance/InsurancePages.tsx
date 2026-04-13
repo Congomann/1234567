@@ -12,7 +12,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     else if (isInactive) color = 'bg-red-600 text-white shadow-sm';
     else if (['Pending', 'Underwriting', 'New'].includes(status)) color = 'bg-yellow-500 text-white shadow-sm';
     
-    return <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${color}`}>{status}</span>;
+    return <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${color}`}>{status || 'Pending'}</span>;
 };
 
 // --- 1. Policies & Apps (REFINED COLOR BOX DESIGN) ---

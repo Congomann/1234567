@@ -56,7 +56,7 @@ const RISK_CFG = {
 };
 
 const StatusBadge = ({ status }: { status: VerifStatus }) => {
-    const c = STATUS_CFG[status];
+    const c = (status && STATUS_CFG[status]) ? STATUS_CFG[status] : STATUS_CFG.pending;
     return (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, backgroundColor: c.bg, color: c.color, padding: '3px 10px', borderRadius: 99, fontSize: 11.5, fontWeight: 600 }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: c.dot, display: 'inline-block' }} />
@@ -178,7 +178,7 @@ const PlaidLinkButton: React.FC<PlaidLinkButtonProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f43f5e', fontSize: 13 }}>
                     <AlertCircle size={16} /> {tokenError}
                 </div>
-                <p style={{ fontSize: 12, color: '#6b7280' }}>Make sure <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code> are set in <code>.env</code> and the server is running.</p>
+                <p style={{ fontSize: 12, color: '#6b7280' }}>Make sure <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code> are set in <strong>Website Settings</strong>.</p>
             </div>
         );
     }
@@ -825,6 +825,7 @@ const EditForm: React.FC<{
         client_phone: record.client_phone || '',
         institution_name: record.institution_name || '',
         routing_number: record.routing_number || '',
+        account_mask: record.account_mask || '',
         notes: record.notes || '',
     });
 
@@ -837,6 +838,7 @@ const EditForm: React.FC<{
             client_phone: form.client_phone || undefined,
             institution_name: form.institution_name || undefined,
             routing_number: form.routing_number || undefined,
+            account_mask: form.account_mask || undefined,
             notes: form.notes || undefined,
         });
         setSaving(false);
@@ -881,6 +883,7 @@ const EditForm: React.FC<{
                         {field('Phone', 'client_phone')}
                         {field('Institution Name', 'institution_name')}
                         {field('Routing Number', 'routing_number')}
+                        {field('Account Mask (Last 4)', 'account_mask')}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: 0.5 }}>Notes (optional)</label>
@@ -1105,14 +1108,14 @@ export const BankVerification: React.FC = () => {
                 <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                         <AlertTriangle size={16} color="#ea580c" />
-                        <p style={{ fontSize: 13, fontWeight: 700, color: '#9a3412' }}>Backend Not Connected — To enable real Plaid integration:</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#9a3412' }}>Plaid API Keys Not Configured</p>
                     </div>
                     <ol style={{ fontSize: 12, color: '#7c2d12', lineHeight: 2, paddingLeft: 20, margin: 0 }}>
                         <li>Go to <strong>dashboard.plaid.com</strong> → Developers → Keys</li>
-                        <li>Copy your <strong>client_id</strong> and <strong>Sandbox secret</strong></li>
-                        <li>Add them to <code>.env</code>: <code>PLAID_CLIENT_ID=...</code> and <code>PLAID_SECRET=...</code></li>
-                        <li>Restart the backend: <code>node backend/server.cjs</code></li>
-                        <li>Change <code>PLAID_ENV=production</code> when going live</li>
+                        <li>Copy your <strong>client_id</strong> and <strong>secret</strong></li>
+                        <li>Navigate to the <strong>Website Settings</strong> module in your Admin Dashboard.</li>
+                        <li>Scroll down to the <strong>Integrations & API Connections</strong> block and paste your keys.</li>
+                        <li>Save settings! Ensure <code>Environment</code> is swapped to <code>production</code> when going live.</li>
                     </ol>
                 </div>
             )}
@@ -1234,8 +1237,8 @@ export const BankVerification: React.FC = () => {
                                                 {[
                                                     { label: 'Email', value: r.client_email || '—', Icon: Mail },
                                                     { label: 'Phone', value: r.client_phone || '—', Icon: Phone },
-                                                    { label: 'Name Match', value: r.name_match ? '✅ Confirmed' : '❌ Mismatch', Icon: User },
-                                                    { label: 'Acct Active', value: r.account_active ? '✅ Active' : '❌ Inactive', Icon: ShieldCheck },
+                                                    { label: 'Name Match', value: r.verification_method === 'plaid' ? (r.name_match ? '✅ Confirmed' : '❌ Mismatch') : (r.name_match ? '✅ Confirmed' : 'N/A (Manual)'), Icon: User },
+                                                    { label: 'Acct Active', value: r.verification_method === 'plaid' ? (r.account_active ? '✅ Active' : '❌ Inactive') : (r.account_active ? '✅ Active' : 'N/A (Manual)'), Icon: ShieldCheck },
                                                     { label: 'Verified By', value: r.verified_by || '—', Icon: BadgeCheck },
                                                     { label: 'Verified At', value: r.verified_at ? new Date(r.verified_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—', Icon: Clock },
                                                     { label: 'Submitted', value: new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), Icon: Info },

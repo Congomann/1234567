@@ -16,6 +16,7 @@ const storageService = require('./storageService.cjs');
 const encryptionService = require('./encryptionService.cjs');
 const notificationService = require('./notificationService.cjs');
 const supabase = require('./supabaseClient.cjs');
+const webhooksRouter = require('./routes/webhooks.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -100,6 +101,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Mount specialized Ad Webhooks
+app.use('/api/webhooks', webhooksRouter);
 
 // Database Connection - Google Cloud SQL Support
 let poolConfig;
@@ -793,10 +797,14 @@ const processWebhookIngestion = async (req, res, platform) => {
 
     // 3. Insert Normalized Lead
     if (leadData) {
+      const { assignLead, getLeadTypeId } = require('./services/routingEngine.cjs');
+      const leadTypeId = leadData.interest ? await getLeadTypeId(leadData.interest) : null;
+      const assignedAdvisorId = leadTypeId ? await assignLead(leadTypeId) : null;
+
       const result = await pool.query(
-        `INSERT INTO leads (name, email, phone, interest, source, campaign_id, status, platform_data, message)
-               VALUES ($1, $2, $3, $4, $5, $6, 'New', $7, 'Auto-Imported via Webhook') RETURNING *`,
-        [leadData.name, leadData.email, leadData.phone, leadData.interest, leadData.source, leadData.campaign_id, JSON.stringify(payload)]
+        `INSERT INTO leads (name, email, phone, interest, source, campaign_id, status, platform_data, message, assigned_to)
+               VALUES ($1, $2, $3, $4, $5, $6, 'New', $7, 'Auto-Imported via Webhook', $8) RETURNING *`,
+        [leadData.name, leadData.email, leadData.phone, leadData.interest, leadData.source, leadData.campaign_id, JSON.stringify(payload), assignedAdvisorId]
       );
 
       // 4. Transform DB obj for frontend
@@ -1291,32 +1299,18 @@ app.post('/api/preferences', authenticateToken, async (req, res) => {
   }
 });
 
-
-
 // ════════════════════════════════════════════════════════════════════════════════
-// ADVISOR ONBOARDING SYSTEM
+// ADVISOR ONBOARDING SYSTEM & MASTER SCHEMA
 // ════════════════════════════════════════════════════════════════════════════════
 
-/**
- * @swagger
- * /api/onboarding/apply:
- *   post:
- *     summary: Submit a new advisor application (Public)
- */
-// Onboarding Table Initialization & User Table Hardening
-const initOnboardingTables = async () => {
+const initMasterSchema = async () => {
   try {
-    // 1. Ensure User table has necessary columns for modern onboarding
-    const safeAddUserCol = async (col, def) => {
-      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${def}`).catch(() => { });
-    };
-    await safeAddUserCol('contract_level', 'NUMERIC(5,2) DEFAULT 50');
-    await safeAddUserCol('products_sold', 'JSONB DEFAULT \'[]\'::jsonb');
-    await safeAddUserCol('onboarding_completed', 'BOOLEAN DEFAULT FALSE');
-    await safeAddUserCol('personal_email', 'VARCHAR(255)');
-    await safeAddUserCol('password_hash', 'VARCHAR(255)');
+    console.log('[DB] Starting Master Schema check...');
+    
+    // Core extensions
+    await pool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"').catch(() => {});
 
-    // 2. Create Onboarding Specific tables
+    // Table: advisor_applications
     await pool.query(`
       CREATE TABLE IF NOT EXISTS advisor_applications (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1325,26 +1319,47 @@ const initOnboardingTables = async () => {
         phone VARCHAR(50),
         license_info TEXT,
         status VARCHAR(50) DEFAULT 'pending_approval',
-        company_email VARCHAR(255),
-        contract_level NUMERIC(5,2),
-        authorized_products JSONB,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
-      CREATE TABLE IF NOT EXISTS activation_tokens (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        token VARCHAR(128) UNIQUE NOT NULL,
-        expires_at TIMESTAMPTZ NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
     `);
-    console.log('[DB] ✅ Onboarding & User schema verified');
+
+    // Helper for safe column adding
+    const safeAdd = async (table, col, def) => {
+      await pool.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS ${col} ${def}`).catch(() => {});
+    };
+
+    await safeAdd('advisor_applications', 'experience', 'TEXT');
+    await safeAdd('advisor_applications', 'address', 'TEXT');
+    await safeAdd('advisor_applications', 'company_email', 'VARCHAR(255)');
+    await safeAdd('advisor_applications', 'contract_level', 'NUMERIC(5,2)');
+    await safeAdd('advisor_applications', 'authorized_products', 'JSONB');
+
+    // CRM STUB TABLES
+    await pool.query('CREATE TABLE IF NOT EXISTS leads (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(255) NOT NULL, status VARCHAR(50) DEFAULT \'New\', created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS interaction_history (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), lead_id UUID, type VARCHAR(50), content TEXT, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS access_logs (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), action VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS documents (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS user_preferences (user_id UUID PRIMARY KEY, theme VARCHAR(20) DEFAULT \'light\')').catch(() => {});
+    await pool.query('CREATE TABLE IF NOT EXISTS analytics_visitors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), visitor_id VARCHAR(100) UNIQUE)').catch(() => {});
+
+    // Data normalization
+    await pool.query(`
+      UPDATE advisor_applications 
+      SET status = 'pending_approval' 
+      WHERE status IS NULL 
+         OR status NOT IN ('pending_approval', 'approved', 'rejected', 'info_requested')
+    `).catch(() => {});
+
+    console.log('[DB] ✅ Master Schema verified and cleaned');
   } catch (err) {
-    console.error('[DB] Onboarding init error:', err.message);
+    console.error('[DB] Master Schema initialization error:', err.message);
   }
 };
-initOnboardingTables();
+
+// Execute schema check immediately
+initMasterSchema();
 
 app.post('/api/onboarding/apply', async (req, res) => {
   const { fullName, personalEmail, phone, licenseInfo, experience, address } = req.body;
@@ -1414,57 +1429,43 @@ app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, as
   if (!companyEmail) return res.status(400).json({ error: 'Company email is required for approval.' });
 
   try {
-    // 1. Get application details from Supabase
-    const { data: application, error: appError } = await (await req.supabaseQuery('advisor_applications'))
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (appError || !application) throw new Error('Application not found.');
+    // 1. Get application details from Supabase using direct SQL
+    const { rows: checkRows } = await pool.query('SELECT * FROM advisor_applications WHERE id = $1', [id]);
+    const application = checkRows[0];
+    if (!application) throw new Error('Application not found.');
 
     // 2. Update application status
-    const { error: updateAppError } = await (await req.supabaseQuery('advisor_applications'))
-      .update({
-        status: 'approved',
-        company_email: companyEmail,
-        contract_level: contractLevel || 50,
-        authorized_products: productsSold || [],
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id);
-
-    if (updateAppError) throw updateAppError;
+    await pool.query(
+      `UPDATE advisor_applications 
+       SET status = 'approved', company_email = $1, contract_level = $2, authorized_products = $3, updated_at = NOW()
+       WHERE id = $4`,
+      [companyEmail, contractLevel || 50, productsSold || [], id]
+    );
 
     // 3. Create/Update user account (Status: pending_activation)
     const passwordHash = tempPassword ? crypto.createHash('sha256').update(tempPassword).digest('hex') : null;
-    const { data: userData, error: userError } = await (await req.supabaseQuery('users'))
-      .upsert({
-        name: application.full_name,
-        email: companyEmail,
-        personal_email: application.personal_email,
-        role: 'Advisor',
-        status: 'pending_activation',
-        password_hash: passwordHash,
-        contract_level: contractLevel || 50,
-        products_sold: productsSold || []
-      })
-      .select('id')
-      .single();
-
-    if (userError) throw userError;
-    const userId = userData.id;
+    
+    // UPSERT directly into users table using SQL to bypass constraints and row level security
+    const { rows: userRows } = await pool.query(
+      `INSERT INTO users (name, email, personal_email, role, status, password_hash, contract_level, products_sold)
+       VALUES ($1, $2, $3, 'Advisor', 'pending_activation', $4, $5, $6)
+       ON CONFLICT (email) DO UPDATE 
+       SET name = EXCLUDED.name, personal_email = EXCLUDED.personal_email, status = 'pending_activation', 
+           contract_level = EXCLUDED.contract_level, products_sold = EXCLUDED.products_sold
+       RETURNING id`,
+      [application.full_name, companyEmail, application.personal_email, passwordHash, contractLevel || 50, productsSold || []]
+    );
+    const userId = userRows[0].id;
 
     // 4. Generate activation token in Supabase
     const token = crypto.randomBytes(48).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    const { error: tokenError } = await (await req.supabaseQuery('activation_tokens'))
-      .insert({
-        user_id: userId,
-        token: token,
-        expires_at: expiresAt.toISOString()
-      });
-
-    if (tokenError) throw tokenError;
+    
+    await pool.query(
+      `INSERT INTO activation_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, $3)`,
+      [userId, token, expiresAt.toISOString()]
+    );
 
     // 5. Send Welcome Email
     const appUrl = process.env.APP_URL || 'http://localhost:5173';
@@ -1728,14 +1729,18 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
   }
   try {
     const settings = req.body;
-    const { error } = await (await req.supabaseQuery('company_settings'))
-      .upsert({
-        id: 'main',
-        data: settings,
-        updated_at: new Date().toISOString()
-      });
+    await pool.query(
+      `INSERT INTO company_settings (id, data, updated_at)
+       VALUES ($1, $2, CURRENT_TIMESTAMP)
+       ON CONFLICT (id) DO UPDATE SET data = $2, updated_at = CURRENT_TIMESTAMP`,
+      ['main', JSON.stringify(settings)]
+    );
 
-    if (error) throw error;
+    // Refresh Plaid connection when settings change so the keys are instantly active natively
+    if (settings.plaidClientId) {
+      await initPlaid();
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('Save Settings Error:', err);
@@ -2006,26 +2011,24 @@ let PlaidEnvs = null;   // PlaidEnvironments — cached after first require
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 PlaidEnvs = PlaidEnvironments;
 
-const initPlaid = () => {
-  const { PLAID_CLIENT_ID, PLAID_SECRET, PLAID_SECRET_PRODUCTION, PLAID_ENV } = process.env;
-
-  if (!PLAID_CLIENT_ID || PLAID_CLIENT_ID === 'your_plaid_client_id_here') {
-    console.warn('[Plaid] ⚠️  PLAID_CLIENT_ID not set — endpoints will return 503 until configured.');
-    return;
-  }
-
-  // Choose the secret based on the environment (fallback to PLAID_SECRET if PRODUCTION variant is missing)
-  const activeSecret = (PLAID_ENV === 'production') 
-    ? (PLAID_SECRET_PRODUCTION || PLAID_SECRET) 
-    : PLAID_SECRET;
-
-  if (!activeSecret) {
-    console.warn(`[Plaid] ⚠️  PLAID_SECRET${PLAID_ENV === 'production' ? '_PRODUCTION' : ''} not set for env: ${PLAID_ENV}.`);
-    return;
-  }
-
+const initPlaid = async () => {
   try {
-    // Module is now required at the top level for Vercel NFT compatibility
+    const { rows } = await pool.query('SELECT data FROM company_settings WHERE id = $1', ['main']);
+    const settings = rows[0]?.data || {};
+
+    const PLAID_CLIENT_ID = settings.plaidClientId || process.env.PLAID_CLIENT_ID;
+    const PLAID_SECRET = settings.plaidSecret || process.env.PLAID_SECRET;
+    const PLAID_ENV = settings.plaidEnv || process.env.PLAID_ENV || 'sandbox';
+
+    if (!PLAID_CLIENT_ID || PLAID_CLIENT_ID === 'your_plaid_client_id_here') {
+      console.warn('[Plaid] ⚠️  PLAID_CLIENT_ID not set in DB or .env — endpoints will return 503 until configured.');
+      return;
+    }
+
+    if (!PLAID_SECRET) {
+      console.warn(`[Plaid] ⚠️  PLAID_SECRET not set for env: ${PLAID_ENV}.`);
+      return;
+    }
 
     const envMap = {
       sandbox: PlaidEnvironments.sandbox,
@@ -2038,13 +2041,13 @@ const initPlaid = () => {
       baseOptions: {
         headers: {
           'PLAID-CLIENT-ID': PLAID_CLIENT_ID,
-          'PLAID-SECRET': activeSecret,
+          'PLAID-SECRET': PLAID_SECRET,
         },
       },
     });
 
     plaidClient = new PlaidApi(configuration);
-    console.log(`[Plaid] ✅ SDK ready — env: ${PLAID_ENV || 'sandbox'} — using secret: ${activeSecret.slice(0, 4)}...`);
+    console.log(`[Plaid] ✅ SDK ready — env: ${PLAID_ENV} — using secret: ${PLAID_SECRET.slice(0, 4)}...`);
   } catch (err) {
     console.error('[Plaid] Init failed:', err.message);
   }
@@ -2422,6 +2425,26 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
     );
     const plaidItemDbId = itemUpsert.rows[0].id;
 
+    // ── User's Custom Engine Setup ───────────────────────────────────────────────
+    // Insert into user's requested bank_accounts table
+    try {
+      await pool.query(
+        `INSERT INTO bank_accounts (user_id, access_token, bank_name, account_mask)
+         VALUES ($1, $2, $3, $4)`,
+         [req.user?.id || null, access_token, resolvedInstitutionName, targetAcct?.mask || null]
+      );
+      
+      // Fire and forget the sync to prevent blocking the UI
+      if (req.user?.id) {
+         const { syncFinancialData } = require('./services/plaidSyncService.cjs');
+         syncFinancialData(req.user.id, access_token).catch(err => {
+             console.error('[Plaid Risk Engine] Background sync failed:', err);
+         });
+      }
+    } catch(err) {
+      console.error('[Plaid Risk Engine] Saving to bank_accounts failed:', err);
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
     // ── Step E: Insert bank_verifications record ─────────────────────────────────
     const verifyInsert = await pool.query(
       `INSERT INTO bank_verifications(
@@ -2503,6 +2526,30 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
       display: pd?.display_message || null,
       request_id: pd?.request_id || null,
     });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// NEW ENDPOINT — Trigger Plaid Risk Engine Sync
+// Manually triggers syncFinancialData for the current user or a specific client
+// ════════════════════════════════════════════════════════════════════════════════
+app.post('/api/plaid/trigger-sync', authenticateToken, async (req, res) => {
+  const targetUserId = req.body.userId || req.user.id;
+  
+  try {
+    const { rows } = await pool.query('SELECT access_token FROM bank_accounts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1', [targetUserId]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No connected bank account found for this user.' });
+    }
+    
+    const { syncFinancialData } = require('./services/plaidSyncService.cjs');
+    const result = await syncFinancialData(targetUserId, rows[0].access_token);
+    
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('[Plaid Risk Engine] Sync failed:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -2752,7 +2799,7 @@ RETURNING * `,
 // ════════════════════════════════════════════════════════════════════════════════
 app.patch('/api/plaid/verifications/:id/info', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { client_name, client_email, client_phone, institution_name, routing_number, notes } = req.body;
+  const { client_name, client_email, client_phone, institution_name, routing_number, account_mask, notes } = req.body;
 
   try {
     const result = await pool.query(
@@ -2763,11 +2810,12 @@ app.patch('/api/plaid/verifications/:id/info', authenticateToken, async (req, re
           client_phone = COALESCE($3, client_phone),
           institution_name = COALESCE($4, institution_name),
           routing_number = COALESCE($5, routing_number),
-          notes = COALESCE($6, notes),
+          account_mask = COALESCE($6, account_mask),
+          notes = COALESCE($7, notes),
           updated_at = NOW()
-       WHERE id = $7::uuid
+       WHERE id = $8::uuid
        RETURNING *`,
-      [client_name, client_email || null, client_phone || null, institution_name || null, routing_number || null, notes || null, id]
+      [client_name, client_email || null, client_phone || null, institution_name || null, routing_number || null, account_mask || null, notes || null, id]
     );
 
     if (!result.rows.length) return res.status(404).json({ error: 'Verification not found' });
@@ -2968,7 +3016,38 @@ const migrateClientLinkTables = async () => {
       )
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_vl_token ON verification_links(token)`).catch(() => { });
-    console.log('[DB] ✅ Client link tables ready');
+
+    // ─── ADMIN ONBOARDING & ACTIVATION STRUCTURE ───
+    const safeAddUserCol = async (col, def) => {
+      await pool.query(
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${def}`
+      ).catch(() => { });
+    };
+    await safeAddUserCol('personal_email', 'VARCHAR(255)');
+    await safeAddUserCol('status', "VARCHAR(50) DEFAULT 'active'");
+    await safeAddUserCol('contract_level', 'NUMERIC(5,2)');
+    await safeAddUserCol('authorized_products', 'TEXT[]');
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS activation_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // ─── ADMIN DEFAULT CREDENTIALS ───
+    const defaultAdminPass = crypto.createHash('sha256').update('Newholland2027!').digest('hex');
+    await pool.query(`
+      INSERT INTO users (email, name, role, status, password_hash)
+      VALUES ('info@newhollandfinancial.com', 'System Admin', 'Administrator', 'active', $1)
+      ON CONFLICT (email) DO UPDATE 
+      SET role = 'Administrator', password_hash = $1, status = 'active'
+    `, [defaultAdminPass]).catch(err => console.error('[DB] Default Admin seed error:', err.message));
+
+    console.log('[DB] ✅ Boot migrations structurally complete');
   } catch (err) {
     console.warn('[DB] Client link migration warning:', err.message);
   }
@@ -4368,7 +4447,169 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  server.listen(PORT, () => {
+  
+// ════════════════════════════════════════════════════════════════════════════════
+// ─── CLIENTS ENGINE ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/clients', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM clients");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/clients', authenticateToken, async (req, res) => {
+  try {
+    const {
+      id, name, email, phone, street, city, state, zip, policyNumber, premium, product, renewalDate, commissionAmount, carrier
+    } = req.body;
+    
+    const clientId = id || require('crypto').randomUUID();
+    const addressJson = JSON.stringify({ street, city, state, zip });
+    
+    await pool.query(
+      `INSERT INTO clients (id, advisor_id, name, email, phone, address, policy_number, premium, product, renewal_date, commission_amount, carrier, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP)
+       ON CONFLICT (id) DO UPDATE SET 
+         name=$3, email=$4, phone=$5, address=$6, policy_number=$7, premium=$8, product=$9, renewal_date=$10, commission_amount=$11, carrier=$12`,
+      [clientId, req.user.id, name, email, phone, addressJson, policyNumber, premium || 0, product, renewalDate, commissionAmount || 0, carrier]
+    );
+    res.json({ success: true, id: clientId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/clients/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM clients WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ─── TASKS ENGINE ───────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/tasks', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM tasks WHERE advisor_id = $1", [req.user.id]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/tasks', authenticateToken, async (req, res) => {
+  try {
+    const { id, title, priority, completed, dueDate, advisorId, description } = req.body;
+    const taskId = id || require('crypto').randomUUID();
+    
+    await pool.query(
+      `INSERT INTO tasks (id, advisor_id, title, description, priority, completed, due_date, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+       ON CONFLICT (id) DO UPDATE SET 
+         title=$3, description=$4, priority=$5, completed=$6, due_date=$7`,
+      [taskId, advisorId || req.user.id, title, description, priority || 'Medium', completed || false, dueDate]
+    );
+    res.json({ success: true, id: taskId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM tasks WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ─── PORTFOLIOS ENGINE ──────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/portfolios', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM portfolios WHERE advisor_id = $1", [req.user.id]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/portfolios', authenticateToken, async (req, res) => {
+  try {
+    const { id, clientName, totalValue, ytdReturn, riskProfile, holdings, advisorId } = req.body;
+    const portId = id || require('crypto').randomUUID();
+    
+    await pool.query(
+      `INSERT INTO portfolios (id, advisor_id, client_name, total_value, ytd_return, risk_profile, holdings, last_rebalanced, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       ON CONFLICT (id) DO UPDATE SET 
+         client_name=$3, total_value=$4, ytd_return=$5, risk_profile=$6, holdings=$7, last_rebalanced=CURRENT_TIMESTAMP`,
+      [portId, advisorId || req.user.id, clientName, totalValue || 0, ytdReturn || 0, riskProfile || 'Moderate', JSON.stringify(holdings || [])]
+    );
+    res.json({ success: true, id: portId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/portfolios/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM portfolios WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ─── APPLICATIONS ENGINE (Policies) ─────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/applications', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM applications");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/applications', authenticateToken, async (req, res) => {
+  try {
+    const { id, leadId, clientName, carrier, policyNumber, status, premium } = req.body;
+    const appId = id || require('crypto').randomUUID();
+    
+    await pool.query(
+      `INSERT INTO applications (id, lead_id, advisor_id, client_name, carrier, policy_number, status, premium, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+       ON CONFLICT (id) DO UPDATE SET 
+         lead_id=$2, client_name=$4, carrier=$5, policy_number=$6, status=$7, premium=$8`,
+      [appId, leadId, req.user.id, clientName, carrier, policyNumber, status || 'Pending', premium || 0]
+    );
+    res.json({ success: true, id: appId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/applications/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM applications WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);
   });
 }
