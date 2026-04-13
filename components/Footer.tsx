@@ -168,31 +168,38 @@ export const Footer: React.FC = () => {
                 </div>
                 <div className="overflow-hidden flex flex-col">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Email Us</p>
-                  <div className="flex flex-col gap-1 inline-block">
+                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 items-baseline">
                     {emailsList.length > 0 ? emailsList.map((emailStr, idx) => {
                       const match = emailStr.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
                       const mailto = match ? `mailto:${match[0]}` : `mailto:${emailStr}`;
-
-                      // Check if there is a prefix (e.g., "Sales: sales@nhfg.com")
                       const parts = emailStr.split(':');
+
                       if (parts.length > 1 && match && parts[1].includes(match[0])) {
                         return (
-                          <a key={idx} href={mailto} className="group/email flex items-center gap-1.5 text-[13px] transition-colors break-words block">
-                            <span className="text-slate-400 font-medium">{parts[0].trim()}:</span>
-                            <span className="text-white font-bold group-hover/email:text-blue-400 transition-colors">{parts[1].trim()}</span>
-                          </a>
+                          <React.Fragment key={idx}>
+                            <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">{parts[0].trim()}:</span>
+                            <a href={mailto} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors break-all">
+                              {parts[1].trim()}
+                            </a>
+                          </React.Fragment>
                         );
                       }
 
                       return (
-                        <a key={idx} href={mailto} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors break-words block">
-                          {emailStr}
-                        </a>
+                        <React.Fragment key={idx}>
+                          <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">Email:</span>
+                          <a href={mailto} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors break-all">
+                            {emailStr}
+                          </a>
+                        </React.Fragment>
                       );
                     }) : (
-                      <a href="mailto:info@domain.com" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors block">
-                        info@domain.com
-                      </a>
+                      <React.Fragment>
+                        <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">Email:</span>
+                        <a href="mailto:info@domain.com" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
+                          info@domain.com
+                        </a>
+                      </React.Fragment>
                     )}
                   </div>
                 </div>
