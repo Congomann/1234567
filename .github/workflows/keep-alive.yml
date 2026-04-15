@@ -1,0 +1,15 @@
+name: Supabase Keep-Alive Heartbeat
+
+on:
+  schedule:
+    - cron: '0 0 */2 * *' # Every 2 days at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Production API Heartbeat
+        run: |
+          curl -f https://www.newhollandfinancial.com/api/heartbeat || \
+          curl -f https://1234567-ten-beige.vercel.app/api/heartbeat

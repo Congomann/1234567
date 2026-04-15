@@ -102,6 +102,31 @@ app.use((req, res, next) => {
   next();
 });
 
+// ════════════════════════════════════════════════════════════════════════════════
+// SUPABASE KEEP-ALIVE HEARTBEAT
+// ════════════════════════════════════════════════════════════════════════════════
+/**
+ * @swagger
+ * /api/heartbeat:
+ *   get:
+ *     summary: Keep-alive heartbeat for Supabase
+ *     description: Performs a simple DB query to prevent project pausing due to inactivity.
+ *     tags: [Monitoring]
+ */
+app.get('/api/heartbeat', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW() as heartbeat');
+    res.json({ 
+      status: 'active', 
+      timestamp: result.rows[0].heartbeat,
+      message: 'Supabase project kept alive successfully'
+    });
+  } catch (err) {
+    console.error('[Heartbeat] Error:', err);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 // Mount specialized Ad Webhooks
 app.use('/api/webhooks', webhooksRouter);
 
