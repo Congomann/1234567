@@ -169,7 +169,7 @@ export const Footer: React.FC = () => {
                 </div>
                 <div className="overflow-hidden flex flex-col">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">Email Us</p>
-                  <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-3">
                     {emailsList.length > 0 ? emailsList.map((emailStr, idx) => {
                       const match = emailStr.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
                       const mailto = match ? `mailto:${match[0]}` : `mailto:${emailStr}`;
@@ -182,7 +182,7 @@ export const Footer: React.FC = () => {
                           <div key={idx} className="flex flex-col group">
                             <button 
                               onClick={() => setRevealedIdx(isRevealed ? null : idx)}
-                              className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                              className="w-max flex items-center gap-2 text-slate-500 font-black text-[11px] uppercase tracking-wider mb-0.5 hover:text-blue-400 transition-colors duration-300"
                             >
                               {label}
                               <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${isRevealed ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
@@ -200,7 +200,7 @@ export const Footer: React.FC = () => {
                         <div key={idx} className="flex flex-col group">
                           <button 
                             onClick={() => setRevealedIdx(isRevealed ? null : idx)}
-                            className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                            className="w-max flex items-center gap-2 text-slate-500 font-black text-[11px] uppercase tracking-wider mb-0.5 hover:text-blue-400 transition-colors duration-300"
                           >
                             Email
                             <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${isRevealed ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
@@ -216,7 +216,7 @@ export const Footer: React.FC = () => {
                       <div className="flex flex-col group">
                         <button 
                           onClick={() => setRevealedIdx(revealedIdx === 999 ? null : 999)}
-                          className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                          className="w-max flex items-center gap-2 text-slate-500 font-black text-[11px] uppercase tracking-wider mb-0.5 hover:text-blue-400 transition-colors duration-300"
                         >
                           General
                           <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${revealedIdx === 999 ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
