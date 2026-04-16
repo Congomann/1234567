@@ -48,15 +48,9 @@ export const Footer: React.FC = () => {
     }
   };
 
-  const socialLinks = companySettings.socialLinks && companySettings.socialLinks.length > 0
-    ? companySettings.socialLinks
-    : [
-      { platform: 'Facebook', url: '#' },
-      { platform: 'LinkedIn', url: '#' },
-      { platform: 'Twitter', url: '#' },
-      { platform: 'Instagram', url: '#' },
-      { platform: 'YouTube', url: '#' }
-    ];
+  const socialLinks = Array.isArray(companySettings.socialLinks) 
+    ? companySettings.socialLinks.filter(link => link.url && link.url !== '#' && link.url.trim() !== '')
+    : [];
 
   // Safely parse multiple emails if the user adds them separated by commas
   const defaultEmails = "General Inquiry: info@newhollandfinancial.com, Sales: sales@newhollandfinancial.com";
