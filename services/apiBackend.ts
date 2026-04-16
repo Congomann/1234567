@@ -270,6 +270,17 @@ class NHFGBackend {
         await DB.save('users', user);
     }
 
+    async deleteUser(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch(`${this.baseUrl}/users/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+            await this.handleResponse(res);
+        }
+        await DB.delete('users', id);
+    }
+
     async getSettings(): Promise<CompanySettings | null> {
         const settings = await this.apiRequest<CompanySettings[]>(`${this.baseUrl}/settings`, { headers: this.getAuthHeaders() }, 'settings');
         return settings && settings.length > 0 ? settings[0] : null;
@@ -331,12 +342,11 @@ class NHFGBackend {
 
     async deleteEvent(id: string): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch(`${this.baseUrl}/events/${id}`, {
-                    method: 'DELETE',
-                    headers: this.getAuthHeaders()
-                });
-            } catch (e) { }
+            const res = await fetch(`${this.baseUrl}/events/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+            await this.handleResponse(res);
         }
         await DB.delete('events', id);
     }
@@ -363,6 +373,17 @@ class NHFGBackend {
         await DB.save('landing_pages', page);
     }
 
+    async deleteAdvisorApplication(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch(`${this.baseUrl}/admin/onboarding/applications/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+            await this.handleResponse(res);
+        }
+        await DB.delete('advisor_applications', id);
+    }
+
     // --- RESOURCES ---
 
     async getResources(): Promise<any[]> {
@@ -384,12 +405,11 @@ class NHFGBackend {
 
     async deleteResource(id: string): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch(`${this.baseUrl}/resources/${id}`, {
-                    method: 'DELETE',
-                    headers: this.getAuthHeaders()
-                });
-            } catch (e) { }
+            const res = await fetch(`${this.baseUrl}/resources/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+            await this.handleResponse(res);
         }
         await DB.delete('resources', id);
     }
@@ -455,12 +475,11 @@ class NHFGBackend {
 
     async deleteTestimonial(id: string): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch(`${this.baseUrl}/testimonials/${id}`, {
-                    method: 'DELETE',
-                    headers: this.getAuthHeaders()
-                });
-            } catch (e) { }
+            const res = await fetch(`${this.baseUrl}/testimonials/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+            await this.handleResponse(res);
         }
         await DB.delete('testimonials', id);
     }
@@ -571,9 +590,8 @@ class NHFGBackend {
     
     async deleteTask(id: string): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch( `${this.baseUrl}/tasks/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
-            } catch (e) {}
+            const res = await fetch( `${this.baseUrl}/tasks/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            await this.handleResponse(res);
         }
         await DB.delete('tasks', id);
     }
@@ -585,15 +603,47 @@ class NHFGBackend {
 
     async savePortfolio(portfolio: any): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch( `${this.baseUrl}/portfolios`, {
-                    method: 'POST',
-                    headers: this.getAuthHeaders(),
-                    body: JSON.stringify(portfolio)
-                });
-            } catch (e) { }
+            const res = await fetch( `${this.baseUrl}/portfolios`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(portfolio)
+            });
+            await this.handleResponse(res);
         }
         await DB.save('portfolios', portfolio);
+    }
+
+    async deletePortfolio(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch( `${this.baseUrl}/portfolios/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            await this.handleResponse(res);
+        }
+        await DB.delete('portfolios', id);
+    }
+
+    // --- REAL ESTATE ---
+    async getProperties(): Promise<any[]> {
+        return this.apiRequest<any[]>( `${this.baseUrl}/real-estate/properties`, { headers: this.getAuthHeaders() }, 'properties' );
+    }
+
+    async saveProperty(property: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch( `${this.baseUrl}/real-estate/properties`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(property)
+            });
+            await this.handleResponse(res);
+        }
+        await DB.save('properties', property);
+    }
+
+    async deleteProperty(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch( `${this.baseUrl}/real-estate/properties/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            await this.handleResponse(res);
+        }
+        await DB.delete('properties', id);
     }
 
     // --- APPLICATIONS / POLICIES ---
@@ -616,9 +666,8 @@ class NHFGBackend {
 
     async deleteClient(id: string): Promise<void> {
         if (USE_REAL_BACKEND) {
-            try {
-                await fetch( `${this.baseUrl}/clients/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
-            } catch (e) {}
+            const res = await fetch( `${this.baseUrl}/clients/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            await this.handleResponse(res);
         }
         await DB.delete('clients', id);
     }

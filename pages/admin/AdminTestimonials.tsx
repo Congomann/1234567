@@ -1,10 +1,13 @@
 import React from 'react';
 import { useData } from '../../context/DataContext';
-import { Check, Trash2, Star, UserCircle, X, ChevronsRight } from 'lucide-react';
+import { Check, Trash2, Star, UserCircle, X, ChevronsRight, Loader2 } from 'lucide-react';
 import { Testimonial } from '../../types';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const AdminTestimonials: React.FC = () => {
     const { testimonials, approveTestimonial, deleteTestimonial, allUsers, approveTestimonialEdit, rejectTestimonialEdit } = useData();
+    const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = React.useState(false);
 
     const pendingTestimonials = testimonials.filter(t => t.status === 'pending');
     const pendingEdits = testimonials.filter(t => t.status === 'pending_edit');
@@ -44,7 +47,7 @@ export const AdminTestimonials: React.FC = () => {
                 <span className="text-xs text-slate-400 font-medium">{new Date(testimonial.date).toLocaleDateString()}</span>
                 <div className="flex gap-2">
                     <button 
-                        onClick={() => deleteTestimonial(testimonial.id)}
+                        onClick={() => setConfirmDeleteId(testimonial.id)}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                         title="Delete"
                     >
@@ -156,6 +159,27 @@ export const AdminTestimonials: React.FC = () => {
                     <p className="text-sm text-slate-500 text-center py-8 bg-slate-50 rounded-lg">No testimonials have been approved yet.</p>
                 )}
             </div>
+
+            <ConfirmModal 
+                isOpen={!!confirmDeleteId}
+                onClose={() => setConfirmDeleteId(null)}
+                onConfirm={async () => {
+                    if (!confirmDeleteId) return;
+                    setIsDeleting(true);
+                    try {
+                        await deleteTestimonial(confirmDeleteId);
+                        setConfirmDeleteId(null);
+                    } catch (e) {
+                        alert("Deletion failed. Please try again.");
+                    } finally {
+                        setIsDeleting(false);
+                    }
+                }}
+                loading={isDeleting}
+                title="Delete Testimonial?"
+                message="Are you sure you want to permanently remove this testimonial? This action will immediately hide it from all microsites and cannot be undone."
+                confirmText="Delete Forever"
+            />
         </div>
     );
 };

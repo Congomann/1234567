@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Resource, ProductType, SocialLink, CompanySettings } from '../../types';
 import { Backend } from '../../services/apiBackend';
-import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2 } from 'lucide-react';
+import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2, RotateCcw } from 'lucide-react';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const WebsiteSettings: React.FC = () => {
     const { companySettings, updateCompanySettings, resources, addResource, deleteResource } = useData();
@@ -27,8 +28,8 @@ export const WebsiteSettings: React.FC = () => {
         url: '',
         description: '',
         content: '', // For Blog
-        thumbnail: '' // For Videos/Blogs
-    });
+    const [confirmAction, setConfirmAction] = useState<{ id: string | number; type: 'resource' | 'reset-leads' | 'partner' | 'social'; metadata?: any } | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         setSettingsForm(companySettings);
@@ -73,9 +74,38 @@ export const WebsiteSettings: React.FC = () => {
         setNewResource({ title: '', type: 'PDF', url: '', description: '', content: '', thumbnail: '' });
     };
 
-    const handleDeleteResource = (id: string) => {
-        if (window.confirm('Are you sure you want to delete this resource?')) {
-            deleteResource(id);
+    const handleConfirmedAction = async () => {
+        if (!confirmAction) return;
+        setIsProcessing(true);
+        try {
+            switch (confirmAction.type) {
+                case 'resource':
+                    await deleteResource(confirmAction.id as string);
+                    break;
+                case 'reset-leads':
+                    setSettingsForm(prev => ({
+                        ...prev,
+                        leadStatuses: ['New', 'Contacted', 'Unavailable', 'Proposal', 'Approved', 'Closed', 'Lost', 'Assigned']
+                    }));
+                    break;
+                case 'partner':
+                    const updatedPartners = { ...(settingsForm.partners || {}) };
+                    delete updatedPartners[confirmAction.metadata.name];
+                    const pSettings = { ...settingsForm, partners: updatedPartners };
+                    setSettingsForm(pSettings);
+                    updateCompanySettings(pSettings);
+                    break;
+                case 'social':
+                    const updatedSocials = [...(settingsForm.socialLinks || [])];
+                    updatedSocials.splice(confirmAction.id as number, 1);
+                    setSettingsForm(prev => ({ ...prev, socialLinks: updatedSocials }));
+                    break;
+            }
+            setConfirmAction(null);
+        } catch (e) {
+            alert("Action failed. Please try again.");
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -299,11 +329,7 @@ export const WebsiteSettings: React.FC = () => {
     };
 
     const removePartner = (name: string) => {
-        const updatedPartners = { ...(settingsForm.partners || {}) };
-        delete updatedPartners[name];
-        const updatedSettings = { ...settingsForm, partners: updatedPartners };
-        setSettingsForm(updatedSettings);
-        updateCompanySettings(updatedSettings); // Auto-save
+        setConfirmAction({ id: name, type: 'partner', metadata: { name } });
     };
 
     const handleAddSocial = () => {
@@ -315,9 +341,7 @@ export const WebsiteSettings: React.FC = () => {
     };
 
     const handleRemoveSocial = (index: number) => {
-        const updated = [...(settingsForm.socialLinks || [])];
-        updated.splice(index, 1);
-        setSettingsForm(prev => ({ ...prev, socialLinks: updated }));
+        setConfirmAction({ id: index, type: 'social' });
     };
 
     const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
@@ -400,12 +424,7 @@ export const WebsiteSettings: React.FC = () => {
     };
 
     const handleResetStatuses = () => {
-        if (window.confirm('Reset lead stages to system defaults?')) {
-            setSettingsForm(prev => ({
-                ...prev,
-                leadStatuses: ['New', 'Contacted', 'Unavailable', 'Proposal', 'Approved', 'Closed', 'Lost', 'Assigned']
-            }));
-        }
+        setConfirmAction({ id: 'reset', type: 'reset-leads' });
     };
 
     return (
@@ -1465,6 +1484,26 @@ export const WebsiteSettings: React.FC = () => {
                     </div>
                 </div>
             )}
+            <ConfirmModal 
+                isOpen={!!confirmAction}
+                onClose={() => setConfirmAction(null)}
+                onConfirm={handleConfirmedAction}
+                loading={isProcessing}
+                title={
+                    confirmAction?.type === 'resource' ? "Delete Resource?" :
+                    confirmAction?.type === 'reset-leads' ? "Reset Lead Stages?" :
+                    confirmAction?.type === 'partner' ? "Remove Partner?" : "Remove Social Link?"
+                }
+                message={
+                    confirmAction?.type === 'resource' ? "Are you sure you want to permanently delete this resource from the library?" :
+                    confirmAction?.type === 'reset-leads' ? "This will reset all your custom lead stages to the system defaults. This cannot be undone." :
+                    confirmAction?.type === 'partner' ? `Are you sure you want to remove ${confirmAction.metadata?.name} from your partners list?` :
+                    "Are you sure you want to remove this social media link?"
+                }
+                confirmText={
+                    confirmAction?.type === 'reset-leads' ? "Reset Now" : "Delete"
+                }
+            />
         </div>
     );
 };

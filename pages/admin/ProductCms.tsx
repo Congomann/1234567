@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { ProductListing } from '../../types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const ProductCms: React.FC = () => {
   const { companySettings, updateCompanySettings } = useData();
@@ -9,6 +10,7 @@ export const ProductCms: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<ProductListing>>({});
   const [isSaved, setIsSaved] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; title: string } | null>(null);
 
   const handleSave = () => {
     updateCompanySettings({ ...companySettings, customProducts: products });
@@ -42,9 +44,10 @@ export const ProductCms: React.FC = () => {
     setEditForm({});
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product listing?')) {
-      setProducts(prev => prev.filter(p => p.id !== id));
+  const handleDeleteAction = () => {
+    if (confirmDelete) {
+      setProducts(prev => prev.filter(p => p.id !== confirmDelete.id));
+      setConfirmDelete(null);
     }
   };
 
@@ -158,7 +161,7 @@ export const ProductCms: React.FC = () => {
                     <button onClick={() => handleEdit(product)} className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-blue-600">
                       <Edit2 className="h-4 w-4" />
                     </button>
-                    <button onClick={() => handleDelete(product.id)} className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-600">
+                    <button onClick={() => setConfirmDelete({ id: product.id, title: product.title })} className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-600">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -228,6 +231,15 @@ export const ProductCms: React.FC = () => {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDeleteAction}
+        title="Remove Product Listing?"
+        message={`Are you sure you want to delete "${confirmDelete?.title}"? Note: This change will only be permanent after you click "Save Changes" in the top header.`}
+        confirmText="Remove now"
+      />
     </div>
   );
 };

@@ -21,6 +21,7 @@ import {
     Edit2
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 interface LandingPage {
     id: string;
@@ -35,9 +36,11 @@ interface LandingPage {
 }
 
 export const LandingPageBuilder: React.FC = () => {
-    const { landingPages, saveLandingPage, companySettings } = useData();
+    const { landingPages, saveLandingPage, deleteLandingPage, companySettings } = useData();
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'editor'>('list');
     const [currentPage, setCurrentPage] = useState<Partial<LandingPage>>({
         title: 'New Landing Page',
@@ -60,6 +63,19 @@ export const LandingPageBuilder: React.FC = () => {
             setViewMode('list');
         } else {
             alert('Failed to save campaign. Check console for details.');
+        }
+    };
+
+    const handleConfirmedDelete = async () => {
+        if (!confirmDeleteId) return;
+        setIsDeleting(true);
+        try {
+            await deleteLandingPage(confirmDeleteId);
+            setConfirmDeleteId(null);
+        } catch (e) {
+            alert("Deletion failed. Please try again.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -131,7 +147,7 @@ export const LandingPageBuilder: React.FC = () => {
 
                             <div className="flex gap-2">
                                 <button onClick={() => { setCurrentPage(page); setViewMode('editor'); }} className="flex-1 bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">Configure</button>
-                                <button className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={16} /></button>
+                                <button onClick={() => setConfirmDeleteId(page.id)} className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={16} /></button>
                             </div>
                         </div>
                     ))}
@@ -305,6 +321,15 @@ export const LandingPageBuilder: React.FC = () => {
                     </div>
                 </div>
             )}
+            <ConfirmModal 
+                isOpen={!!confirmDeleteId}
+                onClose={() => setConfirmDeleteId(null)}
+                onConfirm={handleConfirmedDelete}
+                loading={isDeleting}
+                title="Delete Campaign Page?"
+                message="Are you sure you want to permanently delete this landing page? This will immediately disable the public URL and remove all associated data. This action cannot be undone."
+                confirmText="Delete Deployment"
+            />
         </div>
     );
 };

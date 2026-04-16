@@ -28,8 +28,9 @@ import {
     ChevronDown, Landmark, RefreshCw, Eye, EyeOff, Info,
     Loader2, TrendingUp, BadgeCheck, User, Phone, Mail,
     Hash, ArrowRight, AlertTriangle, AlertCircle, Wifi, WifiOff,
-    Edit2, Trash2,
+    Edit2, Trash2, RotateCcw,
 } from 'lucide-react';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 import { useData } from '../../context/DataContext';
 import {
     BankVerificationService,
@@ -921,6 +922,9 @@ export const BankVerification: React.FC = () => {
     const [showManual, setShowManual] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editRecord, setEditRecord] = useState<VerificationRecord | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
+    const [confirmReverify, setConfirmReverify] = useState<{ id: string; name: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
     const toastRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -984,13 +988,33 @@ export const BankVerification: React.FC = () => {
         showToast(`📋 ${r.client_name} — manual entry submitted (Micro-Deposit status)`);
     };
 
-    const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`Are you sure you want to delete the verification record for ${name}?`)) return;
-        const { error } = await BankVerificationService.deleteVerification(id);
+    const handleDelete = async () => {
+        if (!confirmDelete) return;
+        setIsDeleting(true);
+        const { error } = await BankVerificationService.deleteVerification(confirmDelete.id);
+        setIsDeleting(false);
         if (error) { showToast(error, 'error'); return; }
-        setRecords(rs => rs.filter(r => r.id !== id));
-        if (expandedId === id) setExpandedId(null);
-        showToast(`🗑️ Record for ${name} deleted`);
+        
+        setRecords(rs => rs.filter(r => r.id !== confirmDelete.id));
+        if (expandedId === confirmDelete.id) setExpandedId(null);
+        showToast(`🗑️ Record for ${confirmDelete.name} deleted`);
+        setConfirmDelete(null);
+    };
+
+    const handleReverify = async () => {
+        if (!confirmReverify) return;
+        setIsDeleting(true);
+        const { error } = await BankVerificationService.deleteVerification(confirmReverify.id);
+        setIsDeleting(false);
+        if (error) { showToast(error, 'error'); return; }
+        
+        setRecords(rs => rs.filter(r => r.id !== confirmReverify.id));
+        if (expandedId === confirmReverify.id) setExpandedId(null);
+        showToast(`🔄 Restarting verification for ${confirmReverify.name}...`);
+        
+        // Reset state and open manual entry form as a fresh start
+        setConfirmReverify(null);
+        setShowManual(true);
     };
 
     const handleEditSave = (updated: VerificationRecord) => {
@@ -1008,7 +1032,7 @@ export const BankVerification: React.FC = () => {
     return (
         <div style={{ paddingBottom: 60, position: 'relative' }}>
 
-            {/* Toast */}
+            {/* Toasts */}
             <AnimatePresence>
                 {toast && (
                     <motion.div
@@ -1209,7 +1233,7 @@ export const BankVerification: React.FC = () => {
                                         <button onClick={e => { e.stopPropagation(); setEditRecord(r); }} title="Edit" style={{ width: 30, height: 30, border: '1.5px solid #e2e8f0', background: '#f8fafc', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <Edit2 size={13} color="#475569" />
                                         </button>
-                                        <button onClick={e => { e.stopPropagation(); handleDelete(r.id, r.client_name); }} title="Delete" style={{ width: 30, height: 30, border: '1.5px solid #fecdd3', background: '#fff1f2', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <button onClick={e => { e.stopPropagation(); setConfirmDelete({ id: r.id, name: r.client_name }); }} title="Delete" style={{ width: 30, height: 30, border: '1.5px solid #fecdd3', background: '#fff1f2', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <Trash2 size={13} color="#f43f5e" />
                                         </button>
                                         {r.status !== 'verified' && (
@@ -1289,6 +1313,27 @@ export const BankVerification: React.FC = () => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Confirmation Modals */}
+            <ConfirmModal 
+                isOpen={!!confirmDelete}
+                onClose={() => setConfirmDelete(null)}
+                onConfirm={handleDelete}
+                loading={isDeleting}
+                title="Delete Verification Record?"
+                message={`Are you sure you want to permanently delete the bank verification record for ${confirmDelete?.name}? This action cannot be undone and will remove all audit trails.`}
+                confirmText="Delete Record"
+            />
+
+            <ConfirmModal 
+                isOpen={!!confirmReverify}
+                onClose={() => setConfirmReverify(null)}
+                onConfirm={handleReverify}
+                loading={isDeleting}
+                title="Fresh Start & Re-verify?"
+                message={`This will delete the current stale record for ${confirmReverify?.name} and immediately open the Manual Entry form to allow you to re-enter the correct details. Proceed?`}
+                confirmText="Start Re-verification"
+            />
         </div>
     );
 };

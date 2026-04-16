@@ -13,8 +13,10 @@ import {
   ExternalLink, 
   BookOpen, 
   ShieldCheck,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const RealEstateCms: React.FC = () => {
   const { companySettings, updateCompanySettings } = useData();
@@ -33,6 +35,8 @@ export const RealEstateCms: React.FC = () => {
   });
 
   const [isSaved, setIsSaved] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleGlobalSave = () => {
       updateCompanySettings({
@@ -57,10 +61,29 @@ export const RealEstateCms: React.FC = () => {
   };
 
   const removeResource = (id: string) => {
-      setFormData(prev => ({
-          ...prev,
-          resources: prev.resources.filter(r => r.id !== id)
-      }));
+    setConfirmDeleteId(id);
+  };
+
+  const handleConfirmedDelete = async () => {
+    if (!confirmDeleteId) return;
+    setIsDeleting(true);
+    try {
+        const updatedResources = formData.resources.filter(r => r.id !== confirmDeleteId);
+        setFormData(prev => ({
+            ...prev,
+            resources: updatedResources
+        }));
+        // Auto-sync with context to ensure persistence
+        await updateCompanySettings({
+            ...companySettings,
+            realEstateResources: updatedResources
+        });
+        setConfirmDeleteId(null);
+    } catch (e) {
+        alert("Action failed. Please try again.");
+    } finally {
+        setIsDeleting(false);
+    }
   };
 
   return (
@@ -214,6 +237,17 @@ export const RealEstateCms: React.FC = () => {
               )}
           </div>
       </div>
+      </div>
+
+      <ConfirmModal 
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={handleConfirmedDelete}
+        loading={isDeleting}
+        title="Remove Resource?"
+        message="Are you sure you want to remove this resource link from the Real Estate portal? This change will be saved immediately to the database."
+        confirmText="Remove Link"
+      />
     </div>
   );
 };

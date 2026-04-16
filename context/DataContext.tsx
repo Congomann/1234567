@@ -408,7 +408,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         wrapped(() => Backend.getEvents(), (e) => e && e.length > 0 && setEvents(e)),
         wrapped(() => Backend.getResources(), setResources),
         wrapped(() => Backend.getTestimonials(), setTestimonials),
-        wrapped(() => Backend.getLandingPages(), setLandingPages)
+        wrapped(() => Backend.getLandingPages(), setLandingPages),
+        wrapped(() => Backend.getProperties(), setProperties)
       ]);
       
       // Load user-specific platform modules
@@ -683,7 +684,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const deleteAdvisor = (id: string) => updateUser(id, { deletedAt: new Date().toISOString() });
   const restoreUser = (id: string) => updateUser(id, { deletedAt: undefined });
-  const permanentlyDeleteUser = (id: string) => setAllUsers(prev => prev.filter(u => u.id !== id));
+  const permanentlyDeleteUser = async (id: string) => {
+    try {
+      await Backend.deleteUser(id);
+      setAllUsers(prev => prev.filter(u => u.id !== id));
+    } catch (e) {
+      console.error("[DataContext] Permanent delete failed:", e);
+      throw e;
+    }
+  };
   const assignCarriers = () => { };
   const markChatRead = (id: string) => {
     setChatMessages(prev => prev.map(m => (m.senderId === id || m.receiverId === id) ? { ...m, read: true } : m));
@@ -720,20 +729,27 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateApplicationStatus = (id: string, status: ApplicationStatus) => {
     setApplications(prev => prev.map(app => app.id === id ? { ...app, status } : app));
   };
-  const addProperty = (p: any) => {
+  const addProperty = async (p: any) => {
     const newProp: PropertyListing = { id: crypto.randomUUID(), address: '', city: '', state: '', zip: '', price: 0, type: 'Residential', status: 'Pending Approval', listedDate: new Date().toISOString(), sellerName: '', advisorId: user?.id || '', image: '', ...p };
+    await Backend.saveProperty(newProp);
     setProperties(prev => [newProp, ...prev]);
   };
-  const updateProperty = (id: string, property: Partial<PropertyListing>) => {
-    setProperties(prev => prev.map(p => p.id === id ? { ...p, ...property } : p));
+  const updateProperty = async (id: string, data: Partial<PropertyListing>) => {
+    const prop = properties.find(p => p.id === id);
+    if (prop) {
+      const updated = { ...prop, ...data };
+      await Backend.saveProperty(updated);
+      setProperties(prev => prev.map(p => p.id === id ? updated : p));
+    }
   };
-  const deleteProperty = (id: string) => {
+  const deleteProperty = async (id: string) => {
+    await Backend.deleteProperty(id);
     setProperties(prev => prev.filter(p => p.id !== id));
   };
   const updateTransactionStatus = (id: string, status: 'Open' | 'Closed' | 'Cancelled', stage?: EscrowTransaction['stage']) => {
     setTransactions(prev => prev.map(t => t.id === id ? { ...t, status, stage: stage || t.stage } : t));
   };
-  const addPortfolio = (p: Partial<ClientPortfolio>) => {
+  const addPortfolio = async (p: Partial<ClientPortfolio>) => {
     const newP: ClientPortfolio = {
       id: crypto.randomUUID(),
       advisorId: user?.id || '1',
@@ -746,12 +762,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       clientId: p.clientId || 'unknown',
       ...p
     };
+    await Backend.savePortfolio(newP);
     setPortfolios(prev => [...prev, newP]);
   };
-  const updatePortfolio = (id: string, data: Partial<ClientPortfolio>) => {
-    setPortfolios(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  const updatePortfolio = async (id: string, data: Partial<ClientPortfolio>) => {
+    const port = portfolios.find(p => p.id === id);
+    if (port) {
+      const updated = { ...port, ...data };
+      await Backend.savePortfolio(updated);
+      setPortfolios(prev => prev.map(p => p.id === id ? updated : p));
+    }
   };
-  const deletePortfolio = (id: string) => {
+  const deletePortfolio = async (id: string) => {
+    await Backend.deletePortfolio(id);
     setPortfolios(prev => prev.filter(p => p.id !== id));
   };
   const addComplianceDoc = (data: Partial<ComplianceDocument>) => {

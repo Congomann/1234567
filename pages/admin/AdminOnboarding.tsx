@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Clock, CheckCircle, XCircle, Mail, Phone, ExternalLink,
     Shield, Search, Filter, Loader2, Landmark, ChevronRight, AlertCircle,
-    Copy, Check, Send, DollarSign, Briefcase
+    Copy, Check, Send, DollarSign, Briefcase, Trash2
 } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
 import { ProductType } from '../../types';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 interface Application {
     id: string;
@@ -33,7 +34,9 @@ export default function AdminOnboarding() {
     const [contractLevel, setContractLevel] = useState(50);
     const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([ProductType.LIFE]);
     const [approving, setApproving] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+     const [searchTerm, setSearchTerm] = useState('');
+    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
 
     const fetchApps = useCallback(async () => {
         try {
@@ -74,6 +77,21 @@ export default function AdminOnboarding() {
             alert(err.message);
         } finally {
             setApproving(false);
+        }
+    const handleReject = async () => {
+        if (!selectedApp) return;
+        setIsRejecting(true);
+        try {
+            await Backend.deleteAdvisorApplication(selectedApp.id);
+            // Refresh list
+            const data = await Backend.get<Application[]>('/admin/onboarding/applications');
+            setApps(data || []);
+            setSelectedApp(null);
+            setShowRejectConfirm(false);
+        } catch (err: any) {
+            alert("Rejection failed: " + err.message);
+        } finally {
+            setIsRejecting(false);
         }
     };
 
@@ -294,13 +312,21 @@ export default function AdminOnboarding() {
                                                     </div>
                                                 </div>
 
-                                                <button
+                                                 <button
                                                     onClick={handleApprove}
                                                     disabled={approving || !companyEmail}
                                                     className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 disabled:opacity-50"
                                                 >
                                                     {approving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                                                     Approve & Notify
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setShowRejectConfirm(true)}
+                                                    className="w-full bg-white border border-red-100 text-red-500 font-bold py-3 rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2 mt-2"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    Reject & Delete
                                                 </button>
                                             </div>
                                         ) : (
@@ -343,6 +369,15 @@ export default function AdminOnboarding() {
                     </div>
                 </div>
             </div>
+            <ConfirmModal 
+                isOpen={showRejectConfirm}
+                onClose={() => setShowRejectConfirm(false)}
+                onConfirm={handleReject}
+                loading={isRejecting}
+                title="Reject Advisor Application?"
+                message={`Are you sure you want to permanently delete ${selectedApp?.full_name}'s application? This will purge all associated data from the database.`}
+                confirmText="Reject & Delete"
+            />
         </div>
     );
 }

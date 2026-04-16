@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { User, UserRole, AdvisorCategory, ProductType } from '../../types';
-import { Trash2, Plus, Search, Edit2, Shield, Globe, Power, PowerOff, X, Check, Save, Archive, RotateCcw, AlertTriangle, Briefcase, ChevronDown, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Trash2, Plus, Search, Edit2, Shield, Globe, Power, PowerOff, X, Check, Save, Archive, RotateCcw, AlertTriangle, Briefcase, ChevronDown, Eye, EyeOff, ExternalLink, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const AdminUsers: React.FC = () => {
     const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser, accessLogs } = useData();
@@ -13,6 +14,8 @@ export const AdminUsers: React.FC = () => {
     const [showArchived, setShowArchived] = useState(false);
     const [viewMode, setViewMode] = useState<'users' | 'logs'>('users');
     const [selectedUserLogs, setSelectedUserLogs] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string; permanent: boolean } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const initialFormData: Partial<User & { password?: string }> = {
         name: '',
@@ -41,9 +44,20 @@ export const AdminUsers: React.FC = () => {
         }
     };
 
-    const handleDelete = (id: string, name: string) => {
-        if (window.confirm(`Are you sure you want to remove ${name}? They will be moved to the archive.`)) {
-            deleteAdvisor(id);
+    const handleDeleteAction = async () => {
+        if (!confirmDelete) return;
+        setIsDeleting(true);
+        try {
+            if (confirmDelete.permanent) {
+                await permanentlyDeleteUser(confirmDelete.id);
+            } else {
+                deleteAdvisor(confirmDelete.id);
+            }
+            setConfirmDelete(null);
+        } catch (e) {
+            alert("Failed to delete user. Please try again.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -197,9 +211,14 @@ export const AdminUsers: React.FC = () => {
 
                             <div className="w-1/6 flex items-center justify-end gap-2">
                                 {showArchived ? (
-                                    <button onClick={() => restoreUser(user.id)} className="p-2.5 bg-green-50 text-green-600 hover:bg-green-600 hover:text-white rounded-xl transition-all shadow-sm">
-                                        <RotateCcw className="h-4 w-4" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => restoreUser(user.id)} className="p-2.5 bg-green-50 text-green-600 hover:bg-green-600 hover:text-white rounded-xl transition-all shadow-sm" title="Restore User">
+                                            <RotateCcw className="h-4 w-4" />
+                                        </button>
+                                        <button onClick={() => setConfirmDelete({ id: user.id, name: user.name, permanent: true })} className="p-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm" title="Delete Permanently">
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 ) : (
                                     <>
                                         {user.role === UserRole.ADVISOR && (
@@ -215,7 +234,7 @@ export const AdminUsers: React.FC = () => {
                                         <button onClick={() => handleEditClick(user)} className="p-2.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">
                                             <Edit2 className="h-4 w-4" />
                                         </button>
-                                        <button onClick={() => handleDelete(user.id, user.name)} className="p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all">
+                                        <button onClick={() => setConfirmDelete({ id: user.id, name: user.name, permanent: false })} className="p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all">
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </>
@@ -365,6 +384,18 @@ export const AdminUsers: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmModal 
+                isOpen={!!confirmDelete}
+                onClose={() => setConfirmDelete(null)}
+                onConfirm={handleDeleteAction}
+                loading={isDeleting}
+                title={confirmDelete?.permanent ? "Wipe User Account?" : "Archive User Account?"}
+                message={confirmDelete?.permanent 
+                    ? `Warning: This will permanently purge ${confirmDelete.name} from the database. This action cannot be undone.` 
+                    : `Are you sure you want to move ${confirmDelete?.name} to the archive terminal? They will lose access immediately.`}
+                confirmText={confirmDelete?.permanent ? "Wipe Permanently" : "Archive User"}
+            />
         </div>
     );
 };

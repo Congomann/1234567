@@ -18,14 +18,18 @@ import {
   X,
   Check,
   Building2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  RotateCcw
 } from 'lucide-react';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const RealEstateAdmin: React.FC = () => {
   const { properties, updateProperty, deleteProperty, allUsers } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Pending Approval');
   const [selectedProperty, setSelectedProperty] = useState<PropertyListing | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; type: 'reject' | 'delete' } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const filteredProperties = useMemo(() => {
     return properties.filter(p => {
@@ -41,17 +45,21 @@ export const RealEstateAdmin: React.FC = () => {
     setSelectedProperty(null);
   };
 
-  const handleReject = (id: string) => {
-    if (window.confirm('Are you sure you want to reject this listing? It will not be visible on the public site.')) {
-      updateProperty(id, { status: 'Rejected' });
+  const handleConfirmedAction = async () => {
+    if (!confirmAction) return;
+    setIsProcessing(true);
+    try {
+      if (confirmAction.type === 'reject') {
+        await updateProperty(confirmAction.id, { status: 'Rejected' });
+      } else {
+        await deleteProperty(confirmAction.id);
+      }
+      setConfirmAction(null);
       setSelectedProperty(null);
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Permanently delete this property record? This action cannot be undone.')) {
-      deleteProperty(id);
-      setSelectedProperty(null);
+    } catch (e) {
+      alert("Action failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -341,14 +349,14 @@ export const RealEstateAdmin: React.FC = () => {
                       )}
                       {selectedProperty.status !== 'Rejected' && (
                         <button 
-                          onClick={() => handleReject(selectedProperty.id)}
+                          onClick={() => setConfirmAction({ id: selectedProperty.id, type: 'reject' })}
                           className="w-full py-5 bg-white border border-red-200 text-red-600 font-black rounded-3xl text-xs uppercase tracking-widest hover:bg-red-50 transition-all flex items-center justify-center gap-2"
                         >
                           <XCircle size={20} /> Reject Listing
                         </button>
                       )}
                       <button 
-                        onClick={() => handleDelete(selectedProperty.id)}
+                        onClick={() => setConfirmAction({ id: selectedProperty.id, type: 'delete' })}
                         className="w-full py-5 text-slate-400 hover:text-red-500 font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={16} /> Permanently Delete
@@ -360,6 +368,18 @@ export const RealEstateAdmin: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={handleConfirmedAction}
+        loading={isProcessing}
+        title={confirmAction?.type === 'reject' ? "Reject Listing?" : "Permanently Delete?"}
+        message={confirmAction?.type === 'reject' 
+          ? "Are you sure you want to reject this property? It will be moved to the 'Rejected' filter and hidden from the public site."
+          : "Warning: This will permanently purge the property record from the database. This action cannot be undone."}
+        confirmText={confirmAction?.type === 'reject' ? "Reject Product" : "Delete Forever"}
+      />
     </div>
   );
 };

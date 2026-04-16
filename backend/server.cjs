@@ -180,7 +180,46 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
 
 const pool = new Pool(poolConfig);
 
-// --- HELPERS ---
+// --- DATABASE INITIALIZATION ---
+// Self-healing check for missing engines identified during functional sweep
+const initDB = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS portfolios (
+        id UUID PRIMARY KEY,
+        advisor_id UUID REFERENCES users(id),
+        client_name VARCHAR(255),
+        total_value NUMERIC(15,2),
+        ytd_return NUMERIC(5,2),
+        risk_profile VARCHAR(50),
+        holdings JSONB,
+        last_rebalanced TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS properties (
+        id UUID PRIMARY KEY,
+        address TEXT,
+        city VARCHAR(100),
+        state VARCHAR(50),
+        zip VARCHAR(20),
+        price NUMERIC(15,2),
+        type VARCHAR(100),
+        status VARCHAR(50),
+        listed_date TIMESTAMP WITH TIME ZONE,
+        seller_name VARCHAR(255),
+        advisor_id UUID REFERENCES users(id),
+        image TEXT,
+        source VARCHAR(100),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('[DB] Core & specialized engines (Portfolios, Real Estate) initialized.');
+  } catch (err) {
+    console.warn('[DB] Init warning:', err.message);
+  }
+};
+initDB();
 
 const logAccess = async (userId, action, req, metadata = {}) => {
   try {
@@ -1161,6 +1200,20 @@ app.post('/api/users', authenticateToken, async (req, res) => {
   }
 });
 
+app.delete('/api/users/:id', authenticateToken, authorizeRoles('Administrator'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (id === req.user.id) {
+      return res.status(400).json({ error: 'Cannot delete your own administrator account.' });
+    }
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    await logAccess(req.user.id, `User Deleted: ${id}`, req);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- PLATFORM MODULES (Phase 1-Phase 7) ---
 
 /**
@@ -1564,6 +1617,16 @@ app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, as
     res.status(500).json({ error: err.message });
   } finally {
     if (client) client.release();
+  }
+});
+
+app.delete('/api/admin/onboarding/applications/:id', authenticateToken, authorizeRoles('Administrator', 'Manager'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM advisor_applications WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -4586,6 +4649,54 @@ app.post('/api/portfolios', authenticateToken, async (req, res) => {
 app.delete('/api/portfolios/:id', authenticateToken, async (req, res) => {
   try {
     await pool.query('DELETE FROM portfolios WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ─── PROPERTIES ENGINE (Real Estate) ─────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+app.get('/api/real-estate/properties', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM properties ORDER BY listed_date DESC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/real-estate/properties', authenticateToken, async (req, res) => {
+  try {
+    const p = req.body;
+    const propId = p.id || crypto.randomUUID();
+    
+    await pool.query(
+      `INSERT INTO properties (
+        id, address, city, state, zip, price, type, status, 
+        listed_date, seller_name, advisor_id, image, source
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      ON CONFLICT (id) DO UPDATE SET 
+        address=$2, city=$3, state=$4, zip=$5, price=$6, type=$7, 
+        status=$8, seller_name=$10, advisor_id=$11, image=$12, source=$13`,
+      [
+        propId, p.address, p.city, p.state, p.zip, p.price || 0, 
+        p.type || 'Residential', p.status || 'Pending Approval',
+        p.listedDate || new Date().toISOString(), p.sellerName, 
+        p.advisorId || req.user.id, p.image, p.source
+      ]
+    );
+    res.json({ success: true, id: propId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/real-estate/properties/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM properties WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
