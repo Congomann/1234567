@@ -1343,7 +1343,7 @@ export const WebsiteSettings: React.FC = () => {
                                     <td className="px-6 py-4">{res.likes}</td>
                                     <td className="px-6 py-4 text-xs">{new Date(res.dateAdded).toLocaleDateString()}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => handleDeleteResource(res.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors">
+                                        <button onClick={() => deleteResource(res.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors">
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </td>
