@@ -28,6 +28,7 @@ export const WebsiteSettings: React.FC = () => {
         url: '',
         description: '',
         content: '', // For Blog
+    });
     const [confirmAction, setConfirmAction] = useState<{ id: string | number; type: 'resource' | 'reset-leads' | 'partner' | 'social'; metadata?: any } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
