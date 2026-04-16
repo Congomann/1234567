@@ -55,7 +55,7 @@ const broadcast = (data) => {
 };
 
 const PORT = process.env.PORT || 3001;
-const SECRET_KEY = process.env.SECRET_KEY || 'your_super_secret_key_change_this_in_production';
+const SECRET_KEY = process.env.SECRET_KEY || 'nhfg_secret_key_123';
 
 // Swagger setup
 const swaggerOptions = {
@@ -272,7 +272,7 @@ const authenticateToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
+    const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
 
     // Helper to query Supabase directly via SDK (Handles RLS transparently)
@@ -4471,8 +4471,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error', details: err.message });
 });
 
-if (require.main === module) {
-  
 // ════════════════════════════════════════════════════════════════════════════════
 // ─── CLIENTS ENGINE ─────────────────────────────────────────────────────────────
 // ════════════════════════════════════════════════════════════════════════════════
@@ -4634,6 +4632,7 @@ app.delete('/api/applications/:id', authenticateToken, async (req, res) => {
 });
 
 
+if (require.main === module) {
 server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);
   });
