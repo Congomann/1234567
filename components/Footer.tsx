@@ -212,10 +212,12 @@ export const Footer: React.FC = () => {
                 <div className="flex flex-col">
                   <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Visit Us</p>
                   <p className="text-white font-bold text-[14px] leading-tight flex flex-col">
-                    {!companySettings.hideStreetAddress && (
+                    {!companySettings.hideStreetAddress && companySettings.address && (
                       <span className="text-slate-400 text-[12px] font-medium mb-0.5">{companySettings.address}</span>
                     )}
-                    <span>{companySettings.city}, {companySettings.state} {companySettings.zip}</span>
+                    <span>
+                      {[companySettings.city, companySettings.state].filter(Boolean).join(', ')} {companySettings.zip}
+                    </span>
                   </p>
                 </div>
               </div>
