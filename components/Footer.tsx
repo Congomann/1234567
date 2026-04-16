@@ -167,39 +167,46 @@ export const Footer: React.FC = () => {
                   <Mail size={16} />
                 </div>
                 <div className="overflow-hidden flex flex-col">
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Email Us</p>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 items-baseline">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">Email Us</p>
+                  <div className="flex flex-col gap-4">
                     {emailsList.length > 0 ? emailsList.map((emailStr, idx) => {
                       const match = emailStr.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
                       const mailto = match ? `mailto:${match[0]}` : `mailto:${emailStr}`;
                       const parts = emailStr.split(':');
 
                       if (parts.length > 1 && match && parts[1].includes(match[0])) {
+                        const label = parts[0].trim();
                         return (
-                          <React.Fragment key={idx}>
-                            <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">{parts[0].trim()}:</span>
-                            <a href={mailto} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors break-all">
+                          <div key={idx} className="flex flex-col group">
+                            <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5 group-hover:text-blue-400 transition-colors duration-300">
+                              {label}
+                            </span>
+                            <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
                               {parts[1].trim()}
                             </a>
-                          </React.Fragment>
+                          </div>
                         );
                       }
 
                       return (
-                        <React.Fragment key={idx}>
-                          <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">Email:</span>
-                          <a href={mailto} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors break-all">
+                        <div key={idx} className="flex flex-col group">
+                          <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5 group-hover:text-blue-400 transition-colors duration-300">
+                            Email
+                          </span>
+                          <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
                             {emailStr}
                           </a>
-                        </React.Fragment>
+                        </div>
                       );
                     }) : (
-                      <React.Fragment>
-                        <span className="text-slate-400 font-medium text-[13px] whitespace-nowrap">Email:</span>
-                        <a href="mailto:info@domain.com" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
-                          info@domain.com
+                      <div className="flex flex-col group">
+                        <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5">
+                          General
+                        </span>
+                        <a href="mailto:info@newhollandfinancial.com" className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
+                          info@newhollandfinancial.com
                         </a>
-                      </React.Fragment>
+                      </div>
                     )}
                   </div>
                 </div>
