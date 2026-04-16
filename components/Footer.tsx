@@ -33,6 +33,7 @@ const TikTokIcon = ({ size, className }: { size?: number, className?: string }) 
 
 export const Footer: React.FC = () => {
   const { companySettings } = useData();
+  const [revealedIdx, setRevealedIdx] = useState<number | null>(null);
 
   const getSocialIcon = (platform: string) => {
     switch (platform) {
@@ -168,44 +169,63 @@ export const Footer: React.FC = () => {
                 </div>
                 <div className="overflow-hidden flex flex-col">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-3">Email Us</p>
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-5">
                     {emailsList.length > 0 ? emailsList.map((emailStr, idx) => {
                       const match = emailStr.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
                       const mailto = match ? `mailto:${match[0]}` : `mailto:${emailStr}`;
                       const parts = emailStr.split(':');
+                      const isRevealed = revealedIdx === idx;
 
                       if (parts.length > 1 && match && parts[1].includes(match[0])) {
                         const label = parts[0].trim();
                         return (
                           <div key={idx} className="flex flex-col group">
-                            <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5 group-hover:text-blue-400 transition-colors duration-300">
+                            <button 
+                              onClick={() => setRevealedIdx(isRevealed ? null : idx)}
+                              className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                            >
                               {label}
-                            </span>
-                            <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
-                              {parts[1].trim()}
-                            </a>
+                              <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${isRevealed ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
+                            </button>
+                            <div className={`overflow-hidden transition-all duration-500 ease-out ${isRevealed ? 'max-h-12 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'}`}>
+                              <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
+                                {parts[1].trim()}
+                              </a>
+                            </div>
                           </div>
                         );
                       }
 
                       return (
                         <div key={idx} className="flex flex-col group">
-                          <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5 group-hover:text-blue-400 transition-colors duration-300">
+                          <button 
+                            onClick={() => setRevealedIdx(isRevealed ? null : idx)}
+                            className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                          >
                             Email
-                          </span>
-                          <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
-                            {emailStr}
-                          </a>
+                            <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${isRevealed ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
+                          </button>
+                          <div className={`overflow-hidden transition-all duration-500 ease-out ${isRevealed ? 'max-h-12 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'}`}>
+                            <a href={mailto} className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
+                              {emailStr}
+                            </a>
+                          </div>
                         </div>
                       );
                     }) : (
                       <div className="flex flex-col group">
-                        <span className="text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-0.5">
+                        <button 
+                          onClick={() => setRevealedIdx(revealedIdx === 999 ? null : 999)}
+                          className="w-max flex items-center gap-2 text-slate-500 font-bold text-[9px] uppercase tracking-wider mb-1 hover:text-blue-400 transition-colors duration-300"
+                        >
                           General
-                        </span>
-                        <a href="mailto:info@newhollandfinancial.com" className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
-                          info@newhollandfinancial.com
-                        </a>
+                          <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all duration-300 ${revealedIdx === 999 ? 'scale-150 shadow-[0_0_8px_#3b82f6]' : 'opacity-30'}`} />
+                        </button>
+                        <div className={`overflow-hidden transition-all duration-500 ease-out ${revealedIdx === 999 ? 'max-h-12 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'}`}>
+                          <a href="mailto:info@newhollandfinancial.com" className="text-white font-semibold text-[14px] hover:text-blue-300 transition-all duration-300">
+                            info@newhollandfinancial.com
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
