@@ -22,7 +22,7 @@ const BASE_URL = '/api';
 
 
 const getHeaders = (): HeadersInit => {
-  const token = localStorage.getItem('nhfg_access_token') || localStorage.getItem('token');
+  const token = localStorage.getItem('nhfg_access_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
