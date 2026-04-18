@@ -19,10 +19,15 @@ class NHFGBackend {
 
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem('nhfg_access_token');
-        const headers: HeadersInit = { 'Content-Type': 'application/json' };
+        const headers: { [key: string]: string } = { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
+        
         return headers;
     }
 
