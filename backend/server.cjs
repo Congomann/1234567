@@ -301,6 +301,11 @@ const generateRefreshToken = (user) => {
 
 // --- JWT Middleware ---
 const authenticateToken = (req, res, next) => {
+  // Allow CORS preflight requests to bypass authentication
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   const authHeader = req.headers['authorization'];
   console.log(`[AUTH] Header: ${authHeader ? 'SENT (Length: ' + authHeader.length + ')' : 'MISSING'}`);
   const token = authHeader && authHeader.split(' ')[1];
