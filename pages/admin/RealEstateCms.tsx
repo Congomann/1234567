@@ -174,7 +174,7 @@ export const RealEstateCms: React.FC = () => {
                           <div className="md:col-span-1">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Category</label>
                               <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold appearance-none cursor-pointer" value={newResource.type} onChange={e => setNewResource({...newResource, type: e.target.value as any})}>
-                                  <option value="Buying">Buying</option>
+                                                                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] bg-white px-4 py-2 rounded-full border border-blue-100 shadow-sm">Real Estate Priority</span>span></span>
                                   <option value="Selling">Selling</option>
                                   <option value="Investing">Investing</option>
                                   <option value="Legal">Legal</option>
