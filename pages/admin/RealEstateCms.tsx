@@ -179,8 +179,7 @@ export const RealEstateCms: React.FC = () => {
                                   <option value="Investing">Investing</option>
                                   <option value="Legal">Legal</option>
                               </select>
-                          </div>
-                          <div className="md:col-span-1">
+                          </div>                          <div className="md:col-span-1">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Destination URL</label>
                               <input className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold" value={newResource.url} onChange={e => setNewResource({...newResource, url: e.target.value})} placeholder="https://..." />
                           </div>
