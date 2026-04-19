@@ -374,13 +374,53 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user, pushNotification]);
 
+  const refreshActiveData = async (activeUser?: User | null) => {
+    const targetUser = activeUser || user;
+    
+    const wrapped = async (fn: () => Promise<any>, setter: (val: any) => void) => {
+      try {
+        const val = await fn();
+        if (val) setter(val);
+      } catch (e) {
+        console.error(`[DataSync] Segment failed:`, e);
+      }
+    };
+
+    await Promise.all([
+      wrapped(() => Backend.getLeads(), setLeads),
+      wrapped(() => Backend.getUsers(), (users) => setAllUsers(users.length > 0 ? [...INITIAL_USERS, ...users.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS)),
+      wrapped(() => Backend.getClients(), setClients),
+      wrapped(() => Backend.getSettings(), (s) => s && setCompanySettings(s)),
+      wrapped(() => Backend.getWorkflows(), (w) => w && w.length > 0 && setWorkflows(w)),
+      wrapped(() => Backend.getEvents(), (e) => e && e.length > 0 && setEvents(e)),
+      wrapped(() => Backend.getResources(), setResources),
+      wrapped(() => Backend.getTestimonials(), setTestimonials),
+      wrapped(() => Backend.getLandingPages(), setLandingPages),
+      wrapped(() => Backend.getProperties(), setProperties)
+    ]);
+    
+    // Load user-specific platform modules
+    if (targetUser) {
+      wrapped(() => Backend.getInteractions(), setInteractions);
+      wrapped(() => Backend.getDocuments(), setDocuments);
+      wrapped(() => Backend.getPreferences(), setUserPreferences);
+      if (targetUser.role === UserRole.ADMIN) {
+        wrapped(() => Backend.getAccessLogs(), setAccessLogs);
+      }
+    }
+
+    console.log("[DataSync] Production segments synchronized.");
+  };
+
   useEffect(() => {
     const bootstrap = async () => {
       try {
+        setIsLoading(true);
         // 1. Try to restore Backend session first
         const backendUser = await Backend.getCurrentUser();
         if (backendUser) {
           setUser(backendUser);
+          await refreshActiveData(backendUser);
         } else {
           // Restore mock session if present
           const mockId = localStorage.getItem('nhfg_mock_user_id');
@@ -388,42 +428,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const mockUser = INITIAL_USERS.find(u => u.id === mockId);
             if (mockUser) setUser(mockUser);
           }
+          // Initial mock load
+          await refreshActiveData(null);
         }
-
-      const wrapped = async (fn: () => Promise<any>, setter: (val: any) => void) => {
-        try {
-          const val = await fn();
-          if (val) setter(val);
-        } catch (e) {
-          console.error(`[Bootstrap] Segment failed:`, e);
-        }
-      };
-
-      await Promise.all([
-        wrapped(() => Backend.getLeads(), setLeads),
-        wrapped(() => Backend.getUsers(), (users) => setAllUsers(users.length > 0 ? [...INITIAL_USERS, ...users.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS)),
-        wrapped(() => Backend.getClients(), setClients),
-        wrapped(() => Backend.getSettings(), (s) => s && setCompanySettings(s)),
-        wrapped(() => Backend.getWorkflows(), (w) => w && w.length > 0 && setWorkflows(w)),
-        wrapped(() => Backend.getEvents(), (e) => e && e.length > 0 && setEvents(e)),
-        wrapped(() => Backend.getResources(), setResources),
-        wrapped(() => Backend.getTestimonials(), setTestimonials),
-        wrapped(() => Backend.getLandingPages(), setLandingPages),
-        wrapped(() => Backend.getProperties(), setProperties)
-      ]);
-      
-      // Load user-specific platform modules
-      if (user || backendUser) {
-        const u = user || backendUser;
-        wrapped(() => Backend.getInteractions(), setInteractions);
-        wrapped(() => Backend.getDocuments(), setDocuments);
-        wrapped(() => Backend.getPreferences(), setUserPreferences);
-        if (u?.role === UserRole.ADMIN) {
-          wrapped(() => Backend.getAccessLogs(), setAccessLogs);
-        }
-      }
-
-      console.log("[Bootstrap] Data segments initialized.");
       } catch (err) {
         console.error("Bootstrap error:", err);
       } finally {
@@ -479,6 +486,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendUser = await Backend.login(cleanEmail, password);
       if (backendUser) {
         setUser(backendUser);
+        await refreshActiveData(backendUser);
         pushNotification('Neural Terminal Active', `Authenticated internal node: ${backendUser.name}`, 'success');
         return true;
       }
