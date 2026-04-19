@@ -19,8 +19,7 @@ class SocketService {
     return `${protocol}//${window.location.host}/ws`;
   }
 
-  private listeners: ((data: any) => void)[] = [];
-  private reconnectInterval: number = 3000;
+  private hasAttempted: boolean = false;
 
   connect() {
     if (!USE_REAL_SOCKETS) {
@@ -32,6 +31,16 @@ class SocketService {
       return;
     }
 
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // In production (Vercel), persistent WebSockets are not supported.
+    // We fail silently after the first attempt to prevent constant reconnection loops and console noise.
+    if (!isLocal && this.hasAttempted) {
+        console.log('SocketService: Production environment detected. WebSockets disabled to prevent serverless reconnection noise.');
+        return;
+    }
+
+    this.hasAttempted = true;
     console.log(`SocketService: Attempting connection to ${this.url}...`);
     try {
         this.socket = new WebSocket(this.url);
@@ -50,16 +59,20 @@ class SocketService {
         };
 
         this.socket.onclose = () => {
-          console.log('WebSocket Disconnected. Reconnecting...');
-          setTimeout(() => this.connect(), this.reconnectInterval);
+          if (isLocal) {
+              console.log('WebSocket Disconnected. Reconnecting...');
+              setTimeout(() => this.connect(), this.reconnectInterval);
+          } else {
+              console.log('WebSocket Disconnected. Silence in production.');
+          }
         };
 
         this.socket.onerror = (err) => {
-          console.error('WebSocket Error', err);
+          if (isLocal) console.error('WebSocket Error', err);
           this.socket?.close();
         };
     } catch (e) {
-        console.warn("WebSocket connection failed to initialize", e);
+        if (isLocal) console.warn("WebSocket connection failed to initialize", e);
     }
   }
 

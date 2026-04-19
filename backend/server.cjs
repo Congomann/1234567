@@ -149,16 +149,27 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
   // Supports Vercel/Supabase standard environment variable names
   let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
   
-  // Auto-heal Supabase Pooler Tenancy issues (e.g. Vercel env variable missing project ref)
-  if (connectionString && connectionString.includes('pooler.supabase.com')) {
+  // Auto-heal Supabase DNS and Pooler Tenancy issues
+  if (connectionString) {
     try {
       const dbUrl = new URL(connectionString);
-      const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-      const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
-      if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
-        dbUrl.username = `${dbUrl.username}.${projectRef}`;
-        connectionString = dbUrl.toString();
-        console.log(`[DB] Auto-healed Supabase connection pooler string with project ref: ${projectRef}`);
+      
+      // Fix ENOTFOUND for malformed 'db.' prefix hosts
+      if (dbUrl.host === 'db.boylqkqyclzayrupbrbd.supabase.co') {
+         dbUrl.host = 'boylqkqyclzayrupbrbd.supabase.co';
+         connectionString = dbUrl.toString();
+         console.log(`[DB] Auto-healed malformed Supabase host DNS.`);
+      }
+
+      // Handle project-ref injection for pooler
+      if (connectionString.includes('pooler.supabase.com')) {
+        const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+        const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
+        if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
+          dbUrl.username = `${dbUrl.username}.${projectRef}`;
+          connectionString = dbUrl.toString();
+          console.log(`[DB] Auto-healed Supabase connection pooler string with project ref: ${projectRef}`);
+        }
       }
     } catch (e) {
       console.error('[DB] Failed to parse DATABASE_URL for auto-healing:', e.message);
