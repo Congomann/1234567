@@ -235,7 +235,6 @@ export const RealEstateCms: React.FC = () => {
               )}
           </div>
       </div>
-      </div>
 
       <ConfirmModal 
         isOpen={!!confirmDeleteId}
