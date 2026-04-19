@@ -230,7 +230,7 @@ export const RealEstateCms: React.FC = () => {
                               <ShieldCheck className="h-6 w-6 text-slate-400" />
                               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">All leads from this portal are routed with 'Real Estate' priority.</p>
                           </div>
-                                                                                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] bg-white px-4 py-2 rounded-full border border-blue-100 shadow-sm">Real Estate Priority</span>span></span>
+                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] bg-white px-4 py-2 rounded-full border border-blue-100 shadow-sm">Real Estate Priority</span>
                       </div>
                   </div>
               )}
