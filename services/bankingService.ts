@@ -5,29 +5,11 @@
  * the NHFG backend API (server.cjs).
  *
  * IMPORTANT:
- *  - The Plaid access_token is NEVER sent to or stored on the frontend.
- *  - All sensitive token operations happen exclusively on the backend.
- *  - The frontend only ever receives masked account data and verification IDs.
- *
- * Flow:
- *  1. createLinkToken()     → backend calls Plaid /link/token/create
- *  2. usePlaidLink()        → user completes Plaid Link widget (Plaid JS SDK)
- *  3. exchangeToken()       → backend exchanges public_token, calls Auth, saves to DB
- *  4. getVerifications()    → backend queries bank_verifications table
- *  5. updateStatus()        → backend PATCH on individual record
- *  6. saveManual()          → backend validates routing # (ABA checksum) + saves
+ *  - Now uses the hardened Backend singleton to benefit from automatic
+ *    token refresh and consistent production headers.
  */
 
-const BASE_URL = '/api';
-
-
-const getHeaders = (): HeadersInit => {
-  const token = localStorage.getItem('nhfg_access_token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
+import { Backend } from './apiBackend';
 
 /** Generic fetch wrapper with error extraction */
 const apiFetch = async <T>(
@@ -35,39 +17,15 @@ const apiFetch = async <T>(
   opts: RequestInit = {}
 ): Promise<{ data: T | null; error: string | null }> => {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      ...opts,
-      headers: { ...getHeaders(), ...(opts.headers || {}) },
-    });
-
-    const text = await res.text();
-
-    if (!res.ok) {
-      let msg = `HTTP ${res.status}`;
-      try {
-        const body = JSON.parse(text);
-        msg = body.error || body.message || body.hint || msg;
-      } catch {
-        console.error('[BankVerification] Non-JSON error response:', text.slice(0, 200));
-        if (text.includes('Vercel Security Checkpoint')) msg = 'Vercel Security/WAF blocked the request.';
-        else msg += ': Vercel returned HTML or text. See console.';
-      }
-      return { data: null, error: msg };
-    }
-
-    try {
-      if (!text) return { data: {} as T, error: null };
-      const data: T = JSON.parse(text);
-      return { data, error: null };
-    } catch {
-      console.error('[BankVerification] Expected JSON, but Vercel returned HTML:', text.slice(0, 300));
-      return { data: null, error: 'API returned HTML instead of JSON. Check Vercel logs or WAF settings.' };
-    }
+    // Route all banking requests through the hardened Backend requester
+    // This resolves the production 401 blockade by ensuring persistent auth.
+    const data = await Backend.apiRequest<T>(path, opts, 'bank_verifications');
+    return { data, error: null };
   } catch (err: any) {
-    console.error('[BankVerification] Fetch failed entirely:', err);
+    console.error('[BankVerification] Request failed:', err);
     return {
       data: null,
-      error: 'Backend offline — unable to fetch from server.',
+      error: err.message || 'Backend offline — unable to fetch from server.',
     };
   }
 };
@@ -139,10 +97,6 @@ export const BankVerificationService = {
 
   /**
    * Step 1 — Get a Plaid Link Token from the backend.
-   * The link_token is short-lived (~30 min) and used only to open the
-   * Plaid Link widget on the client side.
-   *
-   * Docs: POST /api/plaid/create-link-token
    */
   createLinkToken: async (
     clientName: string,
@@ -156,13 +110,6 @@ export const BankVerificationService = {
 
   /**
    * Step 3 — Exchange the public_token returned by Plaid Link.
-   * The backend will:
-   *   a) Exchange public_token → access_token (stored in DB, never returned here)
-   *   b) Call Plaid Auth to retrieve routing + account numbers
-   *   c) Create a bank_verifications record in PostgreSQL
-   *   d) Return only safe, masked metadata
-   *
-   * Docs: POST /api/plaid/exchange-token
    */
   exchangeToken: async (
     payload: ExchangeTokenPayload
@@ -175,9 +122,6 @@ export const BankVerificationService = {
 
   /**
    * Fetch all verification records from the database.
-   * Supports optional search and status filter.
-   *
-   * Docs: GET /api/plaid/verifications
    */
   getVerifications: async (
     search?: string,
@@ -192,9 +136,6 @@ export const BankVerificationService = {
 
   /**
    * Update a verification record's status.
-   * Used by internal staff to manually approve, reject, or flag records.
-   *
-   * Docs: PATCH /api/plaid/verifications/:id
    */
   updateStatus: async (
     id: string,
@@ -209,11 +150,6 @@ export const BankVerificationService = {
 
   /**
    * Save a manual ACH verification entry.
-   * The backend performs ABA checksum validation on the routing number.
-   * Account numbers are NEVER sent or stored — only the last 4 digits (mask).
-   * Manual entries start in "micro_deposit" status.
-   *
-   * Docs: POST /api/plaid/verifications/manual
    */
   saveManual: async (
     payload: ManualVerificationPayload
@@ -226,8 +162,6 @@ export const BankVerificationService = {
 
   /**
    * Update client info for a verification record.
-   *
-   * Docs: PATCH /api/plaid/verifications/:id/info
    */
   updateInfo: async (
     id: string,
@@ -249,8 +183,6 @@ export const BankVerificationService = {
 
   /**
    * Delete a verification record.
-   *
-   * Docs: DELETE /api/plaid/verifications/:id
    */
   deleteVerification: async (
     id: string

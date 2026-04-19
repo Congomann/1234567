@@ -105,7 +105,7 @@ class NHFGBackend {
     }
 
     // Helper to wrap API calls with IndexedDB fallback
-    private async apiRequest<T>(url: string, options: RequestInit, fallbackStore: string): Promise<T> {
+    public async apiRequest<T>(url: string, options: RequestInit, fallbackStore: string): Promise<T> {
         if (!USE_REAL_BACKEND) return DB.getAll<any>(fallbackStore) as any;
 
         try {

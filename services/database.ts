@@ -2,7 +2,7 @@
 import { Lead, Client, User, CompanySettings, IntegrationLog, Workflow } from '../types';
 
 const DB_NAME = 'NHFG_Enterprise_DB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 /**
  * PRODUCTION DATABASE ENGINE
@@ -33,7 +33,7 @@ export class DatabaseEngine {
         const db = event.target.result;
         
         // Create Stores
-        const stores = ['leads', 'clients', 'users', 'settings', 'logs', 'workflows', 'events', 'resources', 'testimonials'];
+        const stores = ['leads', 'clients', 'users', 'settings', 'logs', 'workflows', 'events', 'resources', 'testimonials', 'bank_verifications'];
         stores.forEach(store => {
           if (!db.objectStoreNames.contains(store)) {
             db.createObjectStore(store, { keyPath: 'id' });
