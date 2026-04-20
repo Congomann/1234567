@@ -494,7 +494,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.warn("[DataContext] Backend login trace:", e);
     }
 
-    // LEGACY MOCK FALLBACK (Demo/Dev)
+    // LEGACY MOCK FALLBACK (Only allowed on localhost or if explicitly allowed)
+    // In production, we MUST fail if the backend is unreachable to avoid the 'Mock Trap'
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocal) {
+        console.error("[DataContext] Backend handshake failed in production. Mock fallback suppressed.");
+        pushNotification('Connection Error', 'Production backend unreachable. Please check system status.', 'alert');
+        return false;
+    }
+
     const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
     if (found) {
       console.log("Backend login failed, falling back to mock user:", cleanEmail);
