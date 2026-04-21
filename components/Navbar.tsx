@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe } from 'lucide-react';
+import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { UserRole, ProductType } from '../types';
@@ -122,7 +122,7 @@ export const Navbar: React.FC = () => {
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 flex justify-center py-6 px-4 md:px-12 pointer-events-none`}
       >
         <div className={`max-w-6xl w-full pointer-events-auto transition-all duration-500 ${isScrolled ? 'translate-y-[-10px]' : ''}`}>
-          <div className={`relative bg-white/70 backdrop-blur-3xl border border-white/20 rounded-full px-8 py-3.5 flex items-center justify-between transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.04)] ${isScrolled ? 'shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white/90 ring-1 ring-black/[0.03]' : ''}`}>
+          <div className={`relative bg-white border border-slate-200 rounded-full px-8 py-3.5 flex items-center justify-between transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.04)] ${isScrolled ? 'shadow-[0_20px_60px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]' : ''}`}>
             
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3 group transition-transform active:scale-95">
