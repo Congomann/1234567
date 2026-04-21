@@ -78,6 +78,8 @@ export default function AdminOnboarding() {
         } finally {
             setApproving(false);
         }
+    };
+
     const handleReject = async () => {
         if (!selectedApp) return;
         setIsRejecting(true);
