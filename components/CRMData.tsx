@@ -184,6 +184,10 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             vertical.push({ path: '/crm/fees', label: 'Advisory Billing', icon: BadgeDollarSign });
         }
 
+        if (user.category === AdvisorCategory.LOGISTICS || products.includes(ProductType.LOGISTICS)) {
+            vertical.push({ path: '/crm/logistics', label: 'Logistics Hub', icon: Truck });
+        }
+
         const shared = [
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },

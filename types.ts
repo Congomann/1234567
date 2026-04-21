@@ -39,7 +39,8 @@ export enum ProductType {
   COMMERCIAL = 'Commercial Insurance',
   ANNUITY = 'Annuity',
   FINAL_EXPENSE = 'Final Expense',
-  INVESTMENT = 'Investment & Retirement Advisory'
+  INVESTMENT = 'Investment & Retirement Advisory',
+  LOGISTICS = 'Logistics & Trucking'
 }
 
 export enum UserRole {
@@ -56,6 +57,7 @@ export enum AdvisorCategory {
   REAL_ESTATE = 'Real Estate',
   SECURITIES = 'Securities',
   MORTGAGE = 'Mortgage & Lending',
+  LOGISTICS = 'Logistics',
   ADMIN = 'Admin'
 }
 

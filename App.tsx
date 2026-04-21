@@ -11,6 +11,7 @@ import { RealEstate } from './pages/website/RealEstate';
 import { Mortgage } from './pages/website/Mortgage';
 import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
+import { LogisticsServices } from './pages/website/LogisticsServices';
 import { GroupBenefits } from './pages/website/GroupBenefits';
 import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
 import { Securities } from './pages/website/Securities';
@@ -64,6 +65,7 @@ import {
   ComplianceDocs,
   AdvisoryFees
 } from './pages/crm/securities/SecuritiesPages';
+import { LogisticsHub } from './pages/crm/logistics/LogisticsHub';
 import {
   LoanApplications,
   RateTools,
@@ -168,6 +170,7 @@ const App: React.FC = () => {
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
+            <Route path="/logistics" element={<PublicLayout><LogisticsServices /></PublicLayout>} />
             <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
@@ -219,6 +222,7 @@ const App: React.FC = () => {
               <Route path="portfolio" element={<PortfolioMgmt />} />
               <Route path="compliance" element={<ComplianceDocs />} />
               <Route path="fees" element={<AdvisoryFees />} />
+              <Route path="logistics" element={<LogisticsHub />} />
 
               {/* ADMIN CONTROL PANEL */}
               <Route element={<ManagerRoute />}>

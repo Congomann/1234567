@@ -76,6 +76,7 @@ export const Navbar: React.FC = () => {
     { label: 'Group Benefits', path: '/group-benefits', type: ProductType.BUSINESS },
     { label: 'Securities', path: '/securities', type: ProductType.SECURITIES },
     { label: 'Real Estate', path: '/real-estate', type: ProductType.REAL_ESTATE },
+    { label: 'Logistics', path: '/logistics', type: ProductType.LOGISTICS },
   ].filter(link => !hiddenProducts.includes(link.type));
 
   const handleAuthAction = () => {

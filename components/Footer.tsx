@@ -97,12 +97,13 @@ export const Footer: React.FC = () => {
               Navigation
             </h3>
             <ul className="space-y-3">
-              {['Home', 'Investments', 'Group Benefits', 'Shop Insurance', 'Real Estate', 'Find an Advisor'].map((item) => (
+              {['Home', 'Investments', 'Group Benefits', 'Logistics', 'Shop Insurance', 'Real Estate', 'Find an Advisor'].map((item) => (
                 <li key={item}>
                   <Link
                     to={item === 'Home' ? '/' : 
                         item === 'Investments' ? '/investments' :
                         item === 'Group Benefits' ? '/group-benefits' :
+                        item === 'Logistics' ? '/logistics' :
                         item === 'Shop Insurance' ? '/products' : 
                         `/${item.toLowerCase().replace(/ /g, '-')}`}
                     className="text-slate-300 hover:text-white text-[13px] font-bold transition-all hover:translate-x-1 inline-block"
