@@ -89,6 +89,7 @@ import ActivateAccount from './pages/onboarding/ActivateAccount';
 import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
+import { LoadBoard } from './pages/website/LoadBoard';
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -172,6 +173,7 @@ const App: React.FC = () => {
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
             <Route path="/logistics" element={<PublicLayout><LogisticsServices /></PublicLayout>} />
+            <Route path="/logistics/loads" element={<PublicLayout><LoadBoard /></PublicLayout>} />
             <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />

@@ -78,7 +78,8 @@ export const Navbar: React.FC = () => {
       items: [
         { label: 'Freight Shipping', path: '/logistics', icon: Truck },
         { label: 'Freight Brokerage', path: '/logistics', icon: Globe },
-        { label: 'Dispatch Services', path: '/logistics', icon: Navigation }
+        { label: 'Dispatch Services', path: '/logistics', icon: Navigation },
+        { label: 'Live Load Board', path: '/logistics/loads', icon: Activity }
       ]
     }
   ];

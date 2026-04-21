@@ -155,12 +155,12 @@ export const LogisticsServices: React.FC = () => {
             solutions tailored for industrial-scale reliability and speed.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button 
-              onClick={() => document.getElementById('match-tool')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all active:scale-95"
+            <Link 
+              to="/logistics/loads"
+              className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center"
             >
-              Determine Your Load Type
-            </button>
+              Access Live Load Board
+            </Link>
             <button 
               onClick={() => document.getElementById('logistics-form')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-10 py-5 bg-white/10 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all active:scale-95 backdrop-blur-md"

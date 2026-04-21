@@ -91,41 +91,89 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Column */}
+          {/* Insurance Column */}
           <div className="lg:col-span-2">
             <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
-              Navigation
+              Insurance
             </h3>
             <ul className="space-y-3">
-              {['Home', 'Investments', 'Group Benefits', 'Logistics', 'Shop Insurance', 'Real Estate', 'Find an Advisor'].map((item) => (
-                <li key={item}>
+              {[
+                { name: 'Life Insurance', path: '/life-insurance' },
+                { name: 'Auto Insurance', path: '/auto-insurance' },
+                { name: 'Business Insurance', path: '/business-insurance' },
+                { name: 'Group Benefits', path: '/group-benefits' },
+              ].map((link) => (
+                <li key={link.name}>
                   <Link
-                    to={item === 'Home' ? '/' : 
-                        item === 'Investments' ? '/investments' :
-                        item === 'Group Benefits' ? '/group-benefits' :
-                        item === 'Logistics' ? '/logistics' :
-                        item === 'Shop Insurance' ? '/products' : 
-                        `/${item.toLowerCase().replace(/ /g, '-')}`}
+                    to={link.path}
                     className="text-slate-300 hover:text-white text-[13px] font-bold transition-all hover:translate-x-1 inline-block"
                   >
-                    {item}
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Company Column */}
+          {/* Financial & Real Estate Column */}
           <div className="lg:col-span-2">
             <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
-              Company
+              Financial & Real Estate
             </h3>
             <ul className="space-y-3">
               {[
-                { name: 'About Us', path: '/about' },
-                { name: 'Join Our Team', path: '/join' },
-                { name: 'Agent Portal', path: '/login' },
+                { name: 'Mortgage Lending', path: '/mortgage' },
+                { name: 'Securities', path: '/securities' },
+                { name: 'Real Estate Hub', path: '/real-estate' },
+                { name: 'Investments', path: '/investments' },
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.path}
+                    className="text-slate-300 hover:text-white text-[13px] font-bold transition-all hover:translate-x-1 inline-block"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Freight & Logistics Column */}
+          <div className="lg:col-span-2">
+            <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+              Freight & Logistics
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { name: 'Freight Shipping', path: '/logistics' },
+                { name: 'Freight Brokerage', path: '/logistics' },
+                { name: 'Dispatch Services', path: '/logistics' },
+                { name: 'Live Load Board', path: '/logistics/loads' },
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.path}
+                    className="text-slate-300 hover:text-white text-[13px] font-bold transition-all hover:translate-x-1 inline-block"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Find Advisor Column */}
+          <div className="lg:col-span-2">
+            <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+              Find Advisor
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { name: 'Find an Advisor', path: '/advisors' },
+                { name: 'Join the Team', path: '/join' },
                 { name: 'Resources', path: '/resources' },
+                { name: 'Agent Portal', path: '/login' },
               ].map((link) => (
                 <li key={link.name}>
                   <Link
