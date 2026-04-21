@@ -56,7 +56,10 @@ export const LogisticsHub: React.FC = () => {
           <button className="flex items-center gap-2 px-6 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest shadow-sm">
             <Filter size={14} /> Filter
           </button>
-          <button className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-xs font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-xl shadow-slate-200">
+          <button 
+            onClick={() => navigate('/crm/logistics/post-load')}
+            className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-xs font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-xl shadow-slate-200"
+          >
             <Plus size={14} /> Post Load
           </button>
         </div>

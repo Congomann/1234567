@@ -223,6 +223,7 @@ const App: React.FC = () => {
               <Route path="compliance" element={<ComplianceDocs />} />
               <Route path="fees" element={<AdvisoryFees />} />
               <Route path="logistics" element={<LogisticsHub />} />
+              <Route path="logistics/post-load" element={<LoadPostingTerminal />} />
 
               {/* ADMIN CONTROL PANEL */}
               <Route element={<ManagerRoute />}>

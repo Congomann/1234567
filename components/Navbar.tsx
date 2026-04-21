@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
 
   const standardLinks = [
     { label: 'Home', path: '/' },
-    { label: 'Services', path: '/products', mega: true },
+    { label: 'Explore All Services', path: '/products', mega: true },
     { label: 'Advisors', path: '/advisors' },
     { label: 'Resources', path: '/resources' },
     { label: 'About', path: '/about' }

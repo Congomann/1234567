@@ -824,3 +824,35 @@ export interface Workflow {
   executionsYTD: number;
   createdAt: string;
 }
+
+export enum TrailerType {
+  VAN = 'Dry Van',
+  REEFER = 'Reefer',
+  FLATBED = 'Flatbed',
+  STEP_DECK = 'Step-Deck',
+  HAZMAT = 'Hazmat',
+  HEAVY_HAUL = 'Heavy Haul / RGN'
+}
+
+export interface FreightLoad {
+  id: string;
+  brokerId: string;
+  brokerName: string;
+  origin: string; // Point A
+  destination: string; // Point D
+  distance: number; // Total Miles
+  totalRate: number; // Total Cost
+  pickupDate: string;
+  deliveryDate: string;
+  trailerType: TrailerType;
+  requirements: {
+    cleanTrailer: boolean;
+    onTimeGuarantee: boolean;
+    trackingRequired: boolean;
+    tarpRequired?: boolean;
+    hazmatCertified?: boolean;
+  };
+  description: string;
+  status: 'Available' | 'Assigned' | 'In Transit' | 'Delivered';
+  createdAt: string;
+}
