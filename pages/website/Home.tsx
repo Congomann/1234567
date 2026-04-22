@@ -152,154 +152,73 @@ export const Home: React.FC = () => {
 
       <div className="py-24 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Animated Marquee Partners Section Promoted to Top */}
-          {Object.keys(partners).length > 0 && (
-            <div className="mb-32">
-              <div className="text-center mb-16">
-                <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
-                  OUR PARTNERS
-                </span>
-                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
-                  Trusted by Industry Leaders
-                </h2>
-              </div>
-              
-              <div className="w-full relative flex items-center px-4 overflow-hidden mask-edges">
-                <div
-                  className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
-                  style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
-                >
-                  {/* Render the list 3 times to ensure looping seamlessly fills screen */}
-                  {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
-                    <div key={`${name}-${idx}`} className="h-16 flex-shrink-0 flex items-center justify-center transition-all opacity-70 hover:opacity-100 grayscale hover:grayscale-0">
-                      <img
-                        src={
-                          (url as string).startsWith("http") ||
-                            (url as string).startsWith("data:")
-                            ? url
-                            : `https://logo.clearbit.com/${url}`
-                        }
-                        alt={name}
-                        className="h-full object-contain max-w-[150px]"
-                        title={name}
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <style dangerouslySetInnerHTML={{
-                __html: `
-                .mask-edges {
-                  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-                  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-                }
-                @keyframes partnerMarquee {
-                  from { transform: translateX(0); }
-                  to { transform: translateX(calc(-25% - 1rem)); } 
-                }
-              `}} />
+          {/* Partners Section (Replaces Products Grid) */}
+          <div className="mb-32">
+            <div className="text-center mb-16 pt-16">
+              <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
+                OUR PARTNERS
+              </span>
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
+                Trusted by Industry Leaders
+              </h2>
             </div>
-          )}
-
-          <div className="text-center mb-20 pt-16 border-t border-slate-200">
-            <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
-              SOLUTIONS
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
-              Explore Our Services
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {(companySettings.customProducts || [])
-              .filter((p) => {
-                if (p.isHidden) return false;
-                const hiddenProducts = companySettings.hiddenProducts || [];
-                if (p.id === 'life' && hiddenProducts.includes(ProductType.LIFE)) return false;
-                if (p.id === 'mortgage' && hiddenProducts.includes(ProductType.MORTGAGE)) return false;
-                if (p.id === 'business' && hiddenProducts.includes(ProductType.BUSINESS)) return false;
-                if (p.id === 'auto' && hiddenProducts.includes(ProductType.AUTO)) return false;
-                if (p.id === 'securities' && hiddenProducts.includes(ProductType.SECURITIES)) return false;
-                if (p.id === 'real-estate' && hiddenProducts.includes(ProductType.REAL_ESTATE)) return false;
-                return true;
-              })
-              .sort((a, b) => a.order - b.order)
-              .map((product) => {
-                const IconComponent =
-                  (Icons as any)[product.icon] || Icons.ShieldCheck;
-                const isLife = product.id === "life";
-                const isMortgage = product.id === "mortgage";
-                const isBusiness = product.id === "business";
-                const isAuto = product.id === "auto";
-                const isSecurities = product.id === "securities";
-                const isRealEstate = product.id === "real-estate";
-
-                const CardContent = (
-                  <>
-                    <div>
-                      <div
-                        className={`w-14 h-14 bg-gradient-to-br from-${product.color}-400 to-${product.color}-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-md shadow-${product.color}-500/20 group-hover:scale-110 transition-transform duration-500`}
-                      >
-                        <IconComponent className="h-7 w-7" />
-                      </div>
-                      <h3
-                        className={`text-xl font-bold text-slate-900 mb-3 group-hover:text-${product.color}-600 transition-colors`}
-                      >
-                        {product.title}
-                      </h3>
-                      <p className="text-slate-500 leading-relaxed text-sm">
-                        {product.description}
-                      </p>
-                    </div>
-                    <div className="mt-8">
-                      <span
-                        className={`w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 group-hover:bg-${product.color}-50 group-hover:text-white group-hover:border-${product.color}-500 transition-all`}
-                      >
-                        <ArrowRight className="h-5 w-5" />
-                      </span>
-                    </div>
-                  </>
-                );
-
-                if (
-                  isLife ||
-                  isMortgage ||
-                  isBusiness ||
-                  isAuto ||
-                  isSecurities ||
-                  isRealEstate
-                ) {
-                  return (
-                    <button
-                      key={product.id}
-                      onClick={() => {
-                        if (isLife) setIsLifeModalOpen(true);
-                        else if (isMortgage) setIsMortgageModalOpen(true);
-                        else if (isBusiness) setIsBusinessModalOpen(true);
-                        else if (isAuto) setIsAutoModalOpen(true);
-                        else if (isSecurities) setIsSecuritiesModalOpen(true);
-                        else if (isRealEstate) setIsRealEstateModalOpen(true);
+            
+            <div className="w-full relative flex items-center px-4 overflow-hidden mask-edges pb-10">
+              <div
+                className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
+                style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
+              >
+                {[...Object.entries(Object.keys(partners).length > 0 ? partners : {
+                  "Acme Corp": "https://logo.clearbit.com/acme.com",
+                  "Globex": "https://logo.clearbit.com/globex.com",
+                  "Soylent": "https://logo.clearbit.com/soylent.com",
+                  "Initech": "https://logo.clearbit.com/initech.com"
+                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
+                  "Acme Corp": "https://logo.clearbit.com/acme.com",
+                  "Globex": "https://logo.clearbit.com/globex.com",
+                  "Soylent": "https://logo.clearbit.com/soylent.com",
+                  "Initech": "https://logo.clearbit.com/initech.com"
+                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
+                  "Acme Corp": "https://logo.clearbit.com/acme.com",
+                  "Globex": "https://logo.clearbit.com/globex.com",
+                  "Soylent": "https://logo.clearbit.com/soylent.com",
+                  "Initech": "https://logo.clearbit.com/initech.com"
+                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
+                  "Acme Corp": "https://logo.clearbit.com/acme.com",
+                  "Globex": "https://logo.clearbit.com/globex.com",
+                  "Soylent": "https://logo.clearbit.com/soylent.com",
+                  "Initech": "https://logo.clearbit.com/initech.com"
+                })].map(([name, url], idx) => (
+                  <div key={`${name}-${idx}`} className="h-16 flex-shrink-0 flex items-center justify-center transition-all opacity-70 hover:opacity-100 grayscale hover:grayscale-0">
+                    <img
+                      src={
+                        (url as string).startsWith("http") ||
+                          (url as string).startsWith("data:")
+                          ? url
+                          : `https://logo.clearbit.com/${url}`
+                      }
+                      alt={name}
+                      className="h-full object-contain max-w-[150px]"
+                      title={name}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
                       }}
-                      className={`text-left group relative flex flex-col justify-between p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-${product.color}-900/5 transition-all duration-300 hover:-translate-y-1`}
-                    >
-                      {CardContent}
-                    </button>
-                  );
-                }
-
-                return (
-                  <Link
-                    key={product.id}
-                    to={product.link}
-                    className={`group relative flex flex-col justify-between p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-${product.color}-900/5 transition-all duration-300 hover:-translate-y-1`}
-                  >
-                    {CardContent}
-                  </Link>
-                );
-              })}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <style dangerouslySetInnerHTML={{
+              __html: `
+              .mask-edges {
+                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+              }
+              @keyframes partnerMarquee {
+                from { transform: translateX(0); }
+                to { transform: translateX(calc(-25% - 1rem)); } 
+              }
+            `}} />
           </div>
 
 
