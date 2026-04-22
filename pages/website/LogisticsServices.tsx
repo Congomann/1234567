@@ -9,6 +9,8 @@ import {
   HelpCircle,
   ShieldCheck,
   Zap,
+  Search,
+  Landmark
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TestimonialsSection } from "../../components/TestimonialsSection";
@@ -156,17 +158,17 @@ export const LogisticsServices: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link 
-              to="/logistics/loads"
-              className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center"
+              to="/logistics/search"
+              className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
-              Access Live Load Board
+              <Search size={14} /> Search Loads
             </Link>
-            <button 
-              onClick={() => document.getElementById('logistics-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-10 py-5 bg-white/10 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all active:scale-95 backdrop-blur-md"
+            <Link 
+              to="/logistics/booking"
+              className="px-10 py-5 bg-white/10 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all active:scale-95 backdrop-blur-md flex items-center justify-center gap-2"
             >
-              Request a Quote
-            </button>
+              <Landmark size={14} /> Book Freight
+            </Link>
           </div>
         </div>
       </div>
