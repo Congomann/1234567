@@ -315,7 +315,7 @@ export const RealEstate: React.FC = () => {
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
                   title: "Asset Optimization",
@@ -350,22 +350,20 @@ export const RealEstate: React.FC = () => {
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="flex flex-col md:flex-row gap-12 bg-white p-12 rounded-[4.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all items-center group relative overflow-hidden"
+                  className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-8 text-slate-50 font-black text-9xl opacity-10 group-hover:text-amber-500/5 transition-opacity pointer-events-none">
-                    0{i + 1}
+                  <div className="absolute top-0 right-0 p-10 text-slate-100 font-black text-8xl opacity-10 group-hover:text-amber-500/10 transition-colors pointer-events-none">
+                    {i + 1}
                   </div>
-                  <div className="h-24 w-24 bg-amber-50 text-amber-600 rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                    <step.icon size={40} />
+                  <div className="h-20 w-20 bg-slate-50 text-[#0B2240] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
+                    <step.icon size={32} />
                   </div>
-                  <div className="flex-1 relative z-10">
-                    <h3 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tighter">
-                      {step.title}
-                    </h3>
-                    <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-3xl italic">
-                      "{step.desc}"
-                    </p>
-                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tighter uppercase">
+                    {step.title}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed font-medium flex-1 italic">
+                    "{step.desc}"
+                  </p>
                 </div>
               ))}
             </div>
