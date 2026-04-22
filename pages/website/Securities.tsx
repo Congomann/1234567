@@ -253,62 +253,27 @@ export const Securities: React.FC = () => {
 
       {/* Services Types Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {serviceTypes.map((type, index) => {
             const Icon = type.icon;
             return (
               <div
                 id={type.id}
                 key={type.id}
-                className={`bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:shadow-xl ${type.colorClasses.shadow} transition-all duration-300 ${index === serviceTypes.length - 1 && serviceTypes.length % 2 !== 0 ? "lg:col-span-2 lg:max-w-3xl lg:mx-auto" : ""}`}
+                className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
               >
-                <div className="flex items-start gap-6">
-                  <div
-                    className={`w-16 h-16 rounded-2xl ${type.colorClasses.bg} ${type.colorClasses.text} flex items-center justify-center flex-shrink-0`}
-                  >
-                    <Icon className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                      {type.title}
-                    </h2>
-                    <p className="text-slate-600 leading-relaxed mb-4">
-                      {type.description}
-                    </p>
-                    <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <p className="text-sm text-slate-700 font-medium mb-3">
-                        <span className="font-bold text-slate-900 uppercase tracking-wider text-xs mr-2 block mb-1">
-                          Best Suited For:
-                        </span>
-                        {type.suitableFor}
-                      </p>
-                      <p className="text-sm text-slate-700 font-medium">
-                        <span className="font-bold text-slate-900 uppercase tracking-wider text-xs mr-2 block mb-1">
-                          Budget & Cost:
-                        </span>
-                        {type.budget}
-                      </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-slate-100 p-6">
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
-                        Key Benefits
-                      </h3>
-                      <ul className="space-y-3">
-                        {type.benefits.map((benefit, i) => (
-                          <li key={i} className="flex items-start gap-3">
-                            <CheckCircle
-                              className={`w-5 h-5 ${type.colorClasses.iconText} flex-shrink-0 mt-0.5`}
-                            />
-                            <span className="text-slate-700 text-sm font-medium leading-relaxed">
-                              {benefit}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                <div className="absolute top-0 right-0 p-10 text-slate-100 font-black text-8xl opacity-10 group-hover:text-amber-500/10 transition-colors pointer-events-none">
+                  {index + 1}
                 </div>
+                <div className="h-20 w-20 bg-slate-50 text-[#0B2240] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
+                  <Icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tighter uppercase">
+                  {type.title}
+                </h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-medium flex-1 italic">
+                  "{type.description}"
+                </p>
               </div>
             );
           })}
