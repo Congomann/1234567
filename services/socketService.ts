@@ -7,6 +7,7 @@ const USE_REAL_SOCKETS = true; // Set to true only when backend server is runnin
 
 class SocketService {
   private socket: WebSocket | null = null;
+  private listeners: ((data: any) => void)[] = [];
   
   // Dynamically determine the WebSocket URL based on current environment
   private get url(): string {
