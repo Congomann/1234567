@@ -121,7 +121,7 @@ export const Home: React.FC = () => {
                 to="/products"
                 className="px-10 py-5 bg-white text-slate-900 font-bold rounded-full text-lg hover:scale-105 transition-all shadow-xl flex items-center justify-center"
               >
-                Solutions <ArrowRight className="ml-2 h-5 w-5" />
+                Explore Solutions <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
                 to="/advisors"
@@ -152,12 +152,64 @@ export const Home: React.FC = () => {
 
       <div className="py-24 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          {/* Animated Marquee Partners Section Promoted to Top */}
+          {Object.keys(partners).length > 0 && (
+            <div className="mb-32">
+              <div className="text-center mb-16">
+                <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
+                  OUR PARTNERS
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
+                  Trusted by Industry Leaders
+                </h2>
+              </div>
+              
+              <div className="w-full relative flex items-center px-4 overflow-hidden mask-edges">
+                <div
+                  className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
+                  style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
+                >
+                  {/* Render the list 3 times to ensure looping seamlessly fills screen */}
+                  {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
+                    <div key={`${name}-${idx}`} className="h-16 flex-shrink-0 flex items-center justify-center transition-all opacity-70 hover:opacity-100 grayscale hover:grayscale-0">
+                      <img
+                        src={
+                          (url as string).startsWith("http") ||
+                            (url as string).startsWith("data:")
+                            ? url
+                            : `https://logo.clearbit.com/${url}`
+                        }
+                        alt={name}
+                        className="h-full object-contain max-w-[150px]"
+                        title={name}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <style dangerouslySetInnerHTML={{
+                __html: `
+                .mask-edges {
+                  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                }
+                @keyframes partnerMarquee {
+                  from { transform: translateX(0); }
+                  to { transform: translateX(calc(-25% - 1rem)); } 
+                }
+              `}} />
+            </div>
+          )}
+
+          <div className="text-center mb-20 pt-16 border-t border-slate-200">
             <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
-              OUR PARTNERS
+              SOLUTIONS
             </span>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
-              Full Spectrum Financial Services
+              Explore Our Services
             </h2>
           </div>
 
@@ -250,50 +302,6 @@ export const Home: React.FC = () => {
               })}
           </div>
 
-          {/* New Animated Marquee Partners Section */}
-          {Object.keys(partners).length > 0 && (
-            <div className="mt-32 pt-20 border-t border-slate-200 overflow-hidden relative w-full left-1/2 -ml-[50vw] right-1/2 -mr-[50vw] bg-transparent">
-              <div className="w-screen">
-                <p className="text-center text-xs font-black text-slate-400 uppercase tracking-[0.25em] mb-12">
-                  OUR PARTNERS
-                </p>
-                <div className="w-full relative flex items-center mb-16 px-4">
-
-                  <div
-                    className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
-                    style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
-                  >
-                    {/* Render the list 3 times to ensure looping seamlessly fills screen */}
-                    {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
-                      <div key={`${name}-${idx}`} className="h-12 flex-shrink-0 flex items-center justify-center transition-all">
-                        <img
-                          src={
-                            (url as string).startsWith("http") ||
-                              (url as string).startsWith("data:")
-                              ? url
-                              : `https://logo.clearbit.com/${url}`
-                          }
-                          alt={name}
-                          className="h-full object-contain max-w-[150px]"
-                          title={name}
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <style dangerouslySetInnerHTML={{
-                __html: `
-                @keyframes partnerMarquee {
-                  from { transform: translateX(0); }
-                  to { transform: translateX(calc(-25% - 1rem)); } 
-                }
-              `}} />
-            </div>
-          )}
 
         </div>
       </div>
