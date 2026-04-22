@@ -121,7 +121,7 @@ export const Home: React.FC = () => {
                 to="/products"
                 className="px-10 py-5 bg-white text-slate-900 font-bold rounded-full text-lg hover:scale-105 transition-all shadow-xl flex items-center justify-center"
               >
-                Explore Products <ArrowRight className="ml-2 h-5 w-5" />
+                Solutions <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
                 to="/advisors"
