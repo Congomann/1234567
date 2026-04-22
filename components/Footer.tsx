@@ -57,23 +57,47 @@ export const Footer: React.FC = () => {
   const emailsList = (companySettings.email || defaultEmails).split(',').map(e => e.trim()).filter(e => e);
 
   return (
-    <footer className="bg-[#051124] text-white pt-20 pb-12 font-sans border-t border-white/5">
+    <footer className="bg-[#051124] text-white pt-16 pb-8 border-t border-white/10 font-sans">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
           
-          {/* CORE SERVICES */}
-          <div>
-            <h3 className="text-white text-sm font-black uppercase tracking-[0.2em] mb-10">Core Services</h3>
+          {/* Brand Column */}
+          <div className="space-y-6 lg:col-span-4">
+            <Link to="/" className="flex items-center gap-3 group w-max">
+              <div className="relative w-10 h-10 flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+                  <rect x="5" y="15" width="90" height="60" rx="12" fill="#F59E0B" />
+                  <rect x="10" y="35" width="80" height="55" rx="12" fill="#FCD34D" />
+                  <rect x="42" y="52" width="16" height="22" rx="4" fill="#B45309" fillOpacity="0.25" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-black text-xl leading-none text-white tracking-tight">New Holland</span>
+                <span className="text-[0.6rem] font-bold text-slate-400 tracking-[0.2em] uppercase mt-1">Financial Group</span>
+              </div>
+            </Link>
+            <p className="text-slate-400 text-[13px] leading-relaxed font-medium max-w-[280px]">
+              Welcome to New Holland Financial Group
+            </p>
+          </div>
+
+          {/* Navigation Column */}
+          <div className="lg:col-span-3">
+            <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+              Navigation
+            </h3>
             <ul className="space-y-4">
               {[
                 { name: 'Insurance', path: '/life-insurance' },
                 { name: 'Financial Services', path: '/mortgage' },
                 { name: 'Real Estate', path: '/real-estate' },
                 { name: 'Freight & Logistics', path: '/logistics' },
-                { name: 'Find an Advisor', path: '/advisors' },
               ].map((link) => (
                 <li key={link.name}>
-                  <Link to={link.path} className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                  <Link
+                    to={link.path}
+                    className="text-white hover:text-blue-400 text-[13px] font-bold transition-all"
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -81,9 +105,11 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* COMPANY */}
-          <div>
-            <h3 className="text-white text-sm font-black uppercase tracking-[0.2em] mb-10">Company</h3>
+          {/* Company Column */}
+          <div className="lg:col-span-2">
+            <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+              Company
+            </h3>
             <ul className="space-y-4">
               {[
                 { name: 'About Us', path: '/about' },
@@ -92,7 +118,10 @@ export const Footer: React.FC = () => {
                 { name: 'Resources', path: '/resources' },
               ].map((link) => (
                 <li key={link.name}>
-                  <Link to={link.path} className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                  <Link
+                    to={link.path}
+                    className="text-white hover:text-blue-400 text-[13px] font-bold transition-all"
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -100,40 +129,64 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* CONTACT */}
-          <div>
-            <h3 className="text-white text-sm font-black uppercase tracking-[0.2em] mb-10">Contact</h3>
-            <ul className="space-y-5">
-              <li>
-                <a href={`tel:${companySettings.phone || '800-555-0199'}`} className="flex items-center justify-center md:justify-start gap-3 text-slate-400 hover:text-white group transition-colors">
-                  <Phone size={16} className="text-slate-500 group-hover:text-blue-400" />
-                  <span className="text-sm font-medium underline decoration-slate-700 underline-offset-4">{companySettings.phone || '800-555-0199'}</span>
-                </a>
-              </li>
-              <li>
-                <a href="mailto:info@newhollandfinancial.com" className="flex items-center justify-center md:justify-start gap-3 text-slate-400 hover:text-white group transition-colors">
-                  <Mail size={16} className="text-slate-500 group-hover:text-blue-400" />
-                  <span className="text-sm font-medium underline decoration-slate-700 underline-offset-4">info@newhollandfinancial.com</span>
-                </a>
-              </li>
-              <li className="flex items-center justify-center md:justify-start gap-3 text-slate-400">
-                <MapPin size={16} className="text-red-500/80" />
-                <span className="text-sm font-medium">Des Moines, IA</span>
-              </li>
-            </ul>
+          {/* Contact Us Column */}
+          <div className="lg:col-span-3">
+            <h3 className="text-[11px] font-black text-white/50 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+              Contact Us
+            </h3>
+            <div className="space-y-5">
+              <Link to="/advisors" className="text-white hover:text-blue-400 text-[13px] font-bold transition-all block">
+                Find an Advisor
+              </Link>
+
+              <div className="flex gap-3 group items-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-white/5 rounded-full flex items-center justify-center text-blue-400 border border-white/5">
+                  <Phone size={14} />
+                </div>
+                <div>
+                  <a href="tel:800-555-0199" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
+                    800-555-0199
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex gap-3 group items-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-white/5 rounded-full flex items-center justify-center text-blue-400 border border-white/5">
+                  <Mail size={14} />
+                </div>
+                <div>
+                  <a href="mailto:info@newhollandfinancial.com" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
+                    info@newhollandfinancial.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex gap-3 group items-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-white/5 rounded-full flex items-center justify-center text-blue-400 border border-white/5">
+                  <MapPin size={14} />
+                </div>
+                <div>
+                  <span className="text-white font-bold text-[13px]">
+                    Des Moines, IA.
+                  </span>
+                </div>
+              </div>
+
+            </div>
           </div>
 
         </div>
-
+      </div>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Bottom Bar */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-slate-500 text-[11px] font-medium tracking-tight">
-            &copy; {new Date().getFullYear()} New Holland Financial Group |
+        <div className="border-t border-white/10 pt-8 text-center flex flex-col gap-4">
+          <p className="text-slate-400 text-xs font-bold">
+            &copy; {new Date().getFullYear()} New Holland Financial Group
           </p>
-          <div className="flex items-center gap-6">
-            <Link to="/privacy" className="text-slate-400 hover:text-white text-[11px] font-bold transition-colors">Privacy Policy</Link>
-            <span className="text-slate-700">|</span>
-            <Link to="/terms" className="text-slate-400 hover:text-white text-[11px] font-bold transition-colors">Terms of Use</Link>
+
+          <div className="flex justify-center gap-6">
+            <Link to="/privacy" className="text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Terms of Use</Link>
           </div>
         </div>
       </div>
