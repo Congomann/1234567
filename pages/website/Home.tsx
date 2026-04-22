@@ -154,7 +154,7 @@ export const Home: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
             <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
-              Our Expertise
+              OUR PARTNERS
             </span>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">
               Full Spectrum Financial Services

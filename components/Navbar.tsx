@@ -76,10 +76,10 @@ export const Navbar: React.FC = () => {
       title: 'Freight & Logistics',
       subtitle: 'Move your business forward.',
       items: [
-        { label: 'Freight Shipping', path: '/logistics', icon: Truck },
-        { label: 'Freight Brokerage', path: '/logistics', icon: Globe },
-        { label: 'Dispatch Services', path: '/logistics', icon: Navigation },
-        { label: 'Live Load', path: '/logistics/booking', icon: Truck }
+        { label: 'Freight Shipping', path: '/logistics?view=overview', icon: Truck },
+        { label: 'Freight Brokerage', path: '/logistics?view=overview', icon: Globe },
+        { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation },
+        { label: 'Live Load', path: '/logistics?view=listing', icon: Truck }
       ]
     }
   ];

@@ -11,7 +11,8 @@ import { RealEstate } from './pages/website/RealEstate';
 import { Mortgage } from './pages/website/Mortgage';
 import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
-import { LogisticsServices } from './pages/website/LogisticsServices';
+import { LogisticsHub } from './pages/website/LogisticsHub';
+
 import { GroupBenefits } from './pages/website/GroupBenefits';
 import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
 import { Securities } from './pages/website/Securities';
@@ -89,10 +90,7 @@ import ActivateAccount from './pages/onboarding/ActivateAccount';
 import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
-import { LoadBoard } from './pages/website/LoadBoard';
-import { LoadBooking } from './pages/website/LoadBooking';
-import { LoadSearching } from './pages/website/LoadSearching';
-import { LoadListing } from './pages/website/LoadListing';
+
 
 /**
  * DEVELOPER NOTE: App Routing Architecture
@@ -175,11 +173,11 @@ const App: React.FC = () => {
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
-            <Route path="/logistics" element={<PublicLayout><LogisticsServices /></PublicLayout>} />
-            <Route path="/logistics/loads" element={<PublicLayout><LoadBoard /></PublicLayout>} />
-            <Route path="/logistics/booking" element={<PublicLayout><LoadBooking /></PublicLayout>} />
-            <Route path="/logistics/search" element={<PublicLayout><LoadSearching /></PublicLayout>} />
-            <Route path="/logistics/listing" element={<PublicLayout><LoadListing /></PublicLayout>} />
+            <Route path="/logistics" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
+            <Route path="/logistics/loads" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
+            <Route path="/logistics/booking" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
+            <Route path="/logistics/search" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
+            <Route path="/logistics/listing" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
             <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
