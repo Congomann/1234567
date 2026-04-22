@@ -39,7 +39,8 @@ import {
     Home,
     Monitor,
     Activity,
-    Layout
+    Layout,
+    Truck
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -197,6 +198,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         const admin = [];
         if (isManagerOrAdmin) {
             admin.push({ path: '/crm/admin', label: 'User Terminal', icon: Users, tourId: 'nav-user-terminal' });
+            admin.push({ path: '/crm/logistics', label: 'Logistics Command', icon: Truck, tourId: 'nav-logistics-admin' });
             admin.push({ path: '/crm/onboarding', label: 'Advisor Applications', icon: ClipboardCheck, tourId: 'nav-onboarding' });
             admin.push({ path: '/crm/admin/real-estate', label: 'Listing Approval', icon: Home, tourId: 'nav-re-approval' });
             admin.push({ path: '/crm/admin/real-estate-cms', label: 'Real Estate CMS', icon: Monitor, tourId: 'nav-re-cms' });
