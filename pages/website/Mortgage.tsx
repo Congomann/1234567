@@ -255,54 +255,54 @@ export const Mortgage: React.FC = () => {
 
       {/* Mortgage Types Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {mortgageTypes.map((type, index) => {
             const Icon = type.icon;
             return (
               <div
                 id={type.id}
                 key={type.id}
-                className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
+                className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 p-10 text-slate-100 font-black text-8xl opacity-10 group-hover:text-blue-500/10 transition-colors pointer-events-none">
+                <div className="absolute top-0 right-0 p-8 text-slate-100 font-black text-6xl opacity-10 group-hover:text-blue-500/10 transition-colors pointer-events-none">
                   {index + 1}
                 </div>
-                <div className="h-20 w-20 bg-slate-50 text-[#0B2240] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
-                  <Icon className="w-8 h-8" />
+                <div className="h-16 w-16 bg-slate-50 text-[#0B2240] rounded-[1.5rem] flex items-center justify-center mb-6 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
+                  <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tighter uppercase">
+                <h3 className="text-xl font-black text-slate-900 mb-3 tracking-tighter uppercase">
                   {type.title}
                 </h3>
-                <p className="text-slate-500 text-sm leading-relaxed font-medium mb-8 italic">
+                <p className="text-slate-500 text-xs leading-relaxed font-medium mb-6 italic">
                   "{type.description}"
                 </p>
 
-                <div className="mb-6 p-5 bg-slate-50 rounded-3xl border border-slate-100 flex-1">
-                  <p className="text-sm text-slate-700 font-medium mb-4">
-                    <span className="font-black text-slate-400 uppercase tracking-widest text-[10px] mr-2 block mb-1">
+                <div className="mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex-1">
+                  <p className="text-xs text-slate-700 font-medium mb-3">
+                    <span className="font-black text-slate-400 uppercase tracking-widest text-[9px] block mb-1">
                       Best Suited For:
                     </span>
                     {type.suitableFor}
                   </p>
-                  <p className="text-sm text-slate-700 font-medium">
-                    <span className="font-black text-slate-400 uppercase tracking-widest text-[10px] mr-2 block mb-1">
+                  <p className="text-xs text-slate-700 font-medium">
+                    <span className="font-black text-slate-400 uppercase tracking-widest text-[9px] block mb-1">
                       Budget & Cost:
                     </span>
                     {type.budget}
                   </p>
                 </div>
 
-                <div className="bg-white rounded-3xl border border-slate-100 p-6 mt-auto shadow-sm">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                <div className="bg-white rounded-2xl border border-slate-100 p-5 mt-auto shadow-sm">
+                  <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">
                     Key Benefits
                   </h3>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2">
                     {type.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-3">
+                      <li key={i} className="flex items-start gap-2">
                         <CheckCircle
-                          className={`w-4 h-4 ${type.colorClasses.iconText} flex-shrink-0 mt-0.5`}
+                          className={`w-3.5 h-3.5 ${type.colorClasses.iconText} flex-shrink-0 mt-0.5`}
                         />
-                        <span className="text-slate-600 text-xs font-bold leading-relaxed">
+                        <span className="text-slate-600 text-[11px] font-bold leading-relaxed">
                           {benefit}
                         </span>
                       </li>
