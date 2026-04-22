@@ -11,7 +11,7 @@ import { RealEstate } from './pages/website/RealEstate';
 import { Mortgage } from './pages/website/Mortgage';
 import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
-import { LogisticsHub } from './pages/website/LogisticsHub';
+import { LogisticsHub as PublicLogistics } from './pages/website/LogisticsHub';
 
 import { GroupBenefits } from './pages/website/GroupBenefits';
 import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
@@ -66,7 +66,7 @@ import {
   ComplianceDocs,
   AdvisoryFees
 } from './pages/crm/securities/SecuritiesPages';
-import { LogisticsHub } from './pages/crm/logistics/LogisticsHub';
+import { LogisticsHub as CRMLogisticsHub } from './pages/crm/logistics/LogisticsHub';
 import {
   LoanApplications,
   RateTools,
@@ -173,11 +173,11 @@ const App: React.FC = () => {
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
-            <Route path="/logistics" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
-            <Route path="/logistics/loads" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
-            <Route path="/logistics/booking" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
-            <Route path="/logistics/search" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
-            <Route path="/logistics/listing" element={<PublicLayout><LogisticsHub /></PublicLayout>} />
+            <Route path="/logistics" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
+            <Route path="/logistics/loads" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
+            <Route path="/logistics/booking" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
+            <Route path="/logistics/search" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
+            <Route path="/logistics/listing" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
             <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
@@ -229,7 +229,7 @@ const App: React.FC = () => {
               <Route path="portfolio" element={<PortfolioMgmt />} />
               <Route path="compliance" element={<ComplianceDocs />} />
               <Route path="fees" element={<AdvisoryFees />} />
-              <Route path="logistics" element={<LogisticsHub />} />
+              <Route path="logistics" element={<CRMLogisticsHub />} />
               <Route path="logistics/post-load" element={<LoadPostingTerminal />} />
 
               {/* ADMIN CONTROL PANEL */}
