@@ -61,6 +61,47 @@ export enum AdvisorCategory {
   ADMIN = 'Admin'
 }
 
+export enum LogisticsNiche {
+  TRUCKING = 'Trucking',
+  FUEL = 'Fuel',
+  FREIGHT_BROKERAGE = 'Freight Brokerage'
+}
+
+export interface LogisticsDetails {
+  niche: LogisticsNiche;
+  mcNumber?: string;
+  dotNumber?: string;
+  fleetSize?: number;
+  gallonsPerMonth?: number;
+  fuelType?: string;
+  freightVolume?: string;
+  lanes?: string;
+  equipmentType?: string;
+}
+
+export interface MarketingCampaign {
+  id: string;
+  name: string;
+  status: 'Draft' | 'Active' | 'Completed' | 'Paused';
+  budget: number;
+  spend: number;
+  revenueGenerated: number;
+  startDate: string;
+  endDate?: string;
+  audienceId: string;
+  leadsGenerated: number;
+  dealsClosed: number;
+  roi: number;
+}
+
+export interface MarketingAudience {
+  id: string;
+  name: string;
+  size: number;
+  criteria: any;
+  createdAt: string;
+}
+
 export interface SocialLink {
   platform: 'LinkedIn' | 'Facebook' | 'Twitter' | 'Instagram' | 'TikTok' | 'X' | 'YouTube' | 'Snapchat';
   url: string;
@@ -139,6 +180,7 @@ export interface Lead {
   lifeDetails?: Partial<LifeDetails>;
   realEstateDetails?: any;
   securitiesDetails?: any;
+  logisticsDetails?: Partial<LogisticsDetails>;
   customDetails?: any;
   isArchived?: boolean;
   deletedAt?: string;

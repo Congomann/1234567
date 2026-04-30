@@ -154,6 +154,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
 
         const main = [
             { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, tourId: 'nav-dashboard' },
+            { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
             { path: '/crm/automation', label: 'Automation Studio', icon: Zap, tourId: 'nav-automation' },
             { path: '/crm/leads', label: 'Leads DB', icon: Database, tourId: 'nav-leads' },
             { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
@@ -229,14 +230,14 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 key={item.path}
                 to={item.path}
                 id={item.tourId}
-                className={`flex items-center gap-4 px-6 py-3.5 text-sm font-bold transition-all duration-300 group relative ${isActive
-                    ? 'bg-[#3B82F6] text-white shadow-[0_4px_20px_rgba(59,130,246,0.3)] rounded-full'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white rounded-full'
-                    } ${isHighlighted ? 'z-[70] ring-4 ring-blue-500 bg-blue-600 text-white shadow-[0_0_50px_rgba(59,130,246,0.8)] scale-105' : ''}`}
+                className={`flex items-center gap-4 px-6 py-4 text-[13px] font-bold transition-all duration-300 group relative ${isActive
+                    ? 'bg-white text-slate-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-[1.25rem]'
+                    : 'text-slate-400 hover:bg-white/10 hover:text-white rounded-[1.25rem]'
+                    } ${isHighlighted ? 'z-[70] ring-4 ring-blue-500 bg-white text-slate-900 shadow-[0_0_50px_rgba(255,255,255,0.2)] scale-105' : ''}`}
             >
-                <item.icon className={`h-5 w-5 transition-colors ${isActive || isHighlighted ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} strokeWidth={isActive ? 3 : 2.5} />
-                <span className={`tracking-tight ${isActive ? 'font-black uppercase' : ''}`}>{item.label}</span>
-                {isHighlighted && <span className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full animate-ping"></span>}
+                <item.icon className={`h-5 w-5 transition-transform duration-300 ${isActive ? 'scale-110 text-blue-600' : 'group-hover:scale-110'}`} strokeWidth={isActive ? 2.5 : 2} />
+                <span className={`tracking-wide ${isActive ? 'font-black' : ''}`}>{item.label}</span>
+                {isHighlighted && <span className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full animate-ping"></span>}
             </Link>
         );
     };

@@ -90,6 +90,7 @@ import ActivateAccount from './pages/onboarding/ActivateAccount';
 import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
+import { CampaignManager } from './pages/crm/CampaignManager';
 
 
 /**
@@ -214,6 +215,7 @@ const App: React.FC = () => {
               <Route path="clients" element={<Clients />} />
               <Route path="commissions" element={<Commissions />} />
               <Route path="calendar" element={<Calendar />} />
+              <Route path="campaigns" element={<CampaignManager />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
               <Route path="automation" element={<AutomationStudio />} />

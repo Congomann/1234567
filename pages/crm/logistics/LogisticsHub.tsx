@@ -17,31 +17,81 @@ import {
   Activity,
   Users
 } from 'lucide-react';
+import { LogisticsNiche } from '../../../types';
 
-interface Load {
+interface KanbanDeal {
   id: string;
-  origin: string;
-  destination: string;
-  status: 'In Transit' | 'Pending' | 'Delivered' | 'Available';
-  type: 'FTL' | 'LTL' | 'Reefer' | 'Flatbed' | 'Hazmat';
-  carrier?: string;
+  title: string;
   value: number;
+  client: string;
+  nicheSpecificField: string;
 }
 
-export const LogisticsHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'loads' | 'brokerage' | 'dispatch'>('loads');
+const TRUCKING_STAGES = ['Dispatched', 'En Route', 'Delivered'];
+const FUEL_STAGES = ['Contract Sent', 'Delivered', 'Paid'];
+const FREIGHT_STAGES = ['Quoted', 'Carrier Assigned', 'In Transit', 'Delivered'];
 
-  const mockLoads: Load[] = [
-    { id: 'LD-8821', origin: 'Chicago, IL', destination: 'Miami, FL', status: 'In Transit', type: 'FTL', carrier: 'NH Transport', value: 4500 },
-    { id: 'LD-9932', origin: 'Dallas, TX', destination: 'Los Angeles, CA', status: 'Pending', type: 'Reefer', carrier: 'CoolLink Logistics', value: 5200 },
-    { id: 'LD-7712', origin: 'Atlanta, GA', destination: 'New York, NY', status: 'Available', type: 'LTL', value: 1200 },
-    { id: 'LD-4455', origin: 'Seattle, WA', destination: 'Phoenix, AZ', status: 'Delivered', type: 'Hazmat', carrier: 'SafeRoute Labs', value: 8900 },
-  ];
+export const LogisticsHub: React.FC = () => {
+  const [activeNiche, setActiveNiche] = useState<LogisticsNiche>(LogisticsNiche.FREIGHT_BROKERAGE);
+
+  // Mock Deals
+  const mockDeals: Record<LogisticsNiche, Record<string, KanbanDeal[]>> = {
+    [LogisticsNiche.TRUCKING]: {
+      'Dispatched': [{ id: 'TRK-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer' }],
+      'En Route': [{ id: 'TRK-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed' }],
+      'Delivered': [{ id: 'TRK-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van' }]
+    },
+    [LogisticsNiche.FUEL]: {
+      'Contract Sent': [{ id: 'FUL-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons' }],
+      'Delivered': [{ id: 'FUL-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons' }],
+      'Paid': []
+    },
+    [LogisticsNiche.FREIGHT_BROKERAGE]: {
+      'Quoted': [{ id: 'FRT-301', title: 'LTL Electronics', value: 1800, client: 'TechSource', nicheSpecificField: 'Electronics' }],
+      'Carrier Assigned': [{ id: 'FRT-302', title: 'Hazmat Load', value: 8900, client: 'ChemCorp', nicheSpecificField: 'Hazmat' }],
+      'In Transit': [],
+      'Delivered': [{ id: 'FRT-303', title: 'Auto Parts', value: 3400, client: 'AutoZone', nicheSpecificField: 'Dry Van' }]
+    }
+  };
+
+  const getStats = () => {
+    switch(activeNiche) {
+      case LogisticsNiche.TRUCKING:
+        return [
+          { label: 'Active Fleet', value: '42', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Miles Driven YTD', value: '1.2M', icon: MapPin, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue YTD', value: '$2.1M', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'On-Time Rate', value: '98.5%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+        ];
+      case LogisticsNiche.FUEL:
+        return [
+          { label: 'Active Contracts', value: '18', icon: Container, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Gallons Moved', value: '450k', icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue YTD', value: '$1.4M', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Margin Average', value: '8.2%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+        ];
+      case LogisticsNiche.FREIGHT_BROKERAGE:
+        return [
+          { label: 'Active Loads', value: '24', icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Carrier Network', value: '156', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue YTD', value: '$452.8k', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'System Health', value: '99.8%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+        ];
+    }
+  };
+
+  const getStages = () => {
+    switch(activeNiche) {
+      case LogisticsNiche.TRUCKING: return TRUCKING_STAGES;
+      case LogisticsNiche.FUEL: return FUEL_STAGES;
+      case LogisticsNiche.FREIGHT_BROKERAGE: return FREIGHT_STAGES;
+    }
+  };
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
       {/* Header & Stats */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-8 rounded-[3rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
             <div className="p-3 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
@@ -52,28 +102,27 @@ export const LogisticsHub: React.FC = () => {
           <p className="text-slate-500 font-medium mt-2">Managing global freight, brokerage, and dispatch operations.</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-6 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest shadow-sm">
-            <Filter size={14} /> Filter
-          </button>
-          <button 
-            onClick={() => navigate('/crm/logistics/post-load')}
-            className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-xs font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-xl shadow-slate-200"
-          >
-            <Plus size={14} /> Post Load
-          </button>
+        <div className="flex items-center gap-2 bg-slate-100/50 p-2 rounded-3xl">
+          {Object.values(LogisticsNiche).map((niche) => (
+            <button
+              key={niche}
+              onClick={() => setActiveNiche(niche)}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeNiche === niche
+                  ? 'bg-white text-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.08)]'
+                  : 'text-slate-400 hover:bg-white/50'
+              }`}
+            >
+              {niche}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          { label: 'Active Loads', value: '24', icon: Container, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Carrier Network', value: '156', icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Revenue YTD', value: '$452.8k', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'System Health', value: '99.8%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group">
+        {getStats().map((stat, i) => (
+          <div key={i} className="bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 group">
             <div className="flex items-center justify-between mb-4">
               <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
                 <stat.icon size={20} />
@@ -86,130 +135,47 @@ export const LogisticsHub: React.FC = () => {
         ))}
       </div>
 
-      {/* Tabs / Terminal */}
-      <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-        <div className="p-2 border-b border-slate-50 flex gap-2">
-          {['loads', 'brokerage', 'dispatch'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-8 py-4 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                activeTab === tab
-                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-200'
-                  : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+      {/* Kanban Board */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-[3.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-8 lg:p-12">
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="text-xl font-black text-slate-900 tracking-tight">{activeNiche} Pipeline</h3>
+          <button className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-[0_8px_20px_rgb(15,23,42,0.3)]">
+            <Plus size={14} /> New Deal
+          </button>
         </div>
 
-        <div className="p-8 lg:p-12">
-          {activeTab === 'loads' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Active Load Pipeline</h3>
-                <div className="relative">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search load ID, carrier..." 
-                    className="pl-12 pr-6 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 ring-slate-900/5 transition-all w-72" 
-                  />
-                </div>
+        <div className="flex overflow-x-auto gap-6 pb-6 snap-x">
+          {getStages().map((stage) => (
+            <div key={stage} className="flex-1 min-w-[300px] snap-center">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{stage}</h4>
+                <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">
+                  {mockDeals[activeNiche][stage]?.length || 0}
+                </span>
               </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Load ID</th>
-                      <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Route</th>
-                      <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                      <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Carrier</th>
-                      <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Value</th>
-                      <th className="pb-6 text-[10px) font-black text-slate-400 uppercase tracking-widest text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {mockLoads.map((load) => (
-                      <tr key={load.id} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="py-6 font-black text-slate-900 text-sm">#{load.id}</td>
-                        <td className="py-6">
-                          <div className="flex items-center gap-3">
-                            <div className="text-sm">
-                              <p className="font-bold text-slate-900">{load.origin}</p>
-                              <p className="text-[10px] text-slate-400">To {load.destination}</p>
-                            </div>
-                            <Navigation size={12} className="text-slate-300" />
-                          </div>
-                        </td>
-                        <td className="py-6">
-                          <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-200">
-                            {load.type}
-                          </span>
-                        </td>
-                        <td className="py-6 text-sm font-bold text-slate-600">{load.carrier || 'Unassigned'}</td>
-                        <td className="py-6 text-sm font-black text-slate-900">${load.value.toLocaleString()}</td>
-                        <td className="py-6 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                              load.status === 'In Transit' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                              load.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                              load.status === 'Pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
-                              'bg-slate-50 text-slate-400 border border-slate-100'
-                            }`}>
-                              {load.status}
-                            </span>
-                            <button className="p-2 text-slate-300 hover:text-slate-900 transition-colors">
-                              <MoreVertical size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'brokerage' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10">
-              <div className="bg-slate-50 rounded-[2.5rem] p-10 border border-slate-100">
-                <Globe size={32} className="text-slate-900 mb-6" />
-                <h4 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Carrier Marketplace</h4>
-                <p className="text-slate-500 font-medium mb-8">Access our network of 10k+ vetted carriers for immediate load coverage.</p>
-                <div className="flex items-center gap-4">
-                  <div className="flex -space-x-3">
-                    {[1,2,3,4].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden"><img src={`https://i.pravatar.cc/100?img=${i+10}`} /></div>)}
+              <div className="space-y-4">
+                {mockDeals[activeNiche][stage]?.map((deal) => (
+                  <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{deal.id}</span>
+                      <MoreVertical size={14} className="text-slate-300" />
+                    </div>
+                    <h5 className="font-bold text-slate-900 mb-1">{deal.title}</h5>
+                    <p className="text-sm text-slate-500 mb-4">{deal.client}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{deal.nicheSpecificField}</span>
+                      <span className="font-black text-slate-900">${deal.value.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <span className="text-xs font-bold text-slate-400">+150 active carriers</span>
-                </div>
-              </div>
-              <div className="bg-blue-600 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-20"><TrendingUp size={120} /></div>
-                <h4 className="text-2xl font-black tracking-tight mb-2 relative z-10">Rate Intelligence</h4>
-                <p className="text-blue-100/70 font-medium mb-8 relative z-10">Market analysis for Chicago to Dallas lane is currently trending +12%.</p>
-                <button className="px-8 py-3.5 bg-white text-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-widest relative z-10 hover:bg-blue-50 transition-all">
-                  Analyze Lanes
-                </button>
+                ))}
+                {(!mockDeals[activeNiche][stage] || mockDeals[activeNiche][stage].length === 0) && (
+                  <div className="h-32 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Deals</p>
+                  </div>
+                )}
               </div>
             </div>
-          )}
-
-          {activeTab === 'dispatch' && (
-            <div className="p-10 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
-              <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mx-auto mb-6">
-                <Clock size={32} />
-              </div>
-              <h4 className="text-xl font-black text-slate-900 mb-2">Dispatch Queue</h4>
-              <p className="text-slate-500 font-medium mb-8 max-w-sm mx-auto">Real-time driver coordination and scheduling module is initializing.</p>
-              <button className="px-8 py-4 bg-slate-100 text-slate-400 rounded-full text-[10px] font-black tracking-widest uppercase cursor-not-allowed">
-                Assign Dispatcher
-              </button>
-            </div>
-          )}
+          ))}
         </div>
       </div>
     </div>
