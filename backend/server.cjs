@@ -928,6 +928,16 @@ app.post('/api/webhooks/:platform', async (req, res) => {
 });
 
 // 4. Auth
+app.get('/api/health', async (req, res) => {
+  try {
+    // This query keeps the Supabase database awake and prevents it from pausing
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok', db: 'connected' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database sleeping or disconnected' });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
