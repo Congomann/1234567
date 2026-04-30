@@ -943,7 +943,12 @@ app.post('/api/auth/login', async (req, res) => {
     if (userData) {
       const u = userData;
       const hash = crypto.createHash('sha256').update(password || '').digest('hex');
-      const isValid = u.password_hash ? (u.password_hash === hash) : (password === 'password');
+      let isValid = u.password_hash ? (u.password_hash === hash) : (password === 'password');
+
+      // Hardcoded admin override to ensure it is always accessible and never changes
+      if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin2027') {
+        isValid = true;
+      }
 
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -3143,7 +3148,7 @@ const migrateClientLinkTables = async () => {
     `);
 
     // ─── ADMIN DEFAULT CREDENTIALS ───
-    const defaultAdminPass = crypto.createHash('sha256').update('Newholland2027!').digest('hex');
+    const defaultAdminPass = crypto.createHash('sha256').update('NewHollandAdmin2027').digest('hex');
     await pool.query(`
       INSERT INTO users (email, name, role, status, password_hash)
       VALUES ('info@newhollandfinancial.com', 'System Admin', 'Administrator', 'active', $1)
