@@ -1126,6 +1126,19 @@ app.post('/api/auth/logout', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
+    // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access on refresh)
+    if (req.user && req.user.id === 'admin-0000-0000-0000-000000000000') {
+      return res.json({
+        id: 'admin-0000-0000-0000-000000000000',
+        name: 'System Admin',
+        email: 'info@newhollandfinancial.com',
+        role: 'Administrator',
+        category: 'Corporate',
+        avatar: null,
+        productsSold: []
+      });
+    }
+
     const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const u = rows[0];
 
