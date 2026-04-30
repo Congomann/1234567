@@ -90,7 +90,7 @@ import ActivateAccount from './pages/onboarding/ActivateAccount';
 import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
-import { CampaignManager } from './pages/crm/CampaignManager';
+import { CampaignManager } from './pages/crm/MarketingCampaigns';
 
 
 /**
