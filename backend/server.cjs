@@ -162,13 +162,16 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
       }
 
       // Handle project-ref injection for pooler
+      // Handle project-ref injection for pooler
       if (connectionString.includes('pooler.supabase.com')) {
         const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
         const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
+        
+        // If the username is just 'postgres', it MUST have the project ref suffix for Supabase Pooler
         if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
           dbUrl.username = `${dbUrl.username}.${projectRef}`;
           connectionString = dbUrl.toString();
-          console.log(`[DB] Auto-healed Supabase connection pooler string with project ref: ${projectRef}`);
+          console.log(`[DB] Auto-injected project ref into pooler username: ${projectRef}`);
         }
       }
     } catch (e) {
@@ -177,7 +180,7 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
   }
 
   if (!connectionString && process.env.NODE_ENV === 'production') {
-    console.error('[DB] CRITICAL: No database connection string found in environment variables.');
+    console.error('[DB] CRITICAL: No database connection string found in environment variables. Please set DATABASE_URL in Vercel.');
   }
 
   poolConfig = {
@@ -185,11 +188,19 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000, // Increased for stability
   };
 }
 
 const pool = new Pool(poolConfig);
+
+// Improved error logging for pool failures
+pool.on('error', (err) => {
+  console.error('[DB] Unexpected error on idle client:', err.message);
+  if (err.message.includes('authentication failed')) {
+    console.error('[DB] AUTH FAILURE: Check your DATABASE_URL password and project-ref suffix in Vercel/Supabase settings.');
+  }
+});
 
 // --- DATABASE INITIALIZATION ---
 // Self-healing check for missing engines identified during functional sweep
