@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Truck, 
   Box, 
@@ -17,7 +17,9 @@ import {
   Activity,
   Users
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { LogisticsNiche } from '../../../types';
+import { Backend } from '../../../services/apiBackend';
 
 interface KanbanDeal {
   id: string;
@@ -25,33 +27,71 @@ interface KanbanDeal {
   value: number;
   client: string;
   nicheSpecificField: string;
+  status: string;
 }
 
 const TRUCKING_STAGES = ['Dispatched', 'En Route', 'Delivered'];
 const FUEL_STAGES = ['Contract Sent', 'Delivered', 'Paid'];
-const FREIGHT_STAGES = ['Quoted', 'Carrier Assigned', 'In Transit', 'Delivered'];
+const FREIGHT_STAGES = ['available', 'booked', 'in_transit', 'delivered'];
 
 export const LogisticsHub: React.FC = () => {
+  const navigate = useNavigate();
   const [activeNiche, setActiveNiche] = useState<LogisticsNiche>(LogisticsNiche.FREIGHT_BROKERAGE);
+  const [loading, setLoading] = useState(true);
+  const [loads, setLoads] = useState<any[]>([]);
 
-  // Mock Deals
+  useEffect(() => {
+    const fetchLoads = async () => {
+      try {
+        const data = await Backend.getLoads();
+        setLoads(data);
+      } catch (err) {
+        console.error('Failed to fetch loads:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLoads();
+  }, []);
+
+  // Map Real Loads to Kanban Structure
+  const getFreightDeals = () => {
+    const stages: Record<string, KanbanDeal[]> = {
+        'available': [],
+        'booked': [],
+        'in_transit': [],
+        'delivered': []
+    };
+
+    loads.forEach(load => {
+        const stage = load.status || 'available';
+        if (stages[stage]) {
+            stages[stage].push({
+                id: load.id.substring(0, 8).toUpperCase(),
+                title: `${load.origin} to ${load.destination}`,
+                value: load.totalRate || load.rate_usd || 0,
+                client: 'NH Brokerage',
+                nicheSpecificField: load.trailerType || load.equipment_type || 'Dry Van',
+                status: stage
+            });
+        }
+    });
+    return stages;
+  };
+
+  // Mock Deals for other niches
   const mockDeals: Record<LogisticsNiche, Record<string, KanbanDeal[]>> = {
     [LogisticsNiche.TRUCKING]: {
-      'Dispatched': [{ id: 'TRK-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer' }],
-      'En Route': [{ id: 'TRK-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed' }],
-      'Delivered': [{ id: 'TRK-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van' }]
+      'Dispatched': [{ id: 'TRK-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer', status: 'Dispatched' }],
+      'En Route': [{ id: 'TRK-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed', status: 'En Route' }],
+      'Delivered': [{ id: 'TRK-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van', status: 'Delivered' }]
     },
     [LogisticsNiche.FUEL]: {
-      'Contract Sent': [{ id: 'FUL-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons' }],
-      'Delivered': [{ id: 'FUL-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons' }],
+      'Contract Sent': [{ id: 'FUL-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons', status: 'Contract Sent' }],
+      'Delivered': [{ id: 'FUL-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons', status: 'Delivered' }],
       'Paid': []
     },
-    [LogisticsNiche.FREIGHT_BROKERAGE]: {
-      'Quoted': [{ id: 'FRT-301', title: 'LTL Electronics', value: 1800, client: 'TechSource', nicheSpecificField: 'Electronics' }],
-      'Carrier Assigned': [{ id: 'FRT-302', title: 'Hazmat Load', value: 8900, client: 'ChemCorp', nicheSpecificField: 'Hazmat' }],
-      'In Transit': [],
-      'Delivered': [{ id: 'FRT-303', title: 'Auto Parts', value: 3400, client: 'AutoZone', nicheSpecificField: 'Dry Van' }]
-    }
+    [LogisticsNiche.FREIGHT_BROKERAGE]: getFreightDeals()
   };
 
   const getStats = () => {
@@ -72,7 +112,7 @@ export const LogisticsHub: React.FC = () => {
         ];
       case LogisticsNiche.FREIGHT_BROKERAGE:
         return [
-          { label: 'Active Loads', value: '24', icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Active Loads', value: loads.length.toString(), icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Carrier Network', value: '156', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Revenue YTD', value: '$452.8k', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
           { label: 'System Health', value: '99.8%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
@@ -138,9 +178,12 @@ export const LogisticsHub: React.FC = () => {
       {/* Kanban Board */}
       <div className="bg-white/70 backdrop-blur-xl rounded-[3.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-8 lg:p-12">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-black text-slate-900 tracking-tight">{activeNiche} Pipeline</h3>
-          <button className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-[0_8px_20px_rgb(15,23,42,0.3)]">
-            <Plus size={14} /> New Deal
+          <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-[0.2em]">{activeNiche} Pipeline</h3>
+          <button 
+            onClick={() => navigate('/crm/logistics/post')}
+            className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-[0_8px_20px_rgb(15,23,42,0.3)]"
+          >
+            <Plus size={14} /> Post Load
           </button>
         </div>
 
@@ -148,29 +191,31 @@ export const LogisticsHub: React.FC = () => {
           {getStages().map((stage) => (
             <div key={stage} className="flex-1 min-w-[300px] snap-center">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{stage}</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{stage}</h4>
                 <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">
                   {mockDeals[activeNiche][stage]?.length || 0}
                 </span>
               </div>
               <div className="space-y-4">
                 {mockDeals[activeNiche][stage]?.map((deal) => (
-                  <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
+                  <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group">
                     <div className="flex justify-between items-start mb-3">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{deal.id}</span>
-                      <MoreVertical size={14} className="text-slate-300" />
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{deal.id}</span>
+                      <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
+                        <MoreVertical size={14} className="text-slate-300" />
+                      </div>
                     </div>
-                    <h5 className="font-bold text-slate-900 mb-1">{deal.title}</h5>
-                    <p className="text-sm text-slate-500 mb-4">{deal.client}</p>
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{deal.nicheSpecificField}</span>
-                      <span className="font-black text-slate-900">${deal.value.toLocaleString()}</span>
+                    <h5 className="font-black text-slate-900 mb-1 tracking-tight group-hover:text-blue-600 transition-colors">{deal.title}</h5>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{deal.client}</p>
+                    <div className="flex items-center justify-between pt-6 mt-6 border-t border-slate-50">
+                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest">{deal.nicheSpecificField}</span>
+                      <span className="font-black text-slate-900 tracking-tighter">${deal.value.toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
                 {(!mockDeals[activeNiche][stage] || mockDeals[activeNiche][stage].length === 0) && (
-                  <div className="h-32 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Deals</p>
+                  <div className="h-32 border-2 border-dashed border-slate-100 rounded-3xl flex items-center justify-center bg-slate-50/50">
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">No Active Records</p>
                   </div>
                 )}
               </div>

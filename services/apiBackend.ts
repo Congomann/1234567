@@ -677,6 +677,31 @@ class NHFGBackend {
         await DB.delete('clients', id);
     }
 
+    // --- LOGISTICS & LOADS ---
+    async getLoads(): Promise<any[]> {
+        return this.apiRequest<any[]>( `${this.baseUrl}/logistics/loads`, { headers: this.getAuthHeaders() }, 'logistics_loads' );
+    }
+
+    async saveLoad(load: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch( `${this.baseUrl}/logistics/loads`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(load)
+            });
+            await this.handleResponse(res);
+        }
+        await DB.save('logistics_loads', load);
+    }
+
+    async deleteLoad(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch( `${this.baseUrl}/logistics/loads/${id}`, { method: 'DELETE', headers: this.getAuthHeaders() });
+            await this.handleResponse(res);
+        }
+        await DB.delete('logistics_loads', id);
+    }
+
 }
 
 export const Backend = new NHFGBackend();

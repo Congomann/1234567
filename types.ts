@@ -40,7 +40,8 @@ export enum ProductType {
   ANNUITY = 'Annuity',
   FINAL_EXPENSE = 'Final Expense',
   INVESTMENT = 'Investment & Retirement Advisory',
-  LOGISTICS = 'Logistics & Trucking'
+  LOGISTICS = 'Logistics & Trucking',
+  HOME_REPAIR = 'Home Repair'
 }
 
 export enum UserRole {

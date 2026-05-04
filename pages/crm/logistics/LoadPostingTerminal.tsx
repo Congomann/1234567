@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TrailerType, FreightLoad } from '../../../types';
+import { Backend } from '../../../services/apiBackend';
 
 /**
  * NHFG LOGISTICS - LOAD POSTING TERMINAL
@@ -46,11 +47,20 @@ export const LoadPostingTerminal: React.FC = () => {
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const loadId = crypto.randomUUID();
+      await Backend.saveLoad({
+        ...formData,
+        id: loadId,
+        createdAt: new Date().toISOString(),
+        status: 'available'
+      });
       setSuccess(true);
-    }, 1500);
+    } catch (error) {
+      console.error('Failed to post load:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleRequirement = (key: keyof FreightLoad['requirements']) => {
