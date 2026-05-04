@@ -187,142 +187,156 @@ export const HomeRepair: React.FC = () => {
       {/* Contact Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 max-w-md w-full relative">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl w-full relative overflow-hidden">
+            {/* Design Ornament */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
+            
             <button
               onClick={() => setIsFormOpen(false)}
-              className="absolute top-6 right-6 p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 hover:text-slate-700 transition-colors"
+              className="absolute top-6 right-6 p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 hover:text-slate-700 transition-colors z-20"
             >
               <X size={20} />
             </button>
 
             {formSubmitted ? (
-              <div className="text-center py-10">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                  <CheckCircle className="h-10 w-10" />
+              <div className="text-center py-20">
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                  <CheckCircle className="h-12 w-12" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-2">
+                <h3 className="text-3xl font-black text-slate-900 mb-2">
                   Request Received!
                 </h3>
-                <p className="text-slate-500">
+                <p className="text-slate-500 text-lg font-medium">
                   Our repair team will contact you shortly to schedule your service.
                 </p>
               </div>
             ) : (
               <>
-                <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
-                  Book a Repair
-                </h3>
-                <p className="text-slate-500 mb-8 font-medium">
-                  Fill out the details below and we'll get back to you immediately.
-                </p>
-                <form onSubmit={handleFormSubmit} className="space-y-5">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Name
-                    </label>
-                    <input
-                      required
-                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Phone
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Service Needed
-                    </label>
-                    <select
-                      required
-                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
-                      value={formData.serviceType}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          serviceType: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Select a service</option>
-                      {services.map((s) => (
-                        <option key={s.id} value={s.title}>{s.title}</option>
-                      ))}
-                      <option value="Other">Other / General Maintenance</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Property Address
-                    </label>
-                    <input
-                      required
-                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
-                      placeholder="123 Main St, City, State"
-                      value={formData.address}
-                      onChange={(e) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                        Property Type
-                      </label>
-                      <select
-                        className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
-                        value={formData.propertyType}
-                        onChange={(e) =>
-                          setFormData({ ...formData, propertyType: e.target.value })
-                        }
-                      >
-                        <option value="Residential">Residential</option>
-                        <option value="Commercial">Commercial</option>
-                      </select>
+                <div className="mb-10">
+                    <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
+                    Book a Repair
+                    </h3>
+                    <p className="text-slate-500 font-medium">
+                    Fill out the details below and we'll get back to you immediately.
+                    </p>
+                </div>
+
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Column 1 */}
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Full Name
+                            </label>
+                            <input
+                            required
+                            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
+                            value={formData.name}
+                            onChange={(e) =>
+                                setFormData({ ...formData, name: e.target.value })
+                            }
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Service Needed
+                            </label>
+                            <select
+                            required
+                            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
+                            value={formData.serviceType}
+                            onChange={(e) =>
+                                setFormData({
+                                ...formData,
+                                serviceType: e.target.value,
+                                })
+                            }
+                            >
+                            <option value="">Select a service</option>
+                            {services.map((s) => (
+                                <option key={s.id} value={s.title}>{s.title}</option>
+                            ))}
+                            <option value="Other">Other / General Maintenance</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Property Type
+                            </label>
+                            <select
+                                className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
+                                value={formData.propertyType}
+                                onChange={(e) =>
+                                setFormData({ ...formData, propertyType: e.target.value })
+                                }
+                            >
+                                <option value="Residential">Residential</option>
+                                <option value="Commercial">Commercial</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                        Evaluation Time
-                      </label>
-                      <select
-                        required
-                        className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
-                        value={formData.evaluationTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, evaluationTime: e.target.value })
-                        }
-                      >
-                        <option value="">Select time</option>
-                        <option value="ASAP">As Soon As Possible</option>
-                        <option value="Morning (8AM - 12PM)">Morning</option>
-                        <option value="Afternoon (12PM - 4PM)">Afternoon</option>
-                        <option value="Evening (4PM - 7PM)">Evening</option>
-                      </select>
+
+                    {/* Column 2 */}
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Phone Number
+                            </label>
+                            <input
+                            required
+                            type="tel"
+                            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
+                            value={formData.phone}
+                            onChange={(e) =>
+                                setFormData({ ...formData, phone: e.target.value })
+                            }
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Property Address
+                            </label>
+                            <input
+                            required
+                            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
+                            placeholder="123 Main St, City, State"
+                            value={formData.address}
+                            onChange={(e) =>
+                                setFormData({ ...formData, address: e.target.value })
+                            }
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            Evaluation Time
+                            </label>
+                            <select
+                                required
+                                className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
+                                value={formData.evaluationTime}
+                                onChange={(e) =>
+                                setFormData({ ...formData, evaluationTime: e.target.value })
+                                }
+                            >
+                                <option value="">Select time</option>
+                                <option value="ASAP">As Soon As Possible</option>
+                                <option value="Morning (8AM - 12PM)">Morning</option>
+                                <option value="Afternoon (12PM - 4PM)">Afternoon</option>
+                                <option value="Evening (4PM - 7PM)">Evening</option>
+                            </select>
+                        </div>
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                       Describe the Issue
                     </label>
                     <textarea
                       required
-                      rows={3}
-                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium resize-none"
+                      rows={2}
+                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-4 focus:border-orange-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium resize-none"
                       placeholder="Please provide details about the damage or requested service..."
                       value={formData.issueDescription}
                       onChange={(e) =>
@@ -330,26 +344,30 @@ export const HomeRepair: React.FC = () => {
                       }
                     ></textarea>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="emergency"
-                      className="w-5 h-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
-                      checked={formData.isEmergency}
-                      onChange={(e) =>
-                        setFormData({ ...formData, isEmergency: e.target.checked })
-                      }
-                    />
-                    <label htmlFor="emergency" className="text-sm font-bold text-slate-700">
-                      This is an emergency (Urgent repair needed)
-                    </label>
+
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+                    <div className="flex items-center gap-3">
+                        <input
+                        type="checkbox"
+                        id="emergency"
+                        className="w-5 h-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
+                        checked={formData.isEmergency}
+                        onChange={(e) =>
+                            setFormData({ ...formData, isEmergency: e.target.checked })
+                        }
+                        />
+                        <label htmlFor="emergency" className="text-sm font-bold text-slate-700">
+                        This is an emergency (Urgent repair needed)
+                        </label>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="bg-orange-600 text-white font-black px-10 py-4 rounded-xl hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 uppercase tracking-widest text-sm hover:scale-105 active:scale-95"
+                    >
+                        Confirm Booking
+                    </button>
                   </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-orange-600 text-white font-black py-4 rounded-xl hover:bg-orange-700 transition-colors shadow-lg shadow-orange-600/20 uppercase tracking-widest text-sm mt-4"
-                  >
-                    Confirm Booking
-                  </button>
                 </form>
               </>
             )}
