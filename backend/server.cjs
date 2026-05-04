@@ -4849,6 +4849,46 @@ app.delete('/api/applications/:id', authenticateToken, async (req, res) => {
 });
 
 
+// --- LOGISTICS & LOADS ---
+app.get('/api/logistics/loads', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM logistics_loads ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/logistics/loads', authenticateToken, async (req, res) => {
+  const { origin, destination, pickupDate, deliveryDate, trailerType, totalRate, description, id } = req.body;
+  try {
+    const query = `
+      INSERT INTO logistics_loads (id, origin, destination, pickup_date, delivery_date, equipment_type, rate_usd, status, advisor_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (id) DO UPDATE SET
+        status = EXCLUDED.status,
+        rate_usd = EXCLUDED.rate_usd
+      RETURNING *
+    `;
+    const result = await pool.query(query, [
+      id || crypto.randomUUID(),
+      origin,
+      destination,
+      pickupDate || null,
+      deliveryDate || null,
+      trailerType,
+      totalRate,
+      'available',
+      req.user.id
+    ]);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('[Logistics Error]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 if (require.main === module) {
 server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);
