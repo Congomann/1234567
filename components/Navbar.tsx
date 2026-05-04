@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation, Search } from 'lucide-react';
+import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation, Search, Home, Wrench } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { UserRole, ProductType } from '../types';
@@ -58,18 +58,20 @@ export const Navbar: React.FC = () => {
       subtitle: 'Protect what matters most.',
       items: [
         { label: 'Life Insurance', path: '/life-insurance', icon: Shield },
-        { label: 'Auto Insurance', path: '/auto-insurance', icon: Truck },
+        { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck },
+        { label: 'Property Insurance', path: '/property-insurance', icon: Home },
         { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase },
         { label: 'Group Benefits', path: '/group-benefits', icon: FileText }
       ]
     },
     {
-      title: 'Financial & Real Estate',
-      subtitle: 'Build and manage your wealth.',
+      title: 'Financial & Property',
+      subtitle: 'Build, manage, and maintain your assets.',
       items: [
         { label: 'Mortgage', path: '/mortgage', icon: Landmark },
         { label: 'Securities', path: '/securities', icon: BarChart3 },
-        { label: 'Real Estate', path: '/real-estate', icon: Key }
+        { label: 'Real Estate', path: '/real-estate', icon: Key },
+        { label: 'Home Repair', path: '/home-repair', icon: Wrench }
       ]
     },
     {
