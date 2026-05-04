@@ -140,8 +140,8 @@ export const Footer: React.FC = () => {
                   <Phone size={14} />
                 </div>
                 <div>
-                  <a href="tel:800-555-0199" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
-                    800-555-0199
+                  <a href={`tel:${companySettings.phone || '800-555-0199'}`} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
+                    {companySettings.phone || '800-555-0199'}
                   </a>
                 </div>
               </div>
@@ -151,8 +151,8 @@ export const Footer: React.FC = () => {
                   <Mail size={14} />
                 </div>
                 <div>
-                  <a href="mailto:info@newhollandfinancial.com" className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
-                    info@newhollandfinancial.com
+                  <a href={`mailto:${emailsList[0]?.split(':').pop()?.trim() || 'info@newhollandfinancial.com'}`} className="text-white font-bold text-[13px] hover:text-blue-400 transition-colors">
+                    {emailsList[0]?.split(':').pop()?.trim() || 'info@newhollandfinancial.com'}
                   </a>
                 </div>
               </div>
@@ -163,7 +163,10 @@ export const Footer: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-white font-bold text-[13px]">
-                    Des Moines, IA.
+                    {companySettings.hideStreetAddress 
+                      ? `${companySettings.city || 'Des Moines'}, ${companySettings.state || 'IA'}.`
+                      : `${companySettings.address || 'Des Moines'}, ${companySettings.city || ''} ${companySettings.state || 'IA'}.`
+                    }
                   </span>
                 </div>
               </div>

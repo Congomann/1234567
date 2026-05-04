@@ -300,7 +300,26 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                             <CheckCircle2 className="h-24 w-24 text-green-500 relative" />
                         </div>
                         <h2 className="text-4xl font-black text-[#0B2240] tracking-tight">Onboarding Complete</h2>
-                        <p className="text-lg text-slate-500 mt-4 max-w-sm mx-auto font-medium">Your agreements have been signed and filed. You are now ready to access the Advisor Terminal.</p>
+                        <p className="text-lg text-slate-500 mt-4 max-w-sm mx-auto font-medium">
+                            Your agreements have been signed and filed. We have pre-populated your <span className="text-blue-600 font-bold">Strategic Priorities</span> on your dashboard to help you launch your advisor presence today.
+                        </p>
+                        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-2xl mx-auto">
+                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="text-blue-600 mb-2"><User size={18} /></div>
+                                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Step 1</p>
+                                <p className="text-sm font-bold text-slate-700">Refine Profile</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="text-purple-600 mb-2"><Globe size={18} /></div>
+                                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Step 2</p>
+                                <p className="text-sm font-bold text-slate-700">Sync Microsite</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="text-amber-600 mb-2"><Zap size={18} /></div>
+                                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Step 3</p>
+                                <p className="text-sm font-bold text-slate-700">Launch CRM</p>
+                            </div>
+                        </div>
                     </div>
                 )}
               </div>

@@ -268,6 +268,47 @@ export const Dashboard: React.FC = () => {
                 <ClientRiskDashboard />
             </div>
 
+            {/* Smooth Onboarding Welcome Banner */}
+            {user?.role === UserRole.ADVISOR && (
+                <div className="relative overflow-hidden bg-gradient-to-r from-[#0B2240] to-[#0A62A7] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-blue-900/20 mb-12 border border-white/10 group">
+                    <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                        <Cpu size={120} className="w-full h-full" />
+                    </div>
+                    <div className="relative z-10 max-w-2xl">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="bg-blue-400/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-[10px] font-black uppercase tracking-[0.2em]">
+                                Advisor Onboarding Complete
+                            </div>
+                            <div className="flex -space-x-2">
+                                <div className="w-6 h-6 rounded-full bg-green-500 border-2 border-[#0B2240] flex items-center justify-center">
+                                    <CheckCircle2 size={12} className="text-white" />
+                                </div>
+                            </div>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 leading-tight">
+                            Welcome to the Console, <span className="text-blue-300">{user.name.split(' ')[0]}</span>.
+                        </h1>
+                        <p className="text-blue-100 text-lg font-medium leading-relaxed mb-8 opacity-90">
+                            Your legal agreements are signed and your terminal is ready. We've pre-populated your <span className="text-white font-bold">Strategic Priorities</span> below to help you launch your microsite and connect your systems.
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                            <button 
+                                onClick={() => navigate('/crm/profile')}
+                                className="bg-white text-[#0B2240] px-8 py-3.5 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl"
+                            >
+                                <User size={14} /> Finish Profile
+                            </button>
+                            <button 
+                                onClick={() => navigate('/crm/admin/website')}
+                                className="bg-blue-500/20 backdrop-blur-md border border-white/20 text-white px-8 py-3.5 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                            >
+                                <Globe size={14} /> My Microsite
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
                     <MetricCard

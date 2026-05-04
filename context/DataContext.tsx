@@ -627,7 +627,35 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const markNotificationRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   const clearNotifications = () => setNotifications([]);
-  const completeOnboarding = (signatureData?: string) => { if (user) updateUser(user.id, { onboardingCompleted: true }); };
+  const completeOnboarding = (signatureData?: string) => { 
+    if (user) {
+      updateUser(user.id, { onboardingCompleted: true }); 
+      
+      // Auto-generate onboarding strategic priorities for a smooth transition
+      const initialTasks = [
+        { title: "Complete Your Advisor Profile & Biography", priority: TaskPriority.HIGH },
+        { title: "Setup Your Public Advisor Microsite", priority: TaskPriority.HIGH },
+        { title: "Connect Professional Calendar (Google/Outlook)", priority: TaskPriority.MEDIUM },
+        { title: "Link Banking Profile for Commissions (Plaid)", priority: TaskPriority.MEDIUM },
+        { title: "Review NHFG Compliance & Legal Guidelines", priority: TaskPriority.LOW },
+      ];
+
+      initialTasks.forEach((t, i) => {
+        const newTask: Task = {
+          id: crypto.randomUUID(),
+          title: t.title,
+          priority: t.priority,
+          completed: false,
+          order: i,
+          advisorId: user.id
+        };
+        setTasks(prev => [...prev, newTask]);
+        Backend.saveTask(newTask);
+      });
+
+      pushNotification('Onboarding Complete', 'Strategic priorities have been added to your dashboard.', 'success');
+    } 
+  };
   const updateIntegrationConfig = (c: Partial<IntegrationConfig>) => setIntegrationConfig(prev => ({ ...prev, ...c }));
   const getAdvisorAssignments = () => [];
   const likeResource = async (id: string) => { 
