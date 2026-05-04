@@ -8,6 +8,7 @@ import { Home } from './pages/website/Home';
 import { Services } from './pages/website/Services';
 import { LifeInsurance } from './pages/website/LifeInsurance';
 import { RealEstate } from './pages/website/RealEstate';
+import { HomeRepair } from './pages/website/HomeRepair';
 import { Mortgage } from './pages/website/Mortgage';
 import { BusinessInsurance } from './pages/website/BusinessInsurance';
 import { AutoInsurance } from './pages/website/AutoInsurance';
@@ -170,6 +171,7 @@ const App: React.FC = () => {
             <Route path="/products" element={<PublicLayout><Services /></PublicLayout>} />
             <Route path="/life-insurance" element={<PublicLayout><LifeInsurance /></PublicLayout>} />
             <Route path="/real-estate" element={<PublicLayout><RealEstate /></PublicLayout>} />
+            <Route path="/home-repair" element={<PublicLayout><HomeRepair /></PublicLayout>} />
             <Route path="/mortgage" element={<PublicLayout><Mortgage /></PublicLayout>} />
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
