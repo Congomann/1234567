@@ -57,6 +57,11 @@ export const HomeRepair: React.FC = () => {
     phone: "",
     email: "",
     serviceType: "",
+    address: "",
+    evaluationTime: "",
+    propertyType: "Residential",
+    issueDescription: "",
+    isEmergency: false,
     timeRequested: "",
   });
 
@@ -80,8 +85,17 @@ export const HomeRepair: React.FC = () => {
           phone: formData.phone,
           email: formData.email || "Not Provided",
           interest: formData.serviceType as any,
-          message: `Home Repair requested for ${formData.serviceType}. Best time: ${formData.timeRequested || "ASAP"}`,
+          message: `Home Repair requested for ${formData.serviceType}. Address: ${formData.address}. Best time: ${formData.evaluationTime || formData.timeRequested || "ASAP"}`,
           source: "company",
+          customDetails: {
+            homeRepairDetails: {
+              address: formData.address,
+              evaluationTime: formData.evaluationTime || formData.timeRequested || "ASAP",
+              propertyType: formData.propertyType,
+              issueDescription: formData.issueDescription,
+              isEmergency: formData.isEmergency
+            }
+          }
         },
         assignToId,
       );
@@ -95,6 +109,11 @@ export const HomeRepair: React.FC = () => {
           phone: "",
           email: "",
           serviceType: "",
+          address: "",
+          evaluationTime: "",
+          propertyType: "Residential",
+          issueDescription: "",
+          isEmergency: false,
           timeRequested: "",
         });
       }, 3000);
@@ -245,6 +264,85 @@ export const HomeRepair: React.FC = () => {
                       ))}
                       <option value="Other">Other / General Maintenance</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Property Address
+                    </label>
+                    <input
+                      required
+                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium"
+                      placeholder="123 Main St, City, State"
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Property Type
+                      </label>
+                      <select
+                        className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
+                        value={formData.propertyType}
+                        onChange={(e) =>
+                          setFormData({ ...formData, propertyType: e.target.value })
+                        }
+                      >
+                        <option value="Residential">Residential</option>
+                        <option value="Commercial">Commercial</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Evaluation Time
+                      </label>
+                      <select
+                        required
+                        className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium appearance-none"
+                        value={formData.evaluationTime}
+                        onChange={(e) =>
+                          setFormData({ ...formData, evaluationTime: e.target.value })
+                        }
+                      >
+                        <option value="">Select time</option>
+                        <option value="ASAP">As Soon As Possible</option>
+                        <option value="Morning (8AM - 12PM)">Morning</option>
+                        <option value="Afternoon (12PM - 4PM)">Afternoon</option>
+                        <option value="Evening (4PM - 7PM)">Evening</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Describe the Issue
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      className="w-full border-2 border-slate-100 rounded-xl px-5 py-3 focus:border-blue-500 focus:ring-0 outline-none transition-colors bg-slate-50 font-medium resize-none"
+                      placeholder="Please provide details about the damage or requested service..."
+                      value={formData.issueDescription}
+                      onChange={(e) =>
+                        setFormData({ ...formData, issueDescription: e.target.value })
+                      }
+                    ></textarea>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="emergency"
+                      className="w-5 h-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
+                      checked={formData.isEmergency}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isEmergency: e.target.checked })
+                      }
+                    />
+                    <label htmlFor="emergency" className="text-sm font-bold text-slate-700">
+                      This is an emergency (Urgent repair needed)
+                    </label>
                   </div>
                   <button
                     type="submit"

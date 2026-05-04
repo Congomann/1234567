@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType, ApplicationStatus } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
 import { CaseChat } from '../../components/chat/CaseChat';
@@ -546,6 +546,41 @@ export const Leads: React.FC = () => {
                                             </select>
                                         </div>
                                     </div>
+                                    
+                                    {viewingLead.customDetails?.homeRepairDetails && (
+                                        <div className="bg-orange-50 p-8 rounded-[2.5rem] border border-orange-100 shadow-sm relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Wrench size={48} className="text-orange-500" />
+                                            </div>
+                                            <h3 className="text-xs font-black text-orange-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Hammer size={14} /> Home Repair Details</h3>
+                                            
+                                            <div className="space-y-4 relative z-10">
+                                                <div>
+                                                    <span className="block text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Service Address</span>
+                                                    <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.homeRepairDetails.address}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Property Type</span>
+                                                        <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.homeRepairDetails.propertyType}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Evaluation Time</span>
+                                                        <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.homeRepairDetails.evaluationTime}</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span className="block text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Issue Description</span>
+                                                    <span className="text-slate-900 font-medium text-sm whitespace-pre-wrap">{viewingLead.customDetails.homeRepairDetails.issueDescription}</span>
+                                                </div>
+                                                {viewingLead.customDetails.homeRepairDetails.isEmergency && (
+                                                    <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full text-xs font-black uppercase tracking-wider border border-red-200">
+                                                        <AlertTriangle size={14} /> Emergency Request
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">

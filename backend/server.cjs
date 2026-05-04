@@ -731,7 +731,7 @@ app.post('/api/leads', authenticateToken, async (req, res) => {
  
 // 2.5 Public Lead Ingestion (No Auth Required)
 app.post('/api/leads/public', async (req, res) => {
-  const { name, email, phone, interest, message, source, visitorId } = req.body;
+  const { name, email, phone, interest, message, source, visitorId, customDetails } = req.body;
   
   if (!name || !email) {
     return res.status(400).json({ error: 'Missing required fields: name and email' });
@@ -742,8 +742,8 @@ app.post('/api/leads/public', async (req, res) => {
     const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
 
     const query = `
-      INSERT INTO public.leads (name, email, phone, interest, message, source, visitor_id, score, qualification, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO public.leads (name, email, phone, interest, message, source, visitor_id, score, qualification, status, custom_details)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `;
     const result = await pool.query(query, [
@@ -756,7 +756,8 @@ app.post('/api/leads/public', async (req, res) => {
       visitorId, 
       score, 
       qualification, 
-      'New'
+      'New',
+      customDetails ? JSON.stringify(customDetails) : null
     ]);
     const data = result.rows[0];
 

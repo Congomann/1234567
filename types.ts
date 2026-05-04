@@ -154,6 +154,14 @@ export interface LifeDetails {
   weight?: string;
 }
 
+export interface HomeRepairDetails {
+  address: string;
+  evaluationTime: string;
+  propertyType: 'Residential' | 'Commercial' | string;
+  issueDescription: string;
+  isEmergency: boolean;
+}
+
 export interface Lead {
   id: string;
   name: string;
@@ -181,6 +189,7 @@ export interface Lead {
   realEstateDetails?: any;
   securitiesDetails?: any;
   logisticsDetails?: Partial<LogisticsDetails>;
+  homeRepairDetails?: Partial<HomeRepairDetails>;
   customDetails?: any;
   isArchived?: boolean;
   deletedAt?: string;
