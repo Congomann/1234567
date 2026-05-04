@@ -153,7 +153,7 @@ export const Services: React.FC = () => {
     .map((p) => ({
       title: p.title,
       desc: p.description,
-      features: p.features,
+      features: p.features || [],
       image: p.image,
       id: p.id,
       link: p.link,
@@ -165,7 +165,7 @@ export const Services: React.FC = () => {
   const displayedProducts = (
     categoryFilter
       ? products.filter((p) => {
-          const sectionId = p.link.split("category=")[1] || p.id;
+          const sectionId = (p.link || "").split("category=")[1] || p.id;
           return (
             sectionId.includes(categoryFilter) ||
             categoryFilter.includes(sectionId)

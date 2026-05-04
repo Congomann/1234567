@@ -394,7 +394,33 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       wrapped(() => Backend.getLeads(), setLeads),
       wrapped(() => Backend.getUsers(), (users) => setAllUsers(users.length > 0 ? [...INITIAL_USERS, ...users.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS)),
       wrapped(() => Backend.getClients(), setClients),
-      wrapped(() => Backend.getSettings(), (s) => s && setCompanySettings(s)),
+      wrapped(() => Backend.getSettings(), async (s) => {
+        if (s) {
+          let updated = false;
+          if (!s.customProducts) s.customProducts = [];
+          const currentIds = s.customProducts.map(p => p.id);
+          
+          if (!currentIds.includes('property-insurance')) {
+            s.customProducts.push({ id: 'property-insurance', title: 'Property Insurance', description: "Safeguard your most valuable assets with our robust property insurance packages.", features: ['Homeowners', 'Renters', 'Commercial Property', 'Flood & Earthquake'], image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Building2', color: 'indigo', link: '/property-insurance', isHidden: false, order: 7 });
+            updated = true;
+          }
+          if (!currentIds.includes('home-repair')) {
+            s.customProducts.push({ id: 'home-repair', title: 'Home Repair & Maintenance', description: "Expert home repair services to keep your property in pristine condition inside and out.", features: ['Roofing & Renovation', 'Plumbing & Drywall', 'Pressure Washing', 'Lawnscaping'], image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'HomeIcon', color: 'orange', link: '/home-repair', isHidden: false, order: 8 });
+            updated = true;
+          }
+          
+          const autoProduct = s.customProducts.find(p => p.id === 'auto');
+          if (autoProduct && autoProduct.title === 'Auto Insurance') {
+            autoProduct.title = 'Auto & Commercial Insurance';
+            updated = true;
+          }
+          
+          setCompanySettings(s);
+          if (updated) {
+            await Backend.saveSettings(s).catch(console.error);
+          }
+        }
+      }),
       wrapped(() => Backend.getWorkflows(), (w) => w && w.length > 0 && setWorkflows(w)),
       wrapped(() => Backend.getEvents(), (e) => e && e.length > 0 && setEvents(e)),
       wrapped(() => Backend.getResources(), setResources),
