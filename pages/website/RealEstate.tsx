@@ -68,6 +68,10 @@ export const RealEstate: React.FC = () => {
     phone: "",
     email: "",
     message: "",
+    intent: "Buy",
+    budget: "",
+    timeline: "ASAP",
+    propertyType: "Single Family",
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
 
@@ -108,14 +112,31 @@ export const RealEstate: React.FC = () => {
       interest: ProductType.REAL_ESTATE,
       message: selectedProperty
         ? `Inquiry for ${selectedProperty.address}: ${contactForm.message}`
-        : `Real Estate Inquiry (${viewMode}): ${contactForm.message}`,
+        : `Real Estate Inquiry (${viewMode}): ${contactForm.message}. Intent: ${contactForm.intent}, Budget: ${contactForm.budget}, Timeline: ${contactForm.timeline}`,
       source: "Real Estate Portal",
+      customDetails: {
+        realEstateDetails: {
+          intent: contactForm.intent,
+          budget: contactForm.budget,
+          timeline: contactForm.timeline,
+          propertyType: contactForm.propertyType
+        }
+      }
     });
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
       setIsContactFormOpen(false);
-      setContactForm({ name: "", phone: "", email: "", message: "" });
+      setContactForm({ 
+        name: "", 
+        phone: "", 
+        email: "", 
+        message: "",
+        intent: "Buy",
+        budget: "",
+        timeline: "ASAP",
+        propertyType: "Single Family"
+      });
     }, 3000);
   };
 
@@ -570,6 +591,73 @@ export const RealEstate: React.FC = () => {
                         })
                       }
                     />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Objective
+                      </label>
+                      <select
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner appearance-none"
+                        value={contactForm.intent}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, intent: e.target.value })
+                        }
+                      >
+                        <option value="Buy">Buy Property</option>
+                        <option value="Sell">Sell Property</option>
+                        <option value="Invest">Investment/Portfolio</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Timeline
+                      </label>
+                      <select
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner appearance-none"
+                        value={contactForm.timeline}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, timeline: e.target.value })
+                        }
+                      >
+                        <option value="ASAP">As Soon As Possible</option>
+                        <option value="1-3 Months">1-3 Months</option>
+                        <option value="3-6 Months">3-6 Months</option>
+                        <option value="6+ Months">6+ Months</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Target Property Type
+                      </label>
+                      <select
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner appearance-none"
+                        value={contactForm.propertyType}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, propertyType: e.target.value })
+                        }
+                      >
+                        <option value="Single Family">Single Family</option>
+                        <option value="Multi-Family">Multi-Family</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Land">Raw Land</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">
+                        Budget / Price Point
+                      </label>
+                      <input
+                        className="w-full bg-slate-50 border border-transparent rounded-[2rem] px-8 py-5 text-sm font-bold focus:bg-white focus:border-amber-500/30 outline-none transition-all shadow-inner"
+                        placeholder="$500k - $1M"
+                        value={contactForm.budget}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, budget: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-3 block">

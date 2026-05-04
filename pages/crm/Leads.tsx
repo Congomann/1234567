@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType, ApplicationStatus } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer, TrendingUp, Home } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
 import { CaseChat } from '../../components/chat/CaseChat';
@@ -576,6 +576,80 @@ export const Leads: React.FC = () => {
                                                 {viewingLead.customDetails.homeRepairDetails.isEmergency && (
                                                     <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full text-xs font-black uppercase tracking-wider border border-red-200">
                                                         <AlertTriangle size={14} /> Emergency Request
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {viewingLead.customDetails?.realEstateDetails && (
+                                        <div className="bg-amber-50 p-8 rounded-[2.5rem] border border-amber-100 shadow-sm relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Home size={48} className="text-amber-500" />
+                                            </div>
+                                            <h3 className="text-xs font-black text-amber-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2"> Real Estate Intelligence</h3>
+                                            
+                                            <div className="space-y-4 relative z-10">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Objective</span>
+                                                        <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.realEstateDetails.intent}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Timeline</span>
+                                                        <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.realEstateDetails.timeline}</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span className="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Property Type</span>
+                                                    <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.realEstateDetails.propertyType}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Budget Range</span>
+                                                    <span className="text-slate-900 font-black text-lg">{viewingLead.customDetails.realEstateDetails.budget || 'Not specified'}</span>
+                                                </div>
+                                                
+                                                {(viewingLead.customDetails.realEstateDetails.timeline === 'ASAP' && (viewingLead.customDetails.realEstateDetails.budget?.includes('M') || viewingLead.customDetails.realEstateDetails.budget?.includes('500k'))) && (
+                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0B2240] text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20 shadow-xl">
+                                                        <Sparkles size={12} /> Autonomous Priority Detected
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {viewingLead.customDetails?.securitiesDetails && (
+                                        <div className="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100 shadow-sm relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <TrendingUp size={48} className="text-blue-500" />
+                                            </div>
+                                            <h3 className="text-xs font-black text-blue-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2"> Securities & Wealth Profile</h3>
+                                            
+                                            <div className="space-y-4 relative z-10">
+                                                <div>
+                                                    <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Desired Service</span>
+                                                    <span className="text-slate-900 font-bold text-sm">{viewingLead.customDetails.securitiesDetails.serviceType}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Risk Profile</span>
+                                                        <span className={`text-xs font-black uppercase px-3 py-1 rounded-full ${
+                                                            viewingLead.customDetails.securitiesDetails.riskTolerance === 'High' ? 'bg-red-100 text-red-600' :
+                                                            viewingLead.customDetails.securitiesDetails.riskTolerance === 'Moderate' ? 'bg-blue-100 text-blue-600' :
+                                                            'bg-green-100 text-green-600'
+                                                        }`}>
+                                                            {viewingLead.customDetails.securitiesDetails.riskTolerance}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Assets Range</span>
+                                                        <span className="text-slate-900 font-black text-sm">{viewingLead.customDetails.securitiesDetails.investableAssets}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {(viewingLead.customDetails.securitiesDetails.investableAssets?.includes('M') || viewingLead.customDetails.securitiesDetails.investableAssets?.includes('5M')) && (
+                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0B2240] text-blue-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500/20 shadow-xl">
+                                                        <Shield size={12} /> High-Net-Worth Individual
                                                     </div>
                                                 )}
                                             </div>

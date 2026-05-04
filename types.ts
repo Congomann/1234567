@@ -162,6 +162,19 @@ export interface HomeRepairDetails {
   isEmergency: boolean;
 }
 
+export interface RealEstateDetails {
+  intent: 'Buy' | 'Sell' | 'Invest' | string;
+  timeline: 'ASAP' | '1-3 Months' | '3-6 Months' | '6+ Months' | string;
+  budget: string;
+  propertyType: 'Single Family' | 'Multi-Family' | 'Commercial' | 'Land' | string;
+}
+
+export interface SecuritiesDetails {
+  serviceType: 'Portfolio Management' | 'Licensing Support' | 'Retirement Planning' | 'Other' | string;
+  investableAssets: string;
+  riskTolerance: 'Low' | 'Moderate' | 'High' | string;
+}
+
 export interface Lead {
   id: string;
   name: string;
@@ -186,8 +199,8 @@ export interface Lead {
   adId?: string;
   platformData?: string;
   lifeDetails?: Partial<LifeDetails>;
-  realEstateDetails?: any;
-  securitiesDetails?: any;
+  realEstateDetails?: Partial<RealEstateDetails>;
+  securitiesDetails?: Partial<SecuritiesDetails>;
   logisticsDetails?: Partial<LogisticsDetails>;
   homeRepairDetails?: Partial<HomeRepairDetails>;
   customDetails?: any;

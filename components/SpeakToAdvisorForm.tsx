@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, TrendingUp, Shield, BarChart3 } from "lucide-react";
 import { useData } from "../context/DataContext";
+import { ProductType } from "../types";
 
 export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ productType = "General Inquiry" }) => {
   const { addLead } = useData();
@@ -9,6 +10,10 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
     phone: "",
     email: "",
     message: "",
+    // Securities Specific
+    secServiceType: "Portfolio Management",
+    investableAssets: "",
+    riskTolerance: "Moderate",
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
 
@@ -19,13 +24,30 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
       email: contactForm.email,
       phone: contactForm.phone,
       interest: productType as any,
-      message: contactForm.message,
+      message: productType === ProductType.SECURITIES 
+        ? `Securities Inquiry: ${contactForm.message}. Assets: ${contactForm.investableAssets}, Risk: ${contactForm.riskTolerance}`
+        : contactForm.message,
       source: "Website Contact Form",
+      customDetails: productType === ProductType.SECURITIES ? {
+        securitiesDetails: {
+          serviceType: contactForm.secServiceType,
+          investableAssets: contactForm.investableAssets,
+          riskTolerance: contactForm.riskTolerance
+        }
+      } : undefined
     });
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
-      setContactForm({ name: "", phone: "", email: "", message: "" });
+      setContactForm({ 
+        name: "", 
+        phone: "", 
+        email: "", 
+        message: "",
+        secServiceType: "Portfolio Management",
+        investableAssets: "",
+        riskTolerance: "Moderate"
+      });
     }, 3000);
   };
 
@@ -88,6 +110,77 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
                 />
               </div>
             </div>
+
+            {productType === ProductType.SECURITIES && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
+                      Desired Service
+                    </label>
+                    <div className="relative">
+                      <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500 pointer-events-none" />
+                      <select
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner appearance-none"
+                        value={contactForm.secServiceType}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, secServiceType: e.target.value })
+                        }
+                      >
+                        <option value="Portfolio Management">Portfolio Management</option>
+                        <option value="Licensing Support">Licensing Support</option>
+                        <option value="Retirement Planning">Retirement Planning</option>
+                        <option value="Other">Other Advisory</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
+                      Investable Assets
+                    </label>
+                    <div className="relative">
+                      <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500 pointer-events-none" />
+                      <select
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner appearance-none"
+                        value={contactForm.investableAssets}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, investableAssets: e.target.value })
+                        }
+                      >
+                        <option value="">Select Asset Range</option>
+                        <option value="<$100k">&lt; $100k</option>
+                        <option value="$100k - $500k">$100k - $500k</option>
+                        <option value="$500k - $1M">$500k - $1M</option>
+                        <option value="$1M - $5M">$1M - $5M</option>
+                        <option value="$5M+">$5M+</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
+                    Risk Tolerance Profile
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {['Low', 'Moderate', 'High'].map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setContactForm({ ...contactForm, riskTolerance: level })}
+                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
+                          contactForm.riskTolerance === level 
+                          ? "bg-blue-600 border-blue-600 text-white shadow-lg" 
+                          : "bg-white border-slate-100 text-slate-400 hover:border-blue-200"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
                 Email

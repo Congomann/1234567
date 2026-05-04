@@ -630,7 +630,31 @@ const calculateLeadScore = (lead) => {
   if (lead.source?.includes('ads')) score += 5;
   
   // Activity signals
-  if (lead.lifeDetails || lead.realEstateDetails || lead.securitiesDetails) score += 10;
+  if (lead.lifeDetails || lead.realEstateDetails || lead.securitiesDetails || lead.customDetails) score += 10;
+  
+  // Intelligent Autonomous Scoring for specialized verticals
+  if (lead.customDetails) {
+    // Real Estate Intelligence
+    const re = lead.customDetails.realEstateDetails;
+    if (re) {
+      if (re.intent === 'Buy' || re.intent === 'Invest') score += 10;
+      if (re.timeline === 'ASAP') score += 15;
+      if (re.budget && (re.budget.includes('$500k') || re.budget.includes('$1M') || re.budget.includes('M'))) {
+        score += 15;
+      }
+    }
+
+    // Securities Intelligence
+    const sec = lead.customDetails.securitiesDetails;
+    if (sec) {
+      if (sec.investableAssets && (sec.investableAssets.includes('$1M') || sec.investableAssets.includes('$5M'))) {
+        score += 30;
+      } else if (sec.investableAssets && sec.investableAssets.includes('$500k')) {
+        score += 15;
+      }
+      if (sec.riskTolerance === 'High') score += 5; // Aggressive investors often move faster
+    }
+  }
   
   return Math.min(100, score);
 };
