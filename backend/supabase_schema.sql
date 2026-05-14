@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS advisor_applications (
     company_email VARCHAR(255),
     contract_level NUMERIC(5,2),
     authorized_products JSONB,
+    resume_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -19,9 +19,15 @@ import { InvestmentShowcase } from './pages/website/InvestmentShowcase';
 import { Securities } from './pages/website/Securities';
 import { Advisors } from './pages/website/Advisors';
 import { About } from './pages/website/About';
+import { Partnership } from './pages/website/Partnership';
 import { CampaignLandingPage } from './pages/website/CampaignLandingPage';
 import { Resources } from './pages/website/Resources';
 import { Contact } from './pages/website/Contact';
+import { SecuritiesPortfolio } from './pages/website/SecuritiesPortfolio';
+import { RealEstateIntelligence } from './pages/website/RealEstateIntelligence';
+import { ExploreSolutions } from './pages/website/ExploreSolutions';
+import { AnnualReport } from './pages/website/AnnualReport';
+import { PressReleases } from './pages/website/PressReleases';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -38,6 +44,8 @@ import { Chat } from './pages/crm/Chat';
 import { ProfileSettings } from './pages/crm/ProfileSettings';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { WebsiteSettings } from './pages/admin/WebsiteSettings';
+import { AnnualReportAdmin } from './pages/admin/AnnualReportAdmin';
+import { PressReleaseAdmin } from './pages/admin/PressReleaseAdmin';
 import { CarrierAssignment } from './pages/admin/CarrierAssignment';
 import { UserRole } from './types';
 import { AdvisorMicrosite } from './pages/website/AdvisorMicrosite';
@@ -92,6 +100,9 @@ import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
 import { CampaignManager } from './pages/crm/MarketingCampaigns';
+import { InsuranceQuoteFunnel } from './pages/public/InsuranceQuoteFunnel';
+import { LifeInsuranceFunnel } from './pages/public/LifeInsuranceFunnel';
+import { SystemStatus } from './components/SystemStatus';
 
 
 /**
@@ -161,6 +172,7 @@ const App: React.FC = () => {
   return (
     <DataProvider>
       <ThemeProvider>
+        <SystemStatus />
         <Router>
           <SEO />
           <AnalyticsTracker />
@@ -168,14 +180,18 @@ const App: React.FC = () => {
             {/* PUBLIC WEBSITE */}
             <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-            <Route path="/products" element={<PublicLayout><Services /></PublicLayout>} />
+            <Route path="/partnership" element={<PublicLayout><Partnership /></PublicLayout>} />
+            <Route path="/products" element={<PublicLayout><ExploreSolutions /></PublicLayout>} />
             <Route path="/life-insurance" element={<PublicLayout><LifeInsurance /></PublicLayout>} />
+            <Route path="/life-insurance/quote" element={<PublicLayout><LifeInsuranceFunnel /></PublicLayout>} />
             <Route path="/real-estate" element={<PublicLayout><RealEstate /></PublicLayout>} />
+
             <Route path="/home-repair" element={<PublicLayout><HomeRepair /></PublicLayout>} />
             <Route path="/mortgage" element={<PublicLayout><Mortgage /></PublicLayout>} />
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />
             <Route path="/auto-insurance" element={<PublicLayout><AutoInsurance /></PublicLayout>} />
+            <Route path="/insurance/quote" element={<PublicLayout><InsuranceQuoteFunnel /></PublicLayout>} />
             <Route path="/logistics" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
             <Route path="/logistics/loads" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
             <Route path="/logistics/booking" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
@@ -183,11 +199,14 @@ const App: React.FC = () => {
             <Route path="/logistics/listing" element={<PublicLayout><PublicLogistics /></PublicLayout>} />
             <Route path="/investments" element={<PublicLayout><InvestmentShowcase /></PublicLayout>} />
             <Route path="/securities" element={<PublicLayout><Securities /></PublicLayout>} />
+
             <Route path="/advisors" element={<PublicLayout><Advisors /></PublicLayout>} />
             <Route path="/advisor/:slug" element={<PublicLayout><AdvisorMicrosite /></PublicLayout>} />
             <Route path="/campaign/:slug" element={<PublicLayout><CampaignLandingPage /></PublicLayout>} />
             <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+            <Route path="/transparency" element={<PublicLayout><AnnualReport /></PublicLayout>} />
+            <Route path="/press" element={<PublicLayout><PressReleases /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
@@ -220,11 +239,14 @@ const App: React.FC = () => {
               <Route path="campaigns" element={<CampaignManager />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
-              <Route path="automation" element={<AutomationStudio />} />
               <Route path="bank-verification" element={<BankVerification />} />
 
               {/* VERTICAL HUBS */}
               <Route path="applications" element={<PoliciesApps />} />
+              <Route path="auto-quotes" element={<AutoQuotes />} />
+              <Route path="commercial-quotes" element={<CommercialQuotes />} />
+              <Route path="fleet" element={<FleetManager />} />
+              <Route path="claims" element={<Claims />} />
               <Route path="properties" element={<PropertyPipeline />} />
               <Route path="escrow" element={<TransactionsEscrow />} />
               <Route path="loans" element={<LoanApplications />} />
@@ -233,6 +255,8 @@ const App: React.FC = () => {
               <Route path="portfolio" element={<PortfolioMgmt />} />
               <Route path="compliance" element={<ComplianceDocs />} />
               <Route path="fees" element={<AdvisoryFees />} />
+              <Route path="securities-portfolio" element={<SecuritiesPortfolio />} />
+              <Route path="real-estate-intelligence" element={<RealEstateIntelligence />} />
               <Route path="logistics" element={<CRMLogisticsHub />} />
               <Route path="logistics/post-load" element={<LoadPostingTerminal />} />
 
@@ -247,6 +271,8 @@ const App: React.FC = () => {
               {/* SUPER ADMIN ONLY - Based on screenshot request */}
               <Route element={<SuperAdminRoute />}>
                 <Route path="admin/website" element={<WebsiteSettings />} />
+                <Route path="admin/transparency" element={<AnnualReportAdmin />} />
+                <Route path="admin/press" element={<PressReleaseAdmin />} />
                 <Route path="admin/products" element={<ProductCms />} />
                 <Route path="admin/carriers" element={<CarrierAssignment />} />
                 <Route path="admin/testimonials" element={<AdminTestimonials />} />

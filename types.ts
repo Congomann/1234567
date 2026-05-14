@@ -530,6 +530,10 @@ export interface CompanySettings {
   realEstateAbout?: string;
   realEstateContactCta?: string;
   realEstateResources?: RealEstateResourceLink[];
+
+  // System Configuration
+  maintenanceModeEnabled?: boolean;
+  maintenanceModeText?: string;
 }
 
 export interface Testimonial {

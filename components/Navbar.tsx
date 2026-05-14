@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation, Search, Home, Wrench } from 'lucide-react';
+import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation, Search, Home, Wrench, Map as MapIcon, Newspaper, Scale } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { UserRole, ProductType } from '../types';
@@ -83,6 +83,17 @@ export const Navbar: React.FC = () => {
         { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation },
         { label: 'Live Load', path: '/logistics?view=listing', icon: Truck }
       ]
+    },
+    {
+      title: 'Corporate',
+      subtitle: 'Transparency & News.',
+      items: [
+        { label: 'Partnerships & Carriers', path: '/partnership', icon: Briefcase },
+        { label: 'Annual Report', path: '/transparency', icon: Scale },
+        { label: 'Press Releases', path: '/press', icon: Newspaper },
+        { label: 'About NHFG', path: '/about', icon: Shield },
+        { label: 'Contact Us', path: '/contact', icon: Globe }
+      ]
     }
   ];
 
@@ -119,10 +130,43 @@ export const Navbar: React.FC = () => {
           from { opacity: 0; transform: translate(-50%, 4px) scale(0); }
           to { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
+        }
       `}</style>
 
+      {/* Maintenance Banner */}
+      {companySettings?.maintenanceModeEnabled && (
+        <div className="fixed top-0 left-0 right-0 z-[110] bg-black text-white h-10 flex items-center overflow-hidden border-b border-white/10">
+          <div className="flex whitespace-nowrap animate-marquee px-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4">
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 ml-4">
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+              <span className="opacity-30">|</span>
+              <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
+            </span>
+          </div>
+        </div>
+      )}
+
       <nav 
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 flex justify-center py-6 px-4 md:px-12 pointer-events-none`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 flex justify-center py-6 px-4 md:px-12 pointer-events-none ${companySettings?.maintenanceModeEnabled ? 'mt-10' : ''}`}
       >
         <div className={`max-w-6xl w-full pointer-events-auto transition-all duration-500 ${isScrolled ? 'translate-y-[-10px]' : ''}`}>
           <div className={`relative bg-white border border-slate-200 rounded-full px-8 py-3.5 flex items-center justify-between transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.04)] ${isScrolled ? 'shadow-[0_20px_60px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]' : ''}`}>
@@ -167,6 +211,7 @@ export const Navbar: React.FC = () => {
               ))}
             </div>
 
+
             {/* RIGHT AUTH */}
             <div className="flex items-center gap-4">
               <button 
@@ -194,8 +239,8 @@ export const Navbar: React.FC = () => {
               >
                 <div className="bg-white/95 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col md:flex-row min-h-[460px]">
                   
-                  {/* MAIN CONTENT (3 COLUMNS) */}
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-12 p-14 bg-white/50">
+                  {/* MAIN CONTENT (4 COLUMNS) */}
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-12 p-14 bg-white/50">
                     {megaMenuColumns.map((col, idx) => (
                       <div key={idx} className="space-y-8">
                         <div>

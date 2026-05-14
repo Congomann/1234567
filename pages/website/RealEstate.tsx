@@ -26,7 +26,6 @@ import {
   CheckCircle2,
   Calendar,
   Building2,
-  Map,
   School,
   Hammer,
   DoorOpen,
@@ -39,6 +38,7 @@ import {
   Mail,
   Smartphone,
   ChevronDown,
+  Activity,
 } from "lucide-react";
 
 import { PropertyDetailModal } from "../../components/PropertyDetailModal";
@@ -180,6 +180,13 @@ export const RealEstate: React.FC = () => {
                   {view}
                 </Link>
              ))}
+             <Link
+               to="/real-estate-intelligence"
+               className="px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-slate-900 transition-all flex items-center gap-2"
+             >
+               <Activity size={12} />
+               Market Intel
+             </Link>
           </div>
         </div>
       </div>

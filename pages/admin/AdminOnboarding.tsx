@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Clock, CheckCircle, XCircle, Mail, Phone, ExternalLink,
     Shield, Search, Filter, Loader2, Landmark, ChevronRight, AlertCircle,
-    Copy, Check, Send, DollarSign, Briefcase, Trash2
+    Copy, Check, Send, DollarSign, Briefcase, Trash2, FileText
 } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
 import { ProductType } from '../../types';
@@ -22,6 +22,7 @@ interface Application {
     authorized_products?: string[];
     experience?: string;
     address?: string;
+    resume_url?: string;
     created_at: string;
 }
 
@@ -246,6 +247,20 @@ export default function AdminOnboarding() {
                                                 <div className="text-xs text-slate-600 italic">
                                                     {selectedApp.address}
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {selectedApp.resume_url && (
+                                            <div className="pt-2">
+                                                <a 
+                                                    href={selectedApp.resume_url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                    View Uploaded Resume
+                                                </a>
                                             </div>
                                         )}
 

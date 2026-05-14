@@ -41,6 +41,29 @@ class StorageService {
         const encryptedData = encryptionService.encrypt(buffer);
         const encryptedBuffer = Buffer.from(encryptedData);
 
+        // Try Supabase Storage first for persistent cloud storage
+        try {
+            const supabase = require('./supabaseClient.cjs');
+            const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+            const { data, error } = await supabase.storage
+                .from('uploads')
+                .upload(cleanName, encryptedBuffer, {
+                    upsert: true,
+                    contentType: 'application/octet-stream'
+                });
+            
+            if (!error) {
+                // Return public URL if bucket is public, else proxy via API
+                const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(cleanName);
+                console.log(`[Storage] Saved to Supabase: ${publicUrl}`);
+                return publicUrl;
+            } else {
+                console.warn('[Storage] Supabase upload failed, falling back:', error.message);
+            }
+        } catch (e) {
+            console.warn('[Storage] Supabase integration error:', e.message);
+        }
+
         if (this.mode === 'owncloud' && this.clientPromise) {
             try {
                 if (!this.client) await this.clientPromise;

@@ -483,10 +483,10 @@ export const LogisticsHub: React.FC = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
                 <h3 className="text-xl font-black mb-4 tracking-tight relative z-10">Need Assistance?</h3>
                 <p className="text-blue-100 text-sm font-medium mb-8 relative z-10 leading-relaxed">
-                  Our logistics coordinators are available 24/7 to help you secure the best loads.
+                  Our logistics brokers and agents are available 24/7 to help you secure the best loads.
                 </p>
                 <a href="tel:800-555-0199" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white text-blue-600 px-6 py-3 rounded-full hover:bg-slate-50 transition-colors relative z-10">
-                  Call Support
+                  Call the Broker Team
                 </a>
               </div>
             </div>

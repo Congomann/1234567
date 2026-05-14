@@ -178,12 +178,12 @@ export const AutoInsurance: React.FC = () => {
               >
                 Analyze Needs
               </button>
-              <button 
-                onClick={() => document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 bg-red-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
+              <Link 
+                to="/insurance/quote"
+                className="px-10 py-5 bg-red-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md inline-block"
               >
                 Get a Quote
-              </button>
+              </Link>
             </div>
           </div>
         </div>

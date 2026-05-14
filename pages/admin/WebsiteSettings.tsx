@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Resource, ProductType, SocialLink, CompanySettings } from '../../types';
 import { Backend } from '../../services/apiBackend';
-import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2, RotateCcw } from 'lucide-react';
+import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2, RotateCcw, Send } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
 
 export const WebsiteSettings: React.FC = () => {
@@ -623,6 +623,53 @@ export const WebsiteSettings: React.FC = () => {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            {/* System Maintenance Section */}
+            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-orange-600" />
+                    System Maintenance & Global Alerts
+                </h2>
+                <div className="space-y-6">
+                    <div className="bg-orange-50 p-6 rounded-xl border border-orange-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-sm font-bold text-orange-900 uppercase tracking-wide">Maintenance Mode Banner</h3>
+                                <p className="text-xs text-orange-700 mt-1">Show a global sliding marquee/notice to all website visitors.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    className="sr-only peer"
+                                    checked={settingsForm.maintenanceModeEnabled || false}
+                                    onChange={e => setSettingsForm({ ...settingsForm, maintenanceModeEnabled: e.target.checked })}
+                                />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                            </label>
+                        </div>
+                        
+                        <div className="space-y-2 mt-6">
+                            <label className="text-[10px] font-black text-orange-800 uppercase tracking-widest ml-2">Announcement Message</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-900"
+                                placeholder="e.g. Website is currently undergoing maintenance. Some services may be limited."
+                                value={settingsForm.maintenanceModeText || ''}
+                                onChange={e => setSettingsForm({ ...settingsForm, maintenanceModeText: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4 border-t border-slate-100">
+                        <button
+                            onClick={handleSettingsSave}
+                            className="bg-orange-600 text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg hover:bg-orange-700 transition-all flex items-center gap-2"
+                        >
+                            <Save className="h-4 w-4" /> Update Maintenance Status
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Company Information Section */}
@@ -1505,6 +1552,17 @@ export const WebsiteSettings: React.FC = () => {
                     confirmAction?.type === 'reset-leads' ? "Reset Now" : "Delete"
                 }
             />
+
+            {/* Floating Save All Button */}
+            <div className="fixed bottom-8 right-8 z-50">
+                <button
+                    onClick={() => updateCompanySettings(settingsForm)}
+                    className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all group"
+                >
+                    <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    Save Global Configuration
+                </button>
+            </div>
         </div>
     );
 };

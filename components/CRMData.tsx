@@ -40,7 +40,10 @@ import {
     Monitor,
     Activity,
     Layout,
-    Truck
+    Truck,
+    Car,
+    Newspaper,
+    Map as MapIcon
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -64,13 +67,17 @@ const ADMIN_TOUR_STEPS = [
     { id: 'nav-re-approval', title: 'Listing Approval', text: 'Review and approve Real Estate property listings across the firm.', targetId: 'nav-re-approval', path: '/crm/admin/real-estate' },
     { id: 'nav-re-cms', title: 'Real Estate CMS', text: 'Manage localized content for the Real Estate portal.', targetId: 'nav-re-cms', path: '/crm/admin/real-estate-cms' },
     { id: 'nav-site-config', title: 'Site Config', text: 'CMS controls for the public-facing corporate website.', targetId: 'nav-site-config', path: '/crm/admin/website' },
+    { id: 'nav-transparency', title: 'Transparency Manager', text: 'Manage annual reports, lawsuits, and regulatory disclosures.', targetId: 'nav-transparency', path: '/crm/admin/transparency' },
+    { id: 'nav-press-admin', title: 'Newsroom Manager', text: 'Create and publish official press releases.', targetId: 'nav-press-admin', path: '/crm/admin/press' },
     { id: 'nav-carrier-setup', title: 'Carrier Setup', text: 'Provision specific insurance carriers to advisor tiers.', targetId: 'nav-carrier-setup', path: '/crm/admin/carriers' },
     { id: 'nav-client-reviews', title: 'Client Reviews', text: 'Moderate and approve testimonials before they go live.', targetId: 'nav-client-reviews', path: '/crm/admin/testimonials' },
     { id: 'nav-email-signature', title: 'Email Signature', text: 'Generate branded HTML signatures for the whole group.', targetId: 'nav-email-signature', path: '/crm/admin/signature' },
     { id: 'nav-api-integrations', title: 'API Integrations', text: 'Trace raw webhook data from Google and Meta Ads.', targetId: 'nav-api-integrations', path: '/crm/admin/marketing' },
     { id: 'nav-analytics', title: 'User Analytics', text: 'Real-time tracking of website visitors, sessions, and behavior.', targetId: 'nav-analytics', path: '/crm/admin/analytics' },
     { id: 'nav-commissions-recon', title: 'Commission Recon', text: 'Match carrier statements with client data to identify discrepancies.', targetId: 'nav-commissions-recon', path: '/crm/admin/commissions' },
-    { id: 'nav-landing-pages', title: 'Landing Pages', text: 'Create and deploy custom product-specific marketing pages.', targetId: 'nav-landing-pages', path: '/crm/admin/landing-pages' }
+    { id: 'nav-landing-pages', title: 'Landing Pages', text: 'Create and deploy custom product-specific marketing pages.', targetId: 'nav-landing-pages', path: '/crm/admin/landing-pages' },
+    { id: 'nav-portfolio-viz', title: 'Portfolio Visualizer', text: 'Quantitative modeling tool for securities and investment advisory.', targetId: 'nav-portfolio-viz', path: '/crm/securities-portfolio' },
+    { id: 'nav-market-intel', title: 'Market Intelligence', text: 'Real Estate yield modeling and property analytics terminal.', targetId: 'nav-market-intel', path: '/crm/real-estate-intelligence' }
 ];
 
 interface CRMLayoutProps {
@@ -155,7 +162,6 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         const main = [
             { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, tourId: 'nav-dashboard' },
             { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
-            { path: '/crm/automation', label: 'Automation Studio', icon: Zap, tourId: 'nav-automation' },
             { path: '/crm/leads', label: 'Leads DB', icon: Database, tourId: 'nav-leads' },
             { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
             { path: '/crm/chat', label: 'Team Chat', icon: MessageCircle, tourId: 'nav-chat' },
@@ -169,8 +175,15 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             vertical.push({ path: '/crm/commissions', label: 'Commissions', icon: LineChart });
         }
 
+        if (user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.AUTO) || products.includes(ProductType.COMMERCIAL)) {
+            vertical.push({ path: '/crm/auto-quotes', label: 'Auto Quotes', icon: Car });
+            vertical.push({ path: '/crm/commercial-quotes', label: 'Commercial Hub', icon: Truck });
+            vertical.push({ path: '/crm/fleet', label: 'Fleet Manager', icon: Briefcase });
+        }
+
         if (user.category === AdvisorCategory.REAL_ESTATE || products.includes(ProductType.REAL_ESTATE)) {
             vertical.push({ path: '/crm/properties', label: 'Property Pipeline', icon: Building2 });
+            vertical.push({ path: '/crm/real-estate-intelligence', label: 'Market Intelligence', icon: MapIcon, tourId: 'nav-market-intel' });
             vertical.push({ path: '/crm/escrow', label: 'Transactions & Escrow', icon: Key });
         }
 
@@ -182,6 +195,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
 
         if (user.category === AdvisorCategory.SECURITIES || products.includes(ProductType.SECURITIES)) {
             vertical.push({ path: '/crm/portfolio', label: 'Portfolio Mgmt', icon: TrendingUp });
+            vertical.push({ path: '/crm/securities-portfolio', label: 'Portfolio Visualizer', icon: Activity, tourId: 'nav-portfolio-viz' });
             vertical.push({ path: '/crm/compliance', label: 'Compliance Vault', icon: FileCheck });
             vertical.push({ path: '/crm/fees', label: 'Advisory Billing', icon: BadgeDollarSign });
         }
@@ -207,6 +221,8 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
 
         if (isSuperAdmin) {
             admin.push({ path: '/crm/admin/website', label: 'Site Config', icon: Settings, tourId: 'nav-site-config' });
+            admin.push({ path: '/crm/admin/transparency', label: 'Transparency', icon: Scale, tourId: 'nav-transparency' });
+            admin.push({ path: '/crm/admin/press', label: 'Press Releases', icon: Newspaper, tourId: 'nav-press-admin' });
             admin.push({ path: '/crm/admin/products', label: 'Product CMS', icon: Database, tourId: 'nav-product-cms' });
             admin.push({ path: '/crm/admin/carriers', label: 'Carrier Setup', icon: ShieldCheck, tourId: 'nav-carrier-setup' });
             admin.push({ path: '/crm/admin/testimonials', label: 'Client Reviews', icon: Award, tourId: 'nav-client-reviews' });

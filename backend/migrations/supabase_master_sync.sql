@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS advisor_applications (
     experience TEXT,
     address TEXT,
     status VARCHAR(50) DEFAULT 'pending_approval',
+    resume_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

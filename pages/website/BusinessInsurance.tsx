@@ -180,12 +180,12 @@ export const BusinessInsurance: React.FC = () => {
               >
                 Launch Audit
               </button>
-              <button 
-                onClick={() => document.getElementById('advisor-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 bg-amber-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
+              <Link 
+                to="/insurance/quote"
+                className="px-10 py-5 bg-amber-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md inline-block"
               >
-                Speak to Specialist
-              </button>
+                Get Commercial Quote
+              </Link>
             </div>
           </div>
         </div>

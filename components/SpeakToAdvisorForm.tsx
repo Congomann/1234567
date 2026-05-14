@@ -51,15 +51,22 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
     }, 3000);
   };
 
+  const isLogistics = productType === ProductType.LOGISTICS;
+  const titleText = isLogistics ? "Speak to the Broker Team" : "Speak to an Advisor";
+  const successTitle = isLogistics ? "Request Transmitted" : "Request Sent";
+  const successSub = isLogistics ? "An expert broker will reach out to you shortly." : "An expert advisor will reach out to you shortly.";
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-12">
       <div className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-2xl border border-slate-100">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4">
-            Speak to an Advisor
+            {titleText}
           </h2>
           <p className="text-lg text-slate-600">
-            Get personalized guidance from our experts. Fill out the form below and we'll be in touch.
+            {isLogistics 
+              ? "Connect with our elite freight brokerage team for a customized logistics quote."
+              : "Get personalized guidance from our experts. Fill out the form below and we'll be in touch."}
           </p>
         </div>
 
@@ -69,10 +76,10 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
               <CheckCircle2 size={40} />
             </div>
             <h3 className="text-3xl font-black text-slate-900">
-              Request Sent
+              {successTitle}
             </h3>
             <p className="text-slate-500 mt-2 font-medium">
-              An expert advisor will reach out to you shortly.
+              {successSub}
             </p>
           </div>
         ) : (

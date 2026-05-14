@@ -113,6 +113,8 @@ export const Footer: React.FC = () => {
             <ul className="space-y-4">
               {[
                 { name: 'About Us', path: '/about' },
+                { name: 'Annual Report', path: '/transparency' },
+                { name: 'Press Releases', path: '/press' },
                 { name: 'Join Our Team', path: '/join' },
                 { name: 'Agent Portal', path: '/login' },
                 { name: 'Resources', path: '/resources' },

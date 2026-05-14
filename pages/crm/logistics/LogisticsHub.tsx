@@ -180,7 +180,7 @@ export const LogisticsHub: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-[0.2em]">{activeNiche} Pipeline</h3>
           <button 
-            onClick={() => navigate('/crm/logistics/post')}
+            onClick={() => navigate('/crm/logistics/post-load')}
             className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black hover:bg-slate-800 transition-all uppercase tracking-widest shadow-[0_8px_20px_rgb(15,23,42,0.3)]"
           >
             <Plus size={14} /> Post Load

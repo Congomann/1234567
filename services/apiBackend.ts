@@ -68,7 +68,8 @@ class NHFGBackend {
                 try {
                     const text = await res.clone().text();
                     if (text) {
-                        errorMessage = text.length < 150 ? text : `HTTP Error ${res.status}: (Body too large)`;
+                        // Truncate only if extremely long, but keep the actual error content
+                        errorMessage = text.length < 500 ? text : `${text.substring(0, 500)}... (Truncated)`;
                         console.error(`[Backend Response Error Text]`, text);
                     }
                 } catch (textErr) { }

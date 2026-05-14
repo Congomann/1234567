@@ -196,7 +196,9 @@ export const Home: React.FC = () => {
                         (url as string).startsWith("http") ||
                           (url as string).startsWith("data:")
                           ? url
-                          : `https://logo.clearbit.com/${url}`
+                          : (url as string).startsWith("/") 
+                            ? url 
+                            : `https://logo.clearbit.com/${url}`
                       }
                       alt={name}
                       className="h-full object-contain max-w-[150px]"

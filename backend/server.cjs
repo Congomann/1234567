@@ -167,11 +167,16 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
         const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
         const projectRef = sbUrl ? sbUrl.match(/https:\/\/([^.]+)\./)?.[1] : null;
         
-        // If the username is just 'postgres', it MUST have the project ref suffix for Supabase Pooler
-        if (projectRef && dbUrl.username && !dbUrl.username.includes('.')) {
-          dbUrl.username = `${dbUrl.username}.${projectRef}`;
-          connectionString = dbUrl.toString();
-          console.log(`[DB] Auto-injected project ref into pooler username: ${projectRef}`);
+        // Ensure the project ref in the username matches the active Supabase project
+        if (projectRef && dbUrl.username) {
+          const parts = dbUrl.username.split('.');
+          const currentRef = parts.length > 1 ? parts[1] : null;
+          
+          if (currentRef !== projectRef) {
+            dbUrl.username = `postgres.${projectRef}`;
+            connectionString = dbUrl.toString();
+            console.log(`[DB] Forced correct project ref for pooler: ${projectRef} (Was: ${currentRef || 'none'})`);
+          }
         }
       }
     } catch (e) {
@@ -193,6 +198,10 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
 }
 
 const pool = new Pool(poolConfig);
+
+// Diagnostic log for connection (Obfuscated)
+const diagnosticUrl = poolConfig.connectionString ? poolConfig.connectionString.replace(/:([^@]+)@/, ':****@') : 'MISSING';
+console.log(`[DB] Pool initialized with URL: ${diagnosticUrl}`);
 
 // Improved error logging for pool failures
 pool.on('error', (err) => {
@@ -1488,6 +1497,7 @@ app.post('/api/preferences', authenticateToken, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 const initMasterSchema = async () => {
+  console.log('[DB] Running Master Schema verification...');
   try {
     console.log('[DB] Starting Master Schema check...');
     
@@ -1519,6 +1529,50 @@ const initMasterSchema = async () => {
     await safeAdd('advisor_applications', 'contract_level', 'NUMERIC(5,2)');
     await safeAdd('advisor_applications', 'authorized_products', 'JSONB');
 
+    // Analytics Tables
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS analytics_visitors (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        visitor_id VARCHAR(100) UNIQUE,
+        ip_address VARCHAR(45),
+        user_agent TEXT,
+        device_type VARCHAR(50),
+        screen_resolution VARCHAR(50),
+        language VARCHAR(10),
+        metadata JSONB,
+        last_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+
+    // Ensure columns exist (Auto-migration)
+    const columns = ['ip_address', 'user_agent', 'device_type', 'screen_resolution', 'language', 'metadata', 'last_seen'];
+    for (const col of columns) {
+      await pool.query(`ALTER TABLE analytics_visitors ADD COLUMN IF NOT EXISTS ${col} ${col === 'metadata' ? 'JSONB' : col === 'last_seen' ? 'TIMESTAMP WITH TIME ZONE' : 'TEXT'}`).catch(() => {});
+    }
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS analytics_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        visitor_id VARCHAR(100) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE,
+        started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        ended_at TIMESTAMP WITH TIME ZONE,
+        duration_seconds INT
+      )
+    `).catch(() => {});
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS analytics_events (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        visitor_id VARCHAR(100) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE,
+        session_id UUID REFERENCES analytics_sessions(id) ON DELETE SET NULL,
+        event_name VARCHAR(255),
+        url TEXT,
+        path TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+
     // CRM STUB TABLES
     await pool.query('CREATE TABLE IF NOT EXISTS leads (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(255) NOT NULL, status VARCHAR(50) DEFAULT \'New\', created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
     await pool.query('CREATE TABLE IF NOT EXISTS clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
@@ -1527,6 +1581,9 @@ const initMasterSchema = async () => {
     await pool.query('CREATE TABLE IF NOT EXISTS documents (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
     await pool.query('CREATE TABLE IF NOT EXISTS user_preferences (user_id UUID PRIMARY KEY, theme VARCHAR(20) DEFAULT \'light\')').catch(() => {});
     await pool.query('CREATE TABLE IF NOT EXISTS analytics_visitors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), visitor_id VARCHAR(100) UNIQUE)').catch(() => {});
+
+    // Ensure advisor_applications has resume_url
+    await pool.query('ALTER TABLE advisor_applications ADD COLUMN IF NOT EXISTS resume_url TEXT').catch(() => {});
 
     // Data normalization
     await pool.query(`
@@ -1546,25 +1603,67 @@ const initMasterSchema = async () => {
 initMasterSchema();
 
 app.post('/api/onboarding/apply', async (req, res) => {
-  const { fullName, personalEmail, phone, licenseInfo, experience, address } = req.body;
+  const { fullName, personalEmail, phone, licenseInfo, experience, address, resumeData, resumeName } = req.body;
   
   if (!fullName) return res.status(400).json({ error: 'Missing field: fullName' });
   if (!personalEmail) return res.status(400).json({ error: 'Missing field: personalEmail' });
 
   try {
-    const query = `
-      INSERT INTO public.advisor_applications (full_name, personal_email, phone, license_info, experience, address)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *
-    `;
-    const result = await pool.query(query, [fullName, personalEmail, phone, licenseInfo, experience, address]);
-    const data = result.rows[0];
+    let resumeUrl = null;
+    if (resumeData && resumeName) {
+      console.log(`[Onboarding] Processing resume upload for: ${fullName} (${resumeName})`);
+      try {
+        const storedPath = await storageService.saveFile(`resume_${Date.now()}_${resumeName}`, resumeData);
+        resumeUrl = storedPath;
+      } catch (storageErr) {
+        console.error('[Onboarding] Resume storage failed:', storageErr.message);
+        // We continue anyway, but log the error
+      }
+    }
+
+    console.log(`[Onboarding] Processing application for: ${fullName} (Resume: ${resumeName || 'None'})`);
+
+    let finalData = null;
+
+    // Use direct pool query first for maximum reliability in production
+    try {
+        const query = `
+            INSERT INTO public.advisor_applications (full_name, personal_email, phone, license_info, experience, address, resume_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `;
+        const result = await pool.query(query, [fullName, personalEmail, phone, licenseInfo, experience, address, resumeUrl]);
+        finalData = result.rows[0];
+        console.log(`[Onboarding] Inserted application via PG Pool: ${fullName}`);
+    } catch (pgError) {
+        console.warn('[Onboarding] PG Pool Insert failed, trying Supabase Client:', pgError.message);
+        
+        const { data: sbData, error: sbError } = await supabase
+            .from('advisor_applications')
+            .insert([{
+                full_name: fullName,
+                personal_email: personalEmail,
+                phone: phone,
+                license_info: licenseInfo,
+                experience: experience,
+                address: address,
+                resume_url: resumeUrl
+            }])
+            .select()
+            .single();
+
+        if (sbError) {
+            console.error('[Onboarding] Supabase Insert Error:', sbError.message);
+            throw new Error(`Submission failed: ${sbError.message}`);
+        }
+        finalData = sbData;
+    }
 
     // Notify Admin/Manager
-    broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: data });
+    broadcast({ type: 'NEW_ADVISOR_APPLICATION', payload: finalData });
 
-    console.log(`[Onboarding] New application from: ${fullName}`);
-    res.status(201).json({ success: true, message: 'Application submitted successfully.' });
+    console.log(`[Onboarding] New application from: ${fullName}${resumeUrl ? ' (with resume)' : ''}`);
+    res.status(201).json({ success: true, message: 'Application submitted successfully.', data: finalData });
   } catch (err) {
     if (err.code === '23505') {
        return res.status(400).json({ error: 'An application with this email already exists.' });

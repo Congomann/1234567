@@ -17,7 +17,6 @@ import {
   Briefcase,
   Building2,
   Gem,
-  Map,
   Brain,
   Landmark,
   Percent,

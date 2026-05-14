@@ -41,8 +41,24 @@ export const JoinTeam: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setResume(e.target.files[0]);
+      const file = e.target.files[0];
+      // Vercel limit is 4.5MB total payload. Base64 adds ~33% overhead.
+      // 3MB * 1.33 = ~4MB, keeping us safe within the limit.
+      if (file.size > 3 * 1024 * 1024) {
+        alert("File too large. Please upload a resume smaller than 3MB.");
+        return;
+      }
+      setResume(file);
     }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,6 +66,11 @@ export const JoinTeam: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      let resumeData = null;
+      if (resume) {
+        resumeData = await fileToBase64(resume);
+      }
+
       const payload = {
         fullName: formData.fullName,
         personalEmail: formData.email,
@@ -57,8 +78,11 @@ export const JoinTeam: React.FC = () => {
         licenseInfo: formData.licenseNumber,
         experience: formData.experience,
         address: formData.address,
+        resumeData: resumeData,
+        resumeName: resume?.name,
       };
-      console.log('[JoinTeam] Submitting payload:', payload);
+      
+      console.log('[JoinTeam] Submitting application for:', formData.fullName);
       await Backend.post('/onboarding/apply', payload);
 
       // Also trigger the local state/notification if context has it
@@ -85,6 +109,7 @@ export const JoinTeam: React.FC = () => {
       });
       setResume(null);
     } catch (err: any) {
+      console.error('[JoinTeam] Submission error:', err);
       alert(`Submission failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);

@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext';
 import { 
   X, MapPin, Bed, Bath, Square, Home, Calendar, Thermometer, Wind, 
   Car, Shield, DollarSign, ChevronDown, ChevronUp, CheckCircle, 
-  Map, User, Phone, Mail, Share, Heart
+  Map as MapIcon, User, Phone, Mail, Share, Heart
 } from 'lucide-react';
 
 interface PropertyDetailModalProps {
@@ -92,7 +92,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                     {property.bedrooms !== undefined && <span className="flex items-center gap-2"><Bed className="h-5 w-5 text-blue-400" /> {property.bedrooms} Beds</span>}
                     {property.bathrooms !== undefined && <span className="flex items-center gap-2"><Bath className="h-5 w-5 text-blue-400" /> {property.bathrooms} Baths</span>}
                     {property.sqft !== undefined && <span className="flex items-center gap-2"><Square className="h-5 w-5 text-blue-400" /> {property.sqft.toLocaleString()} Sq Ft</span>}
-                    {property.lotSize && <span className="flex items-center gap-2"><Map className="h-5 w-5 text-blue-400" /> {property.lotSize}</span>}
+                    {property.lotSize && <span className="flex items-center gap-2"><MapIcon className="h-5 w-5 text-blue-400" /> {property.lotSize}</span>}
                   </div>
                 </div>
                 
