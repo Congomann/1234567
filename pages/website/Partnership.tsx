@@ -12,7 +12,8 @@ import {
   Users,
   Truck,
   X,
-  PlayCircle
+  PlayCircle,
+  Code2
 } from "lucide-react";
 import { SEO } from "../../components/SEO";
 
@@ -65,12 +66,13 @@ export const Partnership: React.FC = () => {
               <PlayCircle size={20} />
               Test Drive Sandbox
             </button>
-            <a
-              href="#benefits"
-              className="px-8 py-4 rounded-full bg-white/10 text-white font-bold tracking-wide border border-white/20 hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm"
+            <Link
+              to="/developers"
+              className="px-8 py-4 rounded-full bg-white/10 text-white font-bold tracking-wide border border-white/20 hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm flex items-center justify-center gap-2"
             >
-              Explore Benefits
-            </a>
+              <Code2 size={20} />
+              API Documentation
+            </Link>
           </div>
         </div>
       </div>

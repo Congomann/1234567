@@ -2505,6 +2505,28 @@ const migrateAuthTables = async () => {
 };
 migrateAuthTables();
 
+// ── B2B API Migrations ──────────────────
+const migrateB2BTables = async () => {
+  try {
+    console.log('[DB] Starting B2B migration...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS partner_api_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_name VARCHAR(255) NOT NULL,
+        api_key VARCHAR(255) UNIQUE NOT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        last_used_at TIMESTAMPTZ
+      )
+    `);
+    console.log('[DB] ✅ B2B tables ready');
+  } catch (err) {
+    console.error('[DB] CRITICAL B2B migration failure:', err);
+    console.warn('[DB] B2B migration warning:', err.message);
+  }
+};
+migrateB2BTables();
+
 // ════════════════════════════════════════════════════════════════════════════════
 // ENDPOINT 2 — Create Link Token
 // Matches Postman: Link → "Create Link Token"
@@ -4984,6 +5006,113 @@ app.post('/api/logistics/loads', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('[Logistics Error]', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// B2B Technology API Routes (Developer Portal)
+// ════════════════════════════════════════════════════════════════════════════════
+const authenticateApiKey = async (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  if (!apiKey) return res.status(401).json({ error: 'Missing x-api-key header' });
+  
+  try {
+    const { rows } = await pool.query('SELECT * FROM partner_api_keys WHERE api_key = $1 AND status = \'active\'', [apiKey]);
+    if (rows.length === 0) return res.status(403).json({ error: 'Invalid or inactive API Key' });
+    req.partner = rows[0];
+    
+    // Update last_used_at asynchronously
+    pool.query('UPDATE partner_api_keys SET last_used_at = NOW() WHERE id = $1', [rows[0].id]).catch(() => {});
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to authenticate API key' });
+  }
+};
+
+app.post('/api/v1/partners/quotes', authenticateApiKey, (req, res) => {
+  const { age, gender, tobacco, coverageAmount, type = 'term' } = req.body;
+  if (!age || !coverageAmount) return res.status(400).json({ error: 'age and coverageAmount are required fields.' });
+  
+  // Mock Actuarial Quoting Engine Algorithm
+  const baseRate = type === 'whole' ? 12 : 1.5;
+  const ageMultiplier = age > 50 ? 2.5 : (age > 40 ? 1.5 : 1);
+  const tobaccoMultiplier = tobacco ? 2.2 : 1;
+  const genderMultiplier = gender === 'M' ? 1.1 : 0.9;
+  
+  const estimatedMonthlyPremium = ((coverageAmount / 1000) * baseRate * ageMultiplier * tobaccoMultiplier * genderMultiplier).toFixed(2);
+  
+  setTimeout(() => { // Simulate API delay
+    res.json({
+      success: true,
+      partner: req.partner.partner_name,
+      quote: {
+        coverageAmount,
+        type,
+        estimatedMonthlyPremium: parseFloat(estimatedMonthlyPremium),
+        carriers: [
+          { name: 'NHFG Premier', monthly: parseFloat(estimatedMonthlyPremium) },
+          { name: 'Standard Life Inc', monthly: parseFloat((estimatedMonthlyPremium * 1.15).toFixed(2)) },
+          { name: 'SecureFuture', monthly: parseFloat((estimatedMonthlyPremium * 1.05).toFixed(2)) }
+        ],
+        timestamp: new Date().toISOString()
+      }
+    });
+  }, 400);
+});
+
+app.post('/api/v1/partners/underwriting', authenticateApiKey, (req, res) => {
+  const { heightInches, weightLbs, conditions = [] } = req.body;
+  if (!heightInches || !weightLbs) return res.status(400).json({ error: 'heightInches and weightLbs are required fields.' });
+
+  // Mock Underwriting Risk Class Algorithm
+  const bmi = (weightLbs / (heightInches * heightInches)) * 703;
+  let riskClass = 'Preferred Plus';
+  let message = 'Instant Approval';
+  
+  if (bmi > 30 || conditions.includes('diabetes')) {
+    riskClass = 'Standard';
+  }
+  if (bmi > 35 || conditions.includes('heart_disease')) {
+    riskClass = 'Sub-Standard';
+    message = 'Requires further APS review';
+  }
+  if (bmi > 40 && conditions.length > 1) {
+    riskClass = 'Decline';
+    message = 'Does not meet underwriting guidelines';
+  }
+
+  setTimeout(() => {
+    res.json({
+      success: true,
+      data: {
+        bmi: bmi.toFixed(1),
+        riskClass,
+        message,
+        instantDecision: riskClass !== 'Sub-Standard',
+        validUntil: new Date(Date.now() + 30*24*60*60*1000).toISOString()
+      }
+    });
+  }, 600);
+});
+
+app.post('/api/v1/partners/leads', authenticateApiKey, async (req, res) => {
+  const { firstName, lastName, email, phone, intent = 'life_insurance' } = req.body;
+  if (!firstName || !email) return res.status(400).json({ error: 'firstName and email are required fields.' });
+
+  try {
+    const { rows } = await pool.query(`
+      INSERT INTO leads (first_name, last_name, email, phone, source, status, notes)
+      VALUES ($1, $2, $3, $4, $5, 'new', $6)
+      RETURNING id, created_at
+    `, [firstName, lastName || '', email, phone || '', `API: ${req.partner.partner_name}`, `Intent: ${intent}`]);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Lead successfully ingested into NHFG CRM',
+      leadId: rows[0].id
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to ingest lead' });
   }
 });
 

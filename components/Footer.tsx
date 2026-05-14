@@ -118,6 +118,7 @@ export const Footer: React.FC = () => {
                 { name: 'Join Our Team', path: '/join' },
                 { name: 'Agent Portal', path: '/login' },
                 { name: 'Resources', path: '/resources' },
+                { name: 'Developer APIs', path: '/developers' },
               ].map((link) => (
                 <li key={link.name}>
                   <Link
