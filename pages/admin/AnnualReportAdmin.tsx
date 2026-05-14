@@ -30,6 +30,7 @@ export const AnnualReportAdmin: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Initialize from context if exists, otherwise defaults
+  const [isPublished, setIsPublished] = useState(companySettings.annualReportData?.isPublished ?? false);
   const [metrics, setMetrics] = useState(companySettings.annualReportData?.metrics || {
     totalSales: 18.2,
     salesGrowth: 46.5,
@@ -62,7 +63,7 @@ export const AnnualReportAdmin: React.FC = () => {
     try {
         const updatedSettings = {
             ...companySettings,
-            annualReportData: { metrics, audits, partnerRevenue, quarterlyReports }
+            annualReportData: { isPublished, metrics, audits, partnerRevenue, quarterlyReports }
         };
         await Backend.post('/settings', updatedSettings);
         updateCompanySettings(updatedSettings);
@@ -131,14 +132,29 @@ export const AnnualReportAdmin: React.FC = () => {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2 uppercase">Transparency Management</h1>
           <p className="text-slate-500 font-medium">Configure corporate quarterly metrics, financial data, and disclosures.</p>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
-        >
-          {isSaving ? <Loader2 size={16} className="animate-spin" /> : (saveSuccess ? <CheckCircle2 size={16} /> : <Save size={16} />)} 
-          {isSaving ? 'Saving...' : (saveSuccess ? 'Publish Updates' : 'Publish Updates')}
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
+            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Public Visibility</span>
+            <button 
+              onClick={() => setIsPublished(!isPublished)}
+              className={`w-12 h-6 rounded-full relative transition-colors ${isPublished ? 'bg-emerald-500' : 'bg-slate-300'}`}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${isPublished ? 'translate-x-7' : 'translate-x-1'}`} />
+            </button>
+            <span className={`text-xs font-bold ${isPublished ? 'text-emerald-600' : 'text-slate-400'}`}>
+              {isPublished ? 'LIVE' : 'HIDDEN'}
+            </span>
+          </div>
+
+          <button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
+          >
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : (saveSuccess ? <CheckCircle2 size={16} /> : <Save size={16} />)} 
+            {isSaving ? 'Saving...' : (saveSuccess ? 'Saved' : 'Save Updates')}
+          </button>
+        </div>
       </div>
 
       {/* Quarterly Reports Section (Every 3 months) */}

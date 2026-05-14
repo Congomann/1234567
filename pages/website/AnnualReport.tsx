@@ -66,6 +66,7 @@ export const AnnualReport: React.FC = () => {
   const audits = companySettings.annualReportData?.audits || [];
   const partnerRevenue = companySettings.annualReportData?.partnerRevenue || [];
   const quarterlyReports = companySettings.annualReportData?.quarterlyReports || [];
+  const isPublished = companySettings.annualReportData?.isPublished ?? false;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -132,7 +133,22 @@ export const AnnualReport: React.FC = () => {
           </p>
         </div>
 
-        {/* Key Metrics Grid */}
+        {!isPublished ? (
+          <div className="bg-white p-16 md:p-24 rounded-[4rem] border border-slate-100 shadow-xl shadow-slate-200/50 text-center flex flex-col items-center justify-center">
+            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-10 border border-blue-100">
+               <ShieldCheck size={40} />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter mb-6">Pending Release</h2>
+            <p className="text-xl text-slate-500 font-medium mb-10 leading-relaxed max-w-2xl">
+               The comprehensive corporate transparency report, partner network performance metrics, and financial disclosures for the current fiscal year will be publicly released at the end of the year.
+            </p>
+            <div className="px-6 py-3 bg-slate-50 text-slate-500 rounded-full text-xs font-black uppercase tracking-widest border border-slate-200">
+               Check back on December 31st
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50">
             <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-8">
@@ -376,6 +392,8 @@ export const AnnualReport: React.FC = () => {
             {isGenerating ? 'Generating...' : 'Download Full Report (PDF)'}
           </button>
         </div>
+        </>
+        )}
 
       </div>
     </div>

@@ -534,6 +534,15 @@ export interface CompanySettings {
   // System Configuration
   maintenanceModeEnabled?: boolean;
   maintenanceModeText?: string;
+
+  // Annual Report & Transparency
+  annualReportData?: {
+    isPublished?: boolean;
+    metrics?: any;
+    audits?: any;
+    partnerRevenue?: any;
+    quarterlyReports?: any;
+  };
 }
 
 export interface Testimonial {
