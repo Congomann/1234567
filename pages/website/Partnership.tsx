@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Briefcase, 
   Globe, 
@@ -9,11 +9,17 @@ import {
   ArrowRight,
   Handshake,
   Building2,
-  Users
+  Users,
+  Truck,
+  X,
+  PlayCircle
 } from "lucide-react";
 import { SEO } from "../../components/SEO";
 
 export const Partnership: React.FC = () => {
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -52,12 +58,13 @@ export const Partnership: React.FC = () => {
             Expand your market reach, integrate with our modern distribution platform, and join a network of top-tier carriers and technology partners transforming the insurance industry.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/contact"
-              className="px-8 py-4 rounded-full bg-white text-[#0B2240] font-black tracking-wide hover:bg-slate-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto"
+            <button
+              onClick={() => setShowDemoModal(true)}
+              className="px-8 py-4 rounded-full bg-white text-[#0B2240] font-black tracking-wide hover:bg-slate-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto flex items-center justify-center gap-2"
             >
-              Become a Partner
-            </Link>
+              <PlayCircle size={20} />
+              Test Drive Sandbox
+            </button>
             <a
               href="#benefits"
               className="px-8 py-4 rounded-full bg-white/10 text-white font-bold tracking-wide border border-white/20 hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm"
@@ -154,8 +161,18 @@ export const Partnership: React.FC = () => {
                     <Zap size={24} />
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-slate-900 mb-2">InsurTech & Software Partners</h4>
-                    <p className="text-slate-600">Innovative technology companies providing quoting engines, underwriting data, or CRM tools looking for strategic integration partners.</p>
+                    <h4 className="text-xl font-bold text-slate-900 mb-2">InsurTech & Software</h4>
+                    <p className="text-slate-600">We offer proprietary CRM tools, direct quoting engines, and underwriting data APIs for seamless integration with carriers and technology partners.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-6">
+                  <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                    <Truck size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-slate-900 mb-2">Freight & Logistics</h4>
+                    <p className="text-slate-600">Shippers, brokers, and carriers looking to leverage NHFG's massive logistics infrastructure and nationwide dispatching network for scalable distribution.</p>
                   </div>
                 </div>
 
@@ -205,6 +222,61 @@ export const Partnership: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* Demo Request Modal */}
+      {showDemoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                <PlayCircle size={20} className="text-blue-600" />
+                Sandbox Access Request
+              </h3>
+              <button 
+                onClick={() => setShowDemoModal(false)}
+                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form 
+              className="p-6 space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Magic Link: Set mock user ID and redirect to Dashboard
+                localStorage.setItem('nhfg_mock_user_id', 'u1'); // u1 is John Admin/Manager
+                navigate('/crm/dashboard');
+              }}
+            >
+              <p className="text-sm text-slate-600 font-medium mb-2 leading-relaxed">
+                Enter your corporate email to instantly provision a live sandbox environment. You will be logged into a secure, pre-populated CRM instance to test drive our quoting engines and automated workflows.
+              </p>
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+                <input required type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900" placeholder="Jane Doe" />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Corporate Email</label>
+                <input required type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900" placeholder="jane@carrier.com" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Company / Agency Name</label>
+                <input required type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900" placeholder="Acme Insurance" />
+              </div>
+
+              <div className="pt-2">
+                <button type="submit" className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0">
+                  Enter Live Sandbox <ArrowRight size={18} />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
