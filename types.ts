@@ -41,7 +41,7 @@ export enum ProductType {
   FINAL_EXPENSE = 'Final Expense',
   INVESTMENT = 'Investment & Retirement Advisory',
   LOGISTICS = 'Logistics & Trucking',
-  HOME_REPAIR = 'Home Repair'
+  HOME_REPAIR = 'DSM Property Solutions'
 }
 
 export enum UserRole {

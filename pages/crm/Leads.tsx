@@ -552,7 +552,7 @@ export const Leads: React.FC = () => {
                                             <div className="absolute top-0 right-0 p-4 opacity-10">
                                                 <Wrench size={48} className="text-orange-500" />
                                             </div>
-                                            <h3 className="text-xs font-black text-orange-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Hammer size={14} /> Home Repair Details</h3>
+                                            <h3 className="text-xs font-black text-orange-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Hammer size={14} /> DSM Property Solutions Details</h3>
                                             
                                             <div className="space-y-4 relative z-10">
                                                 <div>

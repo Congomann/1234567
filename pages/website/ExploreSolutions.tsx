@@ -53,7 +53,7 @@ export const ExploreSolutions: React.FC = () => {
         { label: 'Mortgage', path: '/mortgage', icon: Landmark, description: 'Purchase, refinance, and equity lines.' },
         { label: 'Securities', path: '/securities', icon: BarChart3, description: 'Stocks, bonds, and mutual funds.' },
         { label: 'Real Estate', path: '/real-estate', icon: Key, description: 'Residential and commercial listings.' },
-        { label: 'Home Repair', path: '/home-repair', icon: Wrench, description: 'Maintenance and renovation services.' }
+        { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench, description: 'Maintenance and renovation services.' }
       ]
     },
     {

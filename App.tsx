@@ -188,7 +188,7 @@ const App: React.FC = () => {
             <Route path="/life-insurance/quote" element={<PublicLayout><LifeInsuranceFunnel /></PublicLayout>} />
             <Route path="/real-estate" element={<PublicLayout><RealEstate /></PublicLayout>} />
 
-            <Route path="/home-repair" element={<PublicLayout><HomeRepair /></PublicLayout>} />
+            <Route path="/dsm-property-solutions" element={<PublicLayout><HomeRepair /></PublicLayout>} />
             <Route path="/mortgage" element={<PublicLayout><Mortgage /></PublicLayout>} />
             <Route path="/business-insurance" element={<PublicLayout><BusinessInsurance /></PublicLayout>} />
             <Route path="/group-benefits" element={<PublicLayout><GroupBenefits /></PublicLayout>} />

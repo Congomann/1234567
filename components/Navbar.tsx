@@ -71,7 +71,7 @@ export const Navbar: React.FC = () => {
         { label: 'Mortgage', path: '/mortgage', icon: Landmark },
         { label: 'Securities', path: '/securities', icon: BarChart3 },
         { label: 'Real Estate', path: '/real-estate', icon: Key },
-        { label: 'Home Repair', path: '/home-repair', icon: Wrench }
+        { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench }
       ]
     },
     {

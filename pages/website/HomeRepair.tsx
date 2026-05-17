@@ -85,7 +85,7 @@ export const HomeRepair: React.FC = () => {
           phone: formData.phone,
           email: formData.email || "Not Provided",
           interest: formData.serviceType as any,
-          message: `Home Repair requested for ${formData.serviceType}. Address: ${formData.address}. Best time: ${formData.evaluationTime || formData.timeRequested || "ASAP"}`,
+          message: `DSM Property Solutions requested for ${formData.serviceType}. Address: ${formData.address}. Best time: ${formData.evaluationTime || formData.timeRequested || "ASAP"}`,
           source: "company",
           customDetails: {
             homeRepairDetails: {
@@ -133,7 +133,7 @@ export const HomeRepair: React.FC = () => {
             Expert Maintenance
           </span>
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
-            Premium Home Repair <br />
+            Premium DSM Property Solutions <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-600">
               & Maintenance
             </span>
