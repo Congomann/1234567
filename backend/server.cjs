@@ -5179,6 +5179,22 @@ app.post('/api/v1/partners/leads', authenticateApiKey, async (req, res) => {
 });
 
 
+// --- SERVE STATIC FRONTEND (For Render / Unified deployment) ---
+const distPath = path.join(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  
+  // Catch-all to serve index.html for React Router (client-side routing)
+  app.get('*', (req, res) => {
+    // Only serve index.html for non-API routes
+    if (!req.url.startsWith('/api')) {
+      res.sendFile(path.join(distPath, 'index.html'));
+    } else {
+      res.status(404).json({ error: 'API route not found' });
+    }
+  });
+}
+
 if (require.main === module) {
 server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);

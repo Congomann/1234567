@@ -152,6 +152,33 @@ export const AdvisorMicrosite: React.FC = () => {
     setTimeout(() => setCopyText("Copy Link"), 2000);
   };
 
+  const handleDownloadVCard = () => {
+    if (!advisor) return;
+    
+    // Create vCard content
+    const vcard = `BEGIN:VCARD
+VERSION:3.0
+N:${advisor.name.split(' ').slice(1).join(' ') || ''};${advisor.name.split(' ')[0] || ''};;;
+FN:${advisor.name}
+ORG:New Holland Financial Group
+TITLE:${advisor.title || 'Advisor'}
+TEL;TYPE=WORK,VOICE:${advisor.phone || companySettings.phone || ''}
+EMAIL;TYPE=PREF,INTERNET:${advisor.email || companySettings.email || ''}
+URL:${window.location.href}
+END:VCARD`;
+
+    // Create a blob and download link
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${advisor.name.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
@@ -353,6 +380,13 @@ export const AdvisorMicrosite: React.FC = () => {
                   className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-white/20 transition-all flex items-center gap-2"
                 >
                   <PhoneIncoming className="h-4 w-4" /> Request Call Back
+                </button>
+
+                <button
+                  onClick={handleDownloadVCard}
+                  className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-white/20 transition-all flex items-center gap-2"
+                >
+                  <User className="h-4 w-4" /> Save Contact
                 </button>
 
                 <button
@@ -798,18 +832,14 @@ export const AdvisorMicrosite: React.FC = () => {
               <LinkIcon className="h-5 w-5 text-slate-400" />
               <input
                 className="flex-1 bg-transparent text-xs font-bold text-slate-600 outline-none truncate"
-                value={window.location.href}
                 readOnly
+                value={window.location.href}
               />
               <button
                 onClick={handleCopyLink}
-                className="text-[10px] font-black text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-widest"
+                className="px-4 py-2 bg-[#0B2240] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-blue-900 transition-colors flex items-center gap-2 shrink-0"
               >
-                {copyText === "Copied!" ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
+                {copyText === 'Copied!' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copyText}
               </button>
             </div>
