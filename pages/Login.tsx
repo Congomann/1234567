@@ -55,7 +55,7 @@ export const Login: React.FC = () => {
           </svg>
         </div>
         <h2 className="text-3xl font-bold text-[#0B2240] tracking-tight">
-          Advisor Login
+          Advisor & Admin Login
         </h2>
       </div>
 
