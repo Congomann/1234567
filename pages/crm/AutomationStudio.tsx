@@ -20,6 +20,7 @@ import {
     Database
 } from 'lucide-react';
 import { Workflow, WorkflowTrigger } from '../../types';
+import { AgentManager } from '../../components/agents/AgentManager';
 
 export const AutomationStudio: React.FC = () => {
     const { automationMetrics, workflows, addWorkflow, toggleWorkflow, processingLeads, leads, triggerPulse } = useData();
@@ -155,6 +156,9 @@ export const AutomationStudio: React.FC = () => {
                     iconBg="bg-amber-500"
                 />
             </div>
+
+            {/* Agent Manager Panel */}
+            <AgentManager />
 
             {/* Workflow Engine Cards */}
             <div className="space-y-12">

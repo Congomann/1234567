@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { UserRole } from '../../types';
-import { Check, ChevronRight, FileText, ShieldCheck, Settings, Briefcase, Key, CheckCircle2, User, Landmark, ShieldAlert, PenTool, Eraser } from 'lucide-react';
+import { Check, ChevronRight, FileText, ShieldCheck, Settings, Briefcase, Key, CheckCircle2, User, Landmark, ShieldAlert, PenTool, Eraser, Globe, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const STEPS = [

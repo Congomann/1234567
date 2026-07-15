@@ -486,6 +486,8 @@ export interface ProductListing {
 }
 
 export interface CompanySettings {
+  maintenanceMode?: boolean;
+  maintenanceMessage?: string;
   phone: string;
   email: string;
   address: string;

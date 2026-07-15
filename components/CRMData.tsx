@@ -43,7 +43,8 @@ import {
     Truck,
     Car,
     Newspaper,
-    Map as MapIcon
+    Map as MapIcon,
+    Briefcase
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';

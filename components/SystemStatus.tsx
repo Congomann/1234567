@@ -7,11 +7,11 @@ import { useData } from '../context/DataContext';
  * Provides a marquee-style announcement for system status and maintenance.
  */
 export const SystemStatus: React.FC = () => {
-  const { settings } = useData();
+  const { companySettings } = useData();
   
   // Logic: Show if settings explicitly enable it, or fallback to a local constant
-  const isMaintenance = settings?.maintenanceMode || false;
-  const message = settings?.maintenanceMessage || "SYSTEM MAINTENANCE IN PROGRESS: We are currently upgrading our core infrastructure to provide you with a faster, more secure experience. Some banking and advisor tools may be temporarily limited. Estimated uptime: 2:00 AM EST.";
+  const isMaintenance = companySettings?.maintenanceMode || false;
+  const message = companySettings?.maintenanceMessage || "SYSTEM MAINTENANCE IN PROGRESS: We are currently upgrading our core infrastructure to provide you with a faster, more secure experience. Some banking and advisor tools may be temporarily limited. Estimated uptime: 2:00 AM EST.";
 
   // If you want to force show it for demonstration:
   const forceShow = true; 

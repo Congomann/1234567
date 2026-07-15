@@ -62,6 +62,7 @@ interface DataContextType {
   updateCompanySettings: (settings: CompanySettings) => Promise<boolean>;
   landingPages: any[];
   saveLandingPage: (page: any) => Promise<boolean>;
+  deleteLandingPage: (id: string) => Promise<boolean>;
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
   completeOnboarding: (signatureData?: string) => void;
@@ -526,7 +527,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // LEGACY MOCK FALLBACK (Only allowed on localhost or if explicitly allowed)
     // In production, we MUST fail if the backend is unreachable to avoid the 'Mock Trap'
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocal = !import.meta.env.PROD;
     if (!isLocal) {
         console.error("[DataContext] Backend handshake failed in production. Mock fallback suppressed.");
         pushNotification('Connection Error', 'Production backend unreachable. Please check system status.', 'alert');
@@ -1001,7 +1002,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
       addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
-      landingPages, saveLandingPage,
+      landingPages, saveLandingPage, deleteLandingPage: async () => false,
       addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,
       assignCarriers, markChatRead, editChatMessage, deleteChatMessage, sendChatMessage, submitJobApplication, updateJobApplicationStatus,
       updateApplicationStatus, updateTransactionStatus, addPortfolio, updatePortfolio, deletePortfolio, addComplianceDoc,

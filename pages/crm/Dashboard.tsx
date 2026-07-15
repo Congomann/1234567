@@ -6,7 +6,7 @@ import {
     Users, Wallet, TrendingUp, Activity, ArrowUpRight,
     MonitorCheck, BarChart3, ShieldAlert, Cpu, ArrowRight,
     Search, Bell, LayoutGrid, Webhook, Bug, RefreshCw, MessageSquarePlus, ChevronRight, AlertCircle, Clock, Info, Server, Globe, Zap, ShieldCheck,
-    FileText, GripVertical, CheckCircle2, Trash2, Plus, Phone, Mail, Calendar
+    FileText, GripVertical, CheckCircle2, Trash2, Plus, Phone, Mail, Calendar, User
 } from 'lucide-react';
 import { UserRole, LeadStatus, TaskPriority, Task } from '../../types';
 

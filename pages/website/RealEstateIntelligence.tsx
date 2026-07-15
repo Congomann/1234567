@@ -37,7 +37,7 @@ import { PDFBrandingService } from "../../services/pdfBrandingService";
 import { jsPDF } from "jspdf";
 import { useData } from "../../context/DataContext";
 import { FileDown, Lock, Loader2 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const MARKET_DATA = [
   { month: "Jan", price: 420, inventory: 450, absorption: 12 },
@@ -86,9 +86,9 @@ export const RealEstateIntelligence: React.FC = () => {
             The Market Intelligence Terminal is reserved for authorized NHFG Real Estate Realtors only.
           </p>
           <div className="pt-4">
-             <Navigate to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
-                Return to Solutions
-             </Navigate>
+             <Link to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
+                Back to Solutions
+             </Link>
           </div>
         </div>
       </div>

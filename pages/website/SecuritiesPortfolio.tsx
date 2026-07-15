@@ -29,7 +29,7 @@ import { useData } from "../../context/DataContext";
 import { PDFBrandingService } from "../../services/pdfBrandingService";
 import { jsPDF } from "jspdf";
 import { Lock, FileDown, Loader2 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 type RiskProfile = "conservative" | "balanced" | "aggressive" | "hyper-growth";
 
@@ -117,9 +117,9 @@ export const SecuritiesPortfolio: React.FC = () => {
             The Strategic Wealth Engine is reserved for internal NHFG Securities & Investment Advisors only.
           </p>
           <div className="pt-4">
-             <Navigate to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
-                Return to Solutions
-             </Navigate>
+             <Link to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
+                Back to Solutions
+             </Link>
           </div>
         </div>
       </div>
