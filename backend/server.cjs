@@ -190,7 +190,7 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
 
   poolConfig = {
     connectionString: connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false },
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000, // Increased for stability
