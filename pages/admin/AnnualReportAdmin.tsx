@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { Backend } from '../../services/apiBackend';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 /**
  * ANNUAL REPORT & TRANSPARENCY ADMIN
@@ -124,10 +125,16 @@ export const AnnualReportAdmin: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 font-sans">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-8 relative">
+      <Tab3DBanner
+        cards={[
+          { title: "Public Disclosure Audit", value: "SEC Compliant", subtitle: "2026 Audit Report", emoji: "📊", gradient: "cyan", linkText: "Audit Filings" },
+          { title: "Regulatory Filings", value: "100% Up to Date", subtitle: "48 Active States", emoji: "⚖️", gradient: "yellow", linkText: "State Disclosures" },
+          { title: "Annual Financial Metric", value: "$142.8M AUM", subtitle: "0 Active Lawsuits", emoji: "📜", gradient: "pink", linkText: "Financial Metrics" }
+        ]}
+      />
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2 uppercase">Transparency Management</h1>
           <p className="text-slate-500 font-medium">Configure corporate quarterly metrics, financial data, and disclosures.</p>

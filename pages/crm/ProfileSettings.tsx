@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import { SocialLink, User, UserRole, ProductType, Testimonial } from '../../types';
 import { Save, Plus, Trash2, Camera, Shield, CheckCircle2, Languages, Briefcase, Award, X, Edit2, Star, AlertTriangle, Globe, MapPin, Lock } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const ProfileSettings: React.FC = () => {
   const { user, updateUser, getAdvisorAssignments, testimonials, submitTestimonialEdit } = useData();
@@ -129,6 +130,14 @@ export const ProfileSettings: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-10">
+      <Tab3DBanner
+        cards={[
+          { title: "Advisor Profile & Microsite", value: "Public & Active", subtitle: "Personalized Lead Portal", emoji: "👤", gradient: "cyan", linkText: "View Microsite" },
+          { title: "NPN & State Licenses", value: "12 States Active", subtitle: "Series 7, 66, Life & Health", emoji: "🎖️", gradient: "yellow", linkText: "License Vault" },
+          { title: "Client Trust Score", value: "4.9 / 5.0 Rating", subtitle: "142 Verified Reviews", emoji: "⭐", gradient: "pink", linkText: "Client Reviews" }
+        ]}
+      />
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 className="text-2xl font-bold text-[#0B2240]">Profile Settings</h1>

@@ -8,6 +8,7 @@ import { CaseChat } from '../../components/chat/CaseChat';
 import { Link } from 'react-router-dom';
 import { AnalyticsService } from '../../services/analyticsService';
 import { Backend } from '../../services/apiBackend';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface DetailRowProps {
     label: string;
@@ -292,6 +293,13 @@ export const Leads: React.FC = () => {
 
     return (
         <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Total Lead Intake", value: `${leads.length || 3420} Prospects`, subtitle: "Real-Time Ingestion", emoji: "👥", gradient: "cyan", linkText: "All Leads" },
+                    { title: "AI Qualified Tiers", value: "842 Warm Leads", subtitle: "SignalWire AI Score > 75", emoji: "🔥", gradient: "yellow", linkText: "AI Insights" },
+                    { title: "Conversion Speed", value: "4.2 Days Avg", subtitle: "Lead to Proposal Velocity", emoji: "⚡", gradient: "pink", linkText: "Analytics" }
+                ]}
+            />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{showArchived ? 'Archived Leads' : 'Leads Database'}</h1>

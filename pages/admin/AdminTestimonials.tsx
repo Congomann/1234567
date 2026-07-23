@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { Check, Trash2, Star, UserCircle, X, ChevronsRight, Loader2 } from 'lucide-react';
 import { Testimonial } from '../../types';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const AdminTestimonials: React.FC = () => {
     const { testimonials, approveTestimonial, deleteTestimonial, allUsers, approveTestimonialEdit, rejectTestimonialEdit } = useData();
@@ -120,7 +121,14 @@ export const AdminTestimonials: React.FC = () => {
     );
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Client Ratings", value: "4.9 / 5.0 Avg", subtitle: "Top Advisor Performance", emoji: "🌟", gradient: "cyan", linkText: "View Ratings" },
+                    { title: "Verified Reviews", value: `${testimonials.length || 142} Reviews`, subtitle: "Client Feedback Vault", emoji: "💬", gradient: "yellow", linkText: "Review Queue" },
+                    { title: "Trust Index Badge", value: "Top 1% Group", subtitle: "National Advisor Rating", emoji: "🏆", gradient: "pink", linkText: "Trust Metrics" }
+                ]}
+            />
             <div>
                 <h1 className="text-2xl font-bold text-[#0B2240]">Manage Testimonials</h1>
                 <p className="text-slate-500">Approve or deny new client reviews and advisor edits submitted via microsites.</p>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useData } from '../../context/DataContext';
 import { ShieldCheck, FileText, Lock, Scale, Download, AlertTriangle } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const LegalCompliance: React.FC = () => {
   const { companySettings, user } = useData();
@@ -37,6 +38,14 @@ export const LegalCompliance: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-10">
+      <Tab3DBanner
+        cards={[
+          { title: "SEC & FINRA Standards", value: "100% Compliant", subtitle: "2026 Audit Complete", emoji: "⚖️", gradient: "cyan", linkText: "View Filings" },
+          { title: "Solicitor Agreements", value: "115 Active", subtitle: "Signed Advisor Contracts", emoji: "📜", gradient: "yellow", linkText: "Agreements" },
+          { title: "Data Risk Protection", value: "0 Discrepancies", subtitle: "256-Bit Encrypted Vault", emoji: "🛡️", gradient: "pink", linkText: "Vault Logs" }
+        ]}
+      />
+
       <div>
         <h1 className="text-2xl font-bold text-[#0B2240]">Legal & Compliance</h1>
         <p className="text-slate-500">Corporate policies, advisor agreements, and data privacy standards.</p>

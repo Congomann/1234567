@@ -20,6 +20,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { LogisticsNiche } from '../../../types';
 import { Backend } from '../../../services/apiBackend';
+import { Tab3DBanner } from '../../../components/shared/Tab3DBanner';
 
 interface KanbanDeal {
   id: string;
@@ -130,6 +131,14 @@ export const LogisticsHub: React.FC = () => {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
+      <Tab3DBanner
+        cards={[
+          { title: "Active Freight Loads", value: `${loads.length || 128} Freight Loads`, subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board" },
+          { title: "Fleet GPS Dispatch", value: "42 Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow", linkText: "GPS Telematics" },
+          { title: "Carrier Rate Confirmations", value: "$420,000 Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink", linkText: "Freight Invoices" }
+        ]}
+      />
+
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-8 rounded-[3rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div>

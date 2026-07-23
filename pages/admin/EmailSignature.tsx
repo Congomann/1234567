@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { UserRole, SocialLink as SocialLinkType } from '../../types';
 import { Copy, Check, Download, Plus, Trash2, RotateCcw, X, Mail, Phone, Globe, MapPin, Facebook, Linkedin, Twitter, Instagram, Maximize2, Move, Ghost, ChevronDown, Database, Link as LinkIcon, ExternalLink, Image as ImageIcon, CheckCircle2, FileImage, Loader2, ShieldCheck } from 'lucide-react';
 import { toPng } from 'html-to-image';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 type Tab = 'Personal' | 'Contact' | 'Social' | 'Legal';
 
@@ -668,7 +669,14 @@ export const EmailSignature: React.FC = () => {
     const ICON_MAP = "https://cdn-icons-png.flaticon.com/32/3082/3082383.png";
 
     return (
-        <div className="space-y-8 pb-10 animate-fade-in">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "HTML Signature Builder", value: "NHFG Brand", subtitle: "Outlook & Gmail Compatible", emoji: "✉️", gradient: "cyan", linkText: "Copy Signature" },
+                    { title: "FINRA & SEC Compliance", value: "Verified Footer", subtitle: "Mandatory Regulatory Notice", emoji: "✒️", gradient: "yellow", linkText: "Legal Settings" },
+                    { title: "1-Click HTML Generator", value: "Active Template", subtitle: "Responsive Email Format", emoji: "📱", gradient: "pink", linkText: "Export HTML" }
+                ]}
+            />
             {isCropping && (
                 <ImageCropper
                     imageUrl={tempImage}

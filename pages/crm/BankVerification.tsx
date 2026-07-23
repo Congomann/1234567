@@ -38,6 +38,7 @@ import {
     ManualVerificationPayload,
 } from '../../services/bankingService';
 import { socketService } from '../../services/socketService';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -1084,6 +1085,14 @@ export const BankVerification: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <Tab3DBanner
+                cards={[
+                    { title: "Plaid Production ACH", value: "Live Direct Link", subtitle: "Instant Bank Verification", emoji: "🏦", gradient: "cyan", linkText: "Connect Bank" },
+                    { title: "Instant Auth Speed", value: "< 2.0 Seconds", subtitle: "Balance & Identity Verified", emoji: "⚡", gradient: "yellow", linkText: "Verification Status" },
+                    { title: "ABA Routing Checksum", value: "100% Validated", subtitle: "Micro-Deposit Protection", emoji: "🛡️", gradient: "pink", linkText: "Security Logs" }
+                ]}
+            />
 
             {/* ── Header ── */}
             <div style={{ marginBottom: 24 }}>

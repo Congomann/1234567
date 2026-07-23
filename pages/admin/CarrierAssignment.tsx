@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { UserRole, Carrier } from '../../types';
 import { Shield, CheckSquare, Square, Search, UserCheck } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const CarrierAssignment: React.FC = () => {
   const { allUsers, availableCarriers, assignCarriers } = useData();
@@ -64,7 +65,14 @@ export const CarrierAssignment: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8 relative">
+      <Tab3DBanner
+        cards={[
+          { title: "Insurance Carriers", value: "35 Partners", subtitle: "Mutual of Omaha, AIG, Lincoln", emoji: "🛡️", gradient: "cyan", linkText: "View Carriers" },
+          { title: "Contracting Portal", value: "Active Contracting", subtitle: "Direct Advisor Appointments", emoji: "📝", gradient: "yellow", linkText: "Contracting" },
+          { title: "Carrier Auto-Provisioning", value: "Live Sync", subtitle: "Tier-Based Contracting", emoji: "⚡", gradient: "pink", linkText: "Tier Settings" }
+        ]}
+      />
         <div>
             <h1 className="text-2xl font-bold text-[#0B2240]">Bulk Carrier Assignment</h1>
             <p className="text-slate-500">Manage advisor appointments with insurance carriers.</p>

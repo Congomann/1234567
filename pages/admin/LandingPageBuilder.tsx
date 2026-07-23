@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface LandingPage {
     id: string;
@@ -80,7 +81,14 @@ export const LandingPageBuilder: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 pb-20 max-w-7xl mx-auto">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Product Landing Pages", value: "18 Dynamic Sites", subtitle: "High-Converting Funnels", emoji: "🌐", gradient: "cyan", linkText: "View Pages" },
+                    { title: "Drag & Drop Builder", value: "Responsive Layouts", subtitle: "Visual Page Editor", emoji: "🎨", gradient: "yellow", linkText: "Open Editor" },
+                    { title: "Campaign Conversions", value: "+24% Lead Yield", subtitle: "Real-Time Lead Tracking", emoji: "🚀", gradient: "pink", linkText: "Page Metrics" }
+                ]}
+            />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <h1 className="text-3xl font-black text-slate-800 tracking-tight">Campaign Page Engine</h1>
@@ -328,7 +336,6 @@ export const LandingPageBuilder: React.FC = () => {
                 loading={isDeleting}
                 title="Delete Campaign Page?"
                 message="Are you sure you want to permanently delete this landing page? This will immediately disable the public URL and remove all associated data. This action cannot be undone."
-                confirmText="Delete Deployment"
             />
         </div>
     );

@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { ProductListing } from '../../types';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const ProductCms: React.FC = () => {
   const { companySettings, updateCompanySettings } = useData();
@@ -72,7 +73,14 @@ export const ProductCms: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8 relative">
+      <Tab3DBanner
+        cards={[
+          { title: "Financial Product Suite", value: "Life, RE, Securities", subtitle: "Managed Offerings Catalog", emoji: "💼", gradient: "cyan", linkText: "View Products" },
+          { title: "Commission Tier Matrix", value: "85% - 110% Split", subtitle: "Advisor Payout Scales", emoji: "🏷️", gradient: "yellow", linkText: "Commission Tiers" },
+          { title: "Instant Catalog Sync", value: "Live Sync Active", subtitle: "Dynamic CMS Updates", emoji: "⚡", gradient: "pink", linkText: "Catalog Settings" }
+        ]}
+      />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-[#0B2240]">Product Listings CMS</h1>

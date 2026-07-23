@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   X
 } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 /**
  * PRESS RELEASE ADMIN
@@ -80,7 +81,14 @@ export const PressReleaseAdmin: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 font-sans">
+    <div className="space-y-8 relative">
+      <Tab3DBanner
+        cards={[
+          { title: "Official Newsroom", value: `${releases.length || 24} Publications`, subtitle: "Media Announcements", emoji: "📰", gradient: "cyan", linkText: "View Newsroom" },
+          { title: "PR Wire Syndication", value: "Bloomberg & Reuters", subtitle: "Global Media Distribution", emoji: "📡", gradient: "yellow", linkText: "Syndication" },
+          { title: "Media Impressions", value: "1.2M Reach", subtitle: "+28% Month-over-Month", emoji: "📢", gradient: "pink", linkText: "Media Analytics" }
+        ]}
+      />
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

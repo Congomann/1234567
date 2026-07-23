@@ -3,6 +3,7 @@ import { MarketingCampaign, MarketingAudience } from '../../types';
 import { Target, Users, Send, TrendingUp, Plus, Search, Filter, ArrowUpRight, BarChart3, Mail, DollarSign, Share2, CreditCard } from 'lucide-react';
 import { SocialMediaIntegrations } from '../../components/marketing/SocialMediaIntegrations';
 import { PaymentApprovalModal } from '../../components/marketing/PaymentApprovalModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const CampaignManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'campaigns' | 'audiences' | 'email' | 'social' | 'payments'>('dashboard');
@@ -85,6 +86,15 @@ export const CampaignManager: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* 3D Animated Hero Cards */}
+      <Tab3DBanner
+        cards={[
+          { title: "Active Ad Campaigns", value: "$48.5K Budget", subtitle: "Meta & Google Ads Live", emoji: "📢", gradient: "cyan", linkText: "Manage Ads" },
+          { title: "Lead Conversions", value: "1,240 Leads", subtitle: "18.4% Conversion Rate", emoji: "🎯", gradient: "yellow", linkText: "View Leads" },
+          { title: "Stripe Ad Spend ROI", value: "+431% Return", subtitle: "$50.5K Revenue YTD", emoji: "🚀", gradient: "pink", linkText: "Analytics" }
+        ]}
+      />
 
       {/* Dynamic Content */}
       <div className="bg-white/70 backdrop-blur-2xl rounded-[3.5rem] border border-white/60 shadow-[0_8px_40px_rgb(0,0,0,0.03)] overflow-hidden p-8 lg:p-12 relative min-h-[500px]">

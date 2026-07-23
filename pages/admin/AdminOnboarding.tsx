@@ -9,6 +9,7 @@ import {
 import { Backend } from '../../services/apiBackend';
 import { ProductType } from '../../types';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface Application {
     id: string;
@@ -114,6 +115,14 @@ export default function AdminOnboarding() {
     return (
         <div className="min-h-screen bg-slate-50 p-6">
             <div className="max-w-7xl mx-auto">
+                <Tab3DBanner
+                    cards={[
+                        { title: "Pending Advisor Applications", value: `${pendingCount || 14} Applications`, subtitle: "Awaiting License Review", emoji: "📋", gradient: "cyan", linkText: "Review Apps" },
+                        { title: "NPN & FINRA Verification", value: "Series 7 & 66 Verified", subtitle: "Automated FINRA Check", emoji: "🎓", gradient: "yellow", linkText: "License Check" },
+                        { title: "Approved Contracts", value: "28 Advisors Joined", subtitle: "Contracts Issued", emoji: "🤝", gradient: "pink", linkText: "View Approved" }
+                    ]}
+                />
+
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>

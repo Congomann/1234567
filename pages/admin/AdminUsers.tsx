@@ -5,6 +5,7 @@ import { User, UserRole, AdvisorCategory, ProductType } from '../../types';
 import { Trash2, Plus, Search, Edit2, Shield, Globe, Power, PowerOff, X, Check, Save, Archive, RotateCcw, AlertTriangle, Briefcase, ChevronDown, Eye, EyeOff, ExternalLink, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const AdminUsers: React.FC = () => {
     const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser, accessLogs } = useData();
@@ -77,7 +78,14 @@ export const AdminUsers: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Master System Admin", value: "Full Control", subtitle: "User Terminal Console", emoji: "👑", gradient: "cyan", linkText: "System Health" },
+                    { title: "Active Advisory Staff", value: `${allUsers.length || 42} Advisors`, subtitle: "Role Permissions Active", emoji: "👥", gradient: "yellow", linkText: "Manage Users" },
+                    { title: "Security Access Logs", value: "0 Violations", subtitle: "Audit Trail Enforced", emoji: "🔑", gradient: "pink", linkText: "View Logs" }
+                ]}
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <div className="bg-white/40 backdrop-blur-md rounded-[2rem] p-6 border border-white/50 shadow-sm">
                     <div className="flex justify-between items-end mb-2">

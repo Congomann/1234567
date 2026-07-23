@@ -17,6 +17,7 @@ import {
   Loader2
 } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const RealEstateCms: React.FC = () => {
   const { companySettings, updateCompanySettings } = useData();
@@ -87,7 +88,14 @@ export const RealEstateCms: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-24 animate-fade-in">
+    <div className="space-y-8 relative">
+      <Tab3DBanner
+        cards={[
+          { title: "Property Portal CMS", value: "Active Content", subtitle: "Real Estate Page Manager", emoji: "🏙️", gradient: "cyan", linkText: "View Portal" },
+          { title: "Virtual Tour Assets", value: "120 HD Uploads", subtitle: "Property Photos & Media", emoji: "📸", gradient: "yellow", linkText: "Media Vault" },
+          { title: "Localized SEO Pages", value: "50 Cities Live", subtitle: "Dynamic Search Engine Pages", emoji: "🌐", gradient: "pink", linkText: "SEO Controls" }
+        ]}
+      />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Real Estate CMS</h1>

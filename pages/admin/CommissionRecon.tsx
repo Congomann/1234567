@@ -18,6 +18,7 @@ import {
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface Reconciliation {
     id: string;
@@ -110,7 +111,15 @@ export const CommissionRecon: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 pb-20 max-w-7xl mx-auto">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Monthly Carrier Statements", value: "$840,000 Recon", subtitle: "Carrier Payout Audits", emoji: "💵", gradient: "cyan", linkText: "Statements" },
+                    { title: "Statement Discrepancy", value: "0 Unmatched", subtitle: "100% Policy Match", emoji: "🔍", gradient: "yellow", linkText: "Audit Queue" },
+                    { title: "Direct Advisor Payouts", value: "85% - 110% Paid", subtitle: "Direct ACH Wire", emoji: "🏦", gradient: "pink", linkText: "Payout Logs" }
+                ]}
+            />
+            <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <h1 className="text-3xl font-black text-slate-800 tracking-tight">Financial Reconciliation</h1>
@@ -262,6 +271,7 @@ export const CommissionRecon: React.FC = () => {
                     </table>
                 </div>
             </div>
+        </div>
         </div>
     );
 };

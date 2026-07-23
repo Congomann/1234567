@@ -5,6 +5,7 @@ import { Resource, ProductType, SocialLink, CompanySettings } from '../../types'
 import { Backend } from '../../services/apiBackend';
 import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2, RotateCcw, Send } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const WebsiteSettings: React.FC = () => {
     const { companySettings, updateCompanySettings, resources, addResource, deleteResource } = useData();
@@ -430,6 +431,13 @@ export const WebsiteSettings: React.FC = () => {
 
     return (
         <div className="space-y-8 pb-10">
+            <Tab3DBanner
+                cards={[
+                    { title: "Global Website CMS", value: "v4.2 Live", subtitle: "Public Theme & Assets", emoji: "⚙️", gradient: "cyan", linkText: "Site Config" },
+                    { title: "Apple Glassmorphism", value: "iOS 18 Theme", subtitle: "Design System Active", emoji: "🎨", gradient: "yellow", linkText: "Theme Settings" },
+                    { title: "Domain & DNS Health", value: "100% Uptime", subtitle: "Production SSL Active", emoji: "🚀", gradient: "pink", linkText: "DNS Status" }
+                ]}
+            />
             <div>
                 <h1 className="text-2xl font-bold text-[#0B2240]">Website Settings</h1>
                 <p className="text-slate-500">Manage global company information and public resources.</p>

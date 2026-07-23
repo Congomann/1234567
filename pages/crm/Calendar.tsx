@@ -7,6 +7,7 @@ import { GridMonth } from '../../components/calendar/GridMonth';
 import { GridWeek } from '../../components/calendar/GridWeek';
 import { GridDay } from '../../components/calendar/GridDay';
 import { EventModal } from '../../components/calendar/EventModal';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 import { ChevronLeft, ChevronRight, Search, List, Filter, Bell, Globe } from 'lucide-react';
 
 export type CalendarViewType = 'month' | 'week' | 'day';
@@ -89,7 +90,16 @@ export const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+    <div className="space-y-6">
+      <Tab3DBanner
+        cards={[
+          { title: "Scheduled Appointments", value: "42 Meetings", subtitle: "This Month", emoji: "📅", gradient: "cyan", linkText: "View Schedule" },
+          { title: "Upcoming Client Calls", value: "18 Calls Today", subtitle: "SignalWire Integrated", emoji: "⏰", gradient: "yellow", linkText: "Join Calls" },
+          { title: "Completed Consultations", value: "128 Sessions", subtitle: "98% Attendance Rate", emoji: "🏆", gradient: "pink", linkText: "Review Logs" }
+        ]}
+      />
+
+      <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
       {/* Sidebar with Alerts */}
       <Sidebar visibleEvents={visibleEvents} onAlertClick={openModalEdit} />
 
@@ -171,6 +181,7 @@ export const Calendar: React.FC = () => {
           />
         )}
       </AnimatePresence>
+    </div>
     </div>
   );
 };

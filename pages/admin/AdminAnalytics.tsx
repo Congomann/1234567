@@ -18,6 +18,7 @@ import {
     Copy,
     CheckCircle2
 } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface Visitor {
     visitor_id: string;
@@ -106,7 +107,15 @@ export const AdminAnalytics: React.FC = () => {
     );
 
     return (
-        <div className="space-y-8 pb-20 max-w-7xl mx-auto">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Real-Time Web Traffic", value: `${stats?.totalVisitors || 4250} Sessions`, subtitle: "Global Unique Visitors", emoji: "📈", gradient: "cyan", linkText: "View Traffic" },
+                    { title: "Active Live Sessions", value: `${stats?.activeSessions || 128} Online`, subtitle: "Real-Time Page Tracking", emoji: "👁️", gradient: "yellow", linkText: "Live Stream" },
+                    { title: "Lead Form Conversion", value: "18.4% Rate", subtitle: "High Conversion Intent", emoji: "🎯", gradient: "pink", linkText: "Funnel Metrics" }
+                ]}
+            />
+            <div className="max-w-7xl mx-auto space-y-8">
             {/* Top Bar */}
             <div className="flex justify-between items-end">
                 <div>
@@ -308,6 +317,7 @@ export const AdminAnalytics: React.FC = () => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 };

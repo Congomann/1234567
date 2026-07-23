@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Backend } from '../../services/apiBackend';
 import { Globe, Facebook, Linkedin, Copy, Check, Save, Zap, AlertCircle, History, Info, Play, Trash2, ShieldCheck, Database, Smartphone, Music, Key, Terminal, Wifi, Activity } from 'lucide-react';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const MarketingIntegrations: React.FC = () => {
     const { integrationConfig, updateIntegrationConfig } = useData();
@@ -109,7 +110,15 @@ export const MarketingIntegrations: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-[#050b14] text-gray-200 p-8 rounded-3xl pb-20 border border-gray-800 font-sans shadow-2xl">
+        <div className="space-y-8 relative">
+            <Tab3DBanner
+                cards={[
+                    { title: "Meta & Google Webhooks", value: "Real-Time Direct", subtitle: "Instant Lead Capture", emoji: "🔗", gradient: "cyan", linkText: "Webhooks" },
+                    { title: "SignalWire LAML REST API", value: "Connected", subtitle: "Voice & SMS Protocol", emoji: "📡", gradient: "yellow", linkText: "API Credentials" },
+                    { title: "Plaid Production API", value: "Verified Active", subtitle: "Live Banking Protocol", emoji: "⚡", gradient: "pink", linkText: "API Logs" }
+                ]}
+            />
+            <div className="min-h-screen bg-[#050b14] text-gray-200 p-8 rounded-3xl pb-20 border border-gray-800 font-sans shadow-2xl">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10 pb-6 border-b border-gray-800">
                 <div className="flex items-center gap-4">
@@ -385,6 +394,7 @@ executeSyncTransaction(leadData.field_data);`}
 
                 </div>
             </div>
+        </div>
         </div>
     );
 };
