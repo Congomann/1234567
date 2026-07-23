@@ -357,10 +357,10 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                     </div>
                 </aside>
 
-                <div className="flex-1 h-full flex flex-col overflow-hidden bg-white">
-                    <header className="h-[52px] bg-white/90 backdrop-blur-md border-b border-slate-200/60 px-6 flex items-center justify-between z-20 sticky top-0">
+                <div className="flex-1 h-full flex flex-col overflow-hidden bg-[#f5f5f7]">
+                    <header className="h-[56px] bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-8 flex items-center justify-between z-20 sticky top-0 shadow-sm">
                         <div className="flex items-center gap-4">
-                            <h2 className="text-[13px] font-semibold text-slate-500 tracking-tight">Terminal Console</h2>
+                            <h2 className="text-sm font-bold text-slate-800 tracking-tight">New Holland Financial Terminal</h2>
                         </div>
                         <div className="flex items-center gap-6">
                             <button onClick={startTour} className="flex items-center gap-2 px-3 py-1.5 bg-slate-100/50 hover:bg-slate-100 rounded-md text-[12px] font-medium text-slate-600 transition-all shadow-sm border border-slate-200/50">
