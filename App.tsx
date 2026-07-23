@@ -56,6 +56,7 @@ import { MarketingIntegrations } from './pages/admin/MarketingIntegrations';
 import { JoinTeam } from './pages/website/JoinTeam';
 import { Onboarding } from './pages/crm/Onboarding';
 import { AdvisorOnboardingFlow } from './pages/crm/AdvisorOnboardingFlow';
+import { TelephonyHub } from './pages/crm/TelephonyHub';
 import { LegalCompliance } from './pages/crm/LegalCompliance';
 import { PrivacyPolicy } from './pages/website/PrivacyPolicy';
 import { TermsOfUse } from './pages/website/TermsOfUse';
@@ -242,6 +243,7 @@ const App: React.FC = () => {
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
               <Route path="bank-verification" element={<BankVerification />} />
+              <Route path="telephony" element={<TelephonyHub />} />
 
               {/* VERTICAL HUBS */}
               <Route path="applications" element={<PoliciesApps />} />

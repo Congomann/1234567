@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "record_call": {
+          "format": "mp3",
+          "stereo": true
+        }
+      },
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are the official AI Lead Qualification Assistant for New Holland Financial Group. Greet the caller warmly and introduce yourself. Ask them which financial solution they require: 1. Wealth Management & Investments, 2. Real Estate & Mortgage Solutions, 3. Life & Commercial Insurance, or 4. Logistics & Fleet Services. Ask for their liquid investment budget and estimated timeline. If their budget is over $50,000 or timeline is under 30 days, inform them that you are escalating their account to a Senior Wealth Advisor and rate them Warm."
+          },
+          "post_prompt": {
+            "text": "Analyze conversation and output JSON: { 'lead_name': string, 'budget': string, 'timeline': string, 'rating': 'Warm' | 'Mild' | 'Cold', 'summary': string }"
+          },
+          "post_prompt_url": "https://newhollandfinancialgroup.com/api/signalwire/recording-callback"
+        }
+      }
+    ]
+  }
+}

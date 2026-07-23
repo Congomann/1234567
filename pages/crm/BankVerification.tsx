@@ -28,7 +28,7 @@ import {
     ChevronDown, Landmark, RefreshCw, Eye, EyeOff, Info,
     Loader2, TrendingUp, BadgeCheck, User, Phone, Mail,
     Hash, ArrowRight, AlertTriangle, AlertCircle, Wifi, WifiOff,
-    Edit2, Trash2, RotateCcw,
+    Edit2, Trash2, RotateCcw, Zap,
 } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
 import { useData } from '../../context/DataContext';
@@ -184,23 +184,57 @@ const PlaidLinkButton: React.FC<PlaidLinkButtonProps> = ({
         );
     }
 
+    const [isSandboxLoading, setIsSandboxLoading] = useState(false);
+
+    const handleSandboxTest = async () => {
+        setIsSandboxLoading(true);
+        const { data, error } = await BankVerificationService.createSandboxPublicToken('ins_1');
+        setIsSandboxLoading(false);
+        if (data?.public_token) {
+            onSuccess(data.public_token, {
+                institution: { institution_id: 'ins_1', name: 'JPMorgan Chase (Sandbox)' },
+                accounts: [{ id: 'sandbox_checking_001' }]
+            });
+        } else {
+            onError(error || 'Failed to create sandbox token');
+        }
+    };
+
     return (
-        <button
-            onClick={() => open()}
-            disabled={!ready}
-            style={{
-                width: '100%', padding: '13px',
-                background: ready ? 'linear-gradient(135deg,#0C2340,#1e40af)' : '#e5e7eb',
-                color: ready ? '#fff' : '#9ca3af',
-                border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700,
-                cursor: ready ? 'pointer' : 'not-allowed',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: ready ? '0 4px 16px rgba(30,64,175,0.3)' : 'none',
-                transition: 'all 0.2s',
-            }}
-        >
-            <Landmark size={16} /> {ready ? 'Open Plaid Bank Link' : 'Loading…'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+            <button
+                onClick={() => open()}
+                disabled={!ready}
+                style={{
+                    width: '100%', padding: '13px',
+                    background: ready ? 'linear-gradient(135deg,#0C2340,#1e40af)' : '#e5e7eb',
+                    color: ready ? '#fff' : '#9ca3af',
+                    border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700,
+                    cursor: ready ? 'pointer' : 'not-allowed',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: ready ? '0 4px 16px rgba(30,64,175,0.3)' : 'none',
+                    transition: 'all 0.2s',
+                }}
+            >
+                <Landmark size={16} /> {ready ? 'Open Plaid Bank Link' : 'Loading…'}
+            </button>
+
+            <button
+                onClick={handleSandboxTest}
+                disabled={isSandboxLoading}
+                style={{
+                    width: '100%', padding: '10px',
+                    background: '#f8fafc',
+                    color: '#0f172a',
+                    border: '1px border #cbd5e1', borderRadius: 10, fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    transition: 'all 0.2s',
+                }}
+            >
+                {isSandboxLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} className="text-amber-500" />} 1-Click Instant Sandbox Verification Test
+            </button>
+        </div>
     );
 };
 

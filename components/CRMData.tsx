@@ -44,7 +44,8 @@ import {
     Car,
     Newspaper,
     Map as MapIcon,
-    Briefcase
+    Briefcase,
+    Phone
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -206,6 +207,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
 
         const shared = [
+            { path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },
             { path: '/crm/profile', label: 'Profile', icon: CircleUser, tourId: 'nav-profile' },

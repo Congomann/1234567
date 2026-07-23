@@ -17,7 +17,9 @@ import {
     Loader2,
     CheckCircle2,
     ChevronDown,
-    Database
+    Database,
+    Share2,
+    MessageCircle
 } from 'lucide-react';
 import { Workflow, WorkflowTrigger } from '../../types';
 import { AgentManager } from '../../components/agents/AgentManager';
@@ -52,63 +54,85 @@ export const AutomationStudio: React.FC = () => {
         }
 
         setIsDeploying(true);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        try {
+            const response = await fetch('http://localhost:3001/api/marketing/automations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: wfName,
+                    trigger: wfTrigger,
+                    actions: wfActions
+                })
+            });
+            
+            if (response.ok) {
+                // Keep the local state sync for immediate UI updates
+                addWorkflow({
+                    name: wfName,
+                    trigger: wfTrigger,
+                    actions: wfActions,
+                    description: `Automatic path triggered by ${wfTrigger} executing ${wfActions.length} system nodes.`,
+                    impact: 'HIGH',
+                    category: wfTrigger.includes('SOCIAL') ? 'SOCIAL AUTOMATION' : 'LEAD NURTURE'
+                });
 
-        addWorkflow({
-            name: wfName,
-            trigger: wfTrigger,
-            actions: wfActions,
-            description: `Automatic path triggered by ${wfTrigger} executing ${wfActions.length} system nodes.`,
-            impact: 'HIGH',
-            category: 'LEAD NURTURE'
-        });
-
-        setIsDeploying(false);
-        setDeploymentSuccess(true);
-
-        setTimeout(() => {
-            setWfName('');
-            setWfTrigger(WorkflowTrigger.LEAD_INGESTION);
-            setWfActions([]);
-            setDeploymentSuccess(false);
-            setIsModalOpen(false);
-        }, 1500);
+                setDeploymentSuccess(true);
+                setTimeout(() => {
+                    setWfName('');
+                    setWfTrigger(WorkflowTrigger.LEAD_INGESTION);
+                    setWfActions([]);
+                    setDeploymentSuccess(false);
+                    setIsModalOpen(false);
+                }, 1500);
+            } else {
+                alert('Failed to deploy workflow to production.');
+            }
+        } catch (err) {
+            console.error('Deployment error:', err);
+            alert('Failed to deploy workflow. Backend unreachable.');
+        } finally {
+            setIsDeploying(false);
+        }
     };
 
     const MetricCard = ({ icon: Icon, value, label, iconBg }: any) => (
-        <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-200 flex items-center gap-10 flex-1 transition-all hover:shadow-2xl group">
-            <div className={`h-24 w-24 rounded-[2.5rem] flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform ${iconBg}`}>
+        <div className="bg-white/60 backdrop-blur-2xl p-10 rounded-[3rem] shadow-[0_8px_40px_rgb(0,0,0,0.03)] border border-white/60 flex items-center gap-10 flex-1 transition-all hover:shadow-[0_20px_60px_rgb(0,0,0,0.06)] group relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-150 transition-transform duration-700">
+                <Icon size={120} />
+            </div>
+            <div className={`relative z-10 h-24 w-24 rounded-[2.5rem] flex items-center justify-center text-white shadow-xl group-hover:scale-105 transition-transform duration-500 ${iconBg}`}>
                 <Icon size={44} />
             </div>
-            <div>
-                <p className="text-6xl font-black text-slate-900 tracking-tighter leading-none mb-2">{value}</p>
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">{label}</p>
+            <div className="relative z-10">
+                <p className="text-6xl font-black text-slate-900 tracking-tighter leading-none mb-2 drop-shadow-sm">{value}</p>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-widest">{label}</p>
             </div>
         </div>
     );
 
     return (
-        <div className="space-y-12 pb-24 animate-fade-in bg-[#F1F5F9] min-h-full">
+        <div className="space-y-12 pb-24 animate-in fade-in duration-700 font-sans min-h-full">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/50 backdrop-blur-3xl p-8 rounded-[3.5rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
                 <div>
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-blue-600 rounded-lg shadow-md">
+                        <div className="p-2.5 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
                             <Zap size={18} className="text-white fill-white" />
                         </div>
-                        <h2 className="text-[11px] font-black text-slate-600 uppercase tracking-[0.4em]">Automation Framework v4.2</h2>
+                        <h2 className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Automation Studio Pro</h2>
                     </div>
-                    <h1 className="text-6xl font-black text-[#0B2240] tracking-tighter">Logic Engine</h1>
+                    <h1 className="text-5xl font-black text-slate-900 tracking-tight">Logic Engine</h1>
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <div className="bg-white p-3 rounded-full border border-slate-200 shadow-md flex items-center gap-3 px-8">
-                        <div className={`h-2.5 w-2.5 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)] ${processingLeads.length > 0 ? 'bg-blue-500 animate-bounce' : 'bg-green-500 animate-pulse'}`}></div>
-                        <span className="text-[11px] font-black text-slate-800 uppercase tracking-[0.3em]">Node: <span className={processingLeads.length > 0 ? 'text-blue-600' : 'text-green-600'}>{processingLeads.length > 0 ? 'Processing Lead' : 'Operational'}</span></span>
+                    <div className="bg-white/80 p-3 rounded-full border border-slate-100 shadow-sm flex items-center gap-4 px-8 backdrop-blur-md">
+                        <div className={`h-3 w-3 rounded-full shadow-[0_0_12px_rgba(34,197,94,0.6)] ${processingLeads.length > 0 ? 'bg-blue-500 animate-pulse' : 'bg-emerald-500 animate-pulse'}`}></div>
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-widest">System Status: <span className={processingLeads.length > 0 ? 'text-blue-600 font-black' : 'text-emerald-600 font-black'}>{processingLeads.length > 0 ? 'Processing Lead' : 'Operational'}</span></span>
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="bg-[#1E293B] text-white px-12 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:bg-slate-800 transition-all flex items-center gap-3 active:scale-95"
+                        className="bg-slate-900 text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest shadow-[0_10px_30px_rgb(15,23,42,0.3)] hover:bg-slate-800 hover:scale-105 transition-all flex items-center gap-3 active:scale-95 duration-300"
                     >
                         <Plus size={18} strokeWidth={4} /> Define Workflow
                     </button>
@@ -117,18 +141,19 @@ export const AutomationStudio: React.FC = () => {
 
             {/* Live Monitor Strip */}
             {processingLeads.length > 0 && (
-                <div className="bg-[#0B2240] p-6 rounded-full border border-white/10 shadow-2xl flex items-center justify-between animate-fade-in px-10">
-                    <div className="flex items-center gap-6">
-                        <div className="p-3 bg-blue-500/20 text-blue-400 rounded-full animate-pulse"><Zap size={20} /></div>
+                <div className="bg-slate-900 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl flex flex-col md:flex-row items-center justify-between animate-in slide-in-from-top-4 px-10 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 animate-pulse"></div>
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className="p-3 bg-blue-500/20 text-blue-400 rounded-full animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.3)]"><Zap size={20} /></div>
                         <div>
                             <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest leading-none mb-1">Live Automation Stream</p>
-                            <p className="text-sm font-bold text-white">Processing: <span className="text-blue-300">{leads.find(l => l.id === processingLeads[0].leadId)?.name || 'Incoming Lead...'}</span></p>
+                            <p className="text-sm font-bold text-white">Processing: <span className="text-blue-300">{leads.find(l => l.id === processingLeads[0].leadId)?.name || 'Incoming Signal...'}</span></p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-10">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-slate-400 uppercase">Step:</span>
-                            <span className="text-xs font-black text-white uppercase tracking-widest bg-blue-600 px-3 py-1 rounded-lg animate-pulse">{processingLeads[0].activeNode}</span>
+                    <div className="flex items-center gap-10 relative z-10 mt-4 md:mt-0">
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Step:</span>
+                            <span className="text-xs font-black text-white uppercase tracking-widest bg-blue-600 px-4 py-1.5 rounded-full shadow-lg animate-pulse">{processingLeads[0].activeNode}</span>
                         </div>
                         <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />
                     </div>
@@ -136,24 +161,24 @@ export const AutomationStudio: React.FC = () => {
             )}
 
             {/* Main Metrics */}
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col xl:flex-row gap-8">
                 <MetricCard
                     icon={Cpu}
                     value={automationMetrics?.executions.toLocaleString() || 0}
                     label="Workflow Executions"
-                    iconBg="bg-blue-600"
+                    iconBg="bg-gradient-to-br from-blue-500 to-indigo-600"
                 />
                 <MetricCard
                     icon={Clock}
                     value={`${Math.floor((automationMetrics?.bandwidthSaved || 0) / 60)}h+`}
                     label="Human Bandwidth Saved"
-                    iconBg="bg-emerald-600"
+                    iconBg="bg-gradient-to-br from-emerald-400 to-emerald-600"
                 />
                 <MetricCard
-                    icon={Cpu}
-                    value="99.8%"
-                    label="Sync Integrity Rate"
-                    iconBg="bg-amber-500"
+                    icon={Share2}
+                    value="1.2k"
+                    label="Social Interactions"
+                    iconBg="bg-gradient-to-br from-purple-500 to-pink-600"
                 />
             </div>
 
@@ -164,13 +189,15 @@ export const AutomationStudio: React.FC = () => {
             <div className="space-y-12">
                 {workflows.map((wf) => {
                     const isWfProcessing = processingLeads.length > 0 && processingLeads.some(p => p.activeNode === wf.actions[0] || wf.actions.includes(p.activeNode));
+                    const isSocial = wf.trigger?.includes('SOCIAL');
+
                     return (
-                        <div key={wf.id} className={`bg-white rounded-[4rem] border shadow-2xl overflow-hidden p-12 lg:p-20 group relative transition-all duration-500 ${isWfProcessing ? 'border-blue-400 ring-4 ring-blue-50' : 'border-slate-200'}`}>
+                        <div key={wf.id} className={`bg-white/60 backdrop-blur-xl rounded-[4rem] border shadow-[0_8px_40px_rgb(0,0,0,0.03)] overflow-hidden p-10 lg:p-16 group relative transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.06)] ${isWfProcessing ? 'border-blue-400 ring-4 ring-blue-50' : 'border-white/60'}`}>
                             {isWfProcessing && (
                                 <div className="absolute top-0 right-0 p-12">
-                                    <span className="flex h-4 w-4">
+                                    <span className="flex h-5 w-5">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500"></span>
+                                        <span className="relative inline-flex rounded-full h-5 w-5 bg-blue-500"></span>
                                     </span>
                                 </div>
                             )}
@@ -178,51 +205,51 @@ export const AutomationStudio: React.FC = () => {
                             <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
                                 <div className="flex-1 space-y-8">
                                     <div className="flex items-center gap-4">
-                                        <span className="px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-rose-600 text-white shadow-lg">
+                                        <span className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg ${isSocial ? 'bg-gradient-to-r from-purple-600 to-pink-600 shadow-purple-500/30' : 'bg-gradient-to-r from-rose-500 to-rose-600 shadow-rose-500/30'}`}>
                                             {wf.impact} PRIORITY
                                         </span>
-                                        <span className="text-[11px] font-black text-slate-800 uppercase tracking-[0.4em] flex items-center gap-3">
-                                            <Layers size={16} className="text-blue-600" /> {wf.category}
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-3 bg-white px-5 py-2.5 rounded-full border border-slate-100 shadow-sm">
+                                            {isSocial ? <MessageCircle size={14} className="text-purple-600" /> : <Layers size={14} className="text-blue-600" />} {wf.category}
                                         </span>
                                     </div>
-                                    <h3 className="text-7xl font-black text-[#0B2240] tracking-tighter leading-none">{wf.name}</h3>
-                                    <p className="text-slate-600 text-xl font-bold leading-relaxed max-w-2xl">{wf.description}</p>
+                                    <h3 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-none">{wf.name}</h3>
+                                    <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl">{wf.description}</p>
                                 </div>
 
-                                <div className="bg-[#0F172A] rounded-[4rem] p-12 border border-slate-700 flex-shrink-0 w-full lg:w-[600px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-                                        <Zap size={400} className="text-white" />
+                                <div className="bg-slate-900 rounded-[3rem] p-10 border border-slate-800 flex-shrink-0 w-full xl:w-[600px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none">
+                                        <Zap size={300} className="text-white" />
                                     </div>
 
-                                    <div className="flex items-center justify-between mb-12">
-                                        <h4 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em] flex items-center gap-3">
-                                            <Database size={16} className="text-blue-400" /> Pipeline Chain Path
+                                    <div className="flex items-center justify-between mb-10">
+                                        <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-3 bg-blue-900/30 px-4 py-2 rounded-full border border-blue-500/20">
+                                            <Database size={14} className="text-blue-400" /> Pipeline Chain Path
                                         </h4>
-                                        <Activity size={16} className={`text-blue-400 ${isWfProcessing ? 'animate-pulse text-blue-300' : ''}`} />
+                                        <Activity size={18} className={`text-blue-400 ${isWfProcessing ? 'animate-pulse text-blue-300' : ''}`} />
                                     </div>
 
-                                    <div className="space-y-14 relative z-10">
-                                        <div className="flex items-center gap-5">
-                                            <div className={`w-5 h-5 rounded-full ${isWfProcessing ? 'bg-blue-400 shadow-[0_0_30px_rgba(96,165,250,0.9)] animate-ping' : 'bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] animate-pulse'}`}></div>
-                                            <span className={`text-base font-black uppercase tracking-[0.2em] ${isWfProcessing ? 'text-blue-300' : 'text-white'}`}>{wf.trigger}</span>
+                                    <div className="space-y-12 relative z-10">
+                                        <div className="flex items-center gap-5 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                                            <div className={`w-4 h-4 rounded-full ${isWfProcessing ? 'bg-blue-400 shadow-[0_0_30px_rgba(96,165,250,0.9)] animate-ping' : 'bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.8)]'}`}></div>
+                                            <span className={`text-sm font-black uppercase tracking-widest ${isWfProcessing ? 'text-blue-300' : 'text-slate-200'}`}>{wf.trigger}</span>
                                         </div>
 
-                                        <div className="flex items-center justify-start gap-4 relative overflow-x-auto no-scrollbar pb-4">
-                                            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-0.5 bg-slate-700 -z-10 mx-6"></div>
+                                        <div className="flex items-center justify-start gap-4 relative overflow-x-auto hide-scrollbar pb-4">
+                                            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-0.5 bg-slate-800 -z-10 mx-6"></div>
 
                                             {wf.actions.map((act, i) => {
                                                 const isStepActive = isWfProcessing && processingLeads.some(p => p.activeNode === act);
                                                 return (
                                                     <React.Fragment key={i}>
-                                                        <div className={`px-6 py-4 rounded-2xl border shadow-xl flex items-center justify-center min-w-[140px] shrink-0 transform transition-all duration-500 border-l-4 ${isStepActive
-                                                                ? 'bg-blue-900/50 border-blue-400 scale-110 border-l-white ring-4 ring-blue-500/20'
-                                                                : 'bg-slate-800 border-slate-600 border-l-blue-500 opacity-70 group-hover:opacity-100'
+                                                        <div className={`px-6 py-4 rounded-2xl shadow-xl flex items-center justify-center min-w-[140px] shrink-0 transform transition-all duration-500 ${isStepActive
+                                                                ? 'bg-blue-600 scale-105 ring-4 ring-blue-500/30 text-white'
+                                                                : 'bg-slate-800 border border-slate-700 text-slate-300 opacity-80 hover:opacity-100'
                                                             }`}>
-                                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${isStepActive ? 'text-white' : 'text-blue-100'}`}>{act}</span>
-                                                            {isStepActive && <Loader2 size={10} className="ml-2 animate-spin text-white" />}
+                                                            <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{act}</span>
+                                                            {isStepActive && <Loader2 size={12} className="ml-3 animate-spin text-white" />}
                                                         </div>
                                                         {i < wf.actions.length - 1 && (
-                                                            <ChevronRight size={18} className={`shrink-0 transition-colors ${isStepActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                                                            <ChevronRight size={20} className={`shrink-0 transition-colors ${isStepActive ? 'text-blue-400' : 'text-slate-600'}`} />
                                                         )}
                                                     </React.Fragment>
                                                 );
@@ -231,16 +258,16 @@ export const AutomationStudio: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col items-end gap-8">
+                                <div className="flex flex-col items-end gap-8 bg-slate-50 p-8 rounded-[3rem] border border-slate-100">
                                     <div className="text-right">
-                                        <p className="text-5xl font-black text-[#0B2240] tracking-tighter leading-none">{wf.executionsYTD.toLocaleString()}</p>
-                                        <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mt-3">Instance Cycles</p>
+                                        <p className="text-5xl font-black text-slate-900 tracking-tighter leading-none">{wf.executionsYTD.toLocaleString()}</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Instance Cycles</p>
                                     </div>
                                     <button
                                         onClick={() => toggleWorkflow(wf.id)}
-                                        className={`p-6 rounded-[2.5rem] transition-all shadow-2xl active:scale-95 flex items-center justify-center transform hover:rotate-3 ${wf.status === 'active' ? 'bg-[#0B2240] text-white' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                                        className={`p-5 rounded-[2rem] transition-all shadow-xl active:scale-95 flex items-center justify-center transform hover:scale-105 ${wf.status === 'active' ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}
                                     >
-                                        {wf.status === 'active' ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
+                                        {wf.status === 'active' ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
                                     </button>
                                 </div>
                             </div>
@@ -250,77 +277,78 @@ export const AutomationStudio: React.FC = () => {
             </div>
 
             {/* Global Sync Section */}
-            <div className="bg-[#1E293B] p-16 rounded-[5rem] text-white flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden group border border-slate-700">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.05] pointer-events-none transform group-hover:scale-110 transition-transform duration-[5s]">
+            <div className="bg-gradient-to-br from-slate-900 to-[#0F172A] p-16 rounded-[4rem] text-white flex flex-col md:flex-row items-center justify-between shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group border border-slate-800">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none transform group-hover:scale-110 transition-transform duration-[5s]">
                     <Zap size={600} strokeWidth={1} />
                 </div>
 
                 <div className="relative z-10 space-y-6 text-center md:text-left max-w-2xl">
-                    <div className="inline-flex items-center gap-3 bg-blue-500/20 px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.3em] text-blue-400 border border-blue-500/30 shadow-sm backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-3 bg-blue-500/20 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-400 border border-blue-500/30 shadow-sm backdrop-blur-md">
                         <ShieldCheck size={14} className="animate-pulse" /> Global System Sync
                     </div>
-                    <h2 className="text-6xl font-black tracking-tight uppercase leading-none">Trigger Logic Pulse</h2>
-                    <p className="text-slate-300 text-xl font-bold leading-relaxed">Instantly recalibrate all pipeline nodes across the terminal to resolve high-priority lead follow-ups.</p>
+                    <h2 className="text-5xl md:text-6xl font-black tracking-tight leading-none">Trigger Logic Pulse</h2>
+                    <p className="text-slate-400 text-lg font-medium leading-relaxed">Instantly recalibrate all pipeline nodes and social media agents across the terminal to resolve high-priority items.</p>
                 </div>
-                <div className="relative z-10 mt-12 md:mt-0">
+                <div className="relative z-10 mt-10 md:mt-0">
                     <button
                         onClick={triggerPulse}
-                        className="px-20 py-8 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-sm uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(37,99,235,0.4)] transition-all flex items-center gap-5 transform hover:scale-105 active:scale-95"
+                        className="px-16 py-6 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-[0_20px_50px_rgba(37,99,235,0.4)] transition-all flex items-center gap-4 transform hover:scale-105 active:scale-95"
                     >
-                        Sync System <Activity size={24} />
+                        Sync System <Activity size={20} />
                     </button>
                 </div>
             </div>
 
             {/* Workflow Architect Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0B2240]/90 backdrop-blur-xl p-4 animate-fade-in">
-                    <div className="bg-white rounded-[4rem] shadow-2xl w-full max-w-5xl p-16 relative border border-white/20">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-2xl p-6 animate-in fade-in duration-300">
+                    <div className="bg-white/90 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl w-full max-w-5xl p-12 md:p-16 relative border border-white/60 animate-in zoom-in-95 duration-300">
                         <button
                             onClick={() => setIsModalOpen(false)}
                             disabled={isDeploying}
-                            className="absolute top-10 right-10 p-4 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-all disabled:opacity-50"
+                            className="absolute top-8 right-8 p-4 bg-slate-100/80 hover:bg-slate-200 rounded-full text-slate-500 transition-all disabled:opacity-50"
                         >
-                            <X size={32} />
+                            <X size={24} />
                         </button>
 
                         {deploymentSuccess ? (
-                            <div className="text-center py-20 animate-fade-in">
-                                <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner animate-bounce-subtle">
-                                    <CheckCircle2 size={60} />
+                            <div className="text-center py-20 animate-in zoom-in-95 duration-500">
+                                <div className="w-28 h-28 bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner animate-bounce">
+                                    <CheckCircle2 size={64} />
                                 </div>
-                                <h2 className="text-5xl font-black text-[#0B2240] tracking-tight uppercase">Operational</h2>
+                                <h2 className="text-5xl font-black text-slate-900 tracking-tight uppercase">Operational</h2>
                                 <p className="text-slate-500 font-bold uppercase text-xs tracking-widest mt-4">Logic sequence has been provisioned to the cluster.</p>
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center gap-5 mb-12">
-                                    <div className="p-4 bg-blue-600 text-white rounded-[2rem] shadow-xl">
-                                        <Zap size={40} />
+                                <div className="flex items-center gap-6 mb-12">
+                                    <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-[2rem] shadow-xl shadow-blue-500/30">
+                                        <Zap size={36} />
                                     </div>
                                     <div>
-                                        <h2 className="text-4xl font-black text-[#0B2240] tracking-tighter uppercase">Workflow Architect</h2>
-                                        <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Configure Automated Workflow Path</p>
+                                        <h2 className="text-4xl font-black text-slate-900 tracking-tight">Workflow Architect</h2>
+                                        <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-2">Configure Automated Workflow Path</p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                                    <div className="space-y-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+                                    <div className="space-y-8">
                                         <div>
-                                            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 ml-1">Workflow Name</label>
+                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-2">Workflow Name</label>
                                             <input
-                                                className="w-full bg-slate-100 border-2 border-transparent focus:border-blue-600 rounded-[1.5rem] px-8 py-5 text-sm font-black text-slate-800 outline-none transition-all shadow-inner"
-                                                placeholder="e.g. Wealth Strategy Dispatch"
+                                                className="w-full bg-slate-50/80 border-2 border-slate-100 focus:border-blue-500 rounded-3xl px-6 py-5 text-sm font-bold text-slate-900 outline-none transition-all shadow-inner backdrop-blur-sm"
+                                                placeholder="e.g. Meta Lead Sync"
                                                 value={wfName}
                                                 disabled={isDeploying}
                                                 onChange={e => setWfName(e.target.value)}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 ml-1">Trigger Event</label>
+                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-2">Trigger Event</label>
                                             <div className="relative">
                                                 <select
-                                                    className="w-full bg-slate-100 border-2 border-transparent focus:border-blue-600 rounded-[1.5rem] px-8 py-5 text-sm font-black text-slate-800 outline-none appearance-none cursor-pointer shadow-inner"
+                                                    className="w-full bg-slate-50/80 border-2 border-slate-100 focus:border-blue-500 rounded-3xl px-6 py-5 text-sm font-bold text-slate-900 outline-none appearance-none cursor-pointer shadow-inner backdrop-blur-sm transition-all"
                                                     value={wfTrigger}
                                                     disabled={isDeploying}
                                                     onChange={e => setWfTrigger(e.target.value as WorkflowTrigger)}
@@ -328,33 +356,35 @@ export const AutomationStudio: React.FC = () => {
                                                     {Object.values(WorkflowTrigger).map(trigger => (
                                                         <option key={trigger} value={trigger}>{trigger}</option>
                                                     ))}
+                                                    <option value="SOCIAL_MENTION_DETECTED">SOCIAL_MENTION_DETECTED</option>
+                                                    <option value="AD_CLICK_CONVERSION">AD_CLICK_CONVERSION</option>
                                                 </select>
-                                                <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                                                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="block text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 ml-1">Action Sequence</label>
-                                        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6 shadow-inner min-h-[300px] flex flex-col">
-                                            <div className="flex items-center justify-between p-5 bg-slate-800 rounded-2xl border border-slate-700 shadow-md">
+                                    <div className="space-y-3">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Action Sequence</label>
+                                        <div className="bg-slate-900 rounded-[2.5rem] p-8 space-y-6 shadow-inner min-h-[300px] flex flex-col border border-slate-800">
+                                            <div className="flex items-center justify-between p-4 bg-slate-800/80 rounded-2xl border border-slate-700/50 shadow-md">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-1.5 bg-blue-600 text-white rounded-lg">
-                                                        <PlayCircle size={18} />
+                                                    <div className="p-2 bg-blue-600 text-white rounded-xl">
+                                                        <PlayCircle size={16} />
                                                     </div>
-                                                    <span className="text-xs font-black text-white uppercase tracking-widest">Start Path</span>
+                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Start Path</span>
                                                 </div>
                                                 <ChevronRight size={16} className="text-slate-500" />
                                             </div>
 
                                             {wfActions.map((action, idx) => (
-                                                <div key={idx} className="flex items-center gap-3 animate-slide-up">
-                                                    <div className="flex-1 flex items-center justify-between p-5 bg-slate-800 rounded-2xl border border-blue-500/30 shadow-xl border-l-4 border-l-blue-500">
-                                                        <span className="text-xs font-black text-blue-100 uppercase tracking-widest">{action}</span>
+                                                <div key={idx} className="flex items-center gap-3 animate-in slide-in-from-bottom-2">
+                                                    <div className="flex-1 flex items-center justify-between p-4 bg-slate-800/80 rounded-2xl border border-blue-500/30 shadow-lg border-l-4 border-l-blue-500">
+                                                        <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">{action}</span>
                                                         <button
                                                             disabled={isDeploying}
                                                             onClick={() => handleRemoveAction(idx)}
-                                                            className="p-1 hover:bg-rose-500/20 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
+                                                            className="p-1.5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition-all"
                                                         >
                                                             <Trash2 size={14} />
                                                         </button>
@@ -364,10 +394,10 @@ export const AutomationStudio: React.FC = () => {
                                             ))}
 
                                             {!isDeploying && (
-                                                <div className="mt-auto space-y-3 pt-6 border-t border-slate-800">
+                                                <div className="mt-auto space-y-3 pt-6 border-t border-slate-800/50">
                                                     <div className="flex gap-2">
                                                         <input
-                                                            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-blue-600 shadow-inner"
+                                                            className="flex-1 bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-inner transition-all"
                                                             placeholder="Enter system action..."
                                                             value={newActionText}
                                                             onChange={e => setNewActionText(e.target.value)}
@@ -375,9 +405,9 @@ export const AutomationStudio: React.FC = () => {
                                                         />
                                                         <button
                                                             onClick={handleInsertAction}
-                                                            className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-md active:scale-90"
+                                                            className="px-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-500 transition-all shadow-md active:scale-95 flex items-center justify-center"
                                                         >
-                                                            <Plus size={18} />
+                                                            <Plus size={20} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -386,18 +416,18 @@ export const AutomationStudio: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="pt-16 flex gap-6 border-t border-slate-100 mt-8">
+                                <div className="pt-12 flex gap-4 md:gap-6 mt-8">
                                     <button
                                         onClick={() => setIsModalOpen(false)}
                                         disabled={isDeploying}
-                                        className="flex-1 py-6 rounded-[1.5rem] font-black text-xs bg-slate-100 text-slate-400 uppercase tracking-[0.3em] hover:bg-slate-200 transition-all active:scale-95"
+                                        className="flex-1 py-5 rounded-full font-black text-[10px] bg-slate-100 text-slate-500 uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
                                     >
                                         Discard Draft
                                     </button>
                                     <button
                                         onClick={handleDeploy}
                                         disabled={isDeploying || wfActions.length === 0}
-                                        className="flex-1 py-6 rounded-[1.5rem] font-black text-xs bg-blue-600 text-white uppercase tracking-[0.3em] hover:bg-blue-700 shadow-2xl shadow-blue-600/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
+                                        className="flex-[2] py-5 rounded-full font-black text-[10px] bg-slate-900 text-white uppercase tracking-widest hover:bg-slate-800 shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                                     >
                                         {isDeploying ? (
                                             <>
@@ -405,7 +435,7 @@ export const AutomationStudio: React.FC = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Zap size={16} className="fill-current" /> Deploy to Production
+                                                <Zap size={16} className="fill-current text-blue-400" /> Deploy to Production
                                             </>
                                         )}
                                     </button>

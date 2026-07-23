@@ -45,13 +45,15 @@ export const Resources: React.FC = () => {
 
   const filters = [
     "All",
-    "Blog",
+    "PDF",
     "Video",
     "YouTube",
-    "PDF",
-    "Image",
     "Article",
-    "Link",
+    "Blog",
+    "Tax Strategy",
+    "Real Estate",
+    "Logistics",
+    "Banking"
   ];
 
   // Derive the selected resource from the live resources array so updates (likes/comments) reflect immediately
@@ -61,8 +63,14 @@ export const Resources: React.FC = () => {
   const filteredResources = resources.filter((r) => {
     const matchesSearch =
       r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = activeFilter === "All" || r.type === activeFilter;
+      r.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesFilter = activeFilter === "All" 
+      || r.type === activeFilter 
+      || r.tags?.includes(activeFilter);
+      
     return matchesSearch && matchesFilter;
   });
 

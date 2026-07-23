@@ -192,4 +192,15 @@ export const BankVerificationService = {
     });
   },
 
+  /**
+   * Create a Sandbox Public Token for quick 1-click test verifications.
+   */
+  createSandboxPublicToken: async (
+    institutionId?: string
+  ): Promise<{ data: { public_token: string } | null; error: string | null }> => {
+    return apiFetch<{ public_token: string }>('/plaid/create-sandbox-public-token', {
+      method: 'POST',
+      body: JSON.stringify({ institutionId: institutionId || 'ins_1' }),
+    });
+  },
 };

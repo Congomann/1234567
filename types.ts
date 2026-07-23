@@ -103,6 +103,29 @@ export interface MarketingAudience {
   createdAt: string;
 }
 
+export interface PaymentTransaction {
+  id: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'succeeded' | 'failed';
+  stripePaymentIntentId?: string;
+  campaignId: string;
+  date: string;
+  approvedBy?: string;
+}
+
+export interface CampaignApproval {
+  id: string;
+  campaignId: string;
+  requestedBudget: number;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedBy: string;
+  reviewerId?: string;
+  notes?: string;
+  dateRequested: string;
+  dateReviewed?: string;
+}
+
 export interface SocialLink {
   platform: 'LinkedIn' | 'Facebook' | 'Twitter' | 'Instagram' | 'TikTok' | 'X' | 'YouTube' | 'Snapchat';
   url: string;
@@ -900,7 +923,7 @@ export interface Workflow {
   actions: string[];
   status: 'active' | 'paused';
   impact: 'HIGH' | 'MEDIUM';
-  category: 'LEAD NURTURE' | 'COMPLIANCE' | 'OPERATIONS';
+  category: 'LEAD NURTURE' | 'COMPLIANCE' | 'OPERATIONS' | 'SOCIAL AUTOMATION' | string;
   executionsYTD: number;
   createdAt: string;
 }
