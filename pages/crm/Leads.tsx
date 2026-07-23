@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Lead, LeadStatus, UserRole, ProductType, ApplicationStatus } from '../../types';
-import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer, TrendingUp, Home } from 'lucide-react';
+import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer, TrendingUp, Home, Landmark } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
 import { CaseChat } from '../../components/chat/CaseChat';
@@ -474,9 +474,17 @@ export const Leads: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 whitespace-nowrap">
-                                        <button onClick={() => handleOpenView(lead)} className="inline-flex items-center px-5 py-2.5 border border-slate-200 bg-white text-slate-600 text-xs font-bold rounded-full hover:bg-slate-50 transition-all shadow-sm">
-                                            <Eye className="h-3 w-3 mr-2" /> Open Profile
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleOpenView(lead)} className="inline-flex items-center px-4 py-2 border border-slate-200 bg-white text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                                                <Eye className="h-3.5 w-3.5 mr-1.5" /> Profile
+                                            </button>
+                                            <Link to="/crm/telephony" className="p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all border border-blue-200" title="SignalWire Call & AI Qualify">
+                                                <Phone className="h-3.5 w-3.5" />
+                                            </Link>
+                                            <Link to="/crm/bank-verification" className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all border border-emerald-200" title="Plaid Instant ACH Verification">
+                                                <Landmark className="h-3.5 w-3.5" />
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -207,6 +207,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
 
         const shared = [
+            { path: '/crm/securities', label: 'Securities & Wealth', icon: TrendingUp, tourId: 'nav-securities' },
             { path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },
@@ -240,7 +241,6 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     }, [user, isSuperAdmin, isManagerOrAdmin]);
 
     const renderNavLink = (item: any) => {
-        // ENHANCEMENT: Use strict matching only to prevent double highlighting
         const isActive = location.pathname === item.path;
         const isHighlighted = isTourActive && currentStep?.targetId === item.tourId;
 
@@ -249,14 +249,18 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 key={item.path}
                 to={item.path}
                 id={item.tourId}
-                className={`flex items-center gap-3 px-3 py-1.5 text-[13px] font-medium transition-all duration-200 group relative ${isActive
-                    ? 'bg-[#0066cc] text-white rounded-[6px] shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-200/60 rounded-[6px]'
-                    } ${isHighlighted ? 'z-[70] ring-4 ring-[#0066cc]/30 bg-[#0066cc] text-white shadow-lg scale-105' : ''}`}
+                className={`flex items-center gap-3 px-3.5 py-2 text-[13px] font-semibold transition-all duration-300 group relative rounded-xl mb-1 ${isActive
+                    ? 'bg-gradient-to-r from-[#0066cc] to-[#0052a3] text-white shadow-lg shadow-blue-500/25 border border-blue-400/30'
+                    : 'text-slate-700 hover:bg-white/80 hover:shadow-sm hover:border hover:border-slate-200/60'
+                    } ${isHighlighted ? 'z-[70] ring-4 ring-[#0066cc]/30 bg-[#0066cc] text-white shadow-xl scale-105' : ''}`}
             >
-                <item.icon className={`h-[18px] w-[18px] ${isActive ? 'text-white' : 'text-[#0066cc] opacity-70 group-hover:opacity-100'}`} strokeWidth={isActive ? 2 : 1.5} />
-                <span className={`tracking-tight ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
-                {isHighlighted && <span className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full animate-ping"></span>}
+                <div className={`p-1.5 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-blue-50 text-[#0066cc]'
+                }`}>
+                    <item.icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className={`tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
             </Link>
         );
     };
