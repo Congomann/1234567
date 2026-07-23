@@ -361,39 +361,43 @@ export const AnnualReportAdmin: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {partnerRevenue.map((p: any) => (
-              <div key={p.id} className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex items-center justify-between group hover:bg-white/10 transition-all">
-                <div className="flex items-center gap-4">
-                  <button onClick={() => handleDeletePartner(p.id)} className="text-white/20 hover:text-red-400 transition-colors">
+              <div key={p.id} className="p-6 sm:p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:bg-white/10 transition-all overflow-hidden relative">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <button 
+                    onClick={() => handleDeletePartner(p.id)} 
+                    className="text-white/20 hover:text-red-400 transition-colors shrink-0"
+                    title="Delete Partner"
+                  >
                     <Trash2 size={16} />
                   </button>
-                  <div>
-                    <h4 className="font-black text-white text-lg leading-tight mb-1">{p.name}</h4>
-                    <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest">{p.vertical}</p>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-black text-white text-base sm:text-lg leading-tight mb-1 truncate">{p.name}</h4>
+                    <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest truncate">{p.vertical}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                   <button 
                     onClick={() => setPartnerRevenue(partnerRevenue.map((item: any) => item.id === p.id ? {...item, visible: !item.visible} : item))}
-                    className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${p.visible ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/40'}`}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shrink-0 ${p.visible ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-white/40 hover:bg-white/20'}`}
                   >
                     {p.visible ? 'Visible' : 'Hidden'}
                   </button>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2 bg-blue-500/20 px-4 py-2 rounded-xl border border-blue-500/30">
-                      <span className="text-blue-400 font-bold">$</span>
-                      <input 
-                        type="number" 
-                        value={p.revenue / 1000}
-                        onChange={(e) => {
-                          const newVal = parseFloat(e.target.value) * 1000;
-                          setPartnerRevenue(partnerRevenue.map((item: any) => item.id === p.id ? {...item, revenue: newVal} : item));
-                        }}
-                        className="bg-transparent border-none focus:ring-0 text-xl font-black text-white w-24 p-0"
-                      />
-                      <span className="text-blue-400 font-bold text-xs">K</span>
-                    </div>
+                  <div className="flex items-center gap-1.5 bg-blue-500/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-blue-500/30 shrink-0">
+                    <span className="text-blue-400 font-extrabold text-sm">$</span>
+                    <input 
+                      type="number" 
+                      value={isNaN(p.revenue) ? '' : p.revenue / 1000}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        const newVal = isNaN(val) ? 0 : val * 1000;
+                        setPartnerRevenue(partnerRevenue.map((item: any) => item.id === p.id ? {...item, revenue: newVal} : item));
+                      }}
+                      className="bg-transparent border-none focus:ring-0 text-base sm:text-lg font-black text-white w-16 sm:w-20 p-0 text-center"
+                    />
+                    <span className="text-blue-400 font-extrabold text-xs">K</span>
                   </div>
                 </div>
               </div>
