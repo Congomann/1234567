@@ -405,16 +405,6 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black">3/6</span>
                         </button>
 
-                        <div className="p-3 bg-white/80 border border-slate-200/80 rounded-2xl shadow-sm space-y-2">
-                            <div className="flex items-center justify-between text-[11px] font-extrabold text-slate-700">
-                                <span>PRO ENTERPRISE</span>
-                                <span className="text-emerald-600 font-bold">Active</span>
-                            </div>
-                            <button onClick={() => navigate('/crm/profile')} className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[11px] font-black shadow-sm transition-all">
-                                Manage Subscription
-                            </button>
-                        </div>
-
                         <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-200/60 rounded-xl w-full transition-all">
                             <LogOut className="h-4 w-4 opacity-70" strokeWidth={1.5} /> Sign Out
                         </button>
