@@ -43,12 +43,22 @@ import {
     Truck,
     Car,
     Newspaper,
-    Map as MapIcon,
     Briefcase,
-    Phone
+    Phone,
+    Search,
+    Folder,
+    UserPlus,
+    Command as CommandIcon,
+    ChevronDown,
+    Check,
+    CheckCircle,
+    DollarSign,
+    Map as MapIcon
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
+import { QuickActionsModal } from './crm/QuickActionsModal';
+import { WorkspaceTemplatesModal, UseCaseTemplate } from './crm/WorkspaceTemplatesModal';
 
 /**
  * EXHAUSTIVE TOUR DEFINITION
@@ -91,6 +101,27 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const { user, logout } = useData();
     const sidebarRef = useRef<HTMLDivElement>(null);
+
+    // --- ATTIO / APPLE MODAL STATES & TEMPLATES ---
+    const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
+    const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+
+    const [useCaseTemplates, setUseCaseTemplates] = useState<UseCaseTemplate[]>([
+        { id: 'sales', name: 'Sales', enabled: true, colorBg: 'bg-blue-50', colorIcon: 'text-blue-600', icon: TrendingUp },
+        { id: 'investing', name: 'Investing', enabled: true, colorBg: 'bg-rose-50', colorIcon: 'text-rose-600', icon: LineChart },
+        { id: 'recruiting', name: 'Recruiting', enabled: true, colorBg: 'bg-amber-50', colorIcon: 'text-amber-600', icon: Users },
+        { id: 'marketing', name: 'Marketing', enabled: true, colorBg: 'bg-blue-50', colorIcon: 'text-blue-600', icon: Zap },
+        { id: 'customer_success', name: 'Customer Success', enabled: true, colorBg: 'bg-emerald-50', colorIcon: 'text-emerald-600', icon: ShieldCheck },
+        { id: 'fundraising', name: 'Fundraising', enabled: false, colorBg: 'bg-purple-50', colorIcon: 'text-purple-600', icon: Landmark },
+        { id: 'finance', name: 'Finance', enabled: false, colorBg: 'bg-rose-50', colorIcon: 'text-rose-600', icon: DollarSign },
+        { id: 'hr', name: 'HR', enabled: false, colorBg: 'bg-amber-50', colorIcon: 'text-amber-600', icon: Briefcase },
+        { id: 'operations', name: 'Operations', enabled: false, colorBg: 'bg-cyan-50', colorIcon: 'text-cyan-600', icon: Truck },
+        { id: 'pr', name: 'PR', enabled: false, colorBg: 'bg-emerald-50', colorIcon: 'text-emerald-600', icon: Newspaper }
+    ]);
+
+    const handleToggleTemplate = (id: string) => {
+        setUseCaseTemplates(prev => prev.map(t => t.id === id ? { ...t, enabled: !t.enabled } : t));
+    };
 
     // --- TOUR STATE ---
     const [isTourActive, setIsTourActive] = useState(false);
@@ -299,61 +330,130 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 </>
             )}
 
-            <div className="w-full h-full max-w-[1920px] bg-white sm:rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex relative overflow-hidden ring-1 ring-slate-200/60 m-0 sm:m-4">
-                <aside ref={sidebarRef} className={`hidden lg:flex flex-col w-[260px] bg-[#f5f5f7]/80 backdrop-blur-2xl text-slate-900 h-full overflow-y-auto py-5 flex-shrink-0 no-scrollbar border-r border-slate-200/50 relative ${isTourActive ? 'z-[65]' : 'z-10'}`}>
-                    <div className="px-5 mb-6 flex flex-col gap-5">
+            {/* MODALS */}
+            <QuickActionsModal
+                isOpen={isQuickActionsOpen}
+                onClose={() => setIsQuickActionsOpen(false)}
+                onOpenTemplates={() => setIsTemplatesOpen(true)}
+            />
+
+            <WorkspaceTemplatesModal
+                isOpen={isTemplatesOpen}
+                onClose={() => setIsTemplatesOpen(false)}
+                templates={useCaseTemplates}
+                onToggleTemplate={handleToggleTemplate}
+            />
+
+            <div className="w-full h-full max-w-[1920px] bg-[#f5f5f7] sm:rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex relative overflow-hidden ring-1 ring-slate-200/60 m-0 sm:m-4">
+                <aside ref={sidebarRef} className={`hidden lg:flex flex-col w-[260px] bg-[#f5f5f7]/90 backdrop-blur-2xl text-slate-900 h-full overflow-y-auto py-4 flex-shrink-0 no-scrollbar border-r border-slate-200/60 relative ${isTourActive ? 'z-[65]' : 'z-10'}`}>
+                    <div className="px-4 mb-4 flex flex-col gap-4">
                         {/* macOS Window Controls */}
-                        <div className="flex items-center gap-2 mb-2 pl-1">
+                        <div className="flex items-center gap-2 mb-1 pl-1">
                             <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></div>
                             <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]"></div>
                             <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]"></div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="relative w-8 h-8 flex-shrink-0">
-                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-sm">
-                                    <rect x="5" y="15" width="90" height="60" rx="12" fill="#F59E0B" />
-                                    <rect x="10" y="35" width="80" height="55" rx="12" fill="#FCD34D" />
-                                    <rect x="42" y="52" width="16" height="22" rx="4" fill="#B45309" fillOpacity="0.25" />
-                                </svg>
+                        {/* ATTIO STYLE QUICK ACTIONS BUTTON */}
+                        <button
+                            onClick={() => setIsQuickActionsOpen(true)}
+                            className="w-full flex items-center justify-between px-3 py-2 bg-white/80 hover:bg-white text-slate-700 text-xs font-semibold rounded-xl border border-slate-200/80 shadow-sm transition-all group"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600" />
+                                <span>Quick actions</span>
                             </div>
-                            <div>
-                                <h1 className="font-semibold text-[13px] leading-none tracking-tight text-slate-800">New Holland</h1>
-                                <p className="text-[10px] text-slate-500 mt-1 font-medium">Financial Group</p>
+                            <div className="flex items-center gap-1">
+                                <kbd className="px-1.5 py-0.5 text-[10px] bg-slate-100 text-slate-500 rounded border border-slate-200 font-mono">⌘K</kbd>
                             </div>
-                        </div>
+                        </button>
                     </div>
 
-                    <nav className="flex-1 px-3 space-y-8">
-                        <div>
-                            <h3 className="text-[11px] font-semibold text-slate-400 px-3 mb-2">Core</h3>
-                            <div className="space-y-0.5">{navStructure.main.map(renderNavLink)}</div>
+                    <nav className="flex-1 px-3 space-y-6">
+                        {/* CORE TOOLKIT */}
+                        <div className="space-y-0.5">
+                            {[
+                                { path: '/crm/dashboard', label: 'Notifications', icon: Bell, badge: '3' },
+                                { path: '/crm/calendar', label: 'Tasks', icon: CheckCircle },
+                                { path: '/crm/chat', label: 'Notes', icon: FileText },
+                                { path: '/crm/telephony', label: 'Emails', icon: Inbox },
+                                { path: '/crm/campaigns', label: 'Reports', icon: LineChart },
+                                { path: '/crm/leads', label: 'Automations', icon: Zap }
+                            ].map(renderNavLink)}
                         </div>
 
-                        {navStructure.vertical.length > 0 && (
-                            <div>
-                                <h3 className="text-[11px] font-semibold text-slate-400 px-3 mb-2">Verticals</h3>
-                                <div className="space-y-0.5">{navStructure.vertical.map(renderNavLink)}</div>
-                            </div>
-                        )}
-
+                        {/* FAVORITES */}
                         <div>
-                            <h3 className="text-[11px] font-semibold text-slate-400 px-3 mb-2">Shared</h3>
-                            <div className="space-y-0.5">{navStructure.shared.map(renderNavLink)}</div>
+                            <div className="flex items-center justify-between px-3 mb-1 cursor-pointer">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Favorites</span>
+                                <ChevronDown className="w-3 h-3 text-slate-400" />
+                            </div>
+                            <div className="space-y-0.5">
+                                {[
+                                    { path: '/crm/admin', label: 'UK & EU Companies', icon: Building2 },
+                                    { path: '/crm/securities', label: 'B2B Relationships', icon: TrendingUp },
+                                    { path: '/crm/chat', label: 'CRM Meeting Notes', icon: FileText },
+                                    { path: '/crm/onboarding', label: 'Potential partners', icon: Users }
+                                ].map(renderNavLink)}
+                            </div>
                         </div>
 
-                        {navStructure.admin.length > 0 && (
-                            <div>
-                                <h3 className="text-[11px] font-semibold text-slate-400 px-3 mb-2">Administration</h3>
-                                <div className="space-y-0.5">{navStructure.admin.map(renderNavLink)}</div>
+                        {/* RECORDS */}
+                        <div>
+                            <div className="flex items-center justify-between px-3 mb-1 cursor-pointer">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Records</span>
+                                <ChevronDown className="w-3 h-3 text-slate-400" />
                             </div>
-                        )}
+                            <div className="space-y-0.5">
+                                {[
+                                    { path: '/crm/admin', label: 'Companies', icon: Building2 },
+                                    { path: '/crm/leads', label: 'People', icon: CircleUser }
+                                ].map(renderNavLink)}
+                            </div>
+                        </div>
+
+                        {/* LISTS / VERTICALS ENABLED BY TEMPLATES */}
+                        <div>
+                            <div className="flex items-center justify-between px-3 mb-1">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Lists</span>
+                                <button onClick={() => setIsTemplatesOpen(true)} className="text-[10px] text-blue-600 hover:underline font-bold">+ Templates</button>
+                            </div>
+                            <div className="space-y-0.5">
+                                {navStructure.shared.map(renderNavLink)}
+                                {navStructure.vertical.map(renderNavLink)}
+                            </div>
+                        </div>
                     </nav>
 
-                    <div className="px-3 mt-6 pt-4 border-t border-slate-200/50">
-                        <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-200/60 rounded-[6px] w-full transition-all">
-                            <LogOut className="h-[18px] w-[18px] opacity-70" strokeWidth={1.5} /> Sign Out
+                    {/* ATTIO BOTTOM UTILITY FOOTER MATCHING SCREENSHOT */}
+                    <div className="px-3 mt-4 pt-3 border-t border-slate-200/60 space-y-2">
+                        <button 
+                            onClick={() => setIsTemplatesOpen(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-white/80 rounded-xl w-full transition-all"
+                        >
+                            <UserPlus className="w-4 h-4 text-slate-500" /> Invite teammates
                         </button>
+
+                        <button 
+                            onClick={startTour}
+                            className="flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-700 hover:bg-white/80 rounded-xl w-full transition-all"
+                        >
+                            <div className="flex items-center gap-2">
+                                <HelpCircle className="w-4 h-4 text-slate-500" /> Help and first steps
+                            </div>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] font-extrabold rounded-md">✨ 3/6</span>
+                        </button>
+
+                        {/* TRIAL / BILLING BADGE */}
+                        <div className="p-2.5 bg-white/80 border border-slate-200/80 rounded-2xl flex items-center justify-between shadow-sm">
+                            <span className="text-xs font-extrabold text-slate-800">14 <span className="font-normal text-slate-500 text-[11px]">days left on trial</span></span>
+                            <button 
+                                onClick={() => navigate('/crm/bank-verification')}
+                                className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded-lg transition-all"
+                            >
+                                Add billing
+                            </button>
+                        </div>
                     </div>
                 </aside>
 
