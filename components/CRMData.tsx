@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutGrid,
     Inbox,
@@ -455,7 +456,18 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                             </div>
                         </div>
                     </header>
-                    <main className="flex-1 overflow-y-auto p-8 lg:p-10 no-scrollbar relative bg-white">{children}</main>
+                    <AnimatePresence mode="wait">
+                        <motion.main
+                            key={location.pathname}
+                            initial={{ opacity: 0, y: 14, scale: 0.99 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -14, scale: 0.99 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className="flex-1 overflow-y-auto p-8 lg:p-10 no-scrollbar relative bg-[#f5f5f7]"
+                        >
+                            {children}
+                        </motion.main>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
