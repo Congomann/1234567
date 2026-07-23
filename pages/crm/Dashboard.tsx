@@ -1,566 +1,437 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import {
-    Users, Wallet, TrendingUp, Activity, ArrowUpRight,
-    MonitorCheck, BarChart3, ShieldAlert, Cpu, ArrowRight,
-    Search, Bell, LayoutGrid, Webhook, Bug, RefreshCw, MessageSquarePlus, ChevronRight, AlertCircle, Clock, Info, Server, Globe, Zap, ShieldCheck,
-    FileText, GripVertical, CheckCircle2, Trash2, Plus, Phone, Mail, Calendar, User
+  Users, Wallet, TrendingUp, Activity, ArrowUpRight,
+  ShieldCheck, ArrowRight, Zap, RefreshCw, MessageSquare, Phone,
+  FileText, CheckCircle2, Radio, Sparkles, Building2, Landmark,
+  Percent, Truck, Plus, Trash2, ShieldAlert, Key, Award, Flame,
+  Clock, CheckSquare
 } from 'lucide-react';
-import { UserRole, LeadStatus, TaskPriority, Task } from '../../types';
+import { UserRole, TaskPriority } from '../../types';
 
-import ClientRiskDashboard from './ClientRiskDashboard';
-
-const MetricCard = ({ title, value, subtext, icon: Icon, colorClass, trend, onClick }: any) => (
-    <div
-        onClick={onClick}
-        className="bg-white/60 backdrop-blur-md p-8 rounded-[2.5rem] shadow-sm border border-white/40 hover:shadow-xl hover:bg-white transition-all group cursor-pointer flex flex-col justify-between min-h-[220px]"
-    >
-        <div className="flex justify-between items-start mb-6">
-            <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.25em]">{title}</p>
-            <div className={`p-3 rounded-2xl ${colorClass || 'bg-slate-50 text-slate-400'} group-hover:scale-110 transition-transform shadow-sm`}>
-                <Icon size={20} strokeWidth={2.5} />
-            </div>
-        </div>
-        <div>
-            <p className="text-5xl font-black text-slate-900 tracking-tighter mb-2">{value}</p>
-            <div className="flex items-center gap-2">
-                {trend && (
-                    <span className={`text-xs font-black flex items-center ${trend.includes('OK') || trend.includes('UP') || trend.includes('100%') || trend.includes('OPTIMAL') ? 'text-green-500' : 'text-orange-500'}`}>
-                        {trend}
-                    </span>
-                )}
-                <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{subtext}</span>
-            </div>
-            {title === "Hot Leads" && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                    <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Daily Conversion Goal</span>
-                        <span className="text-[9px] font-black text-blue-600">85%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-blue-600 h-full rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-);
-
-const TaskList = () => {
-    const { tasks, toggleTask, deleteTask, reorderTasks, addTask, user } = useData();
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-    const [overIndex, setOverIndex] = useState<number | null>(null);
-    const [newTaskTitle, setNewTaskTitle] = useState('');
-
-    const handleDragStart = (index: number) => {
-        setDraggedIndex(index);
-    };
-
-    const handleDragOver = (e: React.DragEvent, index: number) => {
-        e.preventDefault();
-        if (overIndex !== index) {
-            setOverIndex(index);
-        }
-    };
-
-    const handleDrop = (e: React.DragEvent, targetIndex: number) => {
-        e.preventDefault();
-        if (draggedIndex !== null) {
-            reorderTasks(draggedIndex, targetIndex);
-        }
-        setDraggedIndex(null);
-        setOverIndex(null);
-    };
-
-    const handleDragEnd = () => {
-        setDraggedIndex(null);
-        setOverIndex(null);
-    };
-
-    const handleAddTask = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newTaskTitle.trim()) {
-            addTask({
-                title: newTaskTitle.trim(),
-                priority: TaskPriority.MEDIUM,
-                completed: false,
-                advisorId: user?.id || '1'
-            });
-            setNewTaskTitle('');
-        }
-    };
-
-    const sortedTasks = [...tasks].sort((a, b) => a.order - b.order);
-
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Strategic Priorities</h3>
-                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest">Manual Prioritization</span>
-            </div>
-
-            <form onSubmit={handleAddTask} className="flex gap-2 mb-6">
-                <input
-                    type="text"
-                    placeholder="New priority node..."
-                    className="flex-1 bg-white border border-slate-200 rounded-2xl px-6 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                    value={newTaskTitle}
-                    onChange={e => setNewTaskTitle(e.target.value)}
-                />
-                <button type="submit" className="p-3 bg-[#0B2240] text-white rounded-2xl hover:bg-blue-900 transition-all shadow-lg active:scale-90">
-                    <Plus size={20} />
-                </button>
-            </form>
-
-            <div className="space-y-2">
-                {sortedTasks.map((task, index) => (
-                    <div
-                        key={task.id}
-                        draggable
-                        onDragStart={() => handleDragStart(index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDrop={(e) => handleDrop(e, index)}
-                        onDragEnd={handleDragEnd}
-                        className={`flex items-center gap-4 p-4 bg-white/60 rounded-2xl border transition-all cursor-move group relative
-                            ${draggedIndex === index ? 'opacity-30 border-blue-200 scale-95 shadow-inner' : 'border-white/80 hover:shadow-md'}
-                            ${overIndex === index && draggedIndex !== index ? 'border-blue-400 bg-blue-50/30 -translate-y-1' : ''}
-                        `}
-                    >
-                        {/* Drop Indicator Line */}
-                        {overIndex === index && draggedIndex !== null && draggedIndex !== index && (
-                            <div className={`absolute left-0 right-0 h-1 bg-blue-600 rounded-full z-20 ${draggedIndex > index ? '-top-1' : '-bottom-1'}`}></div>
-                        )}
-
-                        <div className="text-slate-300 group-hover:text-blue-500 transition-colors cursor-grab active:cursor-grabbing">
-                            <GripVertical size={18} />
-                        </div>
-
-                        <button
-                            onClick={() => toggleTask(task.id)}
-                            className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-slate-200'}`}
-                        >
-                            {task.completed && <CheckCircle2 size={12} strokeWidth={3} />}
-                        </button>
-
-                        <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold truncate tracking-tight ${task.completed ? 'text-slate-300 line-through' : 'text-slate-700'}`}>
-                                {task.title}
-                            </p>
-                        </div>
-
-                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md shrink-0 border ${task.priority === TaskPriority.HIGH ? 'bg-red-50 text-red-600 border-red-100' :
-                                task.priority === TaskPriority.MEDIUM ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                    'bg-blue-50 text-blue-600 border-blue-100'
-                            }`}>
-                            {task.priority}
-                        </span>
-
-                        <button
-                            onClick={() => deleteTask(task.id)}
-                            className="p-1.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                            <Trash2 size={14} />
-                        </button>
-                    </div>
-                ))}
-
-                {sortedTasks.length === 0 && (
-                    <div className="text-center py-12 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No tasks defined.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
+interface LiveEvent {
+  id: string;
+  type: 'signalwire_call' | 'signalwire_ai' | 'plaid_verify' | 'job_application' | 'marketing_payment' | 'policy_app';
+  title: string;
+  subtitle: string;
+  timestamp: string;
+  badge?: string;
+  color: string;
+}
 
 export const Dashboard: React.FC = () => {
-    const { user, metrics, notifications, markNotificationRead, allUsers, leads, jobApplications, events, interactions } = useData();
-    const navigate = useNavigate();
+  const { user, leads, tasks, addTask, toggleTask, deleteTask, reorderTasks } = useData();
+  const navigate = useNavigate();
 
-    const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.SUB_ADMIN;
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([
+    {
+      id: 'evt-1',
+      type: 'signalwire_ai',
+      title: 'SignalWire AI Lead Qualification Complete',
+      subtitle: 'Jonathan Miller ($250k liquid capital) rated Warm 🔥',
+      timestamp: '2 mins ago',
+      badge: 'Warm',
+      color: 'bg-rose-500/10 text-rose-600 border-rose-200'
+    },
+    {
+      id: 'evt-2',
+      type: 'plaid_verify',
+      title: 'Plaid 1-Click Bank ACH Verification',
+      subtitle: 'Chase Bank checking account ending in ...4910 verified for $120,000 ACH draft',
+      timestamp: '14 mins ago',
+      badge: 'Verified',
+      color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200'
+    },
+    {
+      id: 'evt-3',
+      type: 'job_application',
+      title: 'New Advisor Application Submitted',
+      subtitle: 'David Vance submitted Series 7 & 66 License details via /join',
+      timestamp: '42 mins ago',
+      badge: 'Pending Review',
+      color: 'bg-blue-500/10 text-blue-600 border-blue-200'
+    },
+    {
+      id: 'evt-4',
+      type: 'marketing_payment',
+      title: 'Stripe Campaign Funding Approved',
+      subtitle: 'Q3 Wealth Growth Campaign funded for $15,000 via Stripe PaymentIntent',
+      timestamp: '1 hour ago',
+      badge: 'Approved',
+      color: 'bg-purple-500/10 text-purple-600 border-purple-200'
+    }
+  ]);
 
-    const advisorStats = [
-        { title: "Total Clients", value: metrics.activeClients || "450", subtext: "Managed Accounts", icon: Users, colorClass: "bg-blue-50 text-blue-600", trend: "+12%", route: "/crm/clients" },
-        { title: "Earnings YTD", value: `$${(metrics.totalCommission / 1000).toFixed(1)}k`, subtext: "Net Commission", icon: Wallet, colorClass: "bg-green-50 text-green-600", trend: "OPTIMAL", route: "/crm/commissions" },
-        { title: "Hot Leads", value: leads.filter(l => l.qualification === 'Hot').length, subtext: "High Conversion Potential", icon: TrendingUp, colorClass: "bg-purple-50 text-purple-600", trend: "ACTION REQ", route: "/crm/leads" },
-        { title: "Pipeline Value", value: `$${(leads.length * 2.5).toFixed(1)}k`, subtext: "Estimated Value", icon: Activity, colorClass: "bg-orange-50 text-orange-600", route: "/crm/leads" }
-    ];
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-    const adminStats = [
-        {
-            title: "Website Health",
-            value: "99.9%",
-            subtext: "Current Uptime",
-            icon: Globe,
-            colorClass: "bg-emerald-50 text-emerald-600",
-            trend: "STATUS: UP",
-            route: "/crm/admin/website"
-        },
-        {
-            title: "API Ingestion",
-            value: "100%",
-            subtext: "Sync Success Rate",
-            icon: Zap,
-            colorClass: "bg-blue-50 text-blue-600",
-            trend: "OK: GOOGLE/META",
-            route: "/crm/admin/marketing"
-        },
-        {
-            title: "Advisor Requests",
-            value: jobApplications.filter(a => a.status === 'Pending').length + 3,
-            subtext: "Action Required",
-            icon: MessageSquarePlus,
-            colorClass: "bg-orange-50 text-orange-600",
-            trend: "5 URGENT",
-            route: "/crm/onboarding"
-        },
-        {
-            title: "Security & CRM",
-            value: "SECURE",
-            subtext: "System Encryption",
-            icon: ShieldCheck,
-            colorClass: "bg-purple-50 text-purple-600",
-            trend: "AES-256",
-            route: "/crm/admin/access-logs"
+  // Poll SignalWire & Recent API Events
+  const fetchRecentActivity = async () => {
+    try {
+      const [callsRes, smsRes] = await Promise.all([
+        fetch('/api/signalwire/calls'),
+        fetch('/api/signalwire/sms/history')
+      ]);
+
+      if (callsRes.ok) {
+        const calls = await callsRes.json();
+        if (calls.length > 0) {
+          const latestCall = calls[0];
+          setLiveEvents(prev => [
+            {
+              id: 'call-' + latestCall.id,
+              type: 'signalwire_call',
+              title: `SignalWire ${latestCall.direction === 'ai_qualification' ? 'AI Call' : 'Outbound Call'} (${latestCall.lead_name})`,
+              subtitle: latestCall.ai_qualification_summary || latestCall.transcript?.slice(0, 80),
+              timestamp: 'Just now',
+              badge: latestCall.ai_rating || 'Completed',
+              color: latestCall.ai_rating === 'Warm' ? 'bg-rose-500/10 text-rose-600 border-rose-200' : 'bg-blue-500/10 text-blue-600 border-blue-200'
+            },
+            ...prev.slice(0, 5)
+          ]);
         }
-    ];
+      }
+    } catch (err) {
+      console.error('[Dashboard Feed Error]:', err);
+    }
+  };
 
-    const stats = isAdmin ? adminStats : advisorStats;
+  useEffect(() => {
+    fetchRecentActivity();
+    const interval = setInterval(fetchRecentActivity, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
-    const handleActivityClick = (n: any) => {
-        markNotificationRead(n.id);
-        if (n.resourceType === 'lead') navigate('/crm/leads');
-        else if (n.resourceType === 'event') navigate('/crm/calendar');
-        else if (n.resourceType === 'job_application') navigate('/crm/onboarding');
-    };
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newTaskTitle.trim()) {
+      addTask({
+        title: newTaskTitle.trim(),
+        priority: TaskPriority.MEDIUM,
+        completed: false,
+        advisorId: user?.id || '1'
+      });
+      setNewTaskTitle('');
+    }
+  };
 
-    const getPriorityColor = (type: string) => {
-        switch (type) {
-            case 'alert': return 'text-red-500 bg-red-50 border-red-100';
-            case 'warning': return 'text-orange-500 bg-orange-50 border-orange-100';
-            case 'success': return 'text-green-500 bg-green-50 border-green-100';
-            default: return 'text-blue-500 bg-blue-50 border-blue-100';
-        }
-    };
-
-    return (
-        <div className="space-y-12 pb-20 animate-fade-in">
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                    <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">
-                        {isAdmin ? 'Administrative Control Terminal' : 'Advisor Performance Hub'}
-                    </h2>
-                </div>
-                {isAdmin && (
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 rounded-full border border-white/10 shadow-lg">
-                            <Server size={12} className="text-blue-400" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Master Node: Active</span>
-                        </div>
-                    </div>
-                )}
+  return (
+    <div className="min-h-screen bg-[#f5f5f7] text-slate-900 pb-20 selection:bg-blue-500/20">
+      
+      {/* ── APPLE MAC-STYLE WELCOME HEADER ── */}
+      <div className="relative overflow-hidden apple-glass rounded-[2.5rem] p-8 md:p-12 mb-10 border border-white/80 shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-600/10 text-blue-600 text-xs font-extrabold uppercase tracking-widest mb-4 border border-blue-500/20">
+              <Sparkles className="w-3.5 h-3.5" /> New Holland Command Center v4.2
             </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 mb-3">
+              Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{user?.name || 'Advisor'}</span>.
+            </h1>
+            <p className="text-base text-slate-500 font-medium max-w-xl leading-relaxed">
+              Your real-time enterprise overview across Wealth, Insurance, Real Estate, Mortgages, Logistics, and SignalWire AI Telephony.
+            </p>
+          </div>
 
-            <div className="mb-6">
-                <ClientRiskDashboard />
-            </div>
+          {/* Quick Action Floating Bar */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => navigate('/crm/telephony')}
+              className="px-5 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all apple-card"
+            >
+              <Phone className="w-4 h-4" /> SignalWire Telephony
+            </button>
 
-            {/* Smooth Onboarding Welcome Banner */}
-            {user?.role === UserRole.ADVISOR && (
-                <div className="relative overflow-hidden bg-gradient-to-r from-[#0B2240] to-[#0A62A7] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-blue-900/20 mb-12 border border-white/10 group">
-                    <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                        <Cpu size={120} className="w-full h-full" />
-                    </div>
-                    <div className="relative z-10 max-w-2xl">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="bg-blue-400/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-[10px] font-black uppercase tracking-[0.2em]">
-                                Advisor Onboarding Complete
-                            </div>
-                            <div className="flex -space-x-2">
-                                <div className="w-6 h-6 rounded-full bg-green-500 border-2 border-[#0B2240] flex items-center justify-center">
-                                    <CheckCircle2 size={12} className="text-white" />
-                                </div>
-                            </div>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 leading-tight">
-                            Welcome to the Console, <span className="text-blue-300">{user.name.split(' ')[0]}</span>.
-                        </h1>
-                        <p className="text-blue-100 text-lg font-medium leading-relaxed mb-8 opacity-90">
-                            Your legal agreements are signed and your terminal is ready. We've pre-populated your <span className="text-white font-bold">Strategic Priorities</span> below to help you launch your microsite and connect your systems.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <button 
-                                onClick={() => navigate('/crm/profile')}
-                                className="bg-white text-[#0B2240] px-8 py-3.5 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl"
-                            >
-                                <User size={14} /> Finish Profile
-                            </button>
-                            <button 
-                                onClick={() => navigate('/crm/admin/website')}
-                                className="bg-blue-500/20 backdrop-blur-md border border-white/20 text-white px-8 py-3.5 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-                            >
-                                <Globe size={14} /> My Microsite
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <button
+              onClick={() => navigate('/crm/bank-verification')}
+              className="px-5 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all apple-card"
+            >
+              <Landmark className="w-4 h-4" /> Plaid ACH Verify
+            </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, i) => (
-                    <MetricCard
-                        key={i}
-                        {...stat}
-                        onClick={() => navigate(stat.route)}
-                    />
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-                <div className="lg:col-span-2 bg-white/40 backdrop-blur-md p-10 rounded-[3.5rem] shadow-sm border border-white/50 flex flex-col min-h-[600px]">
-                    <div className="flex justify-between items-center mb-10">
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">
-                                System Activity Logs
-                            </h3>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
-                                {isAdmin ? 'Website Health & CRM Traces' : 'Real-time Prospect Monitoring'}
-                            </p>
-                        </div>
-                        <button onClick={() => isAdmin ? navigate('/crm/admin/marketing') : {}} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm">
-                            <RefreshCw size={16} className="text-blue-600" />
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        {isAdmin ? (
-                            <>
-                                <LogItem
-                                    title="Webhook Ingestion Success"
-                                    desc="New lead ingested from 'Wealth 2024' Campaign. Synchronization verified."
-                                    time="2m ago"
-                                    icon={Webhook}
-                                    type="success"
-                                />
-                                <LogItem
-                                    title="Advisor Request: Signature Approval"
-                                    desc="Sarah RealEstate updated her professional title. Approval pending in Signature Lab."
-                                    time="15m ago"
-                                    icon={Info}
-                                    type="info"
-                                />
-                                <LogItem
-                                    title="Automatic Database Backup"
-                                    desc="Incremental snapshot saved to encrypted cloud node. CRC integrity verified."
-                                    time="1h ago"
-                                    icon={ShieldCheck}
-                                    type="success"
-                                />
-                                <LogItem
-                                    title="Microsite Error Flagged"
-                                    desc="Broken link detected on Advisor #4 Microsite (Profile section assets)."
-                                    time="2h ago"
-                                    icon={Bug}
-                                    type="alert"
-                                />
-                            </>
-                        ) : (
-                            <div className="space-y-8">
-                                <section>
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upcoming Consultations</h4>
-                                        <button onClick={() => navigate('/crm/calendar')} className="text-[9px] font-black text-blue-600 uppercase hover:underline">View Calendar</button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {events
-                                            .filter(e => e.type === 'meeting' && new Date(e.date) >= new Date())
-                                            .slice(0, 4)
-                                            .map(event => (
-                                                <div key={event.id} className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
-                                                            {new Date(event.date).getDate()}
-                                                        </div>
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-sm font-bold text-slate-800 truncate">{event.title}</p>
-                                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{event.time} • {event.type}</p>
-                                                        </div>
-                                                        {event.meetingLink && (
-                                                            <a href={event.meetingLink} target="_blank" rel="noreferrer" className="p-2 bg-slate-900 text-white rounded-xl hover:bg-blue-600 transition-colors">
-                                                                <MonitorCheck size={14} />
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        {events.filter(e => e.type === 'meeting' && new Date(e.date) >= new Date()).length === 0 && (
-                                            <div className="col-span-2 p-8 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-                                                <p className="text-xs text-slate-400 italic font-medium">No consultations scheduled for today.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section>
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Recent Client Engagement</h4>
-                                    <div className="space-y-3">
-                                        {interactions.slice(0, 5).map((interaction, idx) => (
-                                            <div key={idx} className="p-4 bg-white/60 rounded-2xl border border-white/80 flex items-center gap-4 group hover:bg-white transition-all">
-                                                <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                                                    interaction.type === 'Call' ? 'bg-emerald-100 text-emerald-600' :
-                                                    interaction.type === 'Email' ? 'bg-blue-100 text-blue-600' :
-                                                    interaction.type === 'Meeting' ? 'bg-purple-100 text-purple-600' :
-                                                    'bg-slate-100 text-slate-600'
-                                                }`}>
-                                                    {interaction.type === 'Call' ? <Phone size={16} /> :
-                                                     interaction.type === 'Email' ? <Mail size={16} /> :
-                                                     interaction.type === 'Meeting' ? <Calendar size={16} /> :
-                                                     <MessageSquarePlus size={16} />}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-bold text-slate-800 truncate">{interaction.content}</p>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                                                        {interaction.type} with Client • {interaction.authorName || 'System'}
-                                                    </p>
-                                                </div>
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0">
-                                                    {new Date(interaction.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                                </span>
-                                            </div>
-                                        ))}
-                                        {interactions.length === 0 && (
-                                            <p className="text-xs text-slate-400 italic font-medium">No recent interactions logged.</p>
-                                        )}
-                                    </div>
-                                </section>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="lg:col-span-1 space-y-6">
-                    {isAdmin ? (
-                        <div className="bg-[#B7BDC5] p-10 rounded-[3rem] shadow-xl relative overflow-hidden min-h-[480px]">
-                            <div className="absolute top-10 right-10 opacity-30 text-white pointer-events-none">
-                                <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M0 30H20L30 10L50 50L60 20L70 40L80 30H120" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </div>
-
-                            <h3 className="text-xl font-black text-[#5C6675] mb-12 relative z-10 uppercase tracking-widest">Active Deployments</h3>
-
-                            <div className="space-y-12 relative z-10">
-                                <div className="space-y-4">
-                                    <p className="text-[10px] font-black text-[#4E88F5] uppercase tracking-[0.3em]">Microsite Status</p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-lg font-black text-[#5C6675]">{allUsers.filter(u => u.micrositeEnabled).length} Advisors Live</span>
-                                        <div className="h-2.5 w-2.5 bg-[#22C55E] rounded-full shadow-[0_0_12px_rgba(34,197,94,0.6)]"></div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <p className="text-[10px] font-black text-[#4E88F5] uppercase tracking-[0.3em]">Pending Onboarding</p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-lg font-black text-[#5C6675]">{jobApplications.filter(a => a.status === 'Pending').length} Apps Review</span>
-                                        <button
-                                            onClick={() => navigate('/crm/onboarding')}
-                                            className="text-[10px] font-black bg-[#4E88F5] text-white px-5 py-2 rounded-xl hover:bg-blue-600 transition-all shadow-md uppercase tracking-widest"
-                                        >
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="pt-8 mt-12 border-t border-white/20">
-                                    <button
-                                        onClick={() => navigate('/crm/admin/website')}
-                                        className="w-full py-5 bg-[#C9CFD7] text-[#5C6675] rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-3 shadow-inner border border-white/20"
-                                    >
-                                        <MonitorCheck size={18} /> Site Config
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div className="bg-[#B7BDC5]/40 backdrop-blur-md p-10 rounded-[3rem] shadow-sm border border-white/50 min-h-[480px]">
-                                <TaskList />
-                            </div>
-                            
-                            <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Hot Lead Pipeline</h4>
-                                <div className="space-y-3">
-                                    {leads.filter(l => l.qualification === 'Hot').slice(0, 3).map(lead => (
-                                        <div key={lead.id} onClick={() => navigate('/crm/leads')} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-300 transition-all cursor-pointer flex items-center justify-between group">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-black text-[10px]">
-                                                    {lead.name[0]}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-bold text-slate-800">{lead.name}</p>
-                                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{lead.score}% Score</p>
-                                                </div>
-                                            </div>
-                                            <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-500 transition-all" />
-                                        </div>
-                                    ))}
-                                    {leads.filter(l => l.qualification === 'Hot').length === 0 && (
-                                        <p className="text-[10px] text-slate-400 italic font-medium">No urgent leads in pipeline.</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">Internal Service Health</h3>
-                        <div className="space-y-4">
-                            <HealthIndicator label="Database Engine" status="Optimal" />
-                            <HealthIndicator label="Lead Ingestion" status="Active" />
-                            <HealthIndicator label="Email SMTP" status="Active" />
-                            <HealthIndicator label="Auth Gateway" status="Stable" />
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+            <button
+              onClick={() => navigate('/crm/campaigns')}
+              className="px-5 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-slate-900/20 transition-all apple-card"
+            >
+              <Zap className="w-4 h-4" /> Marketing Pro
+            </button>
+          </div>
         </div>
-    );
-};
+      </div>
 
-const LogItem = ({ title, desc, time, icon: Icon, type }: any) => {
-    const colors = {
-        success: 'text-green-500 bg-green-50 border-green-100',
-        alert: 'text-red-500 bg-red-50 border-red-100',
-        info: 'text-blue-500 bg-blue-50 border-blue-100',
-        warning: 'text-orange-500 bg-orange-50 border-orange-100'
-    };
-    return (
-        <div className="flex items-start gap-5 p-6 bg-white/60 rounded-[2rem] border border-white/80 hover:shadow-md transition-all group">
-            <div className={`p-2.5 rounded-xl border ${colors[type as keyof typeof colors]}`}>
-                <Icon size={16} />
+      {/* ── LIVE REAL-TIME CRM EVENT STREAM ("WHAT'S HAPPENING NOW") ── */}
+      <div className="apple-glass rounded-[2.5rem] p-8 mb-10 border border-white/80 shadow-2xl">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-600/10 text-blue-600 rounded-2xl">
+              <Radio className="w-6 h-6 animate-pulse" />
             </div>
-            <div className="flex-1">
-                <div className="flex justify-between items-baseline">
-                    <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{title}</p>
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{time}</span>
+            <div>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">Live CRM Event Feed</h2>
+              <p className="text-xs text-slate-400 font-medium">Real-time stream of SignalWire calls, Plaid verifications, applications, and payments</p>
+            </div>
+          </div>
+
+          <button 
+            onClick={fetchRecentActivity}
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1.5 transition-all"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Live Sync
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {liveEvents.map(evt => (
+            <div key={evt.id} className="apple-glass p-5 rounded-3xl border border-white/60 apple-card flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${evt.color}`}>
+                    {evt.badge || 'Live Event'}
+                  </span>
+                  <span className="text-[10px] font-medium text-slate-400">{evt.timestamp}</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed font-medium">{desc}</p>
-            </div>
-        </div>
-    );
-};
+                <h4 className="font-bold text-sm text-slate-900 mb-1 leading-snug">{evt.title}</h4>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{evt.subtitle}</p>
+              </div>
 
-const HealthIndicator = ({ label, status }: { label: string, status: string }) => (
-    <div className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
-        <span className="text-xs font-bold text-slate-500">{label}</span>
-        <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black text-green-600 uppercase">{status}</span>
-            <div className="h-1.5 w-1.5 bg-green-500 rounded-full"></div>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-blue-600 font-bold">
+                <span>View Details</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* ── PRODUCT SUITE VERTICAL HUBS (APPLE CARDS) ── */}
+      <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-6 px-2">Enterprise Product Vertical Hubs</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        
+        {/* 1. Wealth & Securities */}
+        <div 
+          onClick={() => navigate('/crm/portfolio')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-amber-500/10 text-amber-600 rounded-2xl">
+                <TrendingUp className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 font-extrabold text-xs rounded-full border border-emerald-500/20">
+                +14.2% YoY
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Securities & Advisory</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$142.8M</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Total Assets Under Management (AUM) across private wealth, annuities, and fee-based portfolios.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
+            <span>Portfolio Mgmt & Advisory Billing</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* 2. Real Estate & Escrow */}
+        <div 
+          onClick={() => navigate('/crm/properties')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-blue-500/10 text-blue-600 rounded-2xl">
+                <Building2 className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-blue-500/10 text-blue-600 font-extrabold text-xs rounded-full border border-blue-500/20">
+                18 Active Deals
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Real Estate & Escrow</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$18.4M</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Active escrow pipeline, commercial real estate listings, and market intelligence tracking.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
+            <span>Open Property Pipeline</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* 3. Life & Commercial Insurance */}
+        <div 
+          onClick={() => navigate('/crm/applications')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-rose-500/10 text-rose-600 rounded-2xl">
+                <ShieldCheck className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-rose-500/10 text-rose-600 font-extrabold text-xs rounded-full border border-rose-500/20">
+                98.2% Approval
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Insurance & Protection</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$840K/mo</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Life, auto, commercial, and group benefits policy applications and carrier renewals.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
+            <span>Policies & Carrier Portal</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* 4. Mortgage & Lending */}
+        <div 
+          onClick={() => navigate('/crm/loans')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl">
+                <Landmark className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 font-extrabold text-xs rounded-full border border-emerald-500/20">
+                Plaid Enabled
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Mortgage & Lending</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$6.2M</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Loan originations, rate calculators, and 1-click Plaid instant bank verifications.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
+            <span>Loan Applications & Rates</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* 5. Logistics & Fleet */}
+        <div 
+          onClick={() => navigate('/crm/logistics')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-indigo-500/10 text-indigo-600 rounded-2xl">
+                <Truck className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-indigo-500/10 text-indigo-600 font-extrabold text-xs rounded-full border border-indigo-500/20">
+                42 Dispatched
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Logistics & Fleet</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">128 Loads</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Commercial load posting terminal, carrier verification, and fleet operations.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+            <span>Logistics Command Center</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* 6. SignalWire Telephony & AI */}
+        <div 
+          onClick={() => navigate('/crm/telephony')}
+          className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-purple-500/10 text-purple-600 rounded-2xl">
+                <Radio className="w-7 h-7" />
+              </div>
+              <span className="px-3 py-1 bg-purple-500/10 text-purple-600 font-extrabold text-xs rounded-full border border-purple-500/20">
+                AI Agent Active
+              </span>
+            </div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">SignalWire Telephony</h3>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">94 Calls</p>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Corporate softphone, advisor extensions (IVR), 2-way SMS, and AI Lead Qualification.
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600">
+            <span>Open Telephony Suite</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── STRATEGIC PRIORITIES & TASK MANAGER (APPLE MAC STYLE) ── */}
+      <div className="apple-glass rounded-[2.5rem] p-8 border border-white/80 shadow-2xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200/60">
+          <div>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Strategic Priorities & Advisor Tasks</h3>
+            <p className="text-xs text-slate-400 font-medium">Reorder, mark complete, or add new priority action items</p>
+          </div>
+
+          <form onSubmit={handleAddTask} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newTaskTitle}
+              onChange={e => setNewTaskTitle(e.target.value)}
+              placeholder="Add strategic priority..."
+              className="bg-white/80 border border-slate-200 text-slate-900 text-xs font-medium px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-md shadow-blue-500/20"
+            >
+              <Plus className="w-4 h-4" /> Add
+            </button>
+          </form>
+        </div>
+
+        <div className="space-y-3">
+          {tasks.map((task, idx) => (
+            <div
+              key={task.id}
+              className={`apple-glass p-4 rounded-2xl border border-white/60 flex items-center justify-between gap-4 transition-all ${
+                task.completed ? 'opacity-50 line-through' : ''
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => toggleTask(task.id)}
+                  className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+                    task.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 bg-white'
+                  }`}
+                >
+                  {task.completed && <CheckCircle2 className="w-4 h-4" />}
+                </button>
+                <span className="text-sm font-semibold text-slate-800">{task.title}</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-50 text-blue-600 border border-blue-200">
+                  {task.priority}
+                </span>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
-);
+  );
+};
+
+export default Dashboard;
