@@ -59,7 +59,7 @@ export const Navbar: React.FC = () => {
       items: [
         { label: 'Life Insurance', path: '/life-insurance', icon: Shield },
         { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck },
-        { label: 'Property Insurance', path: '/property-insurance', icon: Home },
+        { label: 'Property Solutions', path: '/dsm-property-solutions', icon: Home },
         { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase },
         { label: 'Group Benefits', path: '/group-benefits', icon: FileText }
       ]
