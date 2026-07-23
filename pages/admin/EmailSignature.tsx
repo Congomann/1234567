@@ -168,25 +168,29 @@ export const EmailSignature: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const lastLoadedId = useRef<string | null>(null);
 
-    const DEFAULT_LEGAL = "CONFIDENTIALITY & COMPLIANCE NOTICE: This communication, including any attachments, may contain confidential and proprietary information related to financial or insurance products and services. It is intended solely for the use of the designated recipient(s). Unauthorized review, use, disclosure, or distribution is prohibited. If you received this message in error, please notify the sender immediately and permanently delete it.";
+    const DEFAULT_LEGAL = "This email and any attachments may contain confidential and proprietary information intended only for the named recipient(s). If you have received this message in error, please notify the sender immediately and permanently delete it. Any unauthorized review, use, disclosure, or distribution is strictly prohibited.";
 
     const [editForm, setEditForm] = useState({
-        firstName: '',
-        lastName: '',
-        title: '',
+        firstName: 'Remmy',
+        lastName: 'Shabani',
+        title: 'REAL ESTATE & INSURANCE ADVISOR',
         titleFontSize: 11,
-        tagline: 'Leading the way in personalized financial solutions.',
-        email: '',
-        phone: '',
-        phone2: '',
-        website: 'www.newhollandfinancial.com',
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        zip: '',
+        tagline: 'Helping you grow, protect, and preserve what matters most.',
+        email: 'remmyk@newhollandfinancial.com',
+        phone: '(717) 847-9638',
+        phone2: '(515) 318-7450',
+        addressLine1: 'Des Moines, IA',
+        addressLine2: 'Des Moines, IA 50309',
+        city: 'Des Moines',
+        state: 'IA',
+        zip: '50309',
         avatar: '',
-        socialLinks: [] as SocialLinkType[],
+        website: 'www.newhollandfinancial.com',
+        socialLinks: [
+            { platform: 'Instagram' as const, url: 'https://instagram.com/remmyshabani' },
+            { platform: 'TikTok' as const, url: 'https://tiktok.com/@remmyshabani' },
+            { platform: 'Facebook' as const, url: 'https://facebook.com/remmyshabani' }
+        ],
         confidentialityNotice: DEFAULT_LEGAL
     });
 
@@ -297,317 +301,176 @@ export const EmailSignature: React.FC = () => {
         }
     };
 
-    const handleCopyHtmlCode = () => {
-        if (exportRef.current) {
-            const fullHtml = `
-<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; width: 100%; background-color: #fafafa; border-collapse: collapse;">
+    const getExportHtml = () => {
+        const logoSrc = companySettings.logoUrl || logoFullColorBase64;
+        const socialPillsHtml = (editForm.socialLinks || []).map(link => {
+            let iconStr = '🔗 ';
+            if (link.platform === 'Instagram') iconStr = '📷 ';
+            else if (link.platform === 'TikTok') iconStr = '🎵 ';
+            else if (link.platform === 'Facebook') iconStr = 'f ';
+            return `
+            <td style="padding-right: 8px;">
+                <a href="${link.url || '#'}" target="_blank" style="display: inline-block; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #334155; text-decoration: none; background-color: #ffffff;">
+                    ${iconStr}${link.platform}
+                </a>
+            </td>
+            `;
+        }).join('');
+
+        return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; max-width: 680px; width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; border-collapse: separate; border-spacing: 0;">
   <tr>
-    <td style="padding: 25px 35px 0 35px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <td width="32%" bgcolor="#0c0d12" valign="top" style="padding: 32px 24px; background-color: #0c0d12; vertical-align: top;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" height="100%">
         <tr>
-          <!-- LEFT COLUMN: NAME & TITLE -->
-          <td width="35%" valign="top" style="padding-top: 10px;">
-            <h1 style="font-size: 22px; font-weight: 900; color: #0B2240; margin: 0; letter-spacing: -0.5px;">
-              ${editForm.firstName} ${editForm.lastName}
-            </h1>
-            <p style="font-size: ${editForm.titleFontSize}px; font-weight: 700; color: #3B82F6; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">
-              ${editForm.title}
-            </p>
-            <div style="height: 2px; width: 35px; background-color: #0B2240; margin: 15px 0;"></div>
-            <p style="font-size: 10px; font-weight: 500; color: #64748B; line-height: 1.6; margin: 0;">
-              ${editForm.tagline}
-            </p>
+          <td valign="top">
+            <div style="width: 64px; height: 64px; background-color: #000000; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <img src="${logoSrc}" width="38" height="38" style="display: block; object-fit: contain;" alt="Logo" />
+            </div>
           </td>
-
-          <!-- MIDDLE COLUMN: PROFILE IMAGE -->
-          <td width="30%" align="center" valign="top">
-            <table cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td style="padding: 6px; border: 2px solid #3B82F6; border-radius: 50%;">
-                  <img src="${editForm.avatar || `https://ui-avatars.com/api/?name=${editForm.firstName}+${editForm.lastName}&background=F1F5F9&color=64748B&size=200`}" width="100" height="100" style="display: block; border-radius: 50%; border: 4px solid #ffffff; background-color: #f1f5f9;" alt="Profile Picture" />
-                </td>
-              </tr>
-            </table>
-          </td>
-
-          <!-- RIGHT COLUMN: CONTACT INFO -->
-          <td width="35%" align="right" valign="top" style="padding-top: 10px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                <td align="right" style="padding-bottom: 12px;">
-                  <table cellpadding="0" cellspacing="0" border="0" align="right">
-                    <tr>
-                      <td align="right" style="padding-right: 10px;">
-                        <a href="tel:${(editForm.phone || '').replace(/[^0-9]/g, '')}" style="text-decoration: none; color: #0B2240; display: block;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;"><span style="font-weight: 500; color: #64748B; margin-right: 4px;">Direct:</span>${editForm.phone}</p>
-                        </a>
-                        <a href="tel:${(editForm.phone2 || '').replace(/[^0-9]/g, '')}" style="text-decoration: none; color: #0B2240; display: block;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;"><span style="font-weight: 500; color: #64748B; margin-right: 4px;">Office:</span>${editForm.phone2}</p>
-                        </a>
-                      </td>
-                      <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" width="10" height="10" style="display: block;" alt="Phone" />
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td align="right" style="padding-bottom: 12px;">
-                  <table cellpadding="0" cellspacing="0" border="0" align="right">
-                    <tr>
-                      <td align="right" style="padding-right: 10px;">
-                        <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">
-                          <a href="mailto:${editForm.email || ''}" style="text-decoration: none; color: #0B2240;">${editForm.email}</a>
-                        </p>
-                        <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 4px 0 0 0;">
-                          <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none; color: #0B2240;">${editForm.website}</a>
-                        </p>
-                      </td>
-                      <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/domain.png" width="10" height="10" style="display: block;" alt="Web" />
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td align="right">
-                  <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none; color: #0B2240;">
-                    <table cellpadding="0" cellspacing="0" border="0" align="right">
-                      <tr>
-                        <td align="right" style="padding-right: 10px;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">${editForm.addressLine1}</p>
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">${editForm.city}, ${editForm.state}</p>
-                        </td>
-                        <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                          <img src="https://img.icons8.com/ios-filled/50/ffffff/marker.png" width="10" height="10" style="display: block;" alt="Map" />
-                        </td>
-                      </tr>
-                    </table>
-                  </a>
-                </td>
-              </tr>
-            </table>
+        </tr>
+        <tr>
+          <td valign="bottom" style="padding-top: 100px;">
+            <p style="font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; margin: 0; text-transform: uppercase;">NEW HOLLAND</p>
+            <p style="font-size: 10px; font-weight: 800; color: #64748b; letter-spacing: 1.5px; margin: 4px 0 0 0; text-transform: uppercase;">FINANCIAL GROUP</p>
           </td>
         </tr>
       </table>
     </td>
-  </tr>
 
-  <!-- MIDDLE SECTION: LOGO BAR -->
-  <tr>
-    <td bgcolor="#0B2240" style="padding: 15px 35px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr>
-          <td width="55%" align="left" valign="middle">
-            <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none;">
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="padding-right: 10px;">
-                    <img src="${companySettings.logoUrl || logoFullColorBase64}" width="24" height="24" style="display: block;" alt="Logo" />
-                  </td>
-                  <td>
-                    <p style="font-size: 11px; font-weight: 900; color: #ffffff; margin: 0; text-transform: uppercase; letter-spacing: 1px;">NEW HOLLAND</p>
-                    <p style="font-size: 6px; font-weight: 700; color: rgba(255,255,255,0.7); margin: 0; text-transform: uppercase; letter-spacing: 2px;">FINANCIAL GROUP</p>
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-          <td width="45%" align="right" valign="middle">
-            <table cellpadding="0" cellspacing="0" border="0" align="right">
-              <tr>
-                ${(editForm.socialLinks || []).map(link => `
-                <td style="padding-left: 12px;" align="center">
-                  <a href="${link.url || '#'}" style="text-decoration: none; display: block;">
-                    <img src="${getSocialIconUrl(link.platform)}" width="22" height="22" style="display: block; background-color: #ffffff; border-radius: 50%; padding: 4px; box-sizing: border-box; margin-bottom: 3px;" alt="${link.platform}" />
-                    <span style="font-size: 8px; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${link.platform}</span>
-                  </a>
-                </td>
-                `).join('')}
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <!-- BOTTOM SECTION: LEGAL DISCLOSURE -->
-  <tr>
-    <td style="padding: 12px 35px; border-top: 1px solid #fecaca;">
-      <p style="font-size: 8px; color: #64748B; line-height: 1.4; margin: 0; font-weight: 500;">
-        ${editForm.confidentialityNotice}
+    <td width="68%" bgcolor="#ffffff" valign="top" style="padding: 32px 36px; background-color: #ffffff; vertical-align: top;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; letter-spacing: -0.5px;">
+        ${editForm.firstName} ${editForm.lastName}
+      </h1>
+      <p style="font-size: ${editForm.titleFontSize || 11}px; font-weight: 800; color: #64748b; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1.5px;">
+        ${editForm.title}
       </p>
-    </td>
-  </tr>
-</table>
-`;
-            navigator.clipboard.writeText(fullHtml);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
+      <p style="font-size: 13px; font-style: italic; color: #64748b; margin: 0 0 20px 0; line-height: 1.4;">
+        ${editForm.tagline}
+      </p>
 
-    const handleCopyVisual = () => {
-        if (exportRef.current) {
-            // We use the same HTML as handleCopyHtmlCode
-            const fullHtml = `
-<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; width: 100%; background-color: #fafafa; border-collapse: collapse;">
-  <tr>
-    <td style="padding: 25px 35px 0 35px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${editForm.phone ? `
         <tr>
-          <!-- LEFT COLUMN: NAME & TITLE -->
-          <td width="35%" valign="top" style="padding-top: 10px;">
-            <h1 style="font-size: 22px; font-weight: 900; color: #0B2240; margin: 0; letter-spacing: -0.5px;">
-              ${editForm.firstName} ${editForm.lastName}
-            </h1>
-            <p style="font-size: ${editForm.titleFontSize}px; font-weight: 700; color: #3B82F6; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">
-              ${editForm.title}
-            </p>
-            <div style="height: 2px; width: 35px; background-color: #0B2240; margin: 15px 0;"></div>
-            <p style="font-size: 10px; font-weight: 500; color: #64748B; line-height: 1.6; margin: 0;">
-              ${editForm.tagline}
-            </p>
-          </td>
-
-          <!-- MIDDLE COLUMN: PROFILE IMAGE -->
-          <td width="30%" align="center" valign="top">
+          <td style="padding-bottom: 10px;">
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="padding: 6px; border: 2px solid #3B82F6; border-radius: 50%;">
-                  <img src="${editForm.avatar || `https://ui-avatars.com/api/?name=${editForm.firstName}+${editForm.lastName}&background=F1F5F9&color=64748B&size=200`}" width="100" height="100" style="display: block; border-radius: 50%; border: 4px solid #ffffff; background-color: #f1f5f9;" alt="Profile Picture" />
+                <td width="30" height="30" bgcolor="#f1f5f9" align="center" style="border-radius: 10px; background-color: #f1f5f9;">
+                  <img src="https://img.icons8.com/ios-filled/50/64748b/phone.png" width="14" height="14" style="display: block;" alt="Phone" />
                 </td>
-              </tr>
-            </table>
-          </td>
-
-          <!-- RIGHT COLUMN: CONTACT INFO -->
-          <td width="35%" align="right" valign="top" style="padding-top: 10px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                <td align="right" style="padding-bottom: 12px;">
-                  <table cellpadding="0" cellspacing="0" border="0" align="right">
-                    <tr>
-                      <td align="right" style="padding-right: 10px;">
-                        <a href="tel:${(editForm.phone || '').replace(/[^0-9]/g, '')}" style="text-decoration: none; color: #0B2240; display: block;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;"><span style="font-weight: 500; color: #64748B; margin-right: 4px;">Direct:</span>${editForm.phone}</p>
-                        </a>
-                        <a href="tel:${(editForm.phone2 || '').replace(/[^0-9]/g, '')}" style="text-decoration: none; color: #0B2240; display: block;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;"><span style="font-weight: 500; color: #64748B; margin-right: 4px;">Office:</span>${editForm.phone2}</p>
-                        </a>
-                      </td>
-                      <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" width="10" height="10" style="display: block;" alt="Phone" />
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td align="right" style="padding-bottom: 12px;">
-                  <table cellpadding="0" cellspacing="0" border="0" align="right">
-                    <tr>
-                      <td align="right" style="padding-right: 10px;">
-                        <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">
-                          <a href="mailto:${editForm.email || ''}" style="text-decoration: none; color: #0B2240;">${editForm.email}</a>
-                        </p>
-                        <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 4px 0 0 0;">
-                          <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none; color: #0B2240;">${editForm.website}</a>
-                        </p>
-                      </td>
-                      <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/domain.png" width="10" height="10" style="display: block;" alt="Web" />
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td align="right">
-                  <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none; color: #0B2240;">
-                    <table cellpadding="0" cellspacing="0" border="0" align="right">
-                      <tr>
-                        <td align="right" style="padding-right: 10px;">
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">${editForm.addressLine1}</p>
-                          <p style="font-size: 9px; font-weight: 800; color: #0B2240; margin: 0;">${editForm.city}, ${editForm.state}</p>
-                        </td>
-                        <td width="22" height="22" bgcolor="#0B2240" align="center" style="border-radius: 50%;">
-                          <img src="https://img.icons8.com/ios-filled/50/ffffff/marker.png" width="10" height="10" style="display: block;" alt="Map" />
-                        </td>
-                      </tr>
-                    </table>
-                  </a>
+                <td style="padding-left: 12px; font-size: 13px; font-weight: 700; color: #1e293b;">
+                  <span style="font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-right: 6px;">DIRECT</span>
+                  <a href="tel:${(editForm.phone || '').replace(/[^0-9]/g, '')}" style="color: #1e293b; text-decoration: none;">${editForm.phone}</a>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
-      </table>
-    </td>
-  </tr>
+        ` : ''}
 
-  <!-- MIDDLE SECTION: LOGO BAR -->
-  <tr>
-    <td bgcolor="#0B2240" style="padding: 15px 35px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${editForm.phone2 ? `
         <tr>
-          <td width="55%" align="left" valign="middle">
-            <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="text-decoration: none;">
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="padding-right: 10px;">
-                    <img src="${companySettings.logoUrl || logoFullColorBase64}" width="24" height="24" style="display: block;" alt="Logo" />
-                  </td>
-                  <td>
-                    <p style="font-size: 11px; font-weight: 900; color: #ffffff; margin: 0; text-transform: uppercase; letter-spacing: 1px;">NEW HOLLAND</p>
-                    <p style="font-size: 6px; font-weight: 700; color: rgba(255,255,255,0.7); margin: 0; text-transform: uppercase; letter-spacing: 2px;">FINANCIAL GROUP</p>
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-          <td width="45%" align="right" valign="middle">
-            <table cellpadding="0" cellspacing="0" border="0" align="right">
+          <td style="padding-bottom: 10px;">
+            <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                ${(editForm.socialLinks || []).map(link => `
-                <td style="padding-left: 12px;" align="center">
-                  <a href="${link.url || '#'}" style="text-decoration: none; display: block;">
-                    <img src="${getSocialIconUrl(link.platform)}" width="22" height="22" style="display: block; background-color: #ffffff; border-radius: 50%; padding: 4px; box-sizing: border-box; margin-bottom: 3px;" alt="${link.platform}" />
-                    <span style="font-size: 8px; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${link.platform}</span>
-                  </a>
+                <td width="30" height="30" bgcolor="#f1f5f9" align="center" style="border-radius: 10px; background-color: #f1f5f9;">
+                  <img src="https://img.icons8.com/ios-filled/50/64748b/phone.png" width="14" height="14" style="display: block;" alt="Phone" />
                 </td>
-                `).join('')}
+                <td style="padding-left: 12px; font-size: 13px; font-weight: 700; color: #1e293b;">
+                  <span style="font-size: 10px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-right: 6px;">OFFICE</span>
+                  <a href="tel:${(editForm.phone2 || '').replace(/[^0-9]/g, '')}" style="color: #1e293b; text-decoration: none;">${editForm.phone2}</a>
+                </td>
               </tr>
             </table>
           </td>
         </tr>
+        ` : ''}
+
+        ${editForm.email ? `
+        <tr>
+          <td style="padding-bottom: 10px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" height="30" bgcolor="#f1f5f9" align="center" style="border-radius: 10px; background-color: #f1f5f9;">
+                  <img src="https://img.icons8.com/ios-filled/50/64748b/email.png" width="14" height="14" style="display: block;" alt="Email" />
+                </td>
+                <td style="padding-left: 12px; font-size: 13px; font-weight: 700; color: #1e293b;">
+                  <a href="mailto:${editForm.email}" style="color: #1e293b; text-decoration: none;">${editForm.email}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        ` : ''}
+
+        ${editForm.website ? `
+        <tr>
+          <td style="padding-bottom: 10px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" height="30" bgcolor="#f1f5f9" align="center" style="border-radius: 10px; background-color: #f1f5f9;">
+                  <img src="https://img.icons8.com/ios-filled/50/64748b/domain.png" width="14" height="14" style="display: block;" alt="Website" />
+                </td>
+                <td style="padding-left: 12px; font-size: 13px; font-weight: 700; color: #1e293b;">
+                  <a href="${(editForm.website || '').startsWith('http') ? editForm.website : 'https://' + editForm.website}" style="color: #1e293b; text-decoration: none;">${editForm.website}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        ` : ''}
+
+        ${(editForm.city || editForm.addressLine1) ? `
+        <tr>
+          <td style="padding-bottom: 18px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="30" height="30" bgcolor="#f1f5f9" align="center" style="border-radius: 10px; background-color: #f1f5f9;">
+                  <img src="https://img.icons8.com/ios-filled/50/64748b/marker.png" width="14" height="14" style="display: block;" alt="Location" />
+                </td>
+                <td style="padding-left: 12px; font-size: 13px; font-weight: 700; color: #1e293b;">
+                  ${editForm.city ? `${editForm.city}, ${editForm.state}` : editForm.addressLine1}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        ` : ''}
       </table>
+
+      ${(editForm.socialLinks || []).length > 0 ? `
+      <table cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px;">
+        <tr>
+          ${socialPillsHtml}
+        </tr>
+      </table>
+      ` : ''}
     </td>
   </tr>
 
-  <!-- BOTTOM SECTION: LEGAL DISCLOSURE -->
   <tr>
-    <td style="padding: 12px 35px; border-top: 1px solid #fecaca;">
-      <p style="font-size: 8px; color: #64748B; line-height: 1.4; margin: 0; font-weight: 500;">
-        ${editForm.confidentialityNotice}
+    <td colSpan="2" bgcolor="#f8fafc" style="padding: 18px 30px; background-color: #f8fafc; border-top: 1px solid #f1f5f9;">
+      <p style="font-size: 10px; color: #94a3b8; line-height: 1.5; margin: 0; font-weight: 500;">
+        <strong style="color: #64748b;">CONFIDENTIALITY NOTICE:</strong> ${editForm.confidentialityNotice}
       </p>
     </td>
   </tr>
 </table>
         `;
+    };
 
-            const type = "text/html";
-            const blob = new Blob([fullHtml], { type });
-            const data = [new ClipboardItem({ [type]: blob })];
+    const handleCopyHtmlCode = () => {
+        const fullHtml = getExportHtml();
+        navigator.clipboard.writeText(fullHtml);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
-            navigator.clipboard.write(data).then(() => {
-                setVisualCopied(true);
-                setTimeout(() => setVisualCopied(false), 2000);
-            });
-        }
+    const handleCopyVisual = () => {
+        const fullHtml = getExportHtml();
+        navigator.clipboard.writeText(fullHtml);
+        setVisualCopied(true);
+        setTimeout(() => setVisualCopied(false), 2000);
     };
 
     const handleDownloadImage = useCallback(async () => {
@@ -876,107 +739,139 @@ export const EmailSignature: React.FC = () => {
 
                         <div className="w-full max-w-[850px] bg-gradient-to-br from-blue-50 to-yellow-50 p-12 rounded-[4rem] shadow-inner flex flex-col items-center justify-center">
                             {/* THE SIGNATURE CARD - EXPORT TARGET */}
-                            <div ref={exportRef} className="shadow-2xl relative overflow-hidden" style={{ width: '700px', minHeight: '250px', height: 'auto', display: 'flex', flexDirection: 'column', background: '#fafafa' }}>
+                            <div ref={exportRef} className="shadow-2xl relative overflow-hidden text-left" style={{ width: '680px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '24px', display: 'flex', flexDirection: 'column' }}>
 
-                                {/* 1. TOP SECTION: CONTENT */}
-                                <div style={{ flex: 1, position: 'relative', display: 'flex', padding: '25px 35px 0 35px' }}>
+                                {/* TOP SECTION: LEFT DARK PANEL + RIGHT DETAILS */}
+                                <div style={{ display: 'flex', width: '100%', minHeight: '310px' }}>
+                                    {/* LEFT DARK SIDEBAR */}
+                                    <div style={{ width: '32%', backgroundColor: '#0c0d12', padding: '32px 24px', display: 'flex', flexDirection: 'column', justifyBetween: 'space-between', borderTopLeftRadius: '24px' }}>
+                                        {/* Logo Badge */}
+                                        <div style={{ width: '64px', height: '64px', backgroundColor: '#000000', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                            <img
+                                                src={companySettings.logoUrl || logoFullColorBase64}
+                                                style={{ width: '36px', height: '36px', objectFit: 'contain' }}
+                                                alt="Logo"
+                                            />
+                                        </div>
 
-                                    <div style={{ flex: 1, paddingTop: '10px' }}>
-                                        <h1 style={{ fontSize: '26px', fontWeight: '900', color: '#0B2240', margin: 0, letterSpacing: '-0.5px' }}>
+                                        {/* Bottom Branding */}
+                                        <div style={{ marginTop: 'auto', paddingTop: '60px' }}>
+                                            <p style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '1.5px', margin: 0, textTransform: 'uppercase' }}>NEW HOLLAND</p>
+                                            <p style={{ fontSize: '10px', fontWeight: '800', color: '#64748b', letterSpacing: '1.5px', margin: '4px 0 0 0', textTransform: 'uppercase' }}>FINANCIAL GROUP</p>
+                                        </div>
+                                    </div>
+
+                                    {/* RIGHT DETAILS AREA */}
+                                    <div style={{ width: '68%', backgroundColor: '#ffffff', padding: '32px 36px', display: 'flex', flexDirection: 'column' }}>
+                                        <h1 style={{ fontSize: '26px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
                                             {editForm.firstName} {editForm.lastName}
                                         </h1>
-                                        <p style={{ fontSize: `${editForm.titleFontSize}px`, fontWeight: '700', color: '#3B82F6', margin: '2px 0 0 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        <p style={{ fontSize: `${editForm.titleFontSize || 11}px`, fontWeight: '800', color: '#64748b', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
                                             {editForm.title}
                                         </p>
-                                        <div style={{ height: '2px', width: '35px', backgroundColor: '#0B2240', margin: '15px 0' }}></div>
-                                        <p style={{ fontSize: '11px', fontWeight: '500', color: '#64748B', maxWidth: '200px', lineHeight: '1.6', margin: 0 }}>
+                                        <p style={{ fontSize: '13px', fontStyle: 'italic', color: '#64748b', margin: '0 0 20px 0', lineHeight: '1.4' }}>
                                             {editForm.tagline}
                                         </p>
-                                    </div>
 
-                                    <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '15px', zIndex: 10 }}>
-                                        <div style={{ position: 'relative' }}>
-                                            <div style={{ position: 'absolute', inset: '-6px', border: '2px solid #3B82F6', borderRadius: '50%' }}></div>
-                                            <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', backgroundColor: '#f1f5f9', overflow: 'hidden', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }}>
-                                                <img
-                                                    src={editForm.avatar || `https://ui-avatars.com/api/?name=${editForm.firstName}+${editForm.lastName}&background=F1F5F9&color=64748B&size=200`}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    alt="Avatar"
-                                                />
-                                            </div>
-                                            <div style={{ position: 'absolute', top: '-10px', left: '-10px', width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#0B2240', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <div style={{ width: '15px', height: '15px', borderRadius: '50%', border: '1.5px solid white' }}></div>
-                                            </div>
-                                            <div style={{ position: 'absolute', right: '-15px', top: '50%', transform: 'translateY(-50%)' }}>
-                                                <div style={{ height: '3px', width: '10px', backgroundColor: '#0B2240', borderRadius: '2px', marginBottom: '3px' }}></div>
-                                                <div style={{ height: '3px', width: '10px', backgroundColor: '#0B2240', borderRadius: '2px' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', paddingTop: '10px' }}>
-                                        <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-                                                <a href={`tel:${(editForm.phone || '').replace(/[^0-9]/g, '')}`} style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0, textDecoration: 'none' }}>
-                                                    <span style={{ fontWeight: '500', color: '#64748B', marginRight: '4px' }}>Direct:</span>{editForm.phone}
-                                                </a>
-                                                <a href={`tel:${(editForm.phone2 || '').replace(/[^0-9]/g, '')}`} style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0, textDecoration: 'none' }}>
-                                                    <span style={{ fontWeight: '500', color: '#64748B', marginRight: '4px' }}>Office:</span>{editForm.phone2}
-                                                </a>
-                                            </div>
-                                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0B2240', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <img src={ICON_PHONE} style={{ width: '10px', height: '10px', filter: 'brightness(0) invert(1)' }} />
-                                            </div>
-                                        </div>
-                                        <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-                                                <a href={`mailto:${editForm.email || ''}`} style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0, textDecoration: 'none' }}>{editForm.email}</a>
-                                                <a href={(editForm.website || '').startsWith('http') ? editForm.website : `https://${editForm.website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0, textDecoration: 'none' }}>{editForm.website}</a>
-                                            </div>
-                                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0B2240', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <img src={ICON_WEB} style={{ width: '10px', height: '10px', filter: 'brightness(0) invert(1)' }} />
-                                            </div>
-                                        </div>
-                                        <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ textAlign: 'right' }}>
-                                                <p style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0 }}>{editForm.addressLine1}</p>
-                                                <p style={{ fontSize: '10px', fontWeight: '800', color: '#0B2240', margin: 0 }}>{editForm.city}, {editForm.state}</p>
-                                            </div>
-                                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0B2240', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <img src={ICON_MAP} style={{ width: '10px', height: '10px', filter: 'brightness(0) invert(1)' }} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 2. MIDDLE SECTION: LOGO BAR */}
-                                <div style={{ padding: '15px 35px', backgroundColor: '#0B2240', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-                                    <a href={(editForm.website || '').startsWith('http') ? editForm.website : `https://${editForm.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-                                        <img src={companySettings.logoUrl || logoFullColorBase64} style={{ width: '24px', height: '24px' }} alt="Logo" />
-                                        <div style={{ color: 'white' }}>
-                                            <p style={{ fontSize: '12px', fontWeight: '900', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>NEW HOLLAND</p>
-                                            <p style={{ fontSize: '7px', fontWeight: '700', color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '2px' }}>FINANCIAL GROUP</p>
-                                        </div>
-                                    </a>
-                                    <div style={{ position: 'absolute', right: '160px', bottom: '15px', display: 'grid', gridTemplateColumns: 'repeat(5, 4px)', gap: '4px', opacity: 0.4 }}>
-                                        {[...Array(15)].map((_, i) => <div key={i} style={{ width: '2.5px', height: '2.5px', borderRadius: '50%', backgroundColor: 'white' }}></div>)}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                        {(editForm.socialLinks || []).map((link, idx) => (
-                                            <a key={idx} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', gap: '4px' }}>
-                                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <img src={getSocialIconUrl(link.platform)} style={{ width: '14px', height: '14px' }} alt={link.platform} />
+                                        {/* CONTACT DETAILS STACK */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                                            {editForm.phone && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: '30px', height: '30px', borderRadius: '10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                                        <Phone size={14} />
+                                                    </div>
+                                                    <div>
+                                                        <span style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '1px', marginRight: '6px' }}>DIRECT</span>
+                                                        <a href={`tel:${(editForm.phone || '').replace(/[^0-9]/g, '')}`} style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textDecoration: 'none' }}>
+                                                            {editForm.phone}
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                                <span style={{ fontSize: '7px', fontWeight: 'bold', color: 'white', textTransform: 'uppercase' }}>{link.platform}</span>
-                                            </a>
-                                        ))}
+                                            )}
+
+                                            {editForm.phone2 && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: '30px', height: '30px', borderRadius: '10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                                        <Phone size={14} />
+                                                    </div>
+                                                    <div>
+                                                        <span style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '1px', marginRight: '6px' }}>OFFICE</span>
+                                                        <a href={`tel:${(editForm.phone2 || '').replace(/[^0-9]/g, '')}`} style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textDecoration: 'none' }}>
+                                                            {editForm.phone2}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {editForm.email && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: '30px', height: '30px', borderRadius: '10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                                        <Mail size={14} />
+                                                    </div>
+                                                    <a href={`mailto:${editForm.email}`} style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textDecoration: 'none' }}>
+                                                        {editForm.email}
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {editForm.website && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: '30px', height: '30px', borderRadius: '10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                                        <Globe size={14} />
+                                                    </div>
+                                                    <a href={(editForm.website || '').startsWith('http') ? editForm.website : `https://${editForm.website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textDecoration: 'none' }}>
+                                                        {editForm.website}
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {(editForm.city || editForm.addressLine1) && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ width: '30px', height: '30px', borderRadius: '10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                                                        <MapPin size={14} />
+                                                    </div>
+                                                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
+                                                        {editForm.city ? `${editForm.city}, ${editForm.state}` : editForm.addressLine1}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* SOCIAL PILLS */}
+                                        {(editForm.socialLinks || []).length > 0 && (
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: 'auto' }}>
+                                                {(editForm.socialLinks || []).map((link, idx) => (
+                                                    <a
+                                                        key={idx}
+                                                        href={link.url || '#'}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{
+                                                            border: '1.5px solid #e2e8f0',
+                                                            borderRadius: '20px',
+                                                            padding: '5px 14px',
+                                                            fontSize: '12px',
+                                                            fontWeight: '700',
+                                                            color: '#334155',
+                                                            textDecoration: 'none',
+                                                            backgroundColor: '#ffffff',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px'
+                                                        }}
+                                                    >
+                                                        {link.platform === 'Instagram' ? '📷' : link.platform === 'TikTok' ? '🎵' : link.platform === 'Facebook' ? 'f' : '🔗'} {link.platform}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* 3. BOTTOM SECTION: LEGAL DISCLOSURE */}
-                                <div style={{ padding: '12px 35px', borderTop: '1px solid #fecaca', flex: 1, display: 'flex', alignItems: 'center' }}>
-                                    <p style={{ fontSize: '8px', color: '#64748B', lineHeight: '1.4', margin: 0, fontWeight: '500' }}>
-                                        {editForm.confidentialityNotice}
+                                {/* BOTTOM FULL-WIDTH CONFIDENTIALITY FOOTER */}
+                                <div style={{ padding: '16px 28px', backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                                    <p style={{ fontSize: '10px', color: '#94a3b8', lineHeight: '1.5', margin: 0, fontWeight: '500' }}>
+                                        <strong style={{ color: '#64748b' }}>CONFIDENTIALITY NOTICE:</strong> {editForm.confidentialityNotice}
                                     </p>
                                 </div>
                             </div>
