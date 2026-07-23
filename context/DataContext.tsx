@@ -168,7 +168,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const DEFAULT_CALENDAR_EVENTS: CalendarEvent[] = [
+    { id: 'evt-1', title: 'Q3 Strategy', date: '2026-07-01', time: '10:00 AM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-2', title: 'Whitfield Call', date: '2026-07-05', time: '02:00 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-3', title: 'Compliance Audit', date: '2026-07-07', time: '09:00 AM', type: 'task', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-4', title: 'Team Standup', date: '2026-07-12', time: '11:00 AM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-5', title: 'Holden Mtg.', date: '2026-07-15', time: '01:30 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-6', title: 'Campaign Review', date: '2026-07-23', time: '03:00 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-7', title: 'Month Close', date: '2026-07-28', time: '05:00 PM', type: 'task', creatorId: 'user-admin', visibility: 'public' },
+    { id: 'evt-8', title: 'Foster Contract', date: '2026-07-30', time: '11:30 AM', type: 'reminder', creatorId: 'user-admin', visibility: 'public' },
+  ];
+
+  const [events, setEvents] = useState<CalendarEvent[]>(DEFAULT_CALENDAR_EVENTS);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [landingPages, setLandingPages] = useState<any[]>([]);

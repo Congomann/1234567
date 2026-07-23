@@ -94,44 +94,33 @@ export const Calendar: React.FC = () => {
       <Sidebar visibleEvents={visibleEvents} onAlertClick={openModalEdit} />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-white/50 backdrop-blur-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
-              <button onClick={handleToday} className="px-4 py-1.5 text-sm font-semibold text-slate-700 bg-white rounded-lg shadow-sm">Today</button>
-              <button onClick={handlePrev} className="p-2 text-slate-500 hover:text-slate-900 transition-colors"><ChevronLeft size={20} /></button>
-              <button onClick={handleNext} className="p-2 text-slate-500 hover:text-slate-900 transition-colors"><ChevronRight size={20} /></button>
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 min-w-[160px]">{titleFormat()}</h2>
-            <div className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-1.5 ml-1 mt-1 uppercase tracking-widest">
-              <Globe size={14} />
-              {Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ')}
-            </div>
+        {/* Header matching exact screenshot aesthetics */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-8 py-6 border-b border-slate-100 bg-white gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Calendar</h1>
+            <p className="text-sm font-semibold text-slate-400 mt-0.5">{titleFormat()}</p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex bg-slate-100/80 p-1 rounded-xl text-sm font-medium">
-              <button
-                onClick={() => setView('month')}
-                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'month' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
-              >
-                Month
-              </button>
-              <button
-                onClick={() => setView('week')}
-                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'week' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
-              >
-                Week
-              </button>
-              <button
-                onClick={() => setView('day')}
-                className={`px-4 py-1.5 rounded-lg transition-all ${view === 'day' ? 'bg-white shadow-sm text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-800'}`}
-              >
-                Day
-              </button>
-            </div>
-            <button className="bg-slate-900 text-white p-2.5 rounded-full hover:bg-slate-800 transition-transform hover:scale-105 active:scale-95 shadow-sm">
-              <PlusIcon className="w-5 h-5" onClick={() => openModalNew(todayStr)} />
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handlePrev} 
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
+            >
+              ← Prev
+            </button>
+
+            <button 
+              onClick={handleToday} 
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+            >
+              Today
+            </button>
+
+            <button 
+              onClick={handleNext} 
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
+            >
+              Next →
             </button>
           </div>
         </div>
