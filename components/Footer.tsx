@@ -288,7 +288,7 @@ export const Footer: React.FC = () => {
         {/* REGULATORY COMPLIANCE STATEMENT */}
         <div className="border-t border-white/10 pt-8 pb-8 text-slate-500 text-[11px] font-medium leading-relaxed">
           <p>
-            <strong className="text-slate-400 uppercase tracking-widest">REGULATORY DISCLOSURE:</strong> New Holland Financial Group provides integrated financial, real estate, mortgage, insurance, and freight brokerage services across 48 active state jurisdictions. All policies, loan applications, securities portfolios, and logistics dispatches are managed by licensed advisors, brokers, and underwriting specialists.
+            <strong className="text-slate-400 uppercase tracking-widest">REGULATORY DISCLOSURE:</strong> New Holland Financial Group provides integrated financial, real estate, mortgage, insurance, and freight brokerage services across 48 active state jurisdictions. Securities, Wealth Management, and Mortgage solutions are offered in partnership with licensed institutional partners, registered broker-dealers, and NMLS originators while direct firm licensure applications remain in process.
           </p>
         </div>
 

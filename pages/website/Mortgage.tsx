@@ -282,6 +282,23 @@ export const Mortgage: React.FC = () => {
         </div>
       </div>
 
+      {/* Institutional Partner & Regulatory Disclosure Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-8">
+        <div className="bg-slate-900 text-slate-300 rounded-3xl p-8 border border-slate-800 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+          <div className="p-4 bg-blue-500/10 text-blue-400 rounded-2xl shrink-0 border border-blue-500/20">
+            <Home className="w-7 h-7" />
+          </div>
+          <div>
+            <h4 className="text-white font-bold text-base mb-1">
+              Institutional Partnership &amp; Mortgage Disclosure
+            </h4>
+            <p className="text-xs leading-relaxed text-slate-400 font-medium">
+              New Holland Financial Group partners with NMLS-licensed institutional mortgage originators and banking partners to provide Mortgage and Home Loan products. Direct firm regulatory licensure applications are currently in process.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <SpeakToAdvisorForm productType={ProductType.MORTGAGE} />
 
       <TestimonialsSection />

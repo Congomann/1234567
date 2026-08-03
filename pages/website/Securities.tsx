@@ -280,6 +280,23 @@ export const Securities: React.FC = () => {
         </div>
       </div>
 
+      {/* Institutional Partner & Regulatory Disclosure Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-8">
+        <div className="bg-slate-900 text-slate-300 rounded-3xl p-8 border border-slate-800 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+          <div className="p-4 bg-amber-500/10 text-amber-400 rounded-2xl shrink-0 border border-amber-500/20">
+            <Shield size={28} />
+          </div>
+          <div>
+            <h4 className="text-white font-bold text-base mb-1">
+              Institutional Partnership & Regulatory Disclosure
+            </h4>
+            <p className="text-xs leading-relaxed text-slate-400 font-medium">
+              New Holland Financial Group partners with licensed institutional partners and FINRA/SIPC registered broker-dealers to provide Securities &amp; Wealth Management services. Direct firm regulatory licensure applications are currently in process.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <SpeakToAdvisorForm productType={ProductType.SECURITIES} />
 
       <TestimonialsSection />
