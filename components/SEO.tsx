@@ -105,6 +105,18 @@ export const SEO: React.FC<SEOProps> = ({ title, description }) => {
         }
         canonicalTag.setAttribute('href', canonicalUrl);
 
+        // --- Schema.org JSON-LD Injection for Google Search Snippets ---
+        let schemaTag = document.querySelector('script[id="nhfg-jsonld-schema"]');
+        if (!schemaTag) {
+          schemaTag = document.createElement('script');
+          schemaTag.setAttribute('id', 'nhfg-jsonld-schema');
+          schemaTag.setAttribute('type', 'application/ld+json');
+          document.head.appendChild(schemaTag);
+        }
+        if (data.jsonLdSchema) {
+          schemaTag.textContent = JSON.stringify(data.jsonLdSchema);
+        }
+
       } catch (err) {
         const config = NHFG_SEO_CONFIG[location.pathname] || NHFG_SEO_CONFIG['/'];
         document.title = title || config.title;

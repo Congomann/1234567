@@ -3500,13 +3500,29 @@ const sendEmail = async ({ to, subject, html }) => {
   }
   const nodemailer = require('nodemailer');
   const transporter = nodemailer.createTransport({
-    host: SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(SMTP_PORT || '587', 10),
-    secure: SMTP_SECURE === 'true',
+    host: SMTP_HOST || 'smtp.larksuite.com',
+    port: parseInt(SMTP_PORT || '465', 10),
+    secure: SMTP_SECURE === 'true' || SMTP_PORT === '465',
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
   return transporter.sendMail({ from: EMAIL_FROM || SMTP_USER, to, subject, html });
 };
+
+// SMTP API Endpoint
+app.post('/api/send-email', async (req, res) => {
+  try {
+    const { to, subject, html, text } = req.body;
+    if (!to || !subject) {
+      return res.status(400).json({ error: 'Missing required fields: to, subject' });
+    }
+    const result = await sendEmail({ to, subject, html: html || `<p>${text || ''}</p>` });
+    console.log(`[SMTP Sent] Email dispatched to ${to} subject: "${subject}"`);
+    res.json({ success: true, message: 'Email sent successfully via SMTP', result });
+  } catch (err) {
+    console.error('[SMTP Send Error]:', err);
+    res.status(500).json({ error: 'Failed to send email via SMTP', details: err.message });
+  }
+});
 
 // Twilio SMS — lazy-init
 const sendSMS = async ({ to, body }) => {
@@ -4311,18 +4327,79 @@ app.get('/api/seo/localize', async (req, res) => {
     city = location.city;
     region = location.region;
 
+    // Localized Phone & Office Mapping based on User Location
+    let phone = '(717) 847-9638';
+    let secondaryPhone = '(515) 318-7450';
+    let officeAddress = city !== 'Your Area' ? `${city}, ${region || 'IA'}` : 'Des Moines, IA 50309';
+
+    if (['IA', 'IL', 'MN', 'NE', 'MO', 'KS', 'WI'].includes(region)) {
+      phone = '(515) 318-7450';
+      secondaryPhone = '(717) 847-9638';
+      officeAddress = 'Des Moines, IA 50309';
+    } else {
+      phone = '(717) 847-9638';
+      secondaryPhone = '(515) 318-7450';
+    }
+
     // Pick a primary keyword
     const products = ["Life Insurance", "Annuities", "IUL", "Real Estate", "Mortgage", "Car Insurance", "Wealth Management"];
     const primaryKeyword = req.query.q || products[Math.floor(Math.random() * products.length)];
 
-    const title = `${primaryKeyword} in ${city}${region ? `, ${region}` : ''} | New Holland Financial Group`;
-    const description = `Looking for ${primaryKeyword.toLowerCase()} in ${city}? New Holland Financial Group provides top-rated protection and financial solutions near you. Fast approvals and expert advice${region ? ` in ${region}` : ''}. Providing coverage across the United States.`;
+    const title = `${primaryKeyword} in ${city}${region ? `, ${region}` : ''} | Call ${phone} | New Holland Financial Group`;
+    const description = `Looking for ${primaryKeyword.toLowerCase()} in ${city}? Call ${phone} or ${secondaryPhone}. New Holland Financial Group provides top-rated life insurance, realtor agents, freight brokers, mortgage specialists, and wealth management near you in ${city}${region ? `, ${region}` : ''}.`;
+
+    // Google Search Rich Snippet Schema.org JSON-LD
+    const jsonLdSchema = {
+      "@context": "https://schema.org",
+      "@type": ["FinancialService", "RealEstateAgent", "InsuranceAgency", "MortgageBroker"],
+      "name": "New Holland Financial Group",
+      "url": "https://www.newhollandfinancial.com",
+      "logo": "https://www.newhollandfinancial.com/logo.png",
+      "telephone": phone,
+      "email": "remmyk@newhollandfinancial.com",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": city !== 'Your Area' ? city : "Des Moines",
+        "addressRegion": region || "IA",
+        "postalCode": "50309",
+        "addressCountry": "US"
+      },
+      "areaServed": [
+        {
+          "@type": "AdministrativeArea",
+          "name": region || "United States"
+        },
+        {
+          "@type": "City",
+          "name": city !== 'Your Area' ? city : "Des Moines"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+1-717-847-9638",
+          "contactType": "sales",
+          "areaServed": "US",
+          "availableLanguage": "English"
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+1-515-318-7450",
+          "contactType": "customer service",
+          "areaServed": "US",
+          "availableLanguage": "English"
+        }
+      ]
+    };
 
     // Compile dynamic keywords based on current location + all states for coverage signal
     const dynamicKeywords = [
       ...SEO_KEYWORDS,
       city,
       region,
+      primaryKeyword,
+      `Call ${phone}`,
       ...Object.keys(SERVICE_AREAS),
       "National Service Areas",
       "Providing coverage across the United States"
@@ -4333,6 +4410,10 @@ app.get('/api/seo/localize', async (req, res) => {
       description,
       city,
       region,
+      phone,
+      secondaryPhone,
+      officeAddress,
+      jsonLdSchema,
       keywords: dynamicKeywords,
       coverageText: "National Service Areas: Providing coverage across the United States"
     });
