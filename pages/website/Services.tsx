@@ -164,11 +164,10 @@ export const Services: React.FC = () => {
   const displayedProducts = (
     categoryFilter
       ? products.filter((p) => {
-          const sectionId = (p.link || "").split("category=")[1] || p.id;
-          return (
-            sectionId.includes(categoryFilter) ||
-            categoryFilter.includes(sectionId)
-          );
+          const cat = categoryFilter.toLowerCase().trim();
+          const pId = p.id.toLowerCase().trim();
+          const pLinkCat = ((p.link || "").split("category=")[1] || "").toLowerCase().trim();
+          return pId === cat || pLinkCat === cat;
         })
       : products
   );
