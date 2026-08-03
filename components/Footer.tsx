@@ -186,19 +186,19 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* SECTION 2: ADVISORS & SERVICES (RELATIVE AGENT TITLES) */}
+          {/* SECTION 2: SOLUTIONS & SERVICES */}
           <div className="space-y-4">
             <h3 className="text-[11px] font-black text-blue-400 tracking-[0.2em] uppercase mb-4">
-              Advisors & Services
+              Solutions &amp; Services
             </h3>
             <ul className="space-y-3">
               {[
-                { label: 'Speak to Realtor Agent', path: '/real-estate', icon: Building2 },
-                { label: 'Speak to Freight Broker', path: '/logistics', icon: Truck },
-                { label: 'Speak to Insurance Advisor', path: '/life-insurance', icon: Shield },
-                { label: 'Speak to Mortgage Specialist', path: '/mortgage', icon: Landmark },
-                { label: 'Speak to Wealth Manager', path: '/securities', icon: BarChart3 },
-                { label: 'Speak to Property Specialist', path: '/dsm-property-solutions', icon: Wrench },
+                { label: 'Real Estate', path: '/real-estate', icon: Building2 },
+                { label: 'Freight & Logistics', path: '/logistics', icon: Truck },
+                { label: 'Life Insurance', path: '/life-insurance', icon: Shield },
+                { label: 'Mortgages & Loans', path: '/mortgage', icon: Landmark },
+                { label: 'Securities & Wealth', path: '/securities', icon: BarChart3 },
+                { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
