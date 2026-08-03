@@ -51,10 +51,39 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
     }, 3000);
   };
 
+  const getAgentTitle = (type: string) => {
+    switch (type) {
+      case ProductType.REAL_ESTATE: return "Speak to Realtor Agent";
+      case ProductType.LOGISTICS: return "Speak to Freight Broker";
+      case ProductType.LIFE: return "Speak to Insurance Advisor";
+      case ProductType.AUTO: return "Speak to Risk Specialist";
+      case ProductType.BUSINESS: return "Speak to Commercial Advisor";
+      case ProductType.MORTGAGE: return "Speak to Mortgage Specialist";
+      case ProductType.SECURITIES: return "Speak to Wealth Manager";
+      case ProductType.HOME_REPAIR: return "Speak to Property Specialist";
+      case ProductType.GROUP_BENEFITS: return "Speak to Benefits Advisor";
+      default: return "Speak to an Advisor";
+    }
+  };
+
+  const getAgentSubtitle = (type: string) => {
+    switch (type) {
+      case ProductType.REAL_ESTATE: return "Connect with our licensed realtor agents for property acquisition, listing, and investment guidance.";
+      case ProductType.LOGISTICS: return "Connect with our elite freight brokers for custom load dispatching and carrier logistics.";
+      case ProductType.LIFE: return "Connect with our licensed life insurance advisors to protect your family and legacy.";
+      case ProductType.AUTO: return "Connect with our commercial and auto risk specialists for competitive coverage quotes.";
+      case ProductType.MORTGAGE: return "Connect with our mortgage specialists for home financing, refinancing, and competitive rate locks.";
+      case ProductType.SECURITIES: return "Connect with our wealth managers for portfolio management, IRA rollovers, and capital preservation.";
+      case ProductType.HOME_REPAIR: return "Connect with our property specialists for renovation, maintenance, and home repair management.";
+      default: return "Get personalized guidance from our experts. Fill out the form below and we'll be in touch.";
+    }
+  };
+
   const isLogistics = productType === ProductType.LOGISTICS;
-  const titleText = isLogistics ? "Speak to the Broker Team" : "Speak to an Advisor";
+  const titleText = getAgentTitle(productType);
+  const subtitleText = getAgentSubtitle(productType);
   const successTitle = isLogistics ? "Request Transmitted" : "Request Sent";
-  const successSub = isLogistics ? "An expert broker will reach out to you shortly." : "An expert advisor will reach out to you shortly.";
+  const successSub = isLogistics ? "An expert freight broker will reach out to you shortly." : "A licensed specialist will reach out to you shortly.";
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-12">
@@ -64,9 +93,7 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
             {titleText}
           </h2>
           <p className="text-lg text-slate-600">
-            {isLogistics 
-              ? "Connect with our elite freight brokerage team for a customized logistics quote."
-              : "Get personalized guidance from our experts. Fill out the form below and we'll be in touch."}
+            {subtitleText}
           </p>
         </div>
 

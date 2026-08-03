@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Mail,
@@ -10,13 +10,21 @@ import {
   Instagram,
   Youtube,
   Globe,
-  ArrowUpRight,
-  ShieldCheck
+  ArrowRight,
+  CheckCircle2,
+  Sparkles,
+  ChevronRight,
+  Building2,
+  Truck,
+  Shield,
+  Landmark,
+  BarChart3,
+  Wrench
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 // Custom TikTok Icon
-const TikTokIcon = ({ size = 15, className = "" }: { size?: number; className?: string }) => (
+const TikTokIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -35,6 +43,19 @@ const TikTokIcon = ({ size = 15, className = "" }: { size?: number; className?: 
 
 export const Footer: React.FC = () => {
   const { companySettings } = useData();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      setSubscribed(true);
+      setTimeout(() => {
+        setNewsletterEmail('');
+        setSubscribed(false);
+      }, 4000);
+    }
+  };
 
   const getSocialIcon = (platform: string) => {
     switch (platform) {
@@ -49,7 +70,7 @@ export const Footer: React.FC = () => {
     }
   };
 
-  const socialLinks = Array.isArray(companySettings.socialLinks)
+  const socialLinks = Array.isArray(companySettings.socialLinks) && companySettings.socialLinks.length > 0
     ? companySettings.socialLinks.filter(link => link.url && link.url !== '#' && link.url.trim() !== '')
     : [
         { platform: 'Instagram', url: 'https://instagram.com/remmyshabani' },
@@ -66,15 +87,58 @@ export const Footer: React.FC = () => {
     : `${companySettings.address || 'Des Moines'}, ${companySettings.city || ''} ${companySettings.state || 'IA 50309'}`.replace(/\s+/g, ' ');
 
   return (
-    <footer className="bg-[#050b14] text-white pt-20 pb-12 border-t border-white/10 font-sans relative overflow-hidden selection:bg-blue-500/30">
-      {/* Background Ambient Glow */}
-      <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none" />
+    <footer className="bg-[#050B14] text-white pt-16 pb-12 border-t border-white/10 font-sans relative overflow-hidden selection:bg-blue-500/30">
+      {/* Subtle Background Glow Elements */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         
-        {/* 4 DISTINCT SECTIONS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-16">
+        {/* TOP NEWSLETTER BRIEF */}
+        <div className="bg-gradient-to-r from-blue-950/40 via-slate-900/60 to-indigo-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 mb-16 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="max-w-2xl text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-widest mb-3">
+              <Sparkles size={12} /> Market Intelligence Briefing
+            </div>
+            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
+              Subscribe to New Holland Financial Intelligence
+            </h3>
+            <p className="text-slate-400 text-sm font-medium leading-relaxed">
+              Get rate updates, real estate market insights, and financial advisory directly to your inbox.
+            </p>
+          </div>
+
+          <div className="w-full lg:w-auto">
+            {subscribed ? (
+              <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-8 py-4 rounded-full font-bold text-sm">
+                <CheckCircle2 size={18} /> Subscribed Successfully
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
+                <div className="relative w-full">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    type="email"
+                    required
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-full text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30 shrink-0 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  Subscribe <ArrowRight size={14} />
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* 4 BALANCED SECTIONS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-16">
           
           {/* SECTION 1: BRAND & IDENTITY */}
           <div className="space-y-6">
@@ -92,17 +156,16 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex flex-col">
                 <span className="font-black text-xl leading-none text-white tracking-tight uppercase">New Holland</span>
-                <span className="text-[10px] font-extrabold text-blue-400 tracking-[0.25em] uppercase mt-1">Financial Group</span>
+                <span className="text-[10px] font-extrabold text-blue-400 tracking-[0.2em] uppercase mt-1">Financial Group</span>
               </div>
             </Link>
 
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium">
-              Helping you grow, protect, and preserve what matters most with integrated wealth, real estate, insurance, and freight solutions.
+            <p className="text-slate-400 text-sm leading-relaxed font-medium">
+              Helping you grow, protect, and preserve what matters most with customized wealth, insurance, real estate, and freight logistics solutions.
             </p>
 
-            {/* Social Pill Buttons */}
             <div className="pt-2">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-3">Follow Us</span>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Follow Us</p>
               <div className="flex flex-wrap gap-2">
                 {socialLinks.map((item, idx) => {
                   const Icon = getSocialIcon(item.platform);
@@ -112,9 +175,9 @@ export const Footer: React.FC = () => {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-blue-500/40 rounded-full text-xs font-bold text-slate-300 hover:text-white transition-all shadow-sm"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-blue-500/40 rounded-full text-xs font-bold text-slate-300 hover:text-white transition-all"
                     >
-                      <Icon size={14} />
+                      <Icon size={13} />
                       <span>{item.platform}</span>
                     </a>
                   );
@@ -123,137 +186,121 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* SECTION 2: SOLUTIONS */}
+          {/* SECTION 2: ADVISORS & SERVICES (RELATIVE AGENT TITLES) */}
           <div className="space-y-4">
-            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.25em] uppercase mb-6 flex items-center gap-2">
-              Solutions
+            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.2em] uppercase mb-4">
+              Advisors & Services
             </h3>
-            <ul className="space-y-3.5">
+            <ul className="space-y-3">
               {[
-                { name: 'Life Insurance', path: '/life-insurance' },
-                { name: 'Auto & Commercial Insurance', path: '/auto-insurance' },
-                { name: 'Business Insurance', path: '/business-insurance' },
-                { name: 'Group Benefits', path: '/group-benefits' },
-                { name: 'Mortgage & Rates', path: '/mortgage' },
-                { name: 'Real Estate & Intelligence', path: '/real-estate' },
-                { name: 'Property Solutions', path: '/dsm-property-solutions' },
-                { name: 'Securities & Wealth', path: '/securities' },
-                { name: 'Freight & Logistics', path: '/logistics' },
+                { label: 'Speak to Realtor Agent', path: '/real-estate', icon: Building2 },
+                { label: 'Speak to Freight Broker', path: '/logistics', icon: Truck },
+                { label: 'Speak to Insurance Advisor', path: '/life-insurance', icon: Shield },
+                { label: 'Speak to Mortgage Specialist', path: '/mortgage', icon: Landmark },
+                { label: 'Speak to Wealth Manager', path: '/securities', icon: BarChart3 },
+                { label: 'Speak to Property Specialist', path: '/dsm-property-solutions', icon: Wrench },
               ].map((link) => (
-                <li key={link.name}>
+                <li key={link.label}>
                   <Link
                     to={link.path}
-                    className="text-slate-300 hover:text-white text-xs sm:text-sm font-semibold transition-all hover:translate-x-1 inline-flex items-center gap-1 group"
+                    className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-blue-600/10 border border-white/5 hover:border-blue-500/30 text-xs font-bold text-slate-200 hover:text-white transition-all"
                   >
-                    <span>{link.name}</span>
-                    <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity" />
+                    <span className="flex items-center gap-2.5">
+                      <link.icon size={15} className="text-blue-400 group-hover:scale-110 transition-transform" />
+                      <span>{link.label}</span>
+                    </span>
+                    <ChevronRight size={13} className="text-slate-500 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* SECTION 3: COMPANY & ECOSYSTEM */}
+          {/* SECTION 3: ECOSYSTEM & CORPORATE */}
           <div className="space-y-4">
-            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.25em] uppercase mb-6 flex items-center gap-2">
-              Company
+            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.2em] uppercase mb-4">
+              Ecosystem & Corporate
             </h3>
-            <ul className="space-y-3.5">
+            <ul className="space-y-2.5">
               {[
+                { name: 'Solutions Overview', path: '/products' },
+                { name: 'Advisors Directory', path: '/advisors' },
+                { name: 'Schedule Advisory', path: '/schedule' },
+                { name: 'Client Portal', path: '/login' },
                 { name: 'About New Holland', path: '/about' },
-                { name: 'Annual Transparency Report', path: '/transparency' },
+                { name: 'Annual Report', path: '/transparency' },
                 { name: 'Press Releases', path: '/press' },
                 { name: 'Careers & Join Team', path: '/join' },
-                { name: 'Advisors Directory', path: '/advisors' },
-                { name: 'Agent & Advisor Terminal', path: '/login' },
-                { name: 'Client Portal', path: '/client-portal' },
-                { name: 'Financial Resources', path: '/resources' },
                 { name: 'Developer APIs', path: '/developers' },
+                { name: 'Financial Resources', path: '/resources' },
               ].map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className="text-slate-300 hover:text-white text-xs sm:text-sm font-semibold transition-all hover:translate-x-1 inline-flex items-center gap-1 group"
+                    className="text-slate-400 hover:text-white text-xs font-semibold transition-colors hover:translate-x-1 inline-block"
                   >
-                    <span>{link.name}</span>
-                    <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity" />
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* SECTION 4: DIRECT CONTACT US */}
-          <div className="space-y-5">
-            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.25em] uppercase mb-6 flex items-center gap-2">
+          {/* SECTION 4: DIRECT CONTACT STACK */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-black text-blue-400 tracking-[0.2em] uppercase mb-4">
               Contact Us
             </h3>
             
-            <div className="space-y-4">
-              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 hover:border-blue-500/40 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <Phone size={18} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Direct</span>
-                  <a href={`tel:${primaryPhone.replace(/[^0-9]/g, '')}`} className="text-white hover:text-blue-400 font-bold text-xs sm:text-sm transition-colors">
-                    {primaryPhone}
-                  </a>
-                </div>
+            <div className="space-y-4 text-xs font-semibold text-slate-300">
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Direct Line</span>
+                <a href={`tel:${primaryPhone.replace(/[^0-9]/g, '')}`} className="text-white hover:text-blue-400 font-bold transition-colors block text-sm">
+                  {primaryPhone}
+                </a>
               </div>
 
-              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 hover:border-blue-500/40 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <Phone size={18} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Office</span>
-                  <a href={`tel:${secondaryPhone.replace(/[^0-9]/g, '')}`} className="text-white hover:text-blue-400 font-bold text-xs sm:text-sm transition-colors">
-                    {secondaryPhone}
-                  </a>
-                </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Office Line</span>
+                <a href={`tel:${secondaryPhone.replace(/[^0-9]/g, '')}`} className="text-white hover:text-blue-400 font-bold transition-colors block text-sm">
+                  {secondaryPhone}
+                </a>
               </div>
 
-              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 hover:border-blue-500/40 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <Mail size={18} />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Email</span>
-                  <a href={`mailto:${primaryEmail}`} className="text-white hover:text-blue-400 font-bold text-xs sm:text-sm transition-colors block truncate">
-                    {primaryEmail}
-                  </a>
-                </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Direct Email</span>
+                <a href={`mailto:${primaryEmail}`} className="text-white hover:text-blue-400 font-bold transition-colors block truncate text-xs">
+                  {primaryEmail}
+                </a>
               </div>
 
-              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 hover:border-blue-500/40 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-                  <MapPin size={18} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Location</span>
-                  <span className="text-white font-bold text-xs sm:text-sm block">
-                    {addressText}
-                  </span>
-                </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Headquarters</span>
+                <span className="text-slate-300 font-bold block leading-relaxed text-xs">
+                  {addressText}
+                </span>
               </div>
             </div>
           </div>
 
         </div>
 
-        {/* BOTTOM LEGAL & COMPLIANCE BAR */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-400">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-blue-400" />
-            <span>&copy; {new Date().getFullYear()} New Holland Financial Group. All rights reserved.</span>
-          </div>
+        {/* REGULATORY COMPLIANCE STATEMENT */}
+        <div className="border-t border-white/10 pt-8 pb-8 text-slate-500 text-[11px] font-medium leading-relaxed">
+          <p>
+            <strong className="text-slate-400 uppercase tracking-widest">REGULATORY DISCLOSURE:</strong> New Holland Financial Group provides integrated financial, real estate, mortgage, insurance, and freight brokerage services across 48 active state jurisdictions. All policies, loan applications, securities portfolios, and logistics dispatches are managed by licensed advisors, brokers, and underwriting specialists.
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-wider">
+        {/* BOTTOM BAR: COPYRIGHT & LEGAL LINKS */}
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-500">
+          <p>&copy; {new Date().getFullYear()} New Holland Financial Group. All rights reserved.</p>
+
+          <div className="flex flex-wrap items-center gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link to="/transparency" className="hover:text-white transition-colors">State Disclosures</Link>
-            <Link to="/developers" className="hover:text-white transition-colors">Developer APIs</Link>
+            <Link to="/developers" className="hover:text-white transition-colors">Developer Portal</Link>
           </div>
         </div>
 
