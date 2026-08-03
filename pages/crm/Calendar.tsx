@@ -89,6 +89,16 @@ export const Calendar: React.FC = () => {
     }
   };
 
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyBookingLink = () => {
+    const advisorSlug = user?.name ? user.name.toLowerCase().replace(/\s+/g, '-') : 'remmy-shabani';
+    const link = `${window.location.origin}/schedule?advisor=${advisorSlug}`;
+    navigator.clipboard.writeText(link);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 3000);
+  };
+
   return (
     <div className="space-y-6">
       <Tab3DBanner
@@ -98,6 +108,13 @@ export const Calendar: React.FC = () => {
           { title: "Completed Consultations", value: "128 Sessions", subtitle: "98% Attendance Rate", emoji: "🏆", gradient: "pink", linkText: "Review Logs" }
         ]}
       />
+
+      {/* Copy Link Toast Alert */}
+      {copiedLink && (
+        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold text-xs flex items-center gap-3 animate-in fade-in">
+          <span>✅ Personal Client Booking Link Copied to Clipboard! (`/schedule?advisor=${user?.name?.toLowerCase().replace(/\s+/g, '-') || 'remmy-shabani'}`)</span>
+        </div>
+      )}
 
       <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
       {/* Sidebar with Alerts */}
@@ -112,6 +129,13 @@ export const Calendar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleCopyBookingLink}
+              className="px-5 py-2.5 bg-[#0B2240] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-lg transition-all flex items-center gap-2"
+            >
+              <span>🔗 Copy My Booking Link</span>
+            </button>
+
             <button 
               onClick={handlePrev} 
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
