@@ -76,18 +76,38 @@ export const BookingPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (advisorParam) {
+      const cleanParam = advisorParam.toLowerCase().trim();
       const found = activeAdvisors.find(a => 
-        a.id === advisorParam || 
-        a.name.toLowerCase().replace(/\s+/g, '-') === advisorParam.toLowerCase() ||
-        a.email.toLowerCase().includes(advisorParam.toLowerCase())
+        a.id.toLowerCase() === cleanParam || 
+        a.name.toLowerCase().replace(/\s+/g, '-') === cleanParam ||
+        a.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanParam.replace(/[^a-z0-9]/g, '') ||
+        a.email.toLowerCase().includes(cleanParam)
       );
       if (found) {
         setSelectedAdvisor(found);
       } else {
-        setSelectedAdvisor(activeAdvisors[0]);
+        setSelectedAdvisor({
+          id: 'remmy-shabani',
+          name: 'Remmy Shabani',
+          email: 'remmyk@newhollandfinancial.com',
+          phone: '(717) 847-9638',
+          role: 'Advisor' as any,
+          advisorCategory: 'Real Estate & Insurance Advisor',
+          avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+          active: true
+        });
       }
     } else {
-      setSelectedAdvisor(activeAdvisors[0]);
+      setSelectedAdvisor(activeAdvisors[0] || {
+        id: 'remmy-shabani',
+        name: 'Remmy Shabani',
+        email: 'remmyk@newhollandfinancial.com',
+        phone: '(717) 847-9638',
+        role: 'Advisor' as any,
+        advisorCategory: 'Real Estate & Insurance Advisor',
+        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+        active: true
+      });
     }
   }, [advisorParam, activeAdvisors]);
 

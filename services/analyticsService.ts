@@ -63,12 +63,19 @@ export const AnalyticsService = {
                 })
             });
 
-            const data = await response.json();
-            if (data.sessionId) {
-                setSessionId(data.sessionId);
+            if (response.ok) {
+                const text = await response.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data && data.sessionId) {
+                        setSessionId(data.sessionId);
+                    }
+                } catch (e) {
+                    // Ignore non-JSON body
+                }
             }
         } catch (err) {
-            console.error('[Analytics] Tracking failed:', err);
+            // Quietly catch analytics network issues
         }
     },
 
