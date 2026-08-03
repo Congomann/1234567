@@ -53,6 +53,7 @@ import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
 import { CommandPalette } from './CommandPalette';
 import { WorkspaceTemplateModal } from './WorkspaceTemplateModal';
+import { CRMCommandPalette } from './CRMCommandPalette';
 
 /**
  * EXHAUSTIVE TOUR DEFINITION
@@ -422,6 +423,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                         enabledModules={enabledModules}
                         onToggleModule={handleToggleModule}
                     />
+                    <CRMCommandPalette />
                 </aside>
 
                 <div className="flex-1 h-full flex flex-col overflow-hidden bg-[#f5f5f7]">
