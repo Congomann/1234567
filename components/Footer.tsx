@@ -98,10 +98,10 @@ export const Footer: React.FC = () => {
         <div className="bg-gradient-to-r from-blue-950/40 via-slate-900/60 to-indigo-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 mb-16 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="max-w-2xl text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-widest mb-3">
-              <Sparkles size={12} /> Market Intelligence Briefing
+              <Sparkles size={12} /> Financial Insights Newsletter
             </div>
             <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
-              Subscribe to New Holland Financial Intelligence
+              Subscribe to New Holland Financial Updates
             </h3>
             <p className="text-slate-400 text-sm font-medium leading-relaxed">
               Get rate updates, real estate market insights, and financial advisory directly to your inbox.

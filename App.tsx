@@ -163,12 +163,10 @@ const SuperAdminRoute: React.FC = () => {
   return <Outlet />;
 };
 
-import { MarketTickerBar } from './components/MarketTickerBar';
 import { SecurityTrustSeal } from './components/SecurityTrustSeal';
 
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col min-h-screen">
-    <MarketTickerBar />
     <Navbar />
     <main className="flex-grow">{children}</main>
     <SecurityTrustSeal />
