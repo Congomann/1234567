@@ -872,63 +872,50 @@ export const WebsiteSettings: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-3">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Video Playlist (Max 3, Max 5 min each)</label>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Direct MP4 Video Source URL</label>
 
-                                        <div className="space-y-2 mb-2">
-                                            {(settingsForm.heroVideoPlaylist || []).map((vid, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200">
-                                                    <PlayCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                                                    <span className="text-xs text-slate-600 truncate flex-1">{vid.substring(0, 50)}...</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeVideoFromPlaylist(idx)}
-                                                        className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors"
-                                                    >
-                                                        <Trash2 className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            {(settingsForm.heroVideoPlaylist || []).length === 0 && (
-                                                <p className="text-xs text-slate-400 italic">No videos in playlist.</p>
-                                            )}
+                                        <div className="relative">
+                                            <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
+                                            <input
+                                                type="text"
+                                                className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent font-mono"
+                                                placeholder="Paste MP4 Video URL (e.g. https://domain.com/video.mp4)"
+                                                value={settingsForm.heroBackgroundUrl || ''}
+                                                onChange={e => setSettingsForm({ ...settingsForm, heroBackgroundUrl: e.target.value, heroBackgroundType: 'video' })}
+                                            />
                                         </div>
 
-                                        <div className="flex gap-2">
-                                            <div className="relative flex-1">
-                                                <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                <input
-                                                    type="text"
-                                                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent"
-                                                    placeholder="Paste .mp4 URL"
-                                                    value={newVideoUrl}
-                                                    onChange={e => setNewVideoUrl(e.target.value)}
+                                        {/* Video Preview Box */}
+                                        {settingsForm.heroBackgroundUrl && (
+                                            <div className="mt-2 rounded-2xl overflow-hidden border border-slate-200 bg-black aspect-video relative group">
+                                                <video
+                                                    key={settingsForm.heroBackgroundUrl}
+                                                    src={settingsForm.heroBackgroundUrl}
+                                                    controls
+                                                    autoPlay
+                                                    muted
+                                                    loop
+                                                    className="w-full h-full object-cover"
                                                 />
+                                                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-wider">
+                                                    Live Hero MP4 Preview
+                                                </div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={addVideoToPlaylist}
-                                                disabled={(settingsForm.heroVideoPlaylist || []).length >= 3 || !newVideoUrl}
-                                                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
-                                            >
-                                                Add
-                                            </button>
-                                        </div>
+                                        )}
 
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xs font-bold text-slate-400 uppercase">OR</span>
-                                            <label className={`flex-1 cursor-pointer flex items-center justify-center gap-2 bg-white border border-dashed border-slate-300 rounded-xl py-2.5 hover:bg-slate-50 hover:border-blue-300 transition-all group relative ${(settingsForm.heroVideoPlaylist || []).length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <span className="text-xs font-bold text-slate-400 uppercase">OR Upload Video File</span>
+                                            <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 bg-white border border-dashed border-slate-300 rounded-xl py-2.5 hover:bg-slate-50 hover:border-blue-300 transition-all group relative">
                                                 <Upload className="h-4 w-4 text-slate-400 group-hover:text-blue-500" />
-                                                <span className="text-sm text-slate-600 group-hover:text-blue-600 font-medium">Upload Video File</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-blue-600 font-medium">Upload Local MP4 File</span>
                                                 <input
                                                     type="file"
                                                     className="hidden"
                                                     accept="video/mp4,video/webm"
                                                     onChange={handleFileUpload}
-                                                    disabled={(settingsForm.heroVideoPlaylist || []).length >= 3}
                                                 />
                                             </label>
                                         </div>
-                                        <p className="text-xs text-slate-400 mt-1">Max size 250MB (Demo). Max duration 5 mins.</p>
                                     </div>
                                 )}
 

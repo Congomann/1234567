@@ -44,6 +44,12 @@ export const Home: React.FC = () => {
   const hiddenProducts = companySettings.hiddenProducts || [];
   const partners = companySettings.partners || {};
 
+  const isDirectMp4 = Boolean(
+    companySettings.heroBackgroundUrl?.match(/\.(mp4|webm|mov)(\?.*)?$/i) || 
+    companySettings.heroBackgroundUrl?.startsWith('data:video')
+  );
+  const isVideoType = companySettings.heroBackgroundType === "video" || isDirectMp4;
+
   // Playlist Logic
   const playlist =
     companySettings.heroVideoPlaylist &&
@@ -51,7 +57,7 @@ export const Home: React.FC = () => {
       ? companySettings.heroVideoPlaylist
       : [companySettings.heroBackgroundUrl];
 
-  const currentVideoSrc = playlist[currentVideoIndex % playlist.length];
+  const currentVideoSrc = playlist[currentVideoIndex % playlist.length] || companySettings.heroBackgroundUrl;
 
   const handleVideoEnded = () => {
     if (playlist.length > 1) {
@@ -62,7 +68,7 @@ export const Home: React.FC = () => {
   return (
     <div className="bg-white flex-1 font-sans">
       <div className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {companySettings.heroBackgroundType === "video" ? (
+        {isVideoType && currentVideoSrc ? (
           <>
             <video
               key={currentVideoSrc}
@@ -71,7 +77,6 @@ export const Home: React.FC = () => {
               className="absolute inset-0 w-full h-full object-cover"
               playsInline
               onEnded={handleVideoEnded}
-              // Loop single video if only one exists
               loop={playlist.length <= 1}
             >
               <source src={currentVideoSrc} type="video/mp4" />

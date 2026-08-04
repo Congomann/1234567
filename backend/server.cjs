@@ -2012,26 +2012,31 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 // 6. Content Management System (Settings & Workflows)
 app.get('/api/settings', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const pgResult = await pool.query("SELECT data FROM company_settings WHERE id = 'main'");
+    if (pgResult.rows.length > 0 && pgResult.rows[0].data) {
+      return res.json([pgResult.rows[0].data]);
+    }
+    const { data } = await supabase
       .from('company_settings')
       .select('data')
       .eq('id', 'main')
       .single();
 
-    if (data) {
+    if (data && data.data) {
       res.json([data.data]);
     } else {
       res.json([]);
     }
   } catch (err) {
-    console.error('Settings Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Settings GET Error:', err);
+    res.json([]);
   }
 });
 
 app.post('/api/settings', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'Administrator') {
-    return res.status(403).json({ error: 'Forbidden: Admin access only' });
+  const role = req.user?.role;
+  if (!['Administrator', 'Admin', 'admin', 'Manager', 'manager', 'Sub-Admin'].includes(role)) {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
   try {
     const settings = req.body;
@@ -2042,9 +2047,14 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
       ['main', JSON.stringify(settings)]
     );
 
-    // Refresh Plaid connection when settings change so the keys are instantly active natively
+    try {
+      await supabase.from('company_settings').upsert({ id: 'main', data: settings });
+    } catch (sbErr) {
+      console.warn('[Settings] Supabase sync warning:', sbErr.message);
+    }
+
     if (settings.plaidClientId) {
-      await initPlaid();
+      await initPlaid().catch(() => {});
     }
 
     res.json({ success: true });
