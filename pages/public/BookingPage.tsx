@@ -299,7 +299,7 @@ export const BookingPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-white/10 text-slate-500 text-[11px] font-medium leading-relaxed">
-              Protected by 256-Bit SSL Encryption. Instant SMTP confirmation dispatched upon completion.
+              Instant email confirmation dispatched upon completion.
             </div>
           </div>
 

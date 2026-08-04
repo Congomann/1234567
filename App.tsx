@@ -163,13 +163,10 @@ const SuperAdminRoute: React.FC = () => {
   return <Outlet />;
 };
 
-import { SecurityTrustSeal } from './components/SecurityTrustSeal';
-
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
     <main className="flex-grow">{children}</main>
-    <SecurityTrustSeal />
     <Footer />
   </div>
 );
