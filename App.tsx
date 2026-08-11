@@ -277,6 +277,7 @@ const App: React.FC = () => {
               {/* SUPER ADMIN ONLY - Based on screenshot request */}
               <Route element={<SuperAdminRoute />}>
                 <Route path="admin/website" element={<WebsiteSettings />} />
+                <Route path="website-settings" element={<WebsiteSettings />} />
                 <Route path="admin/transparency" element={<AnnualReportAdmin />} />
                 <Route path="admin/press" element={<PressReleaseAdmin />} />
                 <Route path="admin/products" element={<ProductCms />} />
