@@ -176,11 +176,12 @@ export const PressReleases: React.FC = () => {
               </button>
             </div>
             <div className="lg:w-1/2 relative bg-slate-800 overflow-hidden">
-               <img 
-                 src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070" 
-                 alt="News" 
-                 className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
-               />
+               <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-[#0B2240] to-slate-950 flex items-center justify-center p-8">
+                 <div className="text-center text-white/80">
+                   <h4 className="text-lg font-bold text-white mb-2">New Holland Financial Press Desk</h4>
+                   <p className="text-xs text-slate-300">Official Corporate Announcements & Regulatory Updates</p>
+                 </div>
+               </div>
                <div className="absolute inset-0 bg-gradient-to-r from-[#0B2240] via-[#0B2240]/40 to-transparent"></div>
             </div>
           </div>

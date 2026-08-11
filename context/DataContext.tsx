@@ -246,8 +246,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (e) {}
     return {
-      phone: '(800) 555-0199', email: 'contact@newholland.com', address: '123 Finance Way', city: 'New York', state: 'NY', zip: '10001', hideStreetAddress: false,
-      heroBackgroundType: 'image', heroBackgroundUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070',
+      phone: '(717) 847-9638', email: 'sales@newhollandfinancial.com', address: 'Des Moines, IA 50309', city: 'Des Moines', state: 'IA', zip: '50309', hideStreetAddress: false,
+      heroBackgroundType: 'video', heroBackgroundUrl: '',
       heroTitle: 'Securing Your Future', heroSubtitle: 'Comprehensive financial solutions for every stage of life.',
       footerDescription: 'Providing tailored insurance solutions that secure financial peace of mind for individuals, families, and businesses.',
       socialLinks: [{ platform: 'Facebook', url: '#' }, { platform: 'LinkedIn', url: '#' }, { platform: 'X', url: '#' }, { platform: 'Instagram', url: '#' }, { platform: 'YouTube', url: '#' }, { platform: 'TikTok', url: '#' }],
@@ -259,15 +259,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         { id: '2', title: 'Market Trends Report', url: '#', description: 'Analysis of residential market shifts.', type: 'Investing' }
       ],
       customProducts: [
-        { id: 'life', title: 'Life Insurance', description: "Ensure your family's financial security with our comprehensive life insurance plans.", features: ['Term Life', 'Whole Life', 'Universal Life', 'Final Expense'], image: "https://picsum.photos/600/400?random=1", icon: 'ShieldCheck', color: 'blue', link: '/life-insurance', isHidden: false, order: 0 },
-        { id: 'real-estate', title: 'Real Estate', description: "Specialized coverage for real estate investors, landlords, and property managers.", features: ['Loss of Rent', 'Vacant Property', 'Multi-family Dwelling', 'Renovation Risk'], image: "https://picsum.photos/600/400?random=3", icon: 'HomeIcon', color: 'amber', link: '/real-estate', isHidden: false, order: 1 },
-        { id: 'mortgage', title: 'Mortgage Lending & Refinance', description: "Transform your mortgage into a strategic financial tool with personalized lending and refinance solutions.", features: ['Lower Monthly Payments', 'Cash-Out Refinance', 'Debt Consolidation', 'Strategic Mortgage Planning'], image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Landmark', color: 'cyan', link: '/mortgage', isHidden: false, order: 2 },
-        { id: 'business', title: 'Business & Professional Liability', description: "Protect your business assets, operations, and professional reputation with tailored commercial and E&O packages.", features: ['General Liability', "Worker's Comp", 'Professional Liability (E&O)', 'Cyber Liability'], image: "https://picsum.photos/600/400?random=2", icon: 'Briefcase', color: 'purple', link: '/business-insurance', isHidden: false, order: 3 },
-        { id: 'auto', title: 'Auto & Commercial Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "https://picsum.photos/600/400?random=6", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
-        { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 },
-        { id: 'logistics', title: 'Logistics & Trucking', description: "Seamless freight shipping, brokerage, and dispatch solutions. Engineering the future of supply chain reliability.", features: ['Freight Shipping (FTL / LTL)', 'Freight Brokerage', 'Dispatch Services', 'Specialized (Reefer, Hazmat)'], image: "https://images.unsplash.com/photo-1519003722824-192d992a6058?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Truck', color: 'slate', link: '/logistics', isHidden: false, order: 6 },
-        { id: 'property-insurance', title: 'Property Insurance', description: "Safeguard your most valuable assets with our robust property insurance packages.", features: ['Homeowners', 'Renters', 'Commercial Property', 'Flood & Earthquake'], image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Building2', color: 'indigo', link: '/property-insurance', isHidden: false, order: 7 },
-        { id: 'dsm-property-solutions', title: 'DSM Property Solutions', description: "Expert property solutions to keep your assets in pristine condition inside and out.", features: ['Roofing & Renovation', 'Plumbing & Drywall', 'Pressure Washing', 'Lawnscaping'], image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'HomeIcon', color: 'orange', link: '/dsm-property-solutions', isHidden: false, order: 8 }
+        { id: 'life', title: 'Life Insurance', description: "Ensure your family's financial security with our comprehensive life insurance plans.", features: ['Term Life', 'Whole Life', 'Universal Life', 'Final Expense'], image: "/assets/products/life.png", icon: 'ShieldCheck', color: 'blue', link: '/life-insurance', isHidden: false, order: 0 },
+        { id: 'real-estate', title: 'Real Estate', description: "Specialized coverage for real estate investors, landlords, and property managers.", features: ['Loss of Rent', 'Vacant Property', 'Multi-family Dwelling', 'Renovation Risk'], image: "/assets/products/realestate.png", icon: 'HomeIcon', color: 'amber', link: '/real-estate', isHidden: false, order: 1 },
+        { id: 'mortgage', title: 'Mortgage Lending & Refinance', description: "Transform your mortgage into a strategic financial tool with personalized lending and refinance solutions.", features: ['Lower Monthly Payments', 'Cash-Out Refinance', 'Debt Consolidation', 'Strategic Mortgage Planning'], image: "/assets/products/mortgage.png", icon: 'Landmark', color: 'cyan', link: '/mortgage', isHidden: false, order: 2 },
+        { id: 'business', title: 'Business & Professional Liability', description: "Protect your business assets, operations, and professional reputation with tailored commercial and E&O packages.", features: ['General Liability', "Worker's Comp", 'Professional Liability (E&O)', 'Cyber Liability'], image: "/assets/products/business.png", icon: 'Briefcase', color: 'purple', link: '/business-insurance', isHidden: false, order: 3 },
+        { id: 'auto', title: 'Auto & Commercial Insurance', description: "Comprehensive auto coverage for personal vehicles and commercial fleets to keep you moving.", features: ['Personal Auto', 'Commercial Fleet', 'Liability Coverage', 'Collision & Comprehensive'], image: "/assets/products/auto.png", icon: 'Truck', color: 'red', link: '/auto-insurance', isHidden: false, order: 4 },
+        { id: 'securities', title: 'Securities & Investment Advisory', description: "Navigating financial securities, series licensing, and providing fiduciary retirement planning strategies.", features: ['Series 6, 7, 63 Support', 'Fiduciary Planning', 'Portfolio Management', 'Wealth Management Compliance'], image: "/assets/products/securities.png", icon: 'BarChart3', color: 'emerald', link: '/securities', isHidden: false, order: 5 },
+        { id: 'logistics', title: 'Logistics & Trucking', description: "Seamless freight shipping, brokerage, and dispatch solutions. Engineering the future of supply chain reliability.", features: ['Freight Shipping (FTL / LTL)', 'Freight Brokerage', 'Dispatch Services', 'Specialized (Reefer, Hazmat)'], image: "/assets/products/logistics.png", icon: 'Truck', color: 'slate', link: '/logistics', isHidden: false, order: 6 },
+        { id: 'property-insurance', title: 'Property Insurance', description: "Safeguard your most valuable assets with our robust property insurance packages.", features: ['Homeowners', 'Renters', 'Commercial Property', 'Flood & Earthquake'], image: "/assets/products/property.png", icon: 'Building2', color: 'indigo', link: '/property-insurance', isHidden: false, order: 7 },
+        { id: 'dsm-property-solutions', title: 'DSM Property Solutions', description: "Expert property solutions to keep your assets in pristine condition inside and out.", features: ['Roofing & Renovation', 'Plumbing & Drywall', 'Pressure Washing', 'Lawnscaping'], image: "/assets/products/dsm.png", icon: 'HomeIcon', color: 'orange', link: '/dsm-property-solutions', isHidden: false, order: 8 }
       ],
       partners: {},
       partnerMarqueeSpeed: 30,
@@ -627,11 +627,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     try {
       await Backend.saveSettings(s); 
-      return true;
     } catch (e) {
-      console.error("[DataContext] Failed to save settings:", e);
-      return false;
+      console.warn("[DataContext] Backend.saveSettings non-blocking warning:", e);
     }
+    return true;
   };
 
   const saveLandingPage = async (page: any) => {

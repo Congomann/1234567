@@ -67,14 +67,20 @@ export const About: React.FC = () => {
               </div>
             </div>
             <div className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px]">
-              <img
-                src={
-                  companySettings.aboutImageUrl ||
-                  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80"
-                }
-                alt="Professional team meeting"
-                className="w-full h-full object-cover"
-              />
+              {companySettings.aboutImageUrl ? (
+                <img
+                  src={companySettings.aboutImageUrl}
+                  alt="Corporate Office & Advisory Team"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-slate-900 border border-slate-800 flex items-center justify-center p-8 text-center text-white">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">New Holland Financial Group</h3>
+                    <p className="text-xs text-slate-400">Institutional Fiduciary & Brokerage Distribution Platform</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

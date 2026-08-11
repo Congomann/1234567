@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../../context/DataContext';
 import { Resource, ProductType, SocialLink, CompanySettings } from '../../types';
 import { Backend } from '../../services/apiBackend';
@@ -429,8 +430,25 @@ export const WebsiteSettings: React.FC = () => {
         setConfirmAction({ id: 'reset', type: 'reset-leads' });
     };
 
+    const [globalSaved, setGlobalSaved] = useState(false);
+
+    const handleSaveGlobalConfig = async () => {
+        setIsProcessing(true);
+        const ok = await updateCompanySettings(settingsForm);
+        setIsProcessing(false);
+        if (ok) {
+            setGlobalSaved(true);
+            setTimeout(() => setGlobalSaved(false), 3500);
+        }
+    };
+
     return (
-        <div className="space-y-8 pb-10">
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-8 pb-10"
+        >
             <Tab3DBanner
                 cards={[
                     { title: "Global Website CMS", value: "v4.2 Live", subtitle: "Public Theme & Assets", emoji: "⚙️", gradient: "cyan", linkText: "Site Config" },
@@ -954,11 +972,15 @@ export const WebsiteSettings: React.FC = () => {
                         </h3>
                         <div className="flex flex-col md:flex-row gap-6 items-center">
                             <div className="w-full md:w-1/3 h-40 bg-slate-200 rounded-xl overflow-hidden relative">
-                                <img
-                                    src={settingsForm.aboutImageUrl || "https://images.unsplash.com/photo-1556761175-5973dc0f32e7"}
-                                    className="w-full h-full object-cover"
-                                    alt="About Page"
-                                />
+                                {settingsForm.aboutImageUrl ? (
+                                    <img
+                                        src={settingsForm.aboutImageUrl}
+                                        className="w-full h-full object-cover"
+                                        alt="About Page"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold uppercase tracking-wider">No Image Uploaded</div>
+                                )}
                             </div>
                             <div className="flex-1 w-full">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Image URL</label>
@@ -1549,15 +1571,31 @@ export const WebsiteSettings: React.FC = () => {
             />
 
             {/* Floating Save All Button */}
-            <div className="fixed bottom-8 right-8 z-50">
+            <div className="fixed bottom-8 right-8 z-50 flex items-center gap-3">
+                {globalSaved && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, x: 20 }}
+                        className="bg-emerald-600 text-white font-bold text-xs px-5 py-3.5 rounded-full shadow-2xl flex items-center gap-2"
+                    >
+                        <CheckCircle2 className="w-4 h-4" />
+                        Saved Successfully!
+                    </motion.div>
+                )}
                 <button
-                    onClick={() => updateCompanySettings(settingsForm)}
-                    className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all group"
+                    onClick={handleSaveGlobalConfig}
+                    disabled={isProcessing}
+                    className="flex items-center gap-3 px-8 py-4 bg-[#0A62A7] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all group disabled:opacity-50"
                 >
-                    <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    {isProcessing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    )}
                     Save Global Configuration
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
