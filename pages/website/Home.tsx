@@ -44,20 +44,20 @@ export const Home: React.FC = () => {
   const hiddenProducts = companySettings.hiddenProducts || [];
   const partners = companySettings.partners || {};
 
+  // Hero Video Playlist Logic
+  const activePlaylist = (companySettings.heroVideoPlaylist || []).filter(Boolean);
+  const playlist = activePlaylist.length > 0
+    ? activePlaylist
+    : (companySettings.heroBackgroundUrl ? [companySettings.heroBackgroundUrl] : []);
+
   const isDirectMp4 = Boolean(
     companySettings.heroBackgroundUrl?.match(/\.(mp4|webm|mov)(\?.*)?$/i) || 
-    companySettings.heroBackgroundUrl?.startsWith('data:video')
+    companySettings.heroBackgroundUrl?.startsWith('data:video') ||
+    companySettings.heroBackgroundUrl?.includes('/api/storage/')
   );
-  const isVideoType = companySettings.heroBackgroundType === "video" || isDirectMp4;
+  const isVideoType = companySettings.heroBackgroundType === "video" || playlist.length > 0 || isDirectMp4;
 
-  // Playlist Logic
-  const playlist =
-    companySettings.heroVideoPlaylist &&
-      companySettings.heroVideoPlaylist.length > 0
-      ? companySettings.heroVideoPlaylist
-      : [companySettings.heroBackgroundUrl];
-
-  const currentVideoSrc = playlist[currentVideoIndex % playlist.length] || companySettings.heroBackgroundUrl;
+  const currentVideoSrc = playlist[currentVideoIndex % (playlist.length || 1)] || companySettings.heroBackgroundUrl;
 
   const handleVideoEnded = () => {
     if (playlist.length > 1) {
@@ -72,16 +72,38 @@ export const Home: React.FC = () => {
           <>
             <video
               key={currentVideoSrc}
+              src={currentVideoSrc}
               autoPlay
               muted={isMuted}
-              className="absolute inset-0 w-full h-full object-cover"
               playsInline
               onEnded={handleVideoEnded}
               loop={playlist.length <= 1}
-            >
-              <source src={currentVideoSrc} type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-black/50 pointer-events-none"></div>
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/45 pointer-events-none"></div>
+
+            {/* Interactive Video Carousel Indicator (when multiple videos exist) */}
+            {playlist.length > 1 && (
+              <div className="absolute bottom-8 right-8 z-30 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center gap-3 shadow-2xl">
+                <span className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5">
+                  <PlayCircle size={12} className="text-blue-400 animate-pulse" /> Video { (currentVideoIndex % playlist.length) + 1 } / { playlist.length }
+                </span>
+                <div className="flex items-center gap-1.5 border-l border-white/20 pl-3">
+                  {playlist.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentVideoIndex(idx)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        (currentVideoIndex % playlist.length) === idx
+                          ? 'w-6 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]'
+                          : 'w-2 bg-white/40 hover:bg-white/70'
+                      }`}
+                      title={`Switch to Video ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         ) : companySettings.heroBackgroundType === "youtube" && youtubeId ? (
           <>
@@ -97,16 +119,15 @@ export const Home: React.FC = () => {
             <div className="absolute inset-0 bg-black/50 pointer-events-none"></div>
           </>
         ) : (
-          <div className="absolute inset-0 bg-slate-900">
+          <div className="absolute inset-0 bg-slate-950">
             {companySettings.heroBackgroundUrl && (
               <img
                 src={companySettings.heroBackgroundUrl}
-                className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay"
-                alt="Hero"
+                className="absolute inset-0 w-full h-full object-cover"
+                alt="Hero Background"
               />
             )}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-700 via-slate-900 to-black opacity-80"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-amber-500/20 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
           </div>
         )}
 

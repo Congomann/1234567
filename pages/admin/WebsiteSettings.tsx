@@ -146,8 +146,8 @@ export const WebsiteSettings: React.FC = () => {
         reader.readAsDataURL(file);
     };
 
-    // Handle File Upload via FileReader with Duration Check
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle File Upload via FileReader with Duration Check & Slot Support
+    const handleFileUploadForSlot = (e: React.ChangeEvent<HTMLInputElement>, slotIndex?: number) => {
         setUploadError('');
         const file = e.target.files?.[0];
         if (file) {
@@ -164,11 +164,23 @@ export const WebsiteSettings: React.FC = () => {
                     console.error("Upload server call failed, using local base64:", err);
                 }
 
-                const updatedSettings = {
+                let newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
+                if (typeof slotIndex === 'number') {
+                    newPlaylist[slotIndex] = targetUrl;
+                } else if (isVideo) {
+                    if (!newPlaylist.includes(targetUrl)) {
+                        newPlaylist.push(targetUrl);
+                    }
+                }
+                newPlaylist = newPlaylist.slice(0, 3).filter(Boolean);
+
+                const updatedSettings: CompanySettings = {
                     ...settingsForm,
-                    heroBackgroundUrl: targetUrl,
-                    heroBackgroundType: (isVideo ? 'video' : 'image') as 'video' | 'image' | 'youtube'
+                    heroBackgroundUrl: isVideo ? (newPlaylist[0] || targetUrl) : targetUrl,
+                    heroBackgroundType: (isVideo ? 'video' : 'image'),
+                    heroVideoPlaylist: isVideo ? newPlaylist : settingsForm.heroVideoPlaylist
                 };
+
                 setSettingsForm(updatedSettings);
                 const savedOk = await updateCompanySettings(updatedSettings);
                 if (savedOk) {
@@ -178,6 +190,26 @@ export const WebsiteSettings: React.FC = () => {
                 setIsUploading(false);
             };
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleFileUploadForSlot(e);
+    };
+
+    const handleRemoveVideoSlot = async (index: number) => {
+        const newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
+        newPlaylist.splice(index, 1);
+        const updatedSettings: CompanySettings = {
+            ...settingsForm,
+            heroVideoPlaylist: newPlaylist,
+            heroBackgroundUrl: newPlaylist[0] || ''
+        };
+        setSettingsForm(updatedSettings);
+        const savedOk = await updateCompanySettings(updatedSettings);
+        if (savedOk) {
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
         }
     };
 
@@ -898,50 +930,91 @@ export const WebsiteSettings: React.FC = () => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col gap-3">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Direct MP4 Video Source URL</label>
-
-                                        <div className="relative">
-                                            <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
-                                            <input
-                                                type="text"
-                                                className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent font-mono"
-                                                placeholder="Paste MP4 Video URL (e.g. https://domain.com/video.mp4)"
-                                                value={settingsForm.heroBackgroundUrl || ''}
-                                                onChange={e => setSettingsForm({ ...settingsForm, heroBackgroundUrl: e.target.value, heroBackgroundType: 'video' })}
-                                            />
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                Hero MP4 Video Playlist (Up to 3 Videos in Infinite Rotation)
+                                            </label>
+                                            <span className="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                                {(settingsForm.heroVideoPlaylist || []).filter(Boolean).length} / 3 Videos Active
+                                            </span>
                                         </div>
 
-                                        {/* Video Preview Box */}
-                                        {settingsForm.heroBackgroundUrl && (
-                                            <div className="mt-2 rounded-2xl overflow-hidden border border-slate-200 bg-black aspect-video relative group">
-                                                <video
-                                                    key={settingsForm.heroBackgroundUrl}
-                                                    src={settingsForm.heroBackgroundUrl}
-                                                    controls
-                                                    autoPlay
-                                                    muted
-                                                    loop
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-wider">
-                                                    Live Hero MP4 Preview
-                                                </div>
-                                            </div>
-                                        )}
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {[0, 1, 2].map((slotIdx) => {
+                                                const videoUrl = settingsForm.heroVideoPlaylist?.[slotIdx] || (slotIdx === 0 ? settingsForm.heroBackgroundUrl : '');
+                                                return (
+                                                    <div key={slotIdx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3 relative">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                                                <VideoIcon className="h-4 w-4 text-blue-600" />
+                                                                Video Slot {slotIdx + 1} {slotIdx === 0 && "(Primary)"}
+                                                            </span>
+                                                            {videoUrl && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveVideoSlot(slotIdx)}
+                                                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
+                                                                    title="Remove Video"
+                                                                >
+                                                                    <Trash2 className="h-3.5 w-3.5" /> Remove
+                                                                </button>
+                                                            )}
+                                                        </div>
 
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <span className="text-xs font-bold text-slate-400 uppercase">OR Upload Video File</span>
-                                            <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 bg-white border border-dashed border-slate-300 rounded-xl py-2.5 hover:bg-slate-50 hover:border-blue-300 transition-all group relative">
-                                                <Upload className="h-4 w-4 text-slate-400 group-hover:text-blue-500" />
-                                                <span className="text-sm text-slate-600 group-hover:text-blue-600 font-medium">Upload Local MP4 File</span>
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="video/mp4,video/webm"
-                                                    onChange={handleFileUpload}
-                                                />
-                                            </label>
+                                                        {videoUrl ? (
+                                                            <div className="rounded-xl overflow-hidden bg-black aspect-video relative border border-slate-200 max-h-48">
+                                                                <video
+                                                                    key={videoUrl}
+                                                                    src={videoUrl}
+                                                                    controls
+                                                                    muted
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-full text-white text-[9px] font-bold uppercase tracking-wider">
+                                                                    Slot {slotIdx + 1} Live Preview
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="h-24 bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400 text-xs font-semibold">
+                                                                Empty Video Slot {slotIdx + 1}
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex flex-col md:flex-row gap-3">
+                                                            <input
+                                                                type="text"
+                                                                className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                                                placeholder={`Video ${slotIdx + 1} MP4 URL or Storage Link`}
+                                                                value={videoUrl || ''}
+                                                                onChange={(e) => {
+                                                                    const newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
+                                                                    newPlaylist[slotIdx] = e.target.value;
+                                                                    const cleanPlaylist = newPlaylist.slice(0, 3);
+                                                                    const updated = {
+                                                                        ...settingsForm,
+                                                                        heroVideoPlaylist: cleanPlaylist,
+                                                                        heroBackgroundUrl: cleanPlaylist[0] || e.target.value,
+                                                                        heroBackgroundType: 'video' as const
+                                                                    };
+                                                                    setSettingsForm(updated);
+                                                                    updateCompanySettings(updated);
+                                                                }}
+                                                            />
+                                                            <label className="cursor-pointer flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-600 border border-slate-300 hover:border-blue-300 px-4 py-2 rounded-xl transition-all font-medium text-xs">
+                                                                <Upload className="h-4 w-4 text-blue-500" />
+                                                                <span>Upload Local MP4</span>
+                                                                <input
+                                                                    type="file"
+                                                                    className="hidden"
+                                                                    accept="video/mp4,video/webm,video/mov"
+                                                                    onChange={(e) => handleFileUploadForSlot(e, slotIdx)}
+                                                                />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
