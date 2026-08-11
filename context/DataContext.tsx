@@ -400,7 +400,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user, pushNotification]);
 
   const refreshActiveData = async (activeUser?: User | null) => {
-    const targetUser = activeUser || user;
+    const targetUser = activeUser !== undefined ? activeUser : user;
+    if (!targetUser) return;
     
     const wrapped = async (fn: () => Promise<any>, setter: (val: any) => void) => {
       try {
