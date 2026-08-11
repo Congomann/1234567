@@ -327,14 +327,7 @@ VALUES ('main', '{
   "heroSubtitle": "New Holland Financial Group provides comprehensive insurance and financial solutions.",
   "heroBackgroundType": "image",
   "heroBackgroundUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070",
-  "partners": {
-    "Root Insurance": "root.com",
-    "Aflac": "aflac.com",
-    "Transamerica": "transamerica.com",
-    "Combined Insurance": "combinedinsurance.com",
-    "Geico": "geico.com",
-    "Securico Life": "securico.com"
-  },
+  "partners": {},
   "partnerMarqueeSpeed": 30
 }')
 ON CONFLICT (id) DO NOTHING;

@@ -242,7 +242,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const cached = localStorage.getItem('nhfg_company_settings');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed === 'object' && parsed.heroBackgroundUrl) return parsed;
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) return parsed;
       }
     } catch (e) {}
     return {
