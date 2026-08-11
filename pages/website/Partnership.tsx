@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useData } from "../../context/DataContext";
 import { 
   Briefcase, 
   Globe, 
@@ -25,22 +26,15 @@ import {
   Check,
   ChevronRight,
   Layers,
-  BarChart3
+  BarChart3,
+  Settings
 } from "lucide-react";
 import { SEO } from "../../components/SEO";
 import { Backend } from "../../services/apiBackend";
 
-interface CarrierPartner {
-  name: string;
-  category: 'life' | 'real-estate' | 'mortgage-wealth' | 'logistics';
-  rating: string;
-  products: string[];
-  statesCovered: number;
-  logoBadge: string;
-}
-
 export const Partnership: React.FC = () => {
   const navigate = useNavigate();
+  const { companySettings } = useData();
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'all' | 'life' | 'real-estate' | 'mortgage-wealth' | 'logistics'>('all');
   
@@ -73,30 +67,14 @@ export const Partnership: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Verified Institutional Carrier Partners
-  const carriers: CarrierPartner[] = [
-    { name: 'Lincoln Financial Group', category: 'life', rating: 'A+ (Superior)', products: ['Universal Life', 'Indexed Universal Life (IUL)', 'Fixed Annuities'], statesCovered: 50, logoBadge: 'LFG' },
-    { name: 'Prudential Financial', category: 'life', rating: 'A+ (Superior)', products: ['Term Life', 'Whole Life', 'Executive Benefits'], statesCovered: 50, logoBadge: 'PRU' },
-    { name: 'Mutual of Omaha', category: 'life', rating: 'A+ (Superior)', products: ['Final Expense', 'Term Life', 'Disability Income'], statesCovered: 50, logoBadge: 'MOO' },
-    { name: 'Protective Life', category: 'life', rating: 'A+ (Superior)', products: ['Indexed Annuities', 'Term Life', 'UL'], statesCovered: 50, logoBadge: 'PRO' },
-    { name: 'Pacific Life', category: 'life', rating: 'A+ (Superior)', products: ['IUL Accumulator', 'Variable Annuities', 'Structured Wealth'], statesCovered: 50, logoBadge: 'PAC' },
-    
-    { name: 'First American Title', category: 'real-estate', rating: 'A (Excellent)', products: ['Commercial Title Insurance', 'Escrow Services', 'Property Verification'], statesCovered: 50, logoBadge: 'FAT' },
-    { name: 'Old Republic National Title', category: 'real-estate', rating: 'A+ (Superior)', products: ['Residential Escrow', 'Land Title Guarantee', 'REO Closing'], statesCovered: 49, logoBadge: 'ORT' },
-    { name: 'DSM Property Solutions', category: 'real-estate', rating: 'Certified Partner', products: ['Renovation & Roofing', 'Plumbing & Mechanical', 'Asset Turnover'], statesCovered: 12, logoBadge: 'DSM' },
-
-    { name: 'Fidelity Clearing & Custody', category: 'mortgage-wealth', rating: 'A+ (Superior)', products: ['Institutional Clearing', 'Custodial Accounts', 'Wealth APIs'], statesCovered: 50, logoBadge: 'FCC' },
-    { name: 'Charles Schwab Advisor Services', category: 'mortgage-wealth', rating: 'A+ (Superior)', products: ['Series Licensing Clearing', 'Fiduciary Asset Management', 'RIA Custody'], statesCovered: 50, logoBadge: 'SCH' },
-    { name: 'NMLS Institutional Lenders Network', category: 'mortgage-wealth', rating: 'Federal NMLS', products: ['Conventional Mortgage', 'Jumbo Loans', 'Cash-Out Refinance'], statesCovered: 48, logoBadge: 'NMLS' },
-
-    { name: 'C.H. Robinson Worldwide', category: 'logistics', rating: 'Tier-1 Freight Network', products: ['FTL / LTL Brokerage', 'Reefer Logistics', 'Intermodal Supply Chain'], statesCovered: 50, logoBadge: 'CHR' },
-    { name: 'Knight-Swift Transportation', category: 'logistics', rating: 'Tier-1 Carrier Network', products: ['Dedicated Fleet Dispatch', 'Dry Van Logistics', 'Cross-Border Freight'], statesCovered: 50, logoBadge: 'KST' },
-    { name: 'Landstar System Logistics', category: 'logistics', rating: 'Tier-1 Carrier Network', products: ['Heavy Haul Freight', 'Hazmat Transportation', 'Owner-Operator Dispatch'], statesCovered: 50, logoBadge: 'LST' },
-  ];
-
-  const filteredCarriers = activeCategory === 'all' 
-    ? carriers 
-    : carriers.filter(c => c.category === activeCategory);
+  // Admin Configured Dynamic Carrier Partners
+  const adminPartners = Object.entries(companySettings.partners || {}).map(([name, url]) => ({
+    name,
+    logoUrl: (url as string).startsWith('http') || (url as string).startsWith('data:') ? (url as string) : `https://logo.clearbit.com/${url}`,
+    domain: url as string,
+    rating: 'Admin Verified Partner',
+    statesCovered: 50
+  }));
 
   // Live API Sandbox Execution Handler
   const handleExecuteApiSandbox = async () => {
@@ -308,45 +286,61 @@ export const Partnership: React.FC = () => {
             </div>
           </div>
 
-          {/* Carrier Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCarriers.map((c, i) => (
-              <div key={i} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black text-xs tracking-wider">
-                      {c.logoBadge}
+          {/* Dynamic Admin Carrier Cards Grid */}
+          {adminPartners.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminPartners.map((c, i) => (
+                <div key={i} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center p-2 border border-slate-200 overflow-hidden">
+                        <img
+                          src={c.logoUrl}
+                          alt={c.name}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        <span className="font-bold text-slate-800 text-xs hidden">{c.name.substring(0, 3).toUpperCase()}</span>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                        <CheckCircle2 size={12} /> {c.rating}
+                      </span>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
-                      <CheckCircle2 size={12} /> {c.rating}
+
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{c.name}</h3>
+                    <p className="text-xs text-slate-500 mb-4 truncate font-mono">{c.domain}</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <Globe size={14} className="text-blue-600" /> 50 States Active
+                    </span>
+                    <span className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1" onClick={() => setShowDemoModal(true)}>
+                      API Quoting <ChevronRight size={12} />
                     </span>
                   </div>
-
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{c.name}</h3>
-                  
-                  <div className="space-y-1.5 mb-6">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Contracted Products:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {c.products.map((p, idx) => (
-                        <span key={idx} className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold">
-                          {p}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
-                  <span className="flex items-center gap-1.5 text-slate-600">
-                    <Globe size={14} className="text-blue-600" /> {c.statesCovered} States Active
-                  </span>
-                  <span className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1" onClick={() => setShowDemoModal(true)}>
-                    API Quoting <ChevronRight size={12} />
-                  </span>
-                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center max-w-2xl mx-auto">
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                <Handshake size={28} />
               </div>
-            ))}
-          </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Admin-Managed Carrier Directory</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                Official insurance carriers, title agencies, lender networks, and logistics partners are managed exclusively by Admin accounts. Log in to the Admin Terminal to configure active partner contracts.
+              </p>
+              <Link
+                to="/crm/admin/website"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0B2240] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md"
+              >
+                <Settings size={14} /> Open Admin Partner CMS
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 

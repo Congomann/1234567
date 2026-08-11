@@ -168,54 +168,32 @@ export const Home: React.FC = () => {
               </h2>
             </div>
             
+          {Object.keys(partners).length > 0 && (
             <div className="w-full relative flex items-center px-4 overflow-hidden mask-edges pb-10">
               <div
                 className="flex w-max hover:[animation-play-state:paused] gap-16 px-8"
                 style={{ animation: `partnerMarquee ${companySettings.partnerMarqueeSpeed || 30}s linear infinite` }}
               >
-                {/* Render the list 3 times to ensure looping seamlessly fills screen */}
-                {[...Object.entries(Object.keys(partners).length > 0 ? partners : {
-                  "Acme Corp": "https://logo.clearbit.com/acme.com",
-                  "Globex": "https://logo.clearbit.com/globex.com",
-                  "Soylent": "https://logo.clearbit.com/soylent.com",
-                  "Initech": "https://logo.clearbit.com/initech.com"
-                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
-                  "Acme Corp": "https://logo.clearbit.com/acme.com",
-                  "Globex": "https://logo.clearbit.com/globex.com",
-                  "Soylent": "https://logo.clearbit.com/soylent.com",
-                  "Initech": "https://logo.clearbit.com/initech.com"
-                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
-                  "Acme Corp": "https://logo.clearbit.com/acme.com",
-                  "Globex": "https://logo.clearbit.com/globex.com",
-                  "Soylent": "https://logo.clearbit.com/soylent.com",
-                  "Initech": "https://logo.clearbit.com/initech.com"
-                }), ...Object.entries(Object.keys(partners).length > 0 ? partners : {
-                  "Acme Corp": "https://logo.clearbit.com/acme.com",
-                  "Globex": "https://logo.clearbit.com/globex.com",
-                  "Soylent": "https://logo.clearbit.com/soylent.com",
-                  "Initech": "https://logo.clearbit.com/initech.com"
-                })].map(([name, url], idx) => (
+                {[...Object.entries(partners), ...Object.entries(partners), ...Object.entries(partners)].map(([name, url], idx) => (
                   <div key={`${name}-${idx}`} className="h-16 flex-shrink-0 flex items-center justify-center transition-all opacity-70 hover:opacity-100 grayscale hover:grayscale-0">
                     <img
                       src={
-                        (url as string).startsWith("http") ||
-                          (url as string).startsWith("data:")
-                          ? url
-                          : (url as string).startsWith("/") 
-                            ? url 
-                            : `https://logo.clearbit.com/${url}`
+                        (url as string).startsWith('http') || (url as string).startsWith('data:')
+                          ? (url as string)
+                          : `https://logo.clearbit.com/${url}`
                       }
                       alt={name}
-                      className="h-full object-contain max-w-[150px]"
-                      title={name}
+                      className="h-9 object-contain"
                       onError={(e) => {
-                        e.currentTarget.style.display = "none";
+                        e.currentTarget.style.display = 'none';
                       }}
                     />
+                    <span className="text-white text-xs font-bold ml-2">{name}</span>
                   </div>
                 ))}
               </div>
             </div>
+          )}
             <style dangerouslySetInnerHTML={{
               __html: `
               .mask-edges {
