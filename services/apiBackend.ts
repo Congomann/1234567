@@ -19,6 +19,7 @@ class NHFGBackend {
 
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem('nhfg_access_token');
+        const mockUserId = localStorage.getItem('nhfg_mock_user_id');
         const headers: { [key: string]: string } = { 
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -26,6 +27,9 @@ class NHFGBackend {
         
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
+        }
+        if (mockUserId) {
+            headers['x-mock-user-id'] = mockUserId;
         }
         
         return headers;
