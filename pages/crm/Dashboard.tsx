@@ -9,6 +9,7 @@ import {
   Clock, CheckSquare
 } from 'lucide-react';
 import { UserRole, TaskPriority } from '../../types';
+import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 interface LiveEvent {
   id: string;
@@ -162,73 +163,14 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 3D VIBRANT ANIMATED BANNER CARDS (MATCHING USER SCREENSHOT CONCEPT) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        
-        {/* 1. Cyan Gradient Weekly Balance Card */}
-        <div 
-          onClick={() => navigate('/crm/securities')}
-          className="gradient-cyan-card p-8 rounded-[2.5rem] shadow-2xl apple-3d-card cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[190px]"
-        >
-          <div className="relative z-10">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-900/80 block mb-1">Weekly Portfolio Balance</span>
-            <p className="text-4xl font-black text-slate-950 tracking-tight">$142.8M</p>
-            <span className="text-xs font-extrabold text-slate-900/90 hover:underline mt-2 inline-flex items-center gap-1">
-              View entire list <ArrowUpRight className="w-4 h-4" />
-            </span>
-          </div>
-
-          {/* 3D Floating Asset Illustration */}
-          <div className="absolute right-4 bottom-2 w-28 h-28 pointer-events-none animate-float-3d">
-            <div className="w-full h-full bg-white/20 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl flex items-center justify-center text-4xl">
-              💰
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Yellow Gradient Orders / Applications In Line Card */}
-        <div 
-          onClick={() => navigate('/crm/leads')}
-          className="gradient-yellow-card p-8 rounded-[2.5rem] shadow-2xl apple-3d-card cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[190px]"
-        >
-          <div className="relative z-10">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-900/80 block mb-1">Applications In Line</span>
-            <p className="text-4xl font-black text-slate-950 tracking-tight">750</p>
-            <span className="text-xs font-extrabold text-slate-900/90 hover:underline mt-2 inline-flex items-center gap-1">
-              View entire list <ArrowUpRight className="w-4 h-4" />
-            </span>
-          </div>
-
-          {/* 3D Floating Asset Illustration */}
-          <div className="absolute right-4 bottom-2 w-28 h-28 pointer-events-none animate-float-3d" style={{ animationDelay: '1s' }}>
-            <div className="w-full h-full bg-white/20 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl flex items-center justify-center text-4xl">
-              📱
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Pink/Purple Gradient New Clients Card */}
-        <div 
-          onClick={() => navigate('/crm/admin')}
-          className="gradient-pink-card p-8 rounded-[2.5rem] shadow-2xl apple-3d-card cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[190px]"
-        >
-          <div className="relative z-10">
-            <span className="text-xs font-black uppercase tracking-wider text-white/80 block mb-1">New HNW Clients</span>
-            <p className="text-4xl font-black text-white tracking-tight">150</p>
-            <span className="text-xs font-extrabold text-white hover:underline mt-2 inline-flex items-center gap-1">
-              View entire list <ArrowUpRight className="w-4 h-4" />
-            </span>
-          </div>
-
-          {/* 3D Floating Character Avatar */}
-          <div className="absolute right-4 bottom-2 w-28 h-28 pointer-events-none animate-float-3d" style={{ animationDelay: '2s' }}>
-            <div className="w-full h-full bg-white/20 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl flex items-center justify-center text-4xl">
-              🦸‍♀️
-            </div>
-          </div>
-        </div>
-
-      </div>
+      {/* ── 3D VIBRANT ANIMATED BANNER CARDS ── */}
+      <Tab3DBanner
+        cards={[
+          { title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" },
+          { title: "Applications In Line", value: "750", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
+          { title: "New HNW Clients", value: "150", subtitle: "Q3 Onboarded Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
+        ]}
+      />
 
       {/* ── LIVE REAL-TIME CRM EVENT STREAM ("WHAT'S HAPPENING NOW") ── */}
       <div className="apple-glass rounded-[2.5rem] p-8 mb-10 border border-white/80 shadow-2xl">

@@ -296,7 +296,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Listed By</p>
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200" alt="Agent" className="w-full h-full object-cover" />
+                        <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(property.sellerName || 'New Holland Agent')}&background=0A62A7&color=fff`} alt="Agent" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="font-bold text-slate-900">{property.sellerName || 'New Holland Agent'}</p>

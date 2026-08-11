@@ -200,7 +200,7 @@ export const RealEstate: React.FC = () => {
                 <div className="absolute -inset-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-[4rem] opacity-20 blur-2xl group-hover:opacity-30 transition-opacity"></div>
                 <div className="relative rounded-[3.5rem] overflow-hidden shadow-2xl h-[500px]">
                   <img
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200"
+                    src="/assets/products/realestate.png"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                     alt="Luxury Estate"
                   />
@@ -472,8 +472,8 @@ export const RealEstate: React.FC = () => {
                 </div>
               </div>
               <div className="relative rounded-[4rem] overflow-hidden shadow-3xl h-[600px] border-[16px] border-white">
-                 <img
-                    src="https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&q=80&w=1200"
+                  <img
+                    src="/assets/products/property.png"
                     className="w-full h-full object-cover"
                     alt="Legacy Building"
                   />
@@ -808,7 +808,7 @@ export const RealEstate: React.FC = () => {
               </div>
               <div className="bg-slate-200 rounded-[4rem] h-[500px] overflow-hidden shadow-2xl relative group">
                 <img
-                  src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=1000"
+                  src="/assets/products/dsm.png"
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                   alt="Team"
                 />

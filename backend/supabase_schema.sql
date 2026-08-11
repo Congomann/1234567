@@ -325,8 +325,8 @@ VALUES ('main', '{
   "zip": "10001",
   "heroTitle": "Securing Your Future, Protecting Your Legacy.",
   "heroSubtitle": "New Holland Financial Group provides comprehensive insurance and financial solutions.",
-  "heroBackgroundType": "image",
-  "heroBackgroundUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070",
+  "heroBackgroundType": "video",
+  "heroBackgroundUrl": "",
   "partners": {},
   "partnerMarqueeSpeed": 30
 }')

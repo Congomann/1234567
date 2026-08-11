@@ -423,11 +423,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const currentIds = s.customProducts.map(p => p.id);
           
           if (!currentIds.includes('property-insurance')) {
-            s.customProducts.push({ id: 'property-insurance', title: 'Property Insurance', description: "Safeguard your most valuable assets with our robust property insurance packages.", features: ['Homeowners', 'Renters', 'Commercial Property', 'Flood & Earthquake'], image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'Building2', color: 'indigo', link: '/property-insurance', isHidden: false, order: 7 });
+            s.customProducts.push({ id: 'property-insurance', title: 'Property Insurance', description: "Safeguard your most valuable assets with our robust property insurance packages.", features: ['Homeowners', 'Renters', 'Commercial Property', 'Flood & Earthquake'], image: "/assets/products/property.png", icon: 'Building2', color: 'indigo', link: '/property-insurance', isHidden: false, order: 7 });
             updated = true;
           }
           if (!currentIds.includes('dsm-property-solutions')) {
-            s.customProducts.push({ id: 'dsm-property-solutions', title: 'DSM Property Solutions', description: "Expert property solutions to keep your assets in pristine condition inside and out.", features: ['Roofing & Renovation', 'Plumbing & Drywall', 'Pressure Washing', 'Lawnscaping'], image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80", icon: 'HomeIcon', color: 'orange', link: '/dsm-property-solutions', isHidden: false, order: 8 });
+            s.customProducts.push({ id: 'dsm-property-solutions', title: 'DSM Property Solutions', description: "Expert property solutions to keep your assets in pristine condition inside and out.", features: ['Roofing & Renovation', 'Plumbing & Drywall', 'Pressure Washing', 'Lawnscaping'], image: "/assets/products/dsm.png", icon: 'HomeIcon', color: 'orange', link: '/dsm-property-solutions', isHidden: false, order: 8 });
             updated = true;
           }
           

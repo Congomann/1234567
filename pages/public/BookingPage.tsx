@@ -66,7 +66,7 @@ export const BookingPage: React.FC = () => {
         phone: '(717) 847-9638',
         role: 'Advisor' as const,
         advisorCategory: 'Real Estate & Insurance',
-        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+          avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
         active: true
       }];
     }
@@ -93,7 +93,7 @@ export const BookingPage: React.FC = () => {
           phone: '(717) 847-9638',
           role: 'Advisor' as any,
           advisorCategory: 'Real Estate & Insurance Advisor',
-          avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+            avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
           active: true
         });
       }
@@ -105,7 +105,7 @@ export const BookingPage: React.FC = () => {
         phone: '(717) 847-9638',
         role: 'Advisor' as any,
         advisorCategory: 'Real Estate & Insurance Advisor',
-        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+          avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
         active: true
       });
     }
@@ -256,7 +256,7 @@ export const BookingPage: React.FC = () => {
                   <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">Selected Advisor</span>
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
                     <img
-                      src={selectedAdvisor.avatar || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400'}
+                      src={selectedAdvisor.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedAdvisor.name)}&background=0A62A7&color=fff`}
                       alt={selectedAdvisor.name}
                       className="w-14 h-14 rounded-full object-cover border-2 border-blue-500/50 shadow-md"
                     />
@@ -330,7 +330,7 @@ export const BookingPage: React.FC = () => {
                               : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                           }`}
                         >
-                          <img src={adv.avatar || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400'} alt={adv.name} className="w-10 h-10 rounded-full object-cover" />
+                          <img src={adv.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adv.name)}&background=0A62A7&color=fff`} alt={adv.name} className="w-10 h-10 rounded-full object-cover" />
                           <div className="overflow-hidden">
                             <span className="font-bold text-xs block text-white truncate">{adv.name}</span>
                             <span className="text-[10px] text-slate-400 block truncate">{adv.advisorCategory || adv.role}</span>

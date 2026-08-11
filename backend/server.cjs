@@ -1978,62 +1978,38 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     ]);
 
     res.status(200).json({ id: result.rows[0].id, success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.put('/api/events/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, date, time, endTime, type, status, description, hasGoogleMeet, meetingLink, participants } = req.body;
-
-    const updateQuery = `
-      UPDATE events SET
-        title = $1, date = $2, time = $3, end_time = $4, type = $5, status = $6, description = $7, 
-        has_google_meet = $8, meeting_link = $9, participants = $10, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $11
-    `;
-
-    await pool.query(updateQuery, [
-      title, date, time, endTime, type, status, description,
-      hasGoogleMeet, meetingLink, JSON.stringify(participants || []), id
-    ]);
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/events/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    await pool.query('DELETE FROM events WHERE id = $1', [id]);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 6. Content Management System (Settings & Workflows)
 app.get('/api/settings', async (req, res) => {
   try {
+    let settingsData = null;
     const pgResult = await pool.query("SELECT data FROM company_settings WHERE id = 'main'");
     if (pgResult.rows.length > 0 && pgResult.rows[0].data) {
-      return res.json([pgResult.rows[0].data]);
-    }
-    const { data } = await supabase
-      .from('company_settings')
-      .select('data')
-      .eq('id', 'main')
-      .single();
-
-    if (data && data.data) {
-      res.json([data.data]);
+      settingsData = pgResult.rows[0].data;
     } else {
-      res.json([]);
+      const { data } = await supabase
+        .from('company_settings')
+        .select('data')
+        .eq('id', 'main')
+        .single();
+      if (data && data.data) {
+        settingsData = data.data;
+      }
     }
+
+    if (settingsData) {
+      if (settingsData.heroBackgroundUrl && settingsData.heroBackgroundUrl.includes('unsplash.com')) {
+        settingsData.heroBackgroundUrl = '';
+      }
+      if (Array.isArray(settingsData.customProducts)) {
+        settingsData.customProducts = settingsData.customProducts.map(p => {
+          if (p.image && p.image.includes('unsplash.com')) {
+            return { ...p, image: `/assets/products/${p.id || 'life'}.png` };
+          }
+          return p;
+        });
+      }
+      return res.json([settingsData]);
+    }
+    res.json([]);
   } catch (err) {
     console.error('Settings GET Error:', err);
     res.json([]);
@@ -2048,6 +2024,9 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
   }
   try {
     const settings = req.body;
+    if (settings.heroBackgroundUrl && settings.heroBackgroundUrl.includes('unsplash.com')) {
+      settings.heroBackgroundUrl = '';
+    }
     try {
       await pool.query(
         `INSERT INTO company_settings (id, data, updated_at)
@@ -2112,8 +2091,8 @@ const defaultCuratedResources = [
     id: 'res-1',
     title: '2026 Fleet Expansion & Tax Depreciation Strategy',
     type: 'PDF',
-    url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
+    url: '/assets/products/logistics.png',
+    thumbnail: '/assets/products/logistics.png',
     description: 'Comprehensive guide to leveraging Section 179 tax deductions for equipment and logistics fleet purchases.',
     content: 'Section 179 of the IRS tax code allows businesses to deduct the full purchase price of qualifying equipment and fleet vehicles purchased or financed during the tax year. This guide breaks down maximum limits, bonus depreciation rules, and real-world calculation examples for fleet operators and trucking enterprise owners.',
     likes: 24,
@@ -2130,7 +2109,7 @@ const defaultCuratedResources = [
     title: 'Real Estate Portfolio Diversification Masterclass',
     type: 'YouTube',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
+    thumbnail: '/assets/products/realestate.png',
     description: 'Learn how high-net-worth investors structure commercial real estate syndications and debt fund yields.',
     content: 'In this video masterclass, senior financial advisors break down risk-adjusted return profiles across commercial, multi-family, and industrial logistics real estate. Discover key metrics including IRR, Equity Multiple, and Debt Service Coverage Ratio (DSCR).',
     likes: 42,
@@ -2145,7 +2124,7 @@ const defaultCuratedResources = [
     title: 'Automated ACH Risk Mitigation & Plaid Bank Verification',
     type: 'Article',
     url: 'https://plaid.com/docs/auth/',
-    thumbnail: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80',
+    thumbnail: '/assets/products/securities.png',
     description: 'Prevent draft returns and verify client account ownership automatically using Plaid Auth.',
     content: 'Draft returns cost financial institutions and lenders millions annually in administrative fees. By integrating real-time Plaid Auth, routing numbers and account balances are verified directly against account-holder bank records before executing direct debits.',
     likes: 31,

@@ -96,7 +96,7 @@ export const PropertyPipeline: React.FC = () => {
                     <div key={prop.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden hover:shadow-lg transition-all flex flex-col group">
                         <div className="h-48 bg-slate-200 relative overflow-hidden">
                             <img 
-                                src={prop.image || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800'} 
+                                src={prop.image || '/assets/products/realestate.png'} 
                                 alt={prop.address} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                             />

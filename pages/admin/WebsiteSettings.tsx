@@ -35,12 +35,20 @@ export const WebsiteSettings: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
-        setSettingsForm(companySettings);
+        const cleaned = { ...companySettings };
+        if (cleaned.heroBackgroundUrl && cleaned.heroBackgroundUrl.includes('unsplash.com')) {
+            cleaned.heroBackgroundUrl = '';
+        }
+        setSettingsForm(cleaned);
     }, [companySettings]);
 
     const handleSettingsSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        const success = await updateCompanySettings(settingsForm);
+        const cleaned = { ...settingsForm };
+        if (cleaned.heroBackgroundUrl && cleaned.heroBackgroundUrl.includes('unsplash.com')) {
+            cleaned.heroBackgroundUrl = '';
+        }
+        const success = await updateCompanySettings(cleaned);
         if (success) {
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 3000);
@@ -148,23 +156,24 @@ export const WebsiteSettings: React.FC = () => {
             const reader = new FileReader();
             reader.onloadend = async () => {
                 const base64 = reader.result as string;
+                let targetUrl = base64;
                 try {
                     const storageUrl = await Backend.uploadFile(file.name, base64);
-                    if (settingsForm.heroBackgroundType === 'video' && isVideo) {
-                        setSettingsForm(prev => ({
-                            ...prev,
-                            heroVideoPlaylist: [...(prev.heroVideoPlaylist || []), storageUrl]
-                        }));
-                    } else {
-                        setSettingsForm(prev => ({
-                            ...prev,
-                            heroBackgroundUrl: storageUrl,
-                            heroBackgroundType: isVideo ? 'video' : 'image'
-                        }));
-                    }
+                    if (storageUrl) targetUrl = storageUrl;
                 } catch (err) {
-                    console.error("Upload failed:", err);
-                    readFile(file, isVideo); // Fallback to base64
+                    console.error("Upload server call failed, using local base64:", err);
+                }
+
+                const updatedSettings = {
+                    ...settingsForm,
+                    heroBackgroundUrl: targetUrl,
+                    heroBackgroundType: (isVideo ? 'video' : 'image') as 'video' | 'image' | 'youtube'
+                };
+                setSettingsForm(updatedSettings);
+                const savedOk = await updateCompanySettings(updatedSettings);
+                if (savedOk) {
+                    setIsSaved(true);
+                    setTimeout(() => setIsSaved(false), 3000);
                 }
                 setIsUploading(false);
             };
