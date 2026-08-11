@@ -10,13 +10,13 @@ export const SystemStatus: React.FC = () => {
   const { companySettings } = useData();
   
   // Logic: Show if settings explicitly enable it, or fallback to a local constant
+  const [dismissed, setDismissed] = React.useState(false);
   const isMaintenance = companySettings?.maintenanceMode || false;
-  const message = companySettings?.maintenanceMessage || "SYSTEM MAINTENANCE IN PROGRESS: We are currently upgrading our core infrastructure to provide you with a faster, more secure experience. Some banking and advisor tools may be temporarily limited. Estimated uptime: 2:00 AM EST.";
+  const message = companySettings?.maintenanceMessage || "SYSTEM MAINTENANCE IN PROGRESS: Upgrading core infrastructure.";
 
-  // If you want to force show it for demonstration:
-  const forceShow = true; 
+  const forceShow = false; 
 
-  if (!isMaintenance && !forceShow) return null;
+  if (dismissed || (!isMaintenance && !forceShow)) return null;
 
   return (
     <div className="relative w-full bg-[#F59E0B] text-[#451A03] overflow-hidden py-1.5 border-b border-amber-600/30 shadow-md z-[10000]">

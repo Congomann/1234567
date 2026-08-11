@@ -140,16 +140,16 @@ export const useData = () => {
 };
 
 const INITIAL_USERS: User[] = [
-  { id: 'admin-main', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', onboardingCompleted: true },
-  { id: '2', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200', onboardingCompleted: true },
-  { id: '4', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true },
-  { id: '5', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true },
-  { id: '6', name: 'Marcus Mortgage', email: 'mortgage@nhfg.com', phone: '(555) 444-3333', role: UserRole.ADVISOR, category: AdvisorCategory.MORTGAGE, productsSold: [ProductType.MORTGAGE], onboardingCompleted: true, micrositeEnabled: true },
-  { id: '7', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true },
-  { id: '8', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true },
-  { id: '9', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false },
-  { id: '10', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true },
-  { id: 'logistics-lead', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' }
+  { id: 'admin-main', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
+  { id: '2', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
+  { id: '4', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '5', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '6', name: 'Marcus Mortgage', email: 'mortgage@nhfg.com', phone: '(555) 444-3333', role: UserRole.ADVISOR, category: AdvisorCategory.MORTGAGE, productsSold: [ProductType.MORTGAGE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '7', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '8', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
+  { id: '9', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, avatar: '' },
+  { id: '10', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
+  { id: 'logistics-lead', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: '' }
 ];
 
 const MOCK_TASKS: Task[] = [
