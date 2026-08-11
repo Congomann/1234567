@@ -337,6 +337,18 @@ const authenticateToken = (req, res, next) => {
       const decoded = jwt.verify(token, SECRET_KEY);
       req.user = decoded;
       req.supabaseQuery = async (table) => supabase.from(table);
+      req.dbQuery = async (text, params) => {
+        const client = await pool.connect();
+        try {
+          await client.query(
+            "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
+            [req.user.id || 'admin-main', req.user.role || 'Admin']
+          );
+          return await client.query(text, params);
+        } finally {
+          client.release();
+        }
+      };
       return next();
     } catch (err) {
       console.warn('[AUTH] Invalid JWT token, checking session fallback:', err.message);
@@ -350,31 +362,19 @@ const authenticateToken = (req, res, next) => {
     sub: 'info@newhollandfinancial.com'
   };
   req.supabaseQuery = async (table) => supabase.from(table);
-  return next();
-};
-
-    // Standard Postgres Query Helper (with RLS context)
-    req.dbQuery = async (text, params) => {
-      const client = await pool.connect();
-      try {
-        await client.query(
-          "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
-          [req.user.id, req.user.role]
-        );
-        return await client.query(text, params);
-      } finally {
-        client.release();
-      }
-    };
-
-    next();
-  } catch (err) {
-    console.error('Token verification failed:', err);
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+  req.dbQuery = async (text, params) => {
+    const client = await pool.connect();
+    try {
+      await client.query(
+        "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
+        [req.user.id, req.user.role]
+      );
+      return await client.query(text, params);
+    } finally {
+      client.release();
     }
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
+  };
+  return next();
 };
 
 // --- HELPER: WEBHOOK NORMALIZERS ---
