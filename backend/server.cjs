@@ -275,8 +275,8 @@ const logPlaidUsage = async (advisorId, action, status, metadata = {}) => {
 };
 
 const checkAdvisorBilling = async (req, res, next) => {
-  // Admins can always use Plaid (company billed)
-  if (req.user.role === 'Administrator') return next();
+  // Admins can always use Plaid (company billed) — accept both 'Admin' (mock) and 'Administrator' (real)
+  if (req.user.role === 'Administrator' || req.user.role === 'Admin' || req.user.role === 'Manager' || req.user.role === 'Sub-Admin') return next();
 
   try {
     const result = await pool.query(
@@ -3632,7 +3632,7 @@ app.post('/api/plaid/send-link', authenticateToken, checkAdvisorBilling, async (
         customMessage || null, sendVia, expiresAt, req.user?.id || null]
     );
 
-    const appUrl = process.env.APP_URL || 'http://localhost:5173';
+    const appUrl = (process.env.APP_URL || 'https://newhollandfinancial.com').replace(/\/$/, '');
     const verifyUrl = `${appUrl}/verify/${token}`;
     const advisorName = req.user?.name || req.user?.email || 'Your advisor';
 

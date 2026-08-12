@@ -7,6 +7,8 @@ import { Backend } from '../../services/apiBackend';
 import { Save, Plus, Trash2, Globe, MapPin, Phone, Mail, Link as LinkIcon, AlertCircle, Image as ImageIcon, Video as VideoIcon, Youtube, Upload, PlayCircle, BookOpen, Camera, Handshake, CheckCircle2, Loader2, Eye, EyeOff, Layout, ShieldCheck, Share2, RotateCcw, Send } from 'lucide-react';
 import ConfirmModal from '../../components/shared/ConfirmModal';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
+import { PlaidConfigPanel } from '../../components/plaid/PlaidConfigPanel';
+
 
 export const WebsiteSettings: React.FC = () => {
     const { companySettings, updateCompanySettings, resources, addResource, deleteResource } = useData();
@@ -629,57 +631,8 @@ export const WebsiteSettings: React.FC = () => {
                 </h2>
 
                 <form onSubmit={handleSettingsSave} className="space-y-6">
-                    {/* Plaid Verification Box */}
-                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-bold text-[#0B2240] uppercase tracking-wide flex items-center gap-2">
-                                <ShieldCheck className="h-4 w-4 text-emerald-600" /> Plaid Banking Integration
-                            </h3>
-                            <span className="text-[10px] uppercase font-bold tracking-wider bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">Bank Verification</span>
-                        </div>
-                        <p className="text-sm text-slate-500 mb-6">Connect your Plaid account to enable real-time bank verifications, ACH validations, and balance checks.</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Plaid Client ID</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. 69acce04b0c813000cd1ba83"
-                                    value={settingsForm.plaidClientId || ''}
-                                    onChange={e => setSettingsForm({ ...settingsForm, plaidClientId: e.target.value })}
-                                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-mono text-slate-600"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Plaid Secret</label>
-                                <input
-                                    type="password"
-                                    placeholder="•••••••••••••••••••••••••"
-                                    value={settingsForm.plaidSecret || ''}
-                                    onChange={e => setSettingsForm({ ...settingsForm, plaidSecret: e.target.value })}
-                                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-mono text-slate-600"
-                                />
-                            </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Plaid Environment</label>
-                            <select
-                                value={settingsForm.plaidEnv || 'sandbox'}
-                                onChange={e => setSettingsForm({ ...settingsForm, plaidEnv: e.target.value as any })}
-                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                            >
-                                <option value="sandbox">Sandbox (Testing / Fake Banks)</option>
-                                <option value="development">Development (Real Banks / Limited Uses)</option>
-                                <option value="production">Production (Real Banks / Live Deploy)</option>
-                            </select>
-                            {(settingsForm.plaidEnv === 'production') && (
-                                <p className="text-xs text-rose-600 font-semibold mt-2 flex items-center gap-1">
-                                    <AlertCircle size={12} /> Ensuring you are using your Production Secret when in Production mode.
-                                </p>
-                            )}
-                        </div>
-                    </div>
+                    {/* ── Plaid Banking Integration ─────────────────────────────── */}
+                    <PlaidConfigPanel settingsForm={settingsForm} setSettingsForm={setSettingsForm} />
 
                     <div className="flex justify-end pt-4 border-t border-slate-100">
                         <button
