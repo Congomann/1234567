@@ -435,3 +435,79 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE 
 -- 7. SECURITY ENHANCEMENTS (RBAC Granular)
 -- For now, we use a metadata column in users for fine-grained permissions if needed
 ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '[]'::jsonb;
+
+-- 8. MARKETING HUB PRO TABLES
+CREATE TABLE IF NOT EXISTS marketing_campaigns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Draft' CHECK (status IN ('Draft', 'Active', 'Paused', 'Completed', 'Cancelled')),
+    type VARCHAR(50) DEFAULT 'Email' CHECK (type IN ('Email', 'Social', 'Google Ads', 'Meta Ads', 'SMS', 'Multi-Channel')),
+    budget NUMERIC(12,2) DEFAULT 0,
+    spend NUMERIC(12,2) DEFAULT 0,
+    roi NUMERIC(8,2) DEFAULT 0,
+    impressions INTEGER DEFAULT 0,
+    clicks INTEGER DEFAULT 0,
+    conversions INTEGER DEFAULT 0,
+    audience_id UUID,
+    subject_line TEXT,
+    message_body TEXT,
+    target_url TEXT,
+    scheduled_at TIMESTAMP WITH TIME ZONE,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS marketing_audiences (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    size INTEGER DEFAULT 0,
+    criteria JSONB DEFAULT '{}'::jsonb,
+    source VARCHAR(100) DEFAULT 'CRM',
+    synced_to_meta BOOLEAN DEFAULT FALSE,
+    synced_to_google BOOLEAN DEFAULT FALSE,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payment_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES marketing_campaigns(id),
+    amount NUMERIC(12,2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'succeeded', 'failed', 'refunded')),
+    stripe_charge_id VARCHAR(255),
+    payment_method_last4 VARCHAR(4),
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS email_sends (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES marketing_campaigns(id),
+    audience_id UUID REFERENCES marketing_audiences(id),
+    subject_line TEXT NOT NULL,
+    message_body TEXT NOT NULL,
+    sent_count INTEGER DEFAULT 0,
+    open_count INTEGER DEFAULT 0,
+    click_count INTEGER DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'queued' CHECK (status IN ('queued', 'sending', 'sent', 'failed')),
+    sent_at TIMESTAMP WITH TIME ZONE,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed demo marketing data
+INSERT INTO marketing_audiences (name, description, size, criteria, source) VALUES
+    ('High-Value Freight Leads', 'Owner-operators with 5+ trucks and active FMCSA number', 847, '{"industry": "Freight", "truck_count": {"gte": 5}, "has_fmcsa": true}', 'CRM'),
+    ('Insurance Cross-Sell', 'Existing clients without life insurance policy', 1240, '{"has_life_insurance": false, "is_existing_client": true}', 'CRM'),
+    ('Mortgage Prospects', 'Leads who visited /mortgage in last 30 days', 312, '{"page_visited": "/mortgage", "days_ago": {"lte": 30}}', 'Analytics')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO marketing_campaigns (name, status, type, budget, spend, roi, impressions, clicks, conversions, subject_line, message_body) VALUES
+    ('Q3 Freight Expansion', 'Active', 'Multi-Channel', 5000, 4500, 431, 12400, 890, 67, 'Exclusive Freight Rates — Save Up to 18% This Quarter', 'Dear Carrier Partner, we have negotiated exclusive lane rates...'),
+    ('Life Insurance Awareness', 'Active', 'Email', 2500, 1800, 285, 8200, 540, 42, 'Is Your Family Protected? New Holland Life Insurance', 'Protect what matters most with our term life solutions...'),
+    ('Mortgage Q4 Push', 'Draft', 'Google Ads', 8000, 0, 0, 0, 0, 0, 'Rates Are Dropping — Lock In Your Mortgage Today', 'Current rates are at a 2-year low. Now is the time...')
+ON CONFLICT DO NOTHING;
+
