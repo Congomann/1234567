@@ -172,13 +172,13 @@ export const WebsiteSettings: React.FC = () => {
                         newPlaylist.push(targetUrl);
                     }
                 }
-                newPlaylist = newPlaylist.slice(0, 3).filter(Boolean);
+                const cleanPlaylist = newPlaylist.slice(0, 3).filter(Boolean);
 
                 const updatedSettings: CompanySettings = {
                     ...settingsForm,
-                    heroBackgroundUrl: isVideo ? (newPlaylist[0] || targetUrl) : targetUrl,
+                    heroBackgroundUrl: isVideo ? (cleanPlaylist[0] || targetUrl) : targetUrl,
                     heroBackgroundType: (isVideo ? 'video' : 'image'),
-                    heroVideoPlaylist: isVideo ? newPlaylist : settingsForm.heroVideoPlaylist
+                    heroVideoPlaylist: isVideo ? cleanPlaylist : settingsForm.heroVideoPlaylist
                 };
 
                 setSettingsForm(updatedSettings);

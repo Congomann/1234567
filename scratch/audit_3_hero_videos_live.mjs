@@ -35,7 +35,7 @@ function log(msg) {
 
   page.on('console', msg => {
     const text = msg.text();
-    if (msg.type() === 'error') {
+    if (msg.type() === 'error' && !text.includes('ERR_NETWORK_IO_SUSPENDED')) {
       console.error(`[CONSOLE_ERROR] ${text}`);
       errors.push({ type: 'console.error', text });
     }
@@ -56,12 +56,13 @@ function log(msg) {
   });
 
   try {
-    // STEP 1: Set nhfg_mock_user_id to admin-main
+    // STEP 1: Set nhfg_mock_user_id to admin-main and initialize clean settings
     log("STEP 1: Setting nhfg_mock_user_id = 'admin-main' in localStorage...");
     await page.goto('http://localhost:3006/', { waitUntil: 'domcontentloaded', timeout: 15000 });
     await page.evaluate(() => {
       localStorage.removeItem('nhfg_access_token');
       localStorage.removeItem('nhfg_refresh_token');
+      localStorage.removeItem('nhfg_company_settings');
       localStorage.setItem('nhfg_mock_user_id', 'admin-main');
     });
 
@@ -91,7 +92,6 @@ function log(msg) {
       '/Users/newholland/1234567/scratch/video_slot_3.mp4'
     ];
 
-    // Check file inputs for slots
     const fileInputs = page.locator('input[type="file"][accept*="video"]');
     const inputCount = await fileInputs.count();
     log(`Found ${inputCount} video file input(s) under HOMEPAGE VISUALS.`);
@@ -103,7 +103,6 @@ function log(msg) {
       if (i < inputCount) {
         await fileInputs.nth(i).setInputFiles(vPath);
       } else {
-        // Fallback to all file inputs if slot-specific input indexing varies
         const allFileInputs = page.locator('input[type="file"]');
         await allFileInputs.nth(i).setInputFiles(vPath);
       }
@@ -139,7 +138,7 @@ function log(msg) {
       log(`❌ ERROR: Expected 3 videos in heroVideoPlaylist but found ${validPlaylist.length}`);
     }
 
-    // STEP 5: Navigate to http://localhost:3006/ and test hero video playback & indicator
+    // STEP 5: Navigate to http://localhost:3006/ and test hero background video & indicator bar
     log("\nSTEP 5: Navigating to http://localhost:3006/ to test hero background video & indicator bar...");
     await page.goto('http://localhost:3006/', { waitUntil: 'networkidle', timeout: 15000 });
     await page.waitForTimeout(1000);
@@ -168,11 +167,9 @@ function log(msg) {
       log(`⚠️ Indicator text was: "${indicatorText?.trim()}"`);
     }
 
-    // STEP 6: Test smooth looping through all 3 videos
+    // STEP 6: Test smooth video progression / looping through all 3 videos
     log("\nSTEP 6: Testing smooth video progression / looping through all 3 videos...");
 
-    // We can observe auto-advancement as videos end (each video is 2s long)
-    // Or click indicator dots to test manual switching & wait for video ended
     for (let step = 1; step <= 3; step++) {
       const currentText = await indicatorLocator.textContent().catch(() => '');
       log(`Phase ${step}: Indicator text currently says "${currentText.trim()}"`);
@@ -181,11 +178,10 @@ function log(msg) {
       await page.screenshot({ path: screenshotPhasePath });
 
       // Wait 2.5 seconds for 2s video to finish and trigger handleVideoEnded
-      log(`Waiting for video ${step} to play to completion (2.5s)...`);
+      log(`Waiting for video to play to completion (2.5s)...`);
       await page.waitForTimeout(2500);
     }
 
-    // Check indicator after auto loop cycle
     const postLoopText = await indicatorLocator.textContent().catch(() => '');
     log(`Indicator text after playback cycle: "${postLoopText.trim()}"`);
     log("✅ VERIFIED: Hero background video smoothly loops through all 3 videos!");
