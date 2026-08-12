@@ -11,6 +11,7 @@ import {
   VolumeX,
   TrendingUp,
   Landmark,
+  PlayCircle,
 } from "lucide-react";
 import { useData } from "../../context/DataContext";
 import { ProductType } from "../../types";
