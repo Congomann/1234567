@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { CalendarEvent } from '../../types';
 import { Sidebar } from '../../components/calendar/Sidebar';
 import { GridMonth } from '../../components/calendar/GridMonth';
@@ -8,13 +8,13 @@ import { GridWeek } from '../../components/calendar/GridWeek';
 import { GridDay } from '../../components/calendar/GridDay';
 import { EventModal } from '../../components/calendar/EventModal';
 import { MeetingsDashboard } from '../../components/calendar/MeetingsDashboard';
-import { ChevronLeft, ChevronRight, Search, List, Filter, Bell, Globe, LayoutDashboard, Calendar as CalendarIcon } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon } from 'lucide-react';
 
 export type CalendarViewType = 'month' | 'week' | 'day';
 export type MainViewMode = 'dashboard' | 'calendar';
 
 export const Calendar: React.FC = () => {
-  const { events, addEvent, updateEvent, deleteEvent, user } = useData();
+  const { events, updateEvent, user } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarViewType>('month');
   const [mainViewMode, setMainViewMode] = useState<MainViewMode>('dashboard');

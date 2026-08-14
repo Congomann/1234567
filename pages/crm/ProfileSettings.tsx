@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
-import { SocialLink, User, UserRole, ProductType, Testimonial } from '../../types';
+import { SocialLink, User, UserRole, ProductType, Testimonial, AdvisorAssignment } from '../../types';
 import { Save, Plus, Trash2, Camera, Shield, CheckCircle2, Languages, Briefcase, Award, X, Edit2, Star, AlertTriangle, Globe, MapPin, Lock } from 'lucide-react';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
@@ -83,7 +83,8 @@ export const ProfileSettings: React.FC = () => {
 
   const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
     const updated = [...(formData.socialLinks || [])];
-    updated[index] = { ...updated[index], [field]: value };
+    const newLink = { ...updated[index], [field]: value } as unknown as SocialLink;
+    updated[index] = newLink;
     setFormData(prev => ({ ...prev, socialLinks: updated }));
   };
   

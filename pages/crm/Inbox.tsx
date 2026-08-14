@@ -32,7 +32,8 @@ export const Inbox: React.FC = () => {
   const selectedLead = myLeads.find(l => l.id === selectedLeadId);
 
   // Helper for Request Icon
-  const getRequestIcon = (msg: string) => {
+  const getRequestIcon = (msg?: string) => {
+      if (!msg) return <MessageSquare className="h-5 w-5 text-purple-500" />;
       if (msg.toLowerCase().includes('callback')) return <PhoneIncoming className="h-5 w-5 text-blue-500" />;
       if (msg.toLowerCase().includes('quote')) return <FileText className="h-5 w-5 text-green-500" />;
       return <MessageSquare className="h-5 w-5 text-purple-500" />;
@@ -123,12 +124,12 @@ export const Inbox: React.FC = () => {
                     className={`cursor-pointer border-b border-white/20 p-6 transition-all duration-300 ${selectedLeadId === lead.id ? 'bg-white/60 backdrop-blur-xl' : 'hover:bg-white/30'}`}
                 >
                     <div className="flex justify-between items-baseline mb-2">
-                        <span className={`truncate text-sm ${lead.status === 'New' ? 'text-[#0B2240] font-black' : 'text-slate-600 font-bold'}`}>{lead.name}</span>
+                        <span className={`truncate text-sm ${lead.status === LeadStatus.NEW ? 'text-[#0B2240] font-black' : 'text-slate-600 font-bold'}`}>{lead.name}</span>
                         <span className="text-[10px] text-slate-400 font-bold bg-white/50 px-2 py-1 rounded-lg">{new Date(lead.date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                         {getRequestIcon(lead.message)}
-                        <span className={`text-xs font-bold uppercase tracking-wide ${lead.status === 'New' ? 'text-blue-600' : 'text-slate-500'}`}>{lead.interest}</span>
+                        <span className={`text-xs font-bold uppercase tracking-wide ${lead.status === LeadStatus.NEW ? 'text-blue-600' : 'text-slate-500'}`}>{lead.interest}</span>
                     </div>
                     <div className="text-xs text-slate-500 truncate font-medium leading-relaxed">{lead.message}</div>
                 </div>

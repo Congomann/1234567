@@ -6,6 +6,16 @@ import {
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
 
+
+const apiFetch = (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('nhfg_access_token');
+  const headers = { ...options.headers };
+  if (token) {
+    (headers as any)['Authorization'] = `Bearer ${token}`;
+  }
+  return fetch(url, { ...options, headers });
+};
+
 interface Extension {
   id: string;
   advisor_name: string;
@@ -81,10 +91,10 @@ export const TelephonyHub: React.FC = () => {
   const fetchData = async () => {
     try {
       const [credRes, extRes, callsRes, smsRes] = await Promise.all([
-        fetch('/api/signalwire/credentials'),
-        fetch('/api/signalwire/extensions'),
-        fetch('/api/signalwire/calls'),
-        fetch('/api/signalwire/sms/history')
+        apiFetch('/api/signalwire/credentials'),
+        apiFetch('/api/signalwire/extensions'),
+        apiFetch('/api/signalwire/calls'),
+        apiFetch('/api/signalwire/sms/history')
       ]);
 
       if (credRes.ok) setCredentials(await credRes.json());
@@ -131,7 +141,7 @@ export const TelephonyHub: React.FC = () => {
     setCallDuration(0);
 
     try {
-      const res = await fetch('/api/signalwire/call', {
+      const res = await apiFetch('/api/signalwire/call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -170,7 +180,7 @@ export const TelephonyHub: React.FC = () => {
 
     if (callIdToSave || callSidToSave) {
       try {
-        await fetch('/api/signalwire/hangup', {
+        await apiFetch('/api/signalwire/hangup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -197,7 +207,7 @@ export const TelephonyHub: React.FC = () => {
   const handleSendSMS = async () => {
     if (!smsText || !smsRecipient) return;
     try {
-      await fetch('/api/signalwire/sms/send', {
+      await apiFetch('/api/signalwire/sms/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -219,7 +229,7 @@ export const TelephonyHub: React.FC = () => {
     if (!aiLeadPhone) return;
     setIsAiCalling(true);
     try {
-      await fetch('/api/signalwire/ai-call', {
+      await apiFetch('/api/signalwire/ai-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -56,7 +56,7 @@ export const AutomationStudio: React.FC = () => {
         setIsDeploying(true);
         
         try {
-            const response = await fetch('http://localhost:3001/api/marketing/automations', {
+            const response = await fetch('/api/marketing/automations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

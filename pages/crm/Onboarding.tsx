@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { JobApplication, ProductType, UserRole } from '../../types';
-import { UserPlus, Check, X, FileText, Search, Mail, Phone, Calendar, Clock, Download, DollarSign, Briefcase, Lock } from 'lucide-react';
+import { UserPlus, Check, X, FileText, Search, Mail, Phone, Calendar, Clock, Download, DollarSign, Lock } from 'lucide-react';
 
 export const Onboarding: React.FC = () => {
     const { jobApplications, updateJobApplicationStatus, user } = useData();

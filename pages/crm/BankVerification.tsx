@@ -1358,7 +1358,6 @@ export const BankVerification: React.FC = () => {
             </AnimatePresence>
 
             {/* Confirmation Modals */}
-            {/* @ts-ignore */}
             <ConfirmModal 
                 isOpen={!!confirmDelete}
                 onClose={() => setConfirmDelete(null)}
@@ -1369,7 +1368,6 @@ export const BankVerification: React.FC = () => {
                 confirmText="Delete Record"
             />
 
-            {/* @ts-ignore */}
             <ConfirmModal 
                 isOpen={!!confirmReverify}
                 onClose={() => setConfirmReverify(null)}

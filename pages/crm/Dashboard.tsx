@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import {
-  Users, Wallet, TrendingUp, Activity, ArrowUpRight,
-  ShieldCheck, ArrowRight, Zap, RefreshCw, MessageSquare, Phone,
-  FileText, CheckCircle2, Radio, Sparkles, Building2, Landmark,
-  Percent, Truck, Plus, Trash2, ShieldAlert, Key, Award, Flame,
-  Clock, CheckSquare
+  TrendingUp, ArrowUpRight, ShieldCheck, ArrowRight, Zap,
+  RefreshCw, Phone, CheckCircle2, Radio, Sparkles,
+  Building2, Landmark, Truck, Plus, Trash2
 } from 'lucide-react';
-import { UserRole, TaskPriority } from '../../types';
+import { TaskPriority } from '../../types';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 import { CRMAnalyticsCharts } from '../../components/analytics/CRMAnalyticsCharts';
 
@@ -23,7 +21,7 @@ interface LiveEvent {
 }
 
 export const Dashboard: React.FC = () => {
-  const { user, leads, tasks, addTask, toggleTask, deleteTask, reorderTasks } = useData();
+  const { user, tasks, addTask, toggleTask, deleteTask } = useData();
   const navigate = useNavigate();
 
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([
@@ -66,15 +64,12 @@ export const Dashboard: React.FC = () => {
   ]);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
 
   // Poll SignalWire & Recent API Events
   const fetchRecentActivity = async () => {
     try {
-      const [callsRes, smsRes] = await Promise.all([
-        fetch('/api/signalwire/calls'),
-        fetch('/api/signalwire/sms/history')
-      ]);
+      const callsRes = await fetch('/api/signalwire/calls');
 
       if (callsRes.ok) {
         const calls = await callsRes.json();
