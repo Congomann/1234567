@@ -54,6 +54,7 @@ import { AdminTestimonials } from './pages/admin/AdminTestimonials';
 import { EmailSignature } from './pages/admin/EmailSignature';
 import { MarketingIntegrations } from './pages/admin/MarketingIntegrations';
 import { JoinTeam } from './pages/website/JoinTeam';
+import { LoadTracking } from './pages/public/LoadTracking';
 import { Onboarding } from './pages/crm/Onboarding';
 import { AdvisorOnboardingFlow } from './pages/crm/AdvisorOnboardingFlow';
 import { TelephonyHub } from './pages/crm/TelephonyHub';
@@ -212,6 +213,7 @@ const App: React.FC = () => {
             <Route path="/transparency" element={<PublicLayout><AnnualReport /></PublicLayout>} />
             <Route path="/press" element={<PublicLayout><PressReleases /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
+            <Route path="/track/:token" element={<LoadTracking />} />
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />

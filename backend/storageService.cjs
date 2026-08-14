@@ -1,13 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-
-// WebDAV is an ES module, it must be loaded dynamically in CommonJS.
-let createClientAsync = null;
 const encryptionService = require('./encryptionService.cjs');
  
 /**
  * StorageService handles file persistence.
- * Currently supports: 'local', 'owncloud'
+ * Relies on Supabase Storage for persistent cloud storage and local storage as fallback.
  */
 class StorageService {
     constructor() {
@@ -17,39 +14,23 @@ class StorageService {
         if (!fs.existsSync(this.baseDir)) {
             fs.mkdirSync(this.baseDir, { recursive: true });
         }
-        
-        this.mode = process.env.STORAGE_MODE || 'local';
-        this.owncloudUrl = process.env.OWNCLOUD_URL;
-        this.owncloudUser = process.env.OWNCLOUD_USERNAME;
-        this.owncloudPass = process.env.OWNCLOUD_PASSWORD;
- 
-        if (this.mode === 'owncloud' && this.owncloudUrl) {
-            console.log(`[Storage] Initializing ownCloud client at ${this.owncloudUrl}`);
-            this.clientPromise = import('webdav').then(({ createClient }) => {
-                this.client = createClient(this.owncloudUrl, {
-                    username: this.owncloudUser,
-                    password: this.owncloudPass
-                });
-                return this.client;
-            }).catch(e => console.error('[Storage] Failed to load webdav module:', e));
-        }
     }
  
     async saveFile(filename, base64Data) {
-        // ENCRYPTION AT REST: Encrypt the buffer before any persistence
         const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
-        const encryptedData = encryptionService.encrypt(buffer);
-        const encryptedBuffer = Buffer.from(encryptedData);
+        return this.saveBuffer(filename, buffer);
+    }
 
+    async saveBuffer(filename, buffer, mimetype = 'application/octet-stream') {
         // Try Supabase Storage first for persistent cloud storage
         try {
             const supabase = require('./supabaseClient.cjs');
             const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
             const { data, error } = await supabase.storage
                 .from('uploads')
-                .upload(cleanName, encryptedBuffer, {
+                .upload(cleanName, buffer, {
                     upsert: true,
-                    contentType: 'application/octet-stream'
+                    contentType: mimetype
                 });
             
             if (!error) {
@@ -64,16 +45,7 @@ class StorageService {
             console.warn('[Storage] Supabase integration error:', e.message);
         }
 
-        if (this.mode === 'owncloud' && this.clientPromise) {
-            try {
-                if (!this.client) await this.clientPromise;
-                return await this.saveToOwnCloud(filename, encryptedBuffer);
-            } catch (error) {
-                console.error('[Storage] ownCloud save failed, falling back to local:', error);
-                return this.saveLocal(filename, encryptedBuffer);
-            }
-        }
-        return this.saveLocal(filename, encryptedBuffer);
+        return this.saveLocal(filename, buffer);
     }
  
     async saveLocal(filename, buffer) {
@@ -88,22 +60,6 @@ class StorageService {
         }
     }
  
-    async saveToOwnCloud(filename, buffer) {
-        try {
-            const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-            
-            console.log(`[Storage] Uploading ${cleanName} to ownCloud...`);
-            await this.client.putFileContents(`/${cleanName}`, buffer);
-            
-            // Quick approach: Save locally AND to cloud.
-            await this.saveLocal(filename, buffer);
-            return `/api/storage/${cleanName}`;
-        } catch (error) {
-            console.error('[Storage] ownCloud PUT error:', error);
-            throw error;
-        }
-    }
- 
     async getFile(filename) {
         const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
         const filePath = path.join(this.baseDir, cleanName);
@@ -113,18 +69,23 @@ class StorageService {
             return filePath;
         }
 
-        // 2. If missing locally but in ownCloud mode, fetch from cloud
-        if (this.mode === 'owncloud' && this.clientPromise) {
-            try {
-                if (!this.client) await this.clientPromise;
-                console.log(`[Storage] Local miss for ${cleanName}, fetching from ownCloud...`);
-                const buffer = await this.client.getFileContents(`/${cleanName}`);
+        // 2. If missing locally, try fetching from Supabase Storage
+        try {
+            const supabase = require('./supabaseClient.cjs');
+            console.log(`[Storage] Local miss for ${cleanName}, fetching from Supabase...`);
+            const { data, error } = await supabase.storage
+                .from('uploads')
+                .download(cleanName);
+
+            if (!error && data) {
+                const buffer = Buffer.from(await data.arrayBuffer());
                 fs.writeFileSync(filePath, buffer); // Cache locally for next time
                 return filePath;
-            } catch (error) {
-                console.error(`[Storage] ownCloud fetch error for ${cleanName}:`, error);
-                return null;
+            } else {
+                console.error(`[Storage] Supabase download error for ${cleanName}:`, error?.message);
             }
+        } catch (error) {
+            console.error(`[Storage] Supabase fetch error for ${cleanName}:`, error.message);
         }
 
         return null;
@@ -132,3 +93,4 @@ class StorageService {
 }
 
 module.exports = new StorageService();
+

@@ -218,7 +218,6 @@ export const PlaidConfigPanel: React.FC<Props> = ({ settingsForm, setSettingsFor
               { key: 'PLAID_ENV', val: 'production' },
               { key: 'PLAID_PRODUCTS', val: 'auth' },
               { key: 'PLAID_COUNTRY_CODES', val: 'US' },
-              { key: 'APP_URL', val: 'https://newhollandfinancial.com' },
             ].map(({ key, val }) => (
               <div key={key} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-slate-200">
                 <span className="font-mono text-xs text-slate-700 font-bold">{key}</span>

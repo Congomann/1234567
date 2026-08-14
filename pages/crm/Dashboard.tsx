@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { UserRole, TaskPriority } from '../../types';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
+import { CRMAnalyticsCharts } from '../../components/analytics/CRMAnalyticsCharts';
 
 interface LiveEvent {
   id: string;
@@ -171,6 +172,9 @@ export const Dashboard: React.FC = () => {
           { title: "New HNW Clients", value: "150", subtitle: "Q3 Onboarded Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
         ]}
       />
+
+      {/* ── ANIMATED ANALYTICS CHARTS & NEON GLOW DASHBOARD ── */}
+      <CRMAnalyticsCharts />
 
       {/* ── LIVE REAL-TIME CRM EVENT STREAM ("WHAT'S HAPPENING NOW") ── */}
       <div className="apple-glass rounded-[2.5rem] p-8 mb-10 border border-white/80 shadow-2xl">

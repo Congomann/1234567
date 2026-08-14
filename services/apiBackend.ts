@@ -517,6 +517,24 @@ class NHFGBackend {
         return data.url;
     }
 
+    async uploadFormData(file: File): Promise<string> {
+        const url = `${this.baseUrl}/upload-multipart`;
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const headers = this.getAuthHeaders();
+        // Remove Content-Type so browser sets it correctly with boundary
+        delete (headers as any)['Content-Type'];
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: formData
+        });
+        const data = await this.handleResponse(res);
+        return data.url;
+    }
+
     // --- ACCESS LOGS ---
     async getAccessLogs(): Promise<any[]> {
         return this.apiRequest<any[]>(`${this.baseUrl}/admin/access-logs`, { headers: this.getAuthHeaders() }, 'access_logs');

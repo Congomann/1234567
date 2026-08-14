@@ -412,3 +412,72 @@ CREATE TABLE landing_pages (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_landing_pages_slug ON landing_pages(slug);
+
+-- ── LOGISTICS LOADS & DISPATCH TELEMETRY ─────────────────────────────────────
+CREATE TABLE logistics_loads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    origin VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    pickup_date VARCHAR(50),
+    delivery_date VARCHAR(50),
+    equipment_type VARCHAR(100),
+    rate_usd NUMERIC(10, 2),
+    status VARCHAR(50) DEFAULT 'available',
+    advisor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    carrier_driver_phone VARCHAR(50),
+    carrier_driver_email VARCHAR(255),
+    current_latitude NUMERIC(9, 6),
+    current_longitude NUMERIC(9, 6),
+    last_tracked_at TIMESTAMP WITH TIME ZONE,
+    tracking_token VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_logistics_loads_token ON logistics_loads(tracking_token);
+CREATE INDEX idx_logistics_loads_advisor ON logistics_loads(advisor_id);
+
+-- ── SIGNALWIRE TELEPHONY & CALL LOGGING ENGINE ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS advisor_extensions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    advisor_name VARCHAR(255) NOT NULL,
+    extension VARCHAR(10) UNIQUE NOT NULL,
+    phone_number VARCHAR(50) NOT NULL,
+    department VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'available',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS telephony_calls (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    call_sid VARCHAR(255) UNIQUE NOT NULL,
+    direction VARCHAR(20) NOT NULL, -- 'inbound' | 'outbound' | 'ai_qualification'
+    from_number VARCHAR(50) NOT NULL,
+    to_number VARCHAR(50) NOT NULL,
+    lead_name VARCHAR(255),
+    lead_id VARCHAR(255),
+    advisor_extension VARCHAR(10),
+    status VARCHAR(50) NOT NULL DEFAULT 'initiated', -- 'initiated' | 'connecting' | 'in-progress' | 'completed' | 'failed' | 'canceled'
+    duration_seconds INT DEFAULT 0,
+    recording_url TEXT,
+    transcript TEXT,
+    ai_rating VARCHAR(20), -- 'Warm' | 'Mild' | 'Cold'
+    ai_qualification_summary TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS telephony_sms (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    message_sid VARCHAR(255) UNIQUE NOT NULL,
+    direction VARCHAR(20) NOT NULL, -- 'inbound' | 'outbound'
+    from_number VARCHAR(50) NOT NULL,
+    to_number VARCHAR(50) NOT NULL,
+    lead_name VARCHAR(255),
+    message_text TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'delivered',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_telephony_calls_created_at ON telephony_calls(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_telephony_calls_sid ON telephony_calls(call_sid);
+CREATE INDEX IF NOT EXISTS idx_telephony_calls_lead_id ON telephony_calls(lead_id);

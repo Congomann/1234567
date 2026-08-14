@@ -153,7 +153,7 @@ export const Partnership: React.FC = () => {
         name: appForm.contactName,
         email: appForm.email,
         phone: appForm.phone,
-        interest: appForm.partnerCategory,
+        interest: appForm.partnerCategory as ProductType,
         message: `Company: ${appForm.companyName} | Title: ${appForm.contactTitle} | States: ${appForm.statesOperating} | Volume: ${appForm.projectedVolume} | Message: ${appForm.message}`,
         source: 'Website Carrier & Partner Application',
         customDetails: {

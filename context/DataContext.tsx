@@ -169,14 +169,168 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const DEFAULT_CALENDAR_EVENTS: CalendarEvent[] = [
-    { id: 'evt-1', title: 'Q3 Strategy', date: '2026-07-01', time: '10:00 AM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-2', title: 'Whitfield Call', date: '2026-07-05', time: '02:00 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-3', title: 'Compliance Audit', date: '2026-07-07', time: '09:00 AM', type: 'task', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-4', title: 'Team Standup', date: '2026-07-12', time: '11:00 AM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-5', title: 'Holden Mtg.', date: '2026-07-15', time: '01:30 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-6', title: 'Campaign Review', date: '2026-07-23', time: '03:00 PM', type: 'meeting', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-7', title: 'Month Close', date: '2026-07-28', time: '05:00 PM', type: 'task', creatorId: 'user-admin', visibility: 'public' },
-    { id: 'evt-8', title: 'Foster Contract', date: '2026-07-30', time: '11:30 AM', type: 'reminder', creatorId: 'user-admin', visibility: 'public' },
+    {
+      id: 'evt-1',
+      title: 'Q3 Wealth Strategy Review',
+      date: '2026-08-15',
+      time: '10:00 AM',
+      endTime: '11:00 AM',
+      timezone: 'EDT',
+      type: 'meeting',
+      status: 'scheduled',
+      recordingEnabled: true,
+      description: 'Quarterly financial asset review and portfolio rebalancing discussion.',
+      meetingLink: 'https://meet.nhfg.com/q3-strategy',
+      participants: [
+        { name: 'Sarah Jenkins', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
+        { name: 'David Miller', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+        { name: 'Alex Wong' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-2',
+      title: 'Whitfield Family Trust Advisory',
+      date: '2026-08-16',
+      time: '02:00 PM',
+      endTime: '03:00 PM',
+      timezone: 'PDT',
+      type: 'meeting',
+      status: 'scheduled',
+      recordingEnabled: false,
+      description: 'Estate planning consultation and generational wealth preservation.',
+      meetingLink: 'https://meet.nhfg.com/whitfield-advisory',
+      participants: [
+        { name: 'Robert Whitfield', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
+        { name: 'Elena Rostova', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-3',
+      title: 'Tax Compliance & Audit Sync',
+      date: '2026-08-14',
+      time: '09:00 AM',
+      endTime: '10:00 AM',
+      timezone: 'CST',
+      type: 'meeting',
+      status: 'rescheduled',
+      recordingEnabled: true,
+      description: 'Annual corporate tax alignment and deduction audit.',
+      meetingLink: 'https://meet.nhfg.com/tax-audit',
+      participants: [
+        { name: 'Marcus Vance' },
+        { name: 'Lisa Ray', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-4',
+      title: 'Executive Board Investment Briefing',
+      date: '2026-08-18',
+      time: '11:00 AM',
+      endTime: '12:30 PM',
+      timezone: 'EDT',
+      type: 'meeting',
+      status: 'scheduled',
+      recordingEnabled: true,
+      description: 'High-net-worth real estate fund deployment update.',
+      meetingLink: 'https://meet.nhfg.com/board-briefing',
+      participants: [
+        { name: 'Jessica Taylor', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150' },
+        { name: 'Michael Chen' },
+        { name: 'Sofia Rodriguez', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-5',
+      title: 'Holden Commercial Escrow Closing',
+      date: '2026-08-10',
+      time: '01:30 PM',
+      endTime: '02:30 PM',
+      timezone: 'PDT',
+      type: 'meeting',
+      status: 'completed',
+      recordingEnabled: false,
+      description: 'Final loan document signing for commercial property acquisition.',
+      meetingLink: 'https://meet.nhfg.com/holden-escrow',
+      participants: [
+        { name: 'James Holden', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150' },
+        { name: 'Patricia Moore' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-6',
+      title: 'Global Macro Market Update',
+      date: '2026-08-12',
+      time: '03:00 PM',
+      endTime: '04:00 PM',
+      timezone: 'CST',
+      type: 'meeting',
+      status: 'canceled',
+      recordingEnabled: false,
+      description: 'Federal Reserve rate cut implications on fixed income assets.',
+      meetingLink: 'https://meet.nhfg.com/macro-update',
+      participants: [
+        { name: 'Dr. Arthur Pendelton' },
+        { name: 'Karen Wright', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-7',
+      title: 'Private Wealth Onboarding - Sterling',
+      date: '2026-08-20',
+      time: '04:00 PM',
+      endTime: '05:00 PM',
+      timezone: 'EDT',
+      type: 'meeting',
+      status: 'rescheduled',
+      recordingEnabled: true,
+      description: 'Initial intake and risk tolerance evaluation for new client.',
+      meetingLink: 'https://meet.nhfg.com/sterling-onboarding',
+      participants: [
+        { name: 'Evelyn Sterling', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150' },
+        { name: 'Tom Harrison' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    },
+    {
+      id: 'evt-8',
+      title: 'Foster Portfolio Liquidity Sync',
+      date: '2026-08-08',
+      time: '11:30 AM',
+      endTime: '12:15 PM',
+      timezone: 'PDT',
+      type: 'meeting',
+      status: 'completed',
+      recordingEnabled: true,
+      description: 'Structured annuity distribution and capital release planning.',
+      meetingLink: 'https://meet.nhfg.com/foster-liquidity',
+      participants: [
+        { name: 'Gerald Foster' },
+        { name: 'Samantha Vance', avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150' }
+      ],
+      creatorId: 'user-admin',
+      creatorName: 'Admin Agent',
+      visibility: 'public'
+    }
   ];
 
   const [events, setEvents] = useState<CalendarEvent[]>(DEFAULT_CALENDAR_EVENTS);

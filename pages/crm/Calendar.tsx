@@ -7,15 +7,17 @@ import { GridMonth } from '../../components/calendar/GridMonth';
 import { GridWeek } from '../../components/calendar/GridWeek';
 import { GridDay } from '../../components/calendar/GridDay';
 import { EventModal } from '../../components/calendar/EventModal';
-import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
-import { ChevronLeft, ChevronRight, Search, List, Filter, Bell, Globe } from 'lucide-react';
+import { MeetingsDashboard } from '../../components/calendar/MeetingsDashboard';
+import { ChevronLeft, ChevronRight, Search, List, Filter, Bell, Globe, LayoutDashboard, Calendar as CalendarIcon } from 'lucide-react';
 
 export type CalendarViewType = 'month' | 'week' | 'day';
+export type MainViewMode = 'dashboard' | 'calendar';
 
 export const Calendar: React.FC = () => {
   const { events, addEvent, updateEvent, deleteEvent, user } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarViewType>('month');
+  const [mainViewMode, setMainViewMode] = useState<MainViewMode>('dashboard');
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,10 +34,7 @@ export const Calendar: React.FC = () => {
   // Visible events logic based on Public / Private
   const visibleEvents = useMemo(() => {
     return events.filter(e => {
-      // Default visibility fallback based on instructions if undefined
       const isPublic = e.visibility ? e.visibility === 'public' : (e.type === 'meeting' || e.type === 'off-day');
-
-      // Public events visible to all. Private visible only to creator.
       if (isPublic) return true;
       return e.creatorId === user?.id;
     });
@@ -101,98 +100,162 @@ export const Calendar: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Tab3DBanner
-        cards={[
-          { title: "Scheduled Appointments", value: "42 Meetings", subtitle: "This Month", emoji: "📅", gradient: "cyan", linkText: "View Schedule" },
-          { title: "Upcoming Client Calls", value: "18 Calls Today", subtitle: "SignalWire Integrated", emoji: "⏰", gradient: "yellow", linkText: "Join Calls" },
-          { title: "Completed Consultations", value: "128 Sessions", subtitle: "98% Attendance Rate", emoji: "🏆", gradient: "pink", linkText: "Review Logs" }
-        ]}
-      />
+      {/* Top View Toggle Navigation */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2 bg-slate-200/50 dark:bg-slate-900/50 rounded-2xl backdrop-blur-md border border-white/20 dark:border-white/10">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-300/60 dark:bg-slate-800/80 rounded-xl">
+          <button
+            onClick={() => setMainViewMode('dashboard')}
+            className={`px-5 py-2.5 rounded-lg text-xs font-black transition-all flex items-center gap-2 ${
+              mainViewMode === 'dashboard'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>3D Meetings Dashboard</span>
+          </button>
+          <button
+            onClick={() => setMainViewMode('calendar')}
+            className={`px-5 py-2.5 rounded-lg text-xs font-black transition-all flex items-center gap-2 ${
+              mainViewMode === 'calendar'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <CalendarIcon className="w-4 h-4" />
+            <span>Calendar Grid View</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleCopyBookingLink}
+            className="px-4 py-2 bg-[#0B2240] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-2"
+          >
+            <span>🔗 Copy Booking Link</span>
+          </button>
+          <button
+            onClick={() => openModalNew(todayStr)}
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-black rounded-xl shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-1.5"
+          >
+            <span>+ Schedule Meeting</span>
+          </button>
+        </div>
+      </div>
 
       {/* Copy Link Toast Alert */}
       {copiedLink && (
         <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold text-xs flex items-center gap-3 animate-in fade-in">
-          <span>✅ Personal Client Booking Link Copied to Clipboard! (`/schedule?advisor=${user?.name?.toLowerCase().replace(/\s+/g, '-') || 'remmy-shabani'}`)</span>
+          <span>✅ Personal Client Booking Link Copied to Clipboard!</span>
         </div>
       )}
 
-      <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
-      {/* Sidebar with Alerts */}
-      <Sidebar visibleEvents={visibleEvents} onAlertClick={openModalEdit} />
+      {/* Main Mode 1: 3D Meetings Dashboard */}
+      {mainViewMode === 'dashboard' && (
+        <MeetingsDashboard onOpenNewModal={() => openModalNew(todayStr)} />
+      )}
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-white/50 backdrop-blur-xl">
-        {/* Header matching exact screenshot aesthetics */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-8 py-6 border-b border-slate-100 bg-white gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Calendar</h1>
-            <p className="text-sm font-semibold text-slate-400 mt-0.5">{titleFormat()}</p>
-          </div>
+      {/* Main Mode 2: Calendar Grid View */}
+      {mainViewMode === 'calendar' && (
+        <div className="flex h-full w-full bg-[#f6f8fb] text-slate-800 rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+          {/* Sidebar with Alerts */}
+          <Sidebar visibleEvents={visibleEvents} onAlertClick={openModalEdit} />
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCopyBookingLink}
-              className="px-5 py-2.5 bg-[#0B2240] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-lg transition-all flex items-center gap-2"
-            >
-              <span>🔗 Copy My Booking Link</span>
-            </button>
+          <div className="flex-1 flex flex-col h-full overflow-hidden bg-white/50 backdrop-blur-xl">
+            {/* Header matching exact aesthetics */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-8 py-6 border-b border-slate-100 bg-white gap-4">
+              <div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Calendar Grid</h1>
+                <p className="text-sm font-semibold text-slate-400 mt-0.5">{titleFormat()}</p>
+              </div>
 
-            <button 
-              onClick={handlePrev} 
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
-            >
-              ← Prev
-            </button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                  <button
+                    onClick={() => setView('month')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      view === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Month
+                  </button>
+                  <button
+                    onClick={() => setView('week')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      view === 'week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Week
+                  </button>
+                  <button
+                    onClick={() => setView('day')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      view === 'day' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Day
+                  </button>
+                </div>
 
-            <button 
-              onClick={handleToday} 
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-500/20 transition-all"
-            >
-              Today
-            </button>
+                <button 
+                  onClick={handlePrev} 
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
+                >
+                  ← Prev
+                </button>
 
-            <button 
-              onClick={handleNext} 
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
-            >
-              Next →
-            </button>
+                <button 
+                  onClick={handleToday} 
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+                >
+                  Today
+                </button>
+
+                <button 
+                  onClick={handleNext} 
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+
+            {/* Calendar View Area */}
+            <div className="flex-1 overflow-auto bg-white relative">
+              {view === 'month' && (
+                <GridMonth
+                  currentDate={currentDate}
+                  visibleEvents={visibleEvents}
+                  openModalNew={openModalNew}
+                  openModalEdit={openModalEdit}
+                  updateEvent={updateEvent}
+                  todayStr={todayStr}
+                />
+              )}
+              {view === 'week' && (
+                <GridWeek
+                  currentDate={currentDate}
+                  visibleEvents={visibleEvents}
+                  openModalNew={openModalNew}
+                  openModalEdit={openModalEdit}
+                  updateEvent={updateEvent}
+                  todayStr={todayStr}
+                />
+              )}
+              {view === 'day' && (
+                <GridDay
+                  currentDate={currentDate}
+                  visibleEvents={visibleEvents}
+                  openModalNew={openModalNew}
+                  openModalEdit={openModalEdit}
+                  updateEvent={updateEvent}
+                  todayStr={todayStr}
+                />
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Calendar View Area */}
-        <div className="flex-1 overflow-auto bg-white relative">
-          {view === 'month' && (
-            <GridMonth
-              currentDate={currentDate}
-              visibleEvents={visibleEvents}
-              openModalNew={openModalNew}
-              openModalEdit={openModalEdit}
-              updateEvent={updateEvent}
-              todayStr={todayStr}
-            />
-          )}
-          {view === 'week' && (
-            <GridWeek
-              currentDate={currentDate}
-              visibleEvents={visibleEvents}
-              openModalNew={openModalNew}
-              openModalEdit={openModalEdit}
-              updateEvent={updateEvent}
-              todayStr={todayStr}
-            />
-          )}
-          {view === 'day' && (
-            <GridDay
-              currentDate={currentDate}
-              visibleEvents={visibleEvents}
-              openModalNew={openModalNew}
-              openModalEdit={openModalEdit}
-              updateEvent={updateEvent}
-              todayStr={todayStr}
-            />
-          )}
-        </div>
-      </div>
+      )}
 
       <AnimatePresence>
         {modalOpen && (
@@ -205,7 +268,6 @@ export const Calendar: React.FC = () => {
           />
         )}
       </AnimatePresence>
-    </div>
     </div>
   );
 };

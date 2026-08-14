@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Phone, PhoneCall, PhoneOff, Mic, MicOff, MessageSquare, Send, Bot, 
   Users, Play, Pause, Sparkles, Shield, CheckCircle2, AlertCircle, 
-  ArrowUpRight, RefreshCw, Radio, Volume2
+  ArrowUpRight, RefreshCw, Radio, Volume2, Delete, X
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
 
@@ -44,6 +44,8 @@ interface SMSMessage {
   created_at: string;
 }
 
+type CallState = 'idle' | 'connecting' | 'in-progress' | 'ended' | 'failed';
+
 export const TelephonyHub: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'logs'>('softphone');
   
@@ -53,10 +55,14 @@ export const TelephonyHub: React.FC = () => {
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [smsHistory, setSmsHistory] = useState<SMSMessage[]>([]);
 
-  // Softphone State
+  // Softphone State & Status Machine
   const [dialNumber, setDialNumber] = useState('');
   const [selectedExtension, setSelectedExtension] = useState('101');
-  const [isCalling, setIsCalling] = useState(false);
+  const [callState, setCallState] = useState<CallState>('idle');
+  const [currentCallId, setCurrentCallId] = useState<string | null>(null);
+  const [currentCallSid, setCurrentCallSid] = useState<string | null>(null);
+  const [callErrorMessage, setCallErrorMessage] = useState<string | null>(null);
+
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isRecording, setIsRecording] = useState(true);
@@ -94,43 +100,97 @@ export const TelephonyHub: React.FC = () => {
     fetchData();
   }, []);
 
-  // Timer for active calls
+  // Timer for active in-progress calls
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isCalling) {
+    if (callState === 'in-progress') {
       timer = setInterval(() => setCallDuration(prev => prev + 1), 1000);
-    } else {
+    } else if (callState === 'idle') {
       setCallDuration(0);
     }
     return () => clearInterval(timer);
-  }, [isCalling]);
+  }, [callState]);
 
-  // Handle Softphone Dialing
+  // Handle Softphone Keypad Controls
   const handleKeypadPress = (key: string) => {
     setDialNumber(prev => prev + key);
   };
 
+  const handleBackspace = () => {
+    setDialNumber(prev => prev.slice(0, -1));
+  };
+
+  const handleClearKeypad = () => {
+    setDialNumber('');
+  };
+
   const handleStartCall = async () => {
     if (!dialNumber) return;
-    setIsCalling(true);
+    setCallState('connecting');
+    setCallErrorMessage(null);
+    setCallDuration(0);
+
     try {
-      await fetch('/api/signalwire/call', {
+      const res = await fetch('/api/signalwire/call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          to: dialNumber,
           toNumber: dialNumber,
           leadName: 'Direct Softphone Call',
+          extension: selectedExtension,
           advisorExtension: selectedExtension
         })
       });
-      fetchData();
-    } catch (err) {
-      console.error('Call failed:', err);
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCurrentCallId(data.callId || data.call?.id || null);
+        setCurrentCallSid(data.sid || data.call?.call_sid || null);
+        setCallState('in-progress');
+        fetchData();
+      } else {
+        setCallState('failed');
+        setCallErrorMessage(data.error || 'Failed to connect call');
+        setTimeout(() => setCallState('idle'), 3500);
+      }
+    } catch (err: any) {
+      setCallState('failed');
+      setCallErrorMessage(err.message || 'Network error connecting call');
+      setTimeout(() => setCallState('idle'), 3500);
     }
   };
 
-  const handleEndCall = () => {
-    setIsCalling(false);
+  const handleEndCall = async () => {
+    const durationToSave = callDuration;
+    const callIdToSave = currentCallId;
+    const callSidToSave = currentCallSid;
+
+    setCallState('ended');
+
+    if (callIdToSave || callSidToSave) {
+      try {
+        await fetch('/api/signalwire/hangup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            callId: callIdToSave,
+            callSid: callSidToSave,
+            status: 'completed',
+            durationSeconds: durationToSave
+          })
+        });
+      } catch (err) {
+        console.error('Failed to log call end status:', err);
+      }
+    }
+
+    fetchData();
+    setTimeout(() => {
+      setCallState('idle');
+      setCurrentCallId(null);
+      setCurrentCallSid(null);
+    }, 2500);
   };
 
   // Handle SMS Send
@@ -142,6 +202,7 @@ export const TelephonyHub: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           toNumber: smsRecipient,
+          to: smsRecipient,
           leadName: smsRecipientName,
           messageText: smsText
         })
@@ -163,6 +224,7 @@ export const TelephonyHub: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           toNumber: aiLeadPhone,
+          to: aiLeadPhone,
           leadName: aiLeadName
         })
       });
@@ -254,7 +316,7 @@ export const TelephonyHub: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Keypad Column */}
           <div className="apple-glass border border-white/80 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center">
-            <div className="w-full mb-6 text-center">
+            <div className="w-full mb-4 text-center">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Phone Number</span>
               <input 
                 type="text" 
@@ -263,6 +325,24 @@ export const TelephonyHub: React.FC = () => {
                 placeholder="+1 (888) 000-0000"
                 className="w-full text-center text-2xl font-black bg-white border border-slate-200 text-slate-900 py-3 rounded-2xl mt-2 tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               />
+            </div>
+
+            {/* Backspace & Clear Bar */}
+            <div className="flex items-center gap-2 mb-4 w-full max-w-[280px]">
+              <button
+                onClick={handleClearKeypad}
+                disabled={!dialNumber || callState !== 'idle'}
+                className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-slate-200/80"
+              >
+                Clear
+              </button>
+              <button
+                onClick={handleBackspace}
+                disabled={!dialNumber || callState !== 'idle'}
+                className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-slate-200/80 flex items-center justify-center gap-1.5"
+              >
+                <Delete className="w-3.5 h-3.5 text-slate-600" /> Backspace
+              </button>
             </div>
 
             {/* Keypad Grid */}
@@ -294,8 +374,8 @@ export const TelephonyHub: React.FC = () => {
               </select>
             </div>
 
-            {/* Action Buttons */}
-            {!isCalling ? (
+            {/* Action Buttons with Status Machine */}
+            {callState === 'idle' && (
               <button
                 onClick={handleStartCall}
                 disabled={!dialNumber}
@@ -303,7 +383,18 @@ export const TelephonyHub: React.FC = () => {
               >
                 <PhoneCall className="w-4 h-4" /> Start Call
               </button>
-            ) : (
+            )}
+
+            {callState === 'connecting' && (
+              <button
+                disabled
+                className="w-full max-w-[280px] py-4 bg-amber-500 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+              >
+                <RefreshCw className="w-4 h-4 animate-spin" /> Connecting Call...
+              </button>
+            )}
+
+            {callState === 'in-progress' && (
               <button
                 onClick={handleEndCall}
                 className="w-full max-w-[280px] py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all apple-card"
@@ -311,16 +402,51 @@ export const TelephonyHub: React.FC = () => {
                 <PhoneOff className="w-4 h-4" /> End Call
               </button>
             )}
+
+            {callState === 'ended' && (
+              <button
+                disabled
+                className="w-full max-w-[280px] py-4 bg-emerald-600 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Call Ended
+              </button>
+            )}
+
+            {callState === 'failed' && (
+              <button
+                disabled
+                className="w-full max-w-[280px] py-4 bg-rose-600 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"
+              >
+                <AlertCircle className="w-4 h-4" /> Call Failed
+              </button>
+            )}
           </div>
 
           {/* Active Call Console */}
           <div className="lg:col-span-2 apple-glass border border-white/80 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-black text-slate-900 mb-1">Active Call Console</h2>
-              <p className="text-xs text-slate-400 font-medium">SignalWire LAML Voice Protocol • Dual Channel Recording</p>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 mb-1">Active Call Console</h2>
+                  <p className="text-xs text-slate-400 font-medium">SignalWire LAML Voice Protocol • Dual Channel Recording</p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-slate-100 font-mono text-xs font-bold text-slate-600 border border-slate-200">
+                  Status: {callState.toUpperCase()}
+                </span>
+              </div>
 
-              {isCalling ? (
-                <div className="my-12 p-8 bg-blue-50/80 rounded-3xl border border-blue-200 text-center">
+              {callState === 'connecting' && (
+                <div className="my-8 p-8 bg-amber-50/80 rounded-3xl border border-amber-200 text-center">
+                  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <Radio className="w-8 h-8 text-amber-600 animate-pulse" />
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 mb-1">Connecting to SignalWire...</h3>
+                  <p className="text-sm text-slate-500 font-mono">Target: {dialNumber} • Ext {selectedExtension}</p>
+                </div>
+              )}
+
+              {callState === 'in-progress' && (
+                <div className="my-8 p-8 bg-blue-50/80 rounded-3xl border border-blue-200 text-center">
                   <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-ping">
                     <Phone className="w-8 h-8 text-blue-600" />
                   </div>
@@ -330,17 +456,58 @@ export const TelephonyHub: React.FC = () => {
                     {formatTime(callDuration)}
                   </div>
                 </div>
-              ) : (
-                <div className="my-12 p-12 bg-white/60 rounded-3xl border border-slate-200 text-center">
-                  <PhoneOff className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-extrabold text-slate-800">Softphone Ready</h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">Enter a phone number on the keypad to initiate a corporate call.</p>
+              )}
+
+              {callState === 'ended' && (
+                <div className="my-8 p-8 bg-emerald-50/80 rounded-3xl border border-emerald-200 text-center">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-black text-slate-900 mb-1">Call Completed & Persisted</h3>
+                  <p className="text-sm text-slate-600 font-mono">Total Duration: {formatTime(callDuration)} • Updated DB log</p>
                 </div>
               )}
+
+              {callState === 'failed' && (
+                <div className="my-8 p-8 bg-rose-50/80 rounded-3xl border border-rose-200 text-center">
+                  <AlertCircle className="w-12 h-12 text-rose-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-black text-slate-900 mb-1">Call Connection Failed</h3>
+                  <p className="text-sm text-rose-600 font-bold mt-1">{callErrorMessage || 'Invalid phone number or API error'}</p>
+                </div>
+              )}
+
+              {callState === 'idle' && (
+                <div className="my-8 p-8 bg-white/60 rounded-3xl border border-slate-200 text-center">
+                  <PhoneOff className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-extrabold text-slate-800">Softphone Ready</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Enter a valid phone number on the keypad to initiate a corporate call.</p>
+                </div>
+              )}
+
+              {/* Recent Call Logs Feed */}
+              <div className="mt-6">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Recent Call History</h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                  {callLogs.slice(0, 4).map(log => (
+                    <div key={log.id} className="p-3 bg-white/80 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-extrabold text-slate-900">{log.lead_name || log.to_number}</span>
+                        <span className="text-slate-400 font-mono ml-2">Ext {log.advisor_extension}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                          log.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {log.status}
+                        </span>
+                        <span className="font-mono text-slate-500">{formatTime(log.duration_seconds || 0)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Mute & Record Controls */}
-            <div className="flex items-center justify-around p-4 bg-white/80 rounded-2xl border border-slate-200/80">
+            <div className="flex items-center justify-around p-4 bg-white/80 rounded-2xl border border-slate-200/80 mt-6">
               <button 
                 onClick={() => setIsMuted(!isMuted)}
                 className={`p-3.5 rounded-xl font-extrabold flex items-center gap-2 text-xs transition-all ${

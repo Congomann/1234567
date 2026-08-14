@@ -236,8 +236,63 @@ const initDB = async () => {
         source VARCHAR(100),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS advisor_extensions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        advisor_name VARCHAR(255) NOT NULL,
+        extension VARCHAR(10) UNIQUE NOT NULL,
+        phone_number VARCHAR(50) NOT NULL,
+        department VARCHAR(100),
+        status VARCHAR(20) DEFAULT 'available',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_calls (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        call_sid VARCHAR(255) UNIQUE NOT NULL,
+        direction VARCHAR(20) NOT NULL,
+        from_number VARCHAR(50) NOT NULL,
+        to_number VARCHAR(50) NOT NULL,
+        lead_name VARCHAR(255),
+        lead_id VARCHAR(255),
+        advisor_extension VARCHAR(10),
+        status VARCHAR(50) NOT NULL DEFAULT 'initiated',
+        duration_seconds INT DEFAULT 0,
+        recording_url TEXT,
+        transcript TEXT,
+        ai_rating VARCHAR(20),
+        ai_qualification_summary TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_sms (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        message_sid VARCHAR(255) UNIQUE NOT NULL,
+        direction VARCHAR(20) NOT NULL,
+        from_number VARCHAR(50) NOT NULL,
+        to_number VARCHAR(50) NOT NULL,
+        lead_name VARCHAR(255),
+        message_text TEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'delivered',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
     `);
-    console.log('[DB] Core & specialized engines (Portfolios, Real Estate) initialized.');
+
+    // Seed default extensions if table is empty
+    const extCheck = await pool.query('SELECT COUNT(*) FROM advisor_extensions');
+    if (parseInt(extCheck.rows[0].count, 10) === 0) {
+      await pool.query(`
+        INSERT INTO advisor_extensions (advisor_name, extension, phone_number, department, status) VALUES
+        ('Marcus Vance', '101', '+18885550101', 'Senior Wealth Advisory', 'available'),
+        ('Sarah Jenkins', '102', '+18885550102', 'Mortgage & Lending', 'available'),
+        ('David Ross', '103', '+18885550103', 'Commercial Insurance', 'busy'),
+        ('Elena Rostova', '104', '+18885550104', 'Private Wealth', 'available')
+        ON CONFLICT (extension) DO NOTHING;
+      `);
+    }
+
+    console.log('[DB] Core & specialized engines (Portfolios, Real Estate, SignalWire Telephony) initialized.');
   } catch (err) {
     console.warn('[DB] Init warning:', err.message);
   }
@@ -458,6 +513,9 @@ const WebhookNormalizer = {
 // --- API ROUTES ---
 
 // --- STORAGE & UPLOADS ---
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } }); // 500MB limit for videos
+
 app.post('/api/upload', async (req, res) => {
   try {
     // Allow uploads with valid JWT OR a mock user ID header (dev/admin panel)
@@ -480,6 +538,25 @@ app.post('/api/upload', async (req, res) => {
     res.json({ url: publicUrl });
   } catch (error) {
     console.error('[API] Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload file' });
+  }
+});
+
+// New multipart upload endpoint using multer to prevent OOM
+app.post('/api/upload-multipart', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    // Pass the raw buffer directly to storageService without ANY base64 conversion
+    // This dramatically reduces Node.js memory footprint during large uploads
+    const publicUrl = await storageService.saveBuffer(req.file.originalname, req.file.buffer, req.file.mimetype);
+    
+    console.log(`[Upload-Multipart] File saved: ${req.file.originalname} → ${publicUrl}`);
+    res.json({ url: publicUrl });
+  } catch (error) {
+    console.error('[API] Multipart Upload error:', error);
     res.status(500).json({ error: 'Failed to upload file' });
   }
 });
@@ -996,7 +1073,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   try {
     // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access)
-    if (email === 'info@newhollandfinancial.com' && password === 'Admin@2027!') {
+    if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin@2025') {
       const u = {
         id: 'admin-0000-0000-0000-000000000000',
         name: 'System Admin',
@@ -1125,8 +1202,38 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/reset-password', async (req, res) => {
   const { email } = req.body;
   console.log(`Password reset requested for ${email}`);
-  // Minimal stub. Production would integrate SendGrid/Postmark here.
-  res.json({ message: 'If the email exists, a reset link will be sent shortly.' });
+  
+  try {
+    const user = await db.get("SELECT * FROM users WHERE email = ?", [email]);
+    if (!user) {
+      return res.json({ message: 'If the email exists, a reset link will be sent shortly.' });
+    }
+
+    const token = require('crypto').randomBytes(20).toString('hex');
+    const resetUrl = `https://newhollandfinancial.com/reset-password?token=${token}`;
+    
+    const html = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #0A62A7;">Password Reset Request</h2>
+        <p>Hi ${user.name},</p>
+        <p>You requested a password reset for your New Holland Financial Group account.</p>
+        <p>Click the button below to reset your password:</p>
+        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0A62A7; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 15px 0;">Reset Password</a>
+        <p>If you did not request this, please ignore this email.</p>
+      </div>
+    `;
+    
+    await sendEmail({
+      to: email,
+      subject: 'Reset Your Password - New Holland Financial Group',
+      html
+    });
+
+    res.json({ message: 'If the email exists, a reset link will be sent shortly.' });
+  } catch (error) {
+    console.error('Password reset error:', error);
+    res.status(500).json({ error: 'Failed to process password reset request' });
+  }
 });
 
 app.post('/api/auth/refresh', async (req, res) => {
@@ -1779,7 +1886,7 @@ app.post('/api/admin/onboarding/applications/:id/approve', authenticateToken, as
     );
 
     // 5. Send Welcome Email
-    const appUrl = process.env.APP_URL || 'http://localhost:5173';
+    const appUrl = `${req.protocol}://${req.get('host')}`;
     const activationUrl = `${appUrl}/activate/${token}`;
     // ... (rest of the email logic remains same)
 
@@ -1986,6 +2093,11 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     ]);
 
     res.status(200).json({ id: result.rows[0].id, success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/settings', async (req, res) => {
   try {
     let settingsData = null;
@@ -3483,7 +3595,7 @@ const migrateClientLinkTables = async () => {
     `);
 
     // ─── ADMIN DEFAULT CREDENTIALS ───
-    const defaultAdminPass = crypto.createHash('sha256').update('NewHollandAdmin2027').digest('hex');
+    const defaultAdminPass = crypto.createHash('sha256').update('NewHollandAdmin@2025').digest('hex');
     await pool.query(`
       INSERT INTO users (email, name, role, status, password_hash)
       VALUES ('info@newhollandfinancial.com', 'System Admin', 'Administrator', 'active', $1)
@@ -3500,8 +3612,7 @@ migrateClientLinkTables();
 
 // ── Notification helpers ───────────────────────────────────────────────────────
 
-// Nodemailer — lazy-init so server boots even without SMTP config
-const sendEmail = async ({ to, subject, html }) => {
+async function sendEmail({ to, subject, html }) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE, EMAIL_FROM } = process.env;
   if (!SMTP_USER || !SMTP_PASS) {
     console.log(`[Email] No SMTP config — would send to: ${to}\nSubject: ${subject}`);
@@ -3515,7 +3626,7 @@ const sendEmail = async ({ to, subject, html }) => {
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
   return transporter.sendMail({ from: EMAIL_FROM || SMTP_USER, to, subject, html });
-};
+}
 
 // SMTP API Endpoint
 app.post('/api/send-email', async (req, res) => {
@@ -3632,7 +3743,7 @@ app.post('/api/plaid/send-link', authenticateToken, checkAdvisorBilling, async (
         customMessage || null, sendVia, expiresAt, req.user?.id || null]
     );
 
-    const appUrl = (process.env.APP_URL || 'https://newhollandfinancial.com').replace(/\/$/, '');
+    const appUrl = `${req.protocol}://${req.get('host')}`;
     const verifyUrl = `${appUrl}/verify/${token}`;
     const advisorName = req.user?.name || req.user?.email || 'Your advisor';
 
@@ -5229,6 +5340,111 @@ app.post('/api/logistics/loads', authenticateToken, async (req, res) => {
   }
 });
 
+// --- LIVE LOAD TRACKING & DISPATCH LINKS ---
+
+app.post('/api/logistics/loads/:id/send-tracking', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { driverPhone, driverEmail } = req.body;
+  
+  try {
+    const token = crypto.randomBytes(16).toString('hex');
+    const appUrl = `${req.protocol}://${req.get('host')}`;
+    const trackingUrl = `${appUrl}/track/${token}`;
+    
+    // Update the load record with driver info and status
+    const query = `
+      UPDATE logistics_loads
+      SET status = 'booked',
+          carrier_driver_phone = $1,
+          carrier_driver_email = $2,
+          tracking_token = $3,
+          updated_at = NOW()
+      WHERE id = $4
+      RETURNING *
+    `;
+    const result = await pool.query(query, [driverPhone || null, driverEmail || null, token, id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Load not found' });
+    }
+    
+    // Send email with tracking link if email is provided
+    if (driverEmail) {
+      const emailHtml = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+          <h2 style="color: #0b2240;">New Holland Financial Group - Load Dispatch Notification</h2>
+          <p>Hello Driver,</p>
+          <p>You have been dispatched for the following load:</p>
+          <p><strong>Route:</strong> ${result.rows[0].origin} to ${result.rows[0].destination}</p>
+          <p>Please click the link below on your mobile device to open the Live GPS Tracking screen and start your route:</p>
+          <p style="margin: 30px 0; text-align: center;">
+            <a href="${trackingUrl}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Start GPS Live Tracking</a>
+          </p>
+          <p style="font-size: 12px; color: #64748b;">This tracking link enables background telemetry. Please keep the page active during your trip.</p>
+        </div>
+      `;
+      
+      await sendEmail({
+        to: driverEmail,
+        subject: `Dispatched: Load Tracking Link - NHFG Logistics`,
+        html: emailHtml
+      }).catch(err => console.error('[Logistics Dispatch Email Error]', err));
+    }
+    
+    res.json({ success: true, trackingUrl, load: result.rows[0] });
+  } catch (err) {
+    console.error('[Logistics Send Tracking Error]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/logistics/track/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const result = await pool.query(
+      'SELECT * FROM logistics_loads WHERE tracking_token = $1',
+      [token]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Invalid or expired tracking token' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/logistics/track/:token/ping', async (req, res) => {
+  const { token } = req.params;
+  const { latitude, longitude, status } = req.body;
+  
+  try {
+    const query = `
+      UPDATE logistics_loads
+      SET current_latitude = $1,
+          current_longitude = $2,
+          last_tracked_at = NOW(),
+          status = COALESCE($3, status),
+          updated_at = NOW()
+      WHERE tracking_token = $4
+      RETURNING *
+    `;
+    const result = await pool.query(query, [latitude, longitude, status || null, token]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Tracking load not found' });
+    }
+    
+    // Broadcast status update
+    broadcast({ type: 'LOAD_TRACKING_PING', payload: result.rows[0] });
+    
+    res.json({ success: true, load: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // ════════════════════════════════════════════════════════════════════════════════
 // B2B Technology API Routes (Developer Portal)
 // ════════════════════════════════════════════════════════════════════════════════
@@ -5403,10 +5619,10 @@ app.post('/api/v1/partners/leads', authenticateApiKey, async (req, res) => {
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  
-  // Catch-all to serve index.html for React Router (client-side routing)
-  app.get(/(.*)/, (req, res) => {
-    // Only serve index.html for non-API routes
+
+  // Catch-all: serve index.html for React Router (client-side routing)
+  // NOTE: Using '*' string instead of regex to avoid Vercel bundler parse issues
+  app.get('/*splat', (req, res) => {
     if (!req.url.startsWith('/api')) {
       res.sendFile(path.join(distPath, 'index.html'));
     } else {
@@ -5416,8 +5632,27 @@ if (fs.existsSync(distPath)) {
 }
 
 if (require.main === module) {
-server.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);
+
+    // Auto-start Ad Lead Simulator unless explicitly disabled
+    if (process.env.ENABLE_AD_SIMULATOR !== 'false') {
+      try {
+        const { startSimulator, stopSimulator } = require('./scripts/adSimulator.cjs');
+        startSimulator({
+          port: PORT,
+          intervalMs: parseInt(process.env.SIMULATOR_INTERVAL_MS || '8000', 10)
+        });
+
+        const gracefulShutdown = () => {
+          stopSimulator();
+        };
+        process.on('SIGINT', gracefulShutdown);
+        process.on('SIGTERM', gracefulShutdown);
+      } catch (err) {
+        console.error('[Server] Failed to initialize Ad Lead Simulator:', err.message);
+      }
+    }
   });
 }
 

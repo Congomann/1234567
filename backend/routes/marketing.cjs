@@ -4,7 +4,7 @@ const router = express.Router();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 // Helper: get Stripe lazily (won't crash if key not set)
@@ -248,6 +248,16 @@ router.get('/social/mentions', async (req, res) => {
     { id: '4', platform: 'Google Reviews', user: 'Anonymous', content: 'Wish they had more local office locations.', sentiment: 'neutral', date: new Date(Date.now() - 259200000).toISOString() }
   ];
   res.json(mockMentions);
+});
+
+// GET /api/marketing/automations
+router.get('/automations', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM workflow_automations ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch automations' });
+  }
 });
 
 // POST /api/marketing/automations

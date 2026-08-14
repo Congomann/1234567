@@ -511,3 +511,28 @@ INSERT INTO marketing_campaigns (name, status, type, budget, spend, roi, impress
     ('Mortgage Q4 Push', 'Draft', 'Google Ads', 8000, 0, 0, 0, 0, 0, 'Rates Are Dropping — Lock In Your Mortgage Today', 'Current rates are at a 2-year low. Now is the time...')
 ON CONFLICT DO NOTHING;
 
+
+-- ── LOGISTICS LOADS & DISPATCH TELEMETRY ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.logistics_loads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    origin VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    pickup_date VARCHAR(50),
+    delivery_date VARCHAR(50),
+    equipment_type VARCHAR(100),
+    rate_usd NUMERIC(10, 2),
+    status VARCHAR(50) DEFAULT 'available',
+    advisor_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+    carrier_driver_phone VARCHAR(50),
+    carrier_driver_email VARCHAR(255),
+    current_latitude NUMERIC(9, 6),
+    current_longitude NUMERIC(9, 6),
+    last_tracked_at TIMESTAMP WITH TIME ZONE,
+    tracking_token VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_logistics_loads_token ON public.logistics_loads(tracking_token);
+CREATE INDEX IF NOT EXISTS idx_logistics_loads_advisor ON public.logistics_loads(advisor_id);
+
+

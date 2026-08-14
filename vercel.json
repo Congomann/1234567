@@ -1,8 +1,32 @@
 {
   "crons": [
     {
-      "path": "/api/health",
+      "path": "/api/heartbeat",
       "schedule": "0 0 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://newhollandfinancial.com/$1",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "newholladfinancial.com"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "destination": "https://newhollandfinancial.com/$1",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.newholladfinancial.com"
+        }
+      ]
     }
   ],
   "rewrites": [

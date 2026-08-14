@@ -399,8 +399,10 @@ export interface CalendarEvent {
   endDate?: string;
   time: string;
   endTime?: string;
+  timezone?: string;
   type: 'meeting' | 'reminder' | 'task' | 'off-day';
-  status?: 'scheduled' | 'canceled' | 'completed';
+  status?: 'scheduled' | 'rescheduled' | 'canceled' | 'completed';
+  recordingEnabled?: boolean;
   description?: string;
   hasGoogleMeet?: boolean;
   meetingLink?: string;
@@ -536,6 +538,7 @@ export interface CompanySettings {
   logoUrl?: string;
   hideLogo?: boolean;
   hideStreetAddress?: boolean;
+  hideDirectLine?: boolean;
 
   // Theme & Branding
   themePrimaryColor?: string;

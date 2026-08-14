@@ -1,6 +1,7 @@
+require('dotenv').config({ path: './backend/.env' });
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: 'postgres://postgres.boylqkqyclzayrupbrbd:2027Newholand@aws-1-us-east-2.pooler.supabase.com:6543/postgres'
+  connectionString: process.env.DATABASE_URL
 });
 
 async function run() {

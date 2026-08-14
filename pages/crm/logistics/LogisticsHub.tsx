@@ -3,19 +3,21 @@ import {
   Truck, 
   Box, 
   Globe, 
-  Settings, 
   Container, 
   MapPin, 
   Clock, 
   Navigation, 
   MoreVertical, 
   Plus, 
-  Search,
-  Filter,
+  PlusCircle,
   ArrowUpRight,
   TrendingUp,
   Activity,
-  Users
+  Users,
+  Send,
+  ExternalLink,
+  X,
+  CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LogisticsNiche } from '../../../types';
@@ -24,11 +26,15 @@ import { Tab3DBanner } from '../../../components/shared/Tab3DBanner';
 
 interface KanbanDeal {
   id: string;
+  realId: string;
   title: string;
   value: number;
   client: string;
   nicheSpecificField: string;
   status: string;
+  trackingToken?: string;
+  driverPhone?: string;
+  driverEmail?: string;
 }
 
 const TRUCKING_STAGES = ['Dispatched', 'En Route', 'Delivered'];
@@ -41,17 +47,27 @@ export const LogisticsHub: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loads, setLoads] = useState<any[]>([]);
 
+  // Dispatch Tracking Modal State
+  const [selectedDeal, setSelectedDeal] = useState<KanbanDeal | null>(null);
+  const [driverPhone, setDriverPhone] = useState('');
+  const [driverEmail, setDriverEmail] = useState('');
+  const [dispatching, setDispatching] = useState(false);
+  const [dispatchSuccess, setDispatchSuccess] = useState(false);
+  const [generatedUrl, setGeneratedUrl] = useState('');
+
+  const fetchLoads = async () => {
+    try {
+      setLoading(true);
+      const data = await Backend.getLoads();
+      setLoads(data);
+    } catch (err) {
+      console.error('Failed to fetch loads:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchLoads = async () => {
-      try {
-        const data = await Backend.getLoads();
-        setLoads(data);
-      } catch (err) {
-        console.error('Failed to fetch loads:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchLoads();
   }, []);
 
@@ -68,12 +84,16 @@ export const LogisticsHub: React.FC = () => {
         const stage = load.status || 'available';
         if (stages[stage]) {
             stages[stage].push({
-                id: load.id.substring(0, 8).toUpperCase(),
-                title: `${load.origin} to ${load.destination}`,
+                id: 'LD-' + load.id.substring(0, 5).toUpperCase(),
+                realId: load.id,
+                title: load.origin + ' to ' + load.destination,
                 value: load.totalRate || load.rate_usd || 0,
                 client: 'NH Brokerage',
                 nicheSpecificField: load.trailerType || load.equipment_type || 'Dry Van',
-                status: stage
+                status: stage,
+                trackingToken: load.tracking_token,
+                driverPhone: load.carrier_driver_phone,
+                driverEmail: load.carrier_driver_email
             });
         }
     });
@@ -83,13 +103,13 @@ export const LogisticsHub: React.FC = () => {
   // Mock Deals for other niches
   const mockDeals: Record<LogisticsNiche, Record<string, KanbanDeal[]>> = {
     [LogisticsNiche.TRUCKING]: {
-      'Dispatched': [{ id: 'TRK-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer', status: 'Dispatched' }],
-      'En Route': [{ id: 'TRK-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed', status: 'En Route' }],
-      'Delivered': [{ id: 'TRK-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van', status: 'Delivered' }]
+      'Dispatched': [{ id: 'TRK-101', realId: 'mock-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer', status: 'Dispatched' }],
+      'En Route': [{ id: 'TRK-102', realId: 'mock-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed', status: 'En Route' }],
+      'Delivered': [{ id: 'TRK-103', realId: 'mock-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van', status: 'Delivered' }]
     },
     [LogisticsNiche.FUEL]: {
-      'Contract Sent': [{ id: 'FUL-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons', status: 'Contract Sent' }],
-      'Delivered': [{ id: 'FUL-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons', status: 'Delivered' }],
+      'Contract Sent': [{ id: 'FUL-201', realId: 'mock-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons', status: 'Contract Sent' }],
+      'Delivered': [{ id: 'FUL-202', realId: 'mock-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons', status: 'Delivered' }],
       'Paid': []
     },
     [LogisticsNiche.FREIGHT_BROKERAGE]: getFreightDeals()
@@ -129,11 +149,54 @@ export const LogisticsHub: React.FC = () => {
     }
   };
 
+  // Submit tracking dispatch request to backend
+  const handleSendTracking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDeal) return;
+    
+    setDispatching(true);
+    try {
+      const res = await fetch('/api/logistics/loads/' + selectedDeal.realId + '/send-tracking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token')
+        },
+        body: JSON.stringify({
+          driverPhone,
+          driverEmail
+        })
+      });
+      
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setGeneratedUrl(data.trackingUrl);
+        setDispatchSuccess(true);
+        fetchLoads(); // Refresh Kanban board
+      } else {
+        alert(data.error || 'Failed to dispatch tracking link.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Error sending tracking link.');
+    } finally {
+      setDispatching(false);
+    }
+  };
+
+  const openDispatchModal = (deal: KanbanDeal) => {
+    setSelectedDeal(deal);
+    setDriverPhone(deal.driverPhone || '');
+    setDriverEmail(deal.driverEmail || '');
+    setDispatchSuccess(false);
+    setGeneratedUrl('');
+  };
+
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
       <Tab3DBanner
         cards={[
-          { title: "Active Freight Loads", value: `${loads.length || 128} Freight Loads`, subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board" },
+          { title: "Active Freight Loads", value: loads.length + " Freight Loads", subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board" },
           { title: "Fleet GPS Dispatch", value: "42 Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow", linkText: "GPS Telematics" },
           { title: "Carrier Rate Confirmations", value: "$420,000 Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink", linkText: "Freight Invoices" }
         ]}
@@ -156,11 +219,7 @@ export const LogisticsHub: React.FC = () => {
             <button
               key={niche}
               onClick={() => setActiveNiche(niche)}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeNiche === niche
-                  ? 'bg-white text-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.08)]'
-                  : 'text-slate-400 hover:bg-white/50'
-              }`}
+              className={"px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all " + (activeNiche === niche ? "bg-white text-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.08)]" : "text-slate-400 hover:bg-white/50")}
             >
               {niche}
             </button>
@@ -173,7 +232,7 @@ export const LogisticsHub: React.FC = () => {
         {getStats().map((stat, i) => (
           <div key={i} className="bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 group">
             <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+              <div className={"p-3 rounded-2xl " + stat.bg + " " + stat.color + " group-hover:scale-110 transition-transform"}>
                 <stat.icon size={20} />
               </div>
               <ArrowUpRight size={16} className="text-slate-300" />
@@ -198,7 +257,7 @@ export const LogisticsHub: React.FC = () => {
 
         <div className="flex overflow-x-auto gap-6 pb-6 snap-x">
           {getStages().map((stage) => (
-            <div key={stage} className="flex-1 min-w-[300px] snap-center">
+            <div key={stage} className="flex-1 min-w-[320px] snap-center">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{stage}</h4>
                 <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">
@@ -207,18 +266,59 @@ export const LogisticsHub: React.FC = () => {
               </div>
               <div className="space-y-4">
                 {mockDeals[activeNiche][stage]?.map((deal) => (
-                  <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group">
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{deal.id}</span>
-                      <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <MoreVertical size={14} className="text-slate-300" />
+                  <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between min-h-[220px]">
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{deal.id}</span>
+                        <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer">
+                          <MoreVertical size={14} className="text-slate-300" />
+                        </div>
                       </div>
+                      <h5 className="font-black text-slate-900 mb-1 tracking-tight group-hover:text-blue-600 transition-colors">{deal.title}</h5>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{deal.client}</p>
                     </div>
-                    <h5 className="font-black text-slate-900 mb-1 tracking-tight group-hover:text-blue-600 transition-colors">{deal.title}</h5>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{deal.client}</p>
-                    <div className="flex items-center justify-between pt-6 mt-6 border-t border-slate-50">
+
+                    {/* DISPATCH ACTIONS & STATUS INDICATORS */}
+                    {activeNiche === LogisticsNiche.FREIGHT_BROKERAGE && (
+                      <div className="mt-4 pt-4 border-t border-slate-50 space-y-3">
+                        {deal.status === 'available' && (
+                          <button
+                            onClick={() => openDispatchModal(deal)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all"
+                          >
+                            <Send size={11} /> Dispatch &amp; Track Driver
+                          </button>
+                        )}
+                        {(deal.status === 'booked' || deal.status === 'in_transit') && (
+                          <div className="flex gap-2">
+                            <a
+                              href={"/track/" + deal.trackingToken}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-emerald-500/10 font-bold"
+                            >
+                              <Navigation size={11} className="animate-pulse" /> Track Live 🛰️
+                            </a>
+                            <button
+                              onClick={() => openDispatchModal(deal)}
+                              className="px-3 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl transition-all"
+                              title="Update Driver Contact Info"
+                            >
+                              <PlusCircle size={14} />
+                            </button>
+                          </div>
+                        )}
+                        {deal.status === 'delivered' && (
+                          <div className="w-full py-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                            <CheckCircle2 size={12} className="text-emerald-500" /> Freight Delivered
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-50">
                       <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest">{deal.nicheSpecificField}</span>
-                      <span className="font-black text-slate-900 tracking-tighter">${deal.value.toLocaleString()}</span>
+                      <span className="font-black text-slate-900 tracking-tighter">{"$" + deal.value.toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
@@ -232,6 +332,110 @@ export const LogisticsHub: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* DISPATCH & TRACKING LINK TRIGGER MODAL */}
+      {selectedDeal && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 w-full max-w-lg p-8 md:p-10 shadow-2xl relative overflow-hidden animate-in zoom-in-95">
+            
+            <button 
+              onClick={() => setSelectedDeal(null)}
+              className="absolute top-6 right-6 p-2 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded-xl transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                <Truck size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">Dispatch Telematics</h3>
+                <p className="text-xs text-slate-500 font-medium">Load: <strong className="text-slate-900 font-semibold">{selectedDeal.id}</strong></p>
+              </div>
+            </div>
+
+            {dispatchSuccess ? (
+              <div className="space-y-6 text-center py-4">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
+                  <CheckCircle2 size={28} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-black text-slate-900 text-base">Dispatch Link Sent!</h4>
+                  <p className="text-xs text-slate-500 font-semibold max-w-sm mx-auto leading-relaxed">
+                    The background live tracking instructions have been emailed to the driver at <strong className="text-slate-800 font-bold">{driverEmail}</strong>.
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left space-y-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Generated Driver URL</span>
+                  <a 
+                    href={generatedUrl} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-xs text-blue-600 hover:underline font-bold font-mono break-all inline-flex items-center gap-1.5"
+                  >
+                    {generatedUrl} <ExternalLink size={12} />
+                  </a>
+                </div>
+
+                <button
+                  onClick={() => setSelectedDeal(null)}
+                  className="w-full py-4 bg-slate-900 hover:bg-black text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all"
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSendTracking} className="space-y-6">
+                <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Generate and send a background live telematics link. The carrier driver will open this URL on their mobile browser to report real-time GPS coordinates.
+                </p>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Driver Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. driver@carriertrucking.com"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      value={driverEmail}
+                      onChange={e => setDriverEmail(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Driver Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. (555) 019-9000"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      value={driverPhone}
+                      onChange={e => setDriverPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={dispatching}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {dispatching ? (
+                    <span className="animate-pulse">Generating Link &amp; Sending Dispatch...</span>
+                  ) : (
+                    <>
+                      <Send size={14} /> Send Tracking Link
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -7,7 +7,7 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 // SignalWire Environment Credentials
@@ -88,6 +88,15 @@ let memoryExtensionsStore = [...defaultExtensions];
 let memoryCallsStore = [...defaultCalls];
 let memorySMSStore = [...defaultSMS];
 
+// Helper: Phone Number Validation (E.164 & Basic Digit check)
+const isValidPhoneNumber = (phone) => {
+  if (!phone || typeof phone !== 'string') return false;
+  const cleaned = phone.trim();
+  if (/[a-zA-Z]/.test(cleaned)) return false;
+  const digitOnly = cleaned.replace(/[^0-9]/g, '');
+  return digitOnly.length >= 7 && digitOnly.length <= 15;
+};
+
 // Helper: SignalWire HTTP Request Helper
 const signalwireFetch = async (endpoint, options = {}) => {
   const authHeader = 'Basic ' + Buffer.from(`${SIGNALWIRE_PROJECT_ID}:${SIGNALWIRE_API_TOKEN}`).toString('base64');
@@ -123,68 +132,179 @@ router.get('/credentials', (req, res) => {
 router.get('/extensions', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM advisor_extensions ORDER BY extension ASC');
-    if (rows.length > 0) return res.json(rows);
-  } catch (_) { }
-  res.json(memoryExtensionsStore);
+    return res.json(rows);
+  } catch (err) {
+    console.error('[SignalWire DB Extensions Error]:', err.message);
+    res.json(memoryExtensionsStore);
+  }
 });
 
 // ── 3. GET /api/signalwire/calls ──
 router.get('/calls', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM telephony_calls ORDER BY created_at DESC');
-    if (rows.length > 0) return res.json(rows);
-  } catch (_) { }
-  res.json(memoryCallsStore);
+    return res.json(rows);
+  } catch (err) {
+    console.error('[SignalWire DB Calls Error]:', err.message);
+    res.json(memoryCallsStore);
+  }
 });
 
 // ── 4. POST /api/signalwire/call (Initiate Outbound Call) ──
 router.post('/call', async (req, res) => {
-  const { toNumber, leadName, leadId, advisorExtension } = req.body;
-  if (!toNumber) return res.status(400).json({ error: 'toNumber is required' });
+  const toNumber = req.body.to || req.body.toNumber;
+  const fromNumber = req.body.from || SIGNALWIRE_PHONE_NUMBER;
+  const leadName = req.body.leadName;
+  const leadId = req.body.leadId;
+  const advisorExtension = req.body.extension || req.body.advisorExtension || '101';
+
+  if (!toNumber || !isValidPhoneNumber(toNumber)) {
+    return res.status(400).json({ error: 'Invalid phone number format. Must be valid phone digits (e.g. +18885550199).' });
+  }
 
   const callSid = 'sw_call_' + crypto.randomBytes(6).toString('hex');
   const newCall = {
     id: crypto.randomUUID(),
     call_sid: callSid,
     direction: 'outbound',
-    from_number: SIGNALWIRE_PHONE_NUMBER,
+    from_number: fromNumber,
     to_number: toNumber,
-    lead_name: leadName || 'Direct Call Lead',
+    lead_name: leadName || 'Direct Softphone Call',
     lead_id: leadId || null,
-    advisor_extension: advisorExtension || '101',
+    advisor_extension: advisorExtension,
     status: 'in-progress',
-    duration_seconds: 45,
+    duration_seconds: 0,
     recording_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-    transcript: `Call connected to ${leadName || toNumber}. Discussed financial goals and product options.`,
+    transcript: `Call connected to ${leadName || toNumber}. Active softphone call.`,
     ai_rating: 'Warm',
-    ai_qualification_summary: 'Direct advisor call completed successfully.',
+    ai_qualification_summary: 'Direct advisor softphone call initiated.',
     created_at: new Date().toISOString()
   };
 
   // Dispatch via SignalWire REST API if live credentials available
-  const bodyParams = new URLSearchParams({
-    From: SIGNALWIRE_PHONE_NUMBER,
-    To: toNumber,
-    Url: `https://${req.headers.host || 'localhost:3001'}/api/signalwire/ivr`
-  });
-  await signalwireFetch('Calls.json', { method: 'POST', body: bodyParams.toString() });
+  try {
+    const bodyParams = new URLSearchParams({
+      From: fromNumber,
+      To: toNumber,
+      Url: `https://${req.headers.host || 'localhost:3001'}/api/signalwire/ivr`
+    });
+    await signalwireFetch('Calls.json', { method: 'POST', body: bodyParams.toString() });
+  } catch (err) {
+    console.warn('[SignalWire REST API Call Dispatch Warning]:', err.message);
+  }
 
   try {
     await pool.query(`
       INSERT INTO telephony_calls 
-      (call_sid, direction, from_number, to_number, lead_name, lead_id, advisor_extension, status, duration_seconds, recording_url, transcript, ai_rating, ai_qualification_summary)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    `, [newCall.call_sid, newCall.direction, newCall.from_number, newCall.to_number, newCall.lead_name, newCall.lead_id, newCall.advisor_extension, 'completed', newCall.duration_seconds, newCall.recording_url, newCall.transcript, newCall.ai_rating, newCall.ai_qualification_summary]);
-  } catch (_) { }
+      (id, call_sid, direction, from_number, to_number, lead_name, lead_id, advisor_extension, status, duration_seconds, recording_url, transcript, ai_rating, ai_qualification_summary, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $15)
+    `, [
+      newCall.id,
+      newCall.call_sid,
+      newCall.direction,
+      newCall.from_number,
+      newCall.to_number,
+      newCall.lead_name,
+      newCall.lead_id,
+      newCall.advisor_extension,
+      newCall.status,
+      newCall.duration_seconds,
+      newCall.recording_url,
+      newCall.transcript,
+      newCall.ai_rating,
+      newCall.ai_qualification_summary,
+      newCall.created_at
+    ]);
+  } catch (err) {
+    console.error('[SignalWire DB Call Insert Error]:', err.message);
+  }
 
   memoryCallsStore.unshift(newCall);
-  res.json({ success: true, call: newCall });
+
+  res.json({
+    success: true,
+    callId: newCall.id,
+    status: newCall.status,
+    sid: newCall.call_sid,
+    call: newCall
+  });
 });
+
+// ── Call Termination / Status Update Handler ──
+const handleCallHangup = async (req, res) => {
+  const { callId, callSid, durationSeconds, status } = req.body;
+  const targetIdentifier = callId || callSid;
+  const finalStatus = status || 'completed';
+  const duration = typeof durationSeconds === 'number' ? Math.max(0, Math.floor(durationSeconds)) : 0;
+
+  if (!targetIdentifier) {
+    return res.status(400).json({ error: 'callId or callSid is required' });
+  }
+
+  if (callSid) {
+    try {
+      const bodyParams = new URLSearchParams({ Status: 'completed' });
+      await signalwireFetch(`Calls/${callSid}.json`, { method: 'POST', body: bodyParams.toString() });
+    } catch (err) {
+      console.warn('[SignalWire Hangup Warning]:', err.message);
+    }
+  }
+
+  let updatedCall = null;
+
+  try {
+    const { rows } = await pool.query(`
+      UPDATE telephony_calls
+      SET status = $1, duration_seconds = $2, updated_at = NOW()
+      WHERE id::text = $3 OR call_sid = $3
+      RETURNING *
+    `, [finalStatus, duration, targetIdentifier]);
+
+    if (rows.length > 0) {
+      updatedCall = rows[0];
+    }
+  } catch (err) {
+    console.error('[SignalWire DB Hangup Error]:', err.message);
+  }
+
+  const memIndex = memoryCallsStore.findIndex(c => c.id === targetIdentifier || c.call_sid === targetIdentifier);
+  if (memIndex !== -1) {
+    memoryCallsStore[memIndex].status = finalStatus;
+    memoryCallsStore[memIndex].duration_seconds = duration;
+    memoryCallsStore[memIndex].updated_at = new Date().toISOString();
+    if (!updatedCall) updatedCall = memoryCallsStore[memIndex];
+  }
+
+  if (!updatedCall) {
+    updatedCall = {
+      id: targetIdentifier,
+      call_sid: callSid || targetIdentifier,
+      status: finalStatus,
+      duration_seconds: duration
+    };
+  }
+
+  res.json({
+    success: true,
+    callId: updatedCall.id || targetIdentifier,
+    status: finalStatus,
+    durationSeconds: duration,
+    call: updatedCall
+  });
+};
+
+router.post('/hangup', handleCallHangup);
+router.post('/call/status', handleCallHangup);
 
 // ── 5. POST /api/signalwire/ai-call (Trigger AI Qualification Agent Call) ──
 router.post('/ai-call', async (req, res) => {
-  const { toNumber, leadName, leadId } = req.body;
-  if (!toNumber) return res.status(400).json({ error: 'toNumber is required' });
+  const toNumber = req.body.to || req.body.toNumber;
+  const leadName = req.body.leadName;
+  const leadId = req.body.leadId;
+
+  if (!toNumber || !isValidPhoneNumber(toNumber)) {
+    return res.status(400).json({ error: 'Invalid phone number format.' });
+  }
 
   const callSid = 'sw_ai_' + crypto.randomBytes(6).toString('hex');
   
@@ -219,27 +339,52 @@ router.post('/ai-call', async (req, res) => {
   try {
     await pool.query(`
       INSERT INTO telephony_calls 
-      (call_sid, direction, from_number, to_number, lead_name, lead_id, advisor_extension, status, duration_seconds, recording_url, transcript, ai_rating, ai_qualification_summary)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    `, [newAiCall.call_sid, newAiCall.direction, newAiCall.from_number, newAiCall.to_number, newAiCall.lead_name, newAiCall.lead_id, newAiCall.advisor_extension, 'completed', newAiCall.duration_seconds, newAiCall.recording_url, newAiCall.transcript, newAiCall.ai_rating, newAiCall.ai_qualification_summary]);
-  } catch (_) { }
+      (id, call_sid, direction, from_number, to_number, lead_name, lead_id, advisor_extension, status, duration_seconds, recording_url, transcript, ai_rating, ai_qualification_summary, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $15)
+    `, [
+      newAiCall.id,
+      newAiCall.call_sid,
+      newAiCall.direction,
+      newAiCall.from_number,
+      newAiCall.to_number,
+      newAiCall.lead_name,
+      newAiCall.lead_id,
+      newAiCall.advisor_extension,
+      newAiCall.status,
+      newAiCall.duration_seconds,
+      newAiCall.recording_url,
+      newAiCall.transcript,
+      newAiCall.ai_rating,
+      newAiCall.ai_qualification_summary,
+      newAiCall.created_at
+    ]);
+  } catch (err) {
+    console.error('[SignalWire DB AI Call Insert Error]:', err.message);
+  }
 
   memoryCallsStore.unshift(newAiCall);
-  res.json({ success: true, aiCall: newAiCall });
+  res.json({ success: true, callId: newAiCall.id, status: newAiCall.status, sid: newAiCall.call_sid, aiCall: newAiCall });
 });
 
 // ── 6. GET & POST /api/signalwire/sms ──
 router.get('/sms/history', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM telephony_sms ORDER BY created_at DESC');
-    if (rows.length > 0) return res.json(rows);
-  } catch (_) { }
-  res.json(memorySMSStore);
+    return res.json(rows);
+  } catch (err) {
+    console.error('[SignalWire DB SMS Error]:', err.message);
+    res.json(memorySMSStore);
+  }
 });
 
 router.post('/sms/send', async (req, res) => {
-  const { toNumber, leadName, messageText } = req.body;
-  if (!toNumber || !messageText) return res.status(400).json({ error: 'toNumber and messageText are required' });
+  const toNumber = req.body.to || req.body.toNumber;
+  const leadName = req.body.leadName;
+  const messageText = req.body.messageText;
+
+  if (!toNumber || !isValidPhoneNumber(toNumber) || !messageText) {
+    return res.status(400).json({ error: 'Valid toNumber and messageText are required' });
+  }
 
   const messageSid = 'sw_msg_' + crypto.randomBytes(6).toString('hex');
   const newSMS = {
@@ -255,19 +400,25 @@ router.post('/sms/send', async (req, res) => {
   };
 
   // Dispatch via SignalWire REST API if live credentials available
-  const bodyParams = new URLSearchParams({
-    From: SIGNALWIRE_PHONE_NUMBER,
-    To: toNumber,
-    Body: messageText
-  });
-  await signalwireFetch('Messages.json', { method: 'POST', body: bodyParams.toString() });
+  try {
+    const bodyParams = new URLSearchParams({
+      From: SIGNALWIRE_PHONE_NUMBER,
+      To: toNumber,
+      Body: messageText
+    });
+    await signalwireFetch('Messages.json', { method: 'POST', body: bodyParams.toString() });
+  } catch (err) {
+    console.warn('[SignalWire REST API SMS Send Warning]:', err.message);
+  }
 
   try {
     await pool.query(`
-      INSERT INTO telephony_sms (message_sid, direction, from_number, to_number, lead_name, message_text, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `, [newSMS.message_sid, newSMS.direction, newSMS.from_number, newSMS.to_number, newSMS.lead_name, newSMS.message_text, newSMS.status]);
-  } catch (_) { }
+      INSERT INTO telephony_sms (id, message_sid, direction, from_number, to_number, lead_name, message_text, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `, [newSMS.id, newSMS.message_sid, newSMS.direction, newSMS.from_number, newSMS.to_number, newSMS.lead_name, newSMS.message_text, newSMS.status, newSMS.created_at]);
+  } catch (err) {
+    console.error('[SignalWire DB SMS Insert Error]:', err.message);
+  }
 
   memorySMSStore.unshift(newSMS);
   res.json({ success: true, message: newSMS });
