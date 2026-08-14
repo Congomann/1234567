@@ -535,6 +535,31 @@ class NHFGBackend {
         return data.url;
     }
 
+    async uploadDirectToSupabase(file: File): Promise<string> {
+        const { supabase } = await import('./supabaseClient');
+        
+        // Generate a clean, unique filename
+        const cleanName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+        const uniqueName = `${Date.now()}_${cleanName}`;
+        
+        // Upload directly from browser to Supabase Storage, bypassing Vercel limits
+        const { data, error } = await supabase.storage
+            .from('uploads')
+            .upload(uniqueName, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+            
+        if (error) {
+            console.error('[Supabase Client Upload Error]', error);
+            throw new Error(`Direct upload failed: ${error.message}`);
+        }
+        
+        const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(uniqueName);
+        console.log(`[Upload-Direct] File saved directly to Supabase: ${publicUrl}`);
+        return publicUrl;
+    }
+
     // --- ACCESS LOGS ---
     async getAccessLogs(): Promise<any[]> {
         return this.apiRequest<any[]>(`${this.baseUrl}/admin/access-logs`, { headers: this.getAuthHeaders() }, 'access_logs');

@@ -158,7 +158,7 @@ export const WebsiteSettings: React.FC = () => {
             
             try {
                 // Use the new FormData upload to bypass base64 memory limits!
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 
                 let newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
                 if (typeof slotIndex === 'number') {
@@ -217,7 +217,7 @@ export const WebsiteSettings: React.FC = () => {
         if (file) {
             setIsUploading(true);
             try {
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setNewResource(prev => ({ ...prev, thumbnail: storageUrl }));
             } catch (err) {
                 console.error("Resource thumbnail upload failed:", err);
@@ -236,7 +236,7 @@ export const WebsiteSettings: React.FC = () => {
 
             setIsUploading(true);
             try {
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setNewResource(prev => ({ ...prev, url: storageUrl }));
             } catch (err) {
                 console.error("Resource file upload failed:", err);
@@ -249,7 +249,7 @@ export const WebsiteSettings: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             try {
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setSettingsForm(prev => ({ ...prev, aboutImageUrl: storageUrl }));
             } catch (err) {
                 console.error("About image upload failed:", err);
@@ -261,7 +261,7 @@ export const WebsiteSettings: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             try {
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setSettingsForm(prev => ({
                     ...prev,
                     productImages: {
@@ -280,7 +280,7 @@ export const WebsiteSettings: React.FC = () => {
         if (file) {
             setIsUploading(true);
             try {
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setNewPartner(prev => ({ ...prev, value: storageUrl }));
             } catch (err) {
                 console.error("Partner logo upload failed:", err);
@@ -719,7 +719,7 @@ export const WebsiteSettings: React.FC = () => {
                                                     if (file) {
                                                         setIsUploading(true);
                                                         try {
-                                                            const storageUrl = await Backend.uploadFormData(file);
+                                                            const storageUrl = await Backend.uploadDirectToSupabase(file);
                                                             setSettingsForm(prev => ({ ...prev, logoUrl: storageUrl }));
                                                         } catch (err) {
                                                             console.error("Logo upload failed:", err);
