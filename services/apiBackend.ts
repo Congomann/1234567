@@ -497,7 +497,12 @@ class NHFGBackend {
     // --- GENERIC HTTP METHODS ---
     async get<T>(path: string): Promise<T> {
         const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-        return this.apiRequest<T>(url, { headers: this.getAuthHeaders() }, path.replace(/\//g, '_'));
+        const cleanStore = path.startsWith('/chat/channels') ? 'chat_channels' :
+                           path.startsWith('/chat/messages') ? 'chat_messages' :
+                           path.startsWith('/case-notes') ? 'case_notes' :
+                           path.startsWith('/events') ? 'events' :
+                           path.replace(/\//g, '_');
+        return this.apiRequest<T>(url, { headers: this.getAuthHeaders() }, cleanStore);
     }
 
     async post<T>(path: string, body: any): Promise<T> {
@@ -536,28 +541,34 @@ class NHFGBackend {
     }
 
     async uploadDirectToSupabase(file: File): Promise<string> {
-        // 1. Get signed URL from our backend to bypass RLS and Vercel payload limits securely
-        const res = await fetch(`${this.baseUrl}/upload/signed-url`, {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify({ filename: file.name })
-        });
-        const data = await this.handleResponse(res);
-        const { signedUrl, token, path, publicUrl } = data;
+        try {
+            // 1. Try direct Supabase Signed Upload URL
+            const res = await fetch(`${this.baseUrl}/upload/signed-url`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify({ filename: file.name })
+            });
+            if (res.ok) {
+                const data = await this.handleResponse(res);
+                const { signedUrl, token, path, publicUrl } = data;
 
-        // 2. Upload directly to Supabase using the signed URL
-        const { supabase } = await import('./supabaseClient');
-        const { data: uploadData, error } = await supabase.storage
-            .from('uploads')
-            .uploadToSignedUrl(path, token, file);
+                const { supabase } = await import('./supabaseClient');
+                const { data: uploadData, error } = await supabase.storage
+                    .from('uploads')
+                    .uploadToSignedUrl(path, token, file);
 
-        if (error) {
-            console.error('[Supabase Signed Upload Error]', error);
-            throw new Error(`Upload failed: ${error.message || JSON.stringify(error)}`);
+                if (!error) {
+                    console.log(`[Upload-Direct] File saved via signed URL: ${publicUrl}`);
+                    return publicUrl;
+                }
+                console.warn('[Upload-Direct] Signed upload error, attempting multipart upload:', error?.message);
+            }
+        } catch (err: any) {
+            console.warn('[Upload-Direct] Signed upload bypass error, falling back to multipart:', err?.message);
         }
-        
-        console.log(`[Upload-Direct] File saved via signed URL: ${publicUrl}`);
-        return publicUrl;
+
+        // Fallback: Use standard multipart form-data upload endpoint (up to 500MB supported)
+        return this.uploadFormData(file);
     }
 
     // --- ACCESS LOGS ---

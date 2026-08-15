@@ -167,6 +167,8 @@ CREATE TABLE events (
 CREATE INDEX idx_leads_email ON leads(email);
 CREATE INDEX idx_leads_assigned ON leads(assigned_to);
 CREATE INDEX idx_clients_advisor ON clients(advisor_id);
+CREATE INDEX IF NOT EXISTS idx_events_date_time ON events(date ASC, time ASC);
+CREATE INDEX IF NOT EXISTS idx_events_creator ON events(creator_id);
 
 -- COMPANY SETTINGS (Content Management)
 CREATE TABLE company_settings (

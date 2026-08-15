@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS chat_read_receipts (
 
 -- 6. INDEXES for Performance
 CREATE INDEX IF NOT EXISTS idx_chat_messages_channel ON chat_messages(channel_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_chat_channel_members_channel ON chat_channel_members(channel_id);
+CREATE INDEX IF NOT EXISTS idx_chat_channel_members_user ON chat_channel_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_case_notes_client ON case_notes(client_id);
 CREATE INDEX IF NOT EXISTS idx_chat_channels_case ON chat_channels(case_id);
 

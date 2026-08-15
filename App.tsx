@@ -39,9 +39,9 @@ import { Leads } from './pages/crm/Leads';
 import { LeadIntake } from './pages/crm/LeadIntake';
 import { Clients } from './pages/crm/Clients';
 import { Commissions } from './pages/crm/Commissions';
-import { Calendar } from './pages/crm/Calendar';
+const Calendar = React.lazy(() => import('./pages/crm/Calendar').then(m => ({ default: m.Calendar })));
+const Chat = React.lazy(() => import('./pages/crm/Chat').then(m => ({ default: m.Chat })));
 import { Inbox } from './pages/crm/Inbox';
-import { Chat } from './pages/crm/Chat';
 import { ProfileSettings } from './pages/crm/ProfileSettings';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { WebsiteSettings } from './pages/admin/WebsiteSettings';
@@ -141,7 +141,9 @@ const ProtectedCRMRoute: React.FC = () => {
 
   return (
     <CRMLayout>
-      <Outlet />
+      <React.Suspense fallback={<div className="h-full w-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>}>
+        <Outlet />
+      </React.Suspense>
     </CRMLayout>
   );
 };

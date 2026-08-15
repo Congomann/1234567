@@ -630,12 +630,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } else {
           // Restore mock session if present
           const mockId = localStorage.getItem('nhfg_mock_user_id');
+          let activeUser = INITIAL_USERS[0];
           if (mockId) {
             const mockUser = INITIAL_USERS.find(u => u.id === mockId);
-            if (mockUser) setUser(mockUser);
+            if (mockUser) activeUser = mockUser;
           }
-          // Initial mock load
-          await refreshActiveData(null);
+          setUser(activeUser);
+          // Initial load with active user so calendar and CRM data sync immediately
+          await refreshActiveData(activeUser);
         }
       } catch (err) {
         console.error("Bootstrap error:", err);

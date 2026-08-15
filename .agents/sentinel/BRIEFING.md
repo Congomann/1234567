@@ -1,12 +1,12 @@
-# BRIEFING — 2026-08-12T23:32:19-05:00
+# BRIEFING — 2026-08-15T05:02:29Z
 
 ## Mission
-Manage New Holland Financial CRM major system upgrade: 3D glassmorphic meetings dashboard, animated analytics widgets, SignalWire dialer, ad lead ingestion & real-time qualification.
+Manage video upload fix (allow video files including video/mp4 up to 120MB) and performance optimization for calendar & team chat delay.
 
 ## 🔒 My Identity
 - Archetype: sentinel
 - Working directory: /Users/newholland/1234567/.agents/sentinel
-- Orchestrator: ad3cd5ba-596f-4aae-9acb-db7207d6f30d
+- Orchestrator: 5b064446-429a-4c99-a780-46e761b6b0af
 - Victory Auditor: TBD
 
 ## 🔒 Key Constraints
@@ -15,7 +15,7 @@ Manage New Holland Financial CRM major system upgrade: 3D glassmorphic meetings 
 - Must run two crons: Progress Reporting (`*/8 * * * *`) and Liveness Check (`*/10 * * * *`)
 
 ## User Context
-- **Last user request**: System upgrade for CRM (R1: 3D Meetings, R2: Animated Analytics, R3: SignalWire Dialer, R4: Lead Ingestion, R5: Qualification Engine).
+- **Last user request**: Fix video upload issue (mime type video/mp4, up to 120MB) and resolve calendar & team chat display delay. Single self-contained fix with small focused team requested.
 - **Pending clarifications**: None
 - **Delivered results**: None
 
@@ -28,8 +28,8 @@ Manage New Holland Financial CRM major system upgrade: 3D glassmorphic meetings 
 - **Retry count**: 0
 
 ## Routing Decision
-- **Route**: General (`teamwork_preview_orchestrator`)
-- **Rationale**: Full SWE project with 5 major components across frontend UI, backend API, SignalWire dialer, and lead processing pipeline. Does not match Document Review, Math/Proof, or explicit SWE Light signals.
+- **Route**: SWE Light (`teamwork_preview_swe`)
+- **Rationale**: Self-contained bug fix and performance fix with explicit user signal requesting a small, focused team ("Requested team: A small focused team (best for a single self-contained fix)", "This is a single self-contained fix; keep it small and focused").
 
 ## Artifact Index
 - /Users/newholland/1234567/.agents/ORIGINAL_REQUEST.md — Original User Request

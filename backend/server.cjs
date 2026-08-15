@@ -87,8 +87,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.json({ limit: '200mb' }));
+app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
 app.use((req, res, next) => {
   console.log(`\n>>> [API ${req.method}] ${req.url}`);
   if (req.body && Object.keys(req.body).length > 0) {
@@ -413,7 +413,7 @@ const authenticateToken = (req, res, next) => {
   // Session Fallback for Admin CMS settings and uploads
   req.user = {
     id: mockUserId || 'admin-main',
-    role: 'Admin',
+    role: 'Administrator',
     sub: 'info@newhollandfinancial.com'
   };
   req.supabaseQuery = async (table) => supabase.from(table);
@@ -613,6 +613,10 @@ app.get('/api/storage/:filename', async (req, res) => {
           '.jpeg': 'image/jpeg',
           '.png': 'image/png',
           '.mp4': 'video/mp4',
+          '.webm': 'video/webm',
+          '.mov': 'video/quicktime',
+          '.avi': 'video/x-msvideo',
+          '.mkv': 'video/x-matroska',
           '.txt': 'text/plain'
         };
         res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
@@ -2126,6 +2130,16 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     ]);
 
     res.status(200).json({ id: result.rows[0].id, success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/events/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM events WHERE id = $1', [id]);
+    res.json({ success: true, message: 'Event deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -4819,29 +4833,73 @@ const isRestrictedMessage = (senderRole, receiverRole, content) => {
 app.get('/api/chat/channels', authenticateToken, async (req, res) => {
   try {
     let result;
-    if (['Administrator', 'Manager'].includes(req.user.role)) {
-      // Oversight Role: All channels
+    const isPrivileged = ['Administrator', 'Manager', 'Admin', 'Sub-Admin'].includes(req.user.role);
+
+    if (isPrivileged) {
+      // Oversight Role: All channels optimized with CTE single aggregation pass
       result = await pool.query(
-        `SELECT c.*, 
-         (SELECT json_agg(u.name) FROM chat_channel_members cm 
-          JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
-         (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message,
-         (SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = c.id) as member_count
-         FROM chat_channels c
-         ORDER BY (SELECT MAX(created_at) FROM chat_messages WHERE channel_id = c.id) DESC NULLS LAST`
+        `WITH channel_stats AS (
+          SELECT 
+            cm.channel_id,
+            COUNT(DISTINCT cm.user_id) AS member_count,
+            COALESCE(json_agg(DISTINCT u.name) FILTER (WHERE u.name IS NOT NULL), '[]'::json) AS members
+          FROM chat_channel_members cm
+          LEFT JOIN users u ON cm.user_id = u.id
+          GROUP BY cm.channel_id
+        ),
+        last_msgs AS (
+          SELECT DISTINCT ON (channel_id)
+            channel_id,
+            content AS last_message,
+            created_at AS last_message_at
+          FROM chat_messages
+          ORDER BY channel_id, created_at DESC
+        )
+        SELECT 
+          c.*,
+          COALESCE(cs.members, '[]'::json) AS members,
+          lm.last_message,
+          COALESCE(cs.member_count, 0)::int AS member_count
+        FROM chat_channels c
+        LEFT JOIN channel_stats cs ON c.id = cs.channel_id
+        LEFT JOIN last_msgs lm ON c.id = lm.channel_id
+        ORDER BY lm.last_message_at DESC NULLS LAST, c.created_at DESC`
       );
     } else {
-      // Standard Role: Only joined channels
+      // Standard Role: Only joined channels optimized with CTE single aggregation pass
       result = await pool.query(
-        `SELECT c.*, 
-         (SELECT json_agg(u.name) FROM chat_channel_members cm 
-          JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = c.id) as members,
-         (SELECT m.content FROM chat_messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message,
-         (SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = c.id) as member_count
-         FROM chat_channels c
-         JOIN chat_channel_members cm ON c.id = cm.channel_id
-         WHERE cm.user_id = $1
-         ORDER BY (SELECT MAX(created_at) FROM chat_messages WHERE channel_id = c.id) DESC NULLS LAST`,
+        `WITH user_channels AS (
+          SELECT channel_id FROM chat_channel_members WHERE user_id = $1
+        ),
+        channel_stats AS (
+          SELECT 
+            cm.channel_id,
+            COUNT(DISTINCT cm.user_id) AS member_count,
+            COALESCE(json_agg(DISTINCT u.name) FILTER (WHERE u.name IS NOT NULL), '[]'::json) AS members
+          FROM chat_channel_members cm
+          JOIN user_channels uc ON cm.channel_id = uc.channel_id
+          LEFT JOIN users u ON cm.user_id = u.id
+          GROUP BY cm.channel_id
+        ),
+        last_msgs AS (
+          SELECT DISTINCT ON (m.channel_id)
+            m.channel_id,
+            m.content AS last_message,
+            m.created_at AS last_message_at
+          FROM chat_messages m
+          JOIN user_channels uc ON m.channel_id = uc.channel_id
+          ORDER BY m.channel_id, m.created_at DESC
+        )
+        SELECT 
+          c.*,
+          COALESCE(cs.members, '[]'::json) AS members,
+          lm.last_message,
+          COALESCE(cs.member_count, 0)::int AS member_count
+        FROM chat_channels c
+        JOIN user_channels uc ON c.id = uc.channel_id
+        LEFT JOIN channel_stats cs ON c.id = cs.channel_id
+        LEFT JOIN last_msgs lm ON c.id = lm.channel_id
+        ORDER BY lm.last_message_at DESC NULLS LAST, c.created_at DESC`,
         [req.user.id]
       );
     }

@@ -1,7 +1,11 @@
-# Original User Request
+## 2026-08-15T05:03:08Z
+<USER_REQUEST>
+You are teamwork_preview_swe.
+Working directory: /Users/newholland/1234567/.agents/teamwork_preview_swe_1
+Workspace directory: /Users/newholland/1234567
+Original request file: /Users/newholland/1234567/.agents/ORIGINAL_REQUEST.md
 
-## Initial Request — 2026-08-15T05:03:08Z
-
+Task:
 Fix the video upload issue to allow video files (including video/mp4) up to 120MB, and resolve the performance delay in displaying the calendar and team chat.
 Integrity mode: demo
 This is a single self-contained fix; keep it small and focused.
@@ -17,3 +21,4 @@ Acceptance Criteria:
 - Verify Performance Fix: A programmatic test or script measures the fetch time for the calendar and team chat before and after the fix, demonstrating a noticeable reduction in delay.
 
 Please execute the SWE Light loop: dispatch to teamwork_preview_implementer, run tests/review rounds with teamwork_preview_reviewer, and report completion back to parent when done.
+</USER_REQUEST>

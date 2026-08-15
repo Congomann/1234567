@@ -157,8 +157,8 @@ export const WebsiteSettings: React.FC = () => {
             const isVideo = file.type.startsWith('video/');
             
             try {
-                // Use the new FormData upload to bypass base64 memory limits!
-                const storageUrl = await Backend.uploadDirectToSupabase(file);
+                // Use the multipart form-data upload to handle massive files without memory/tier limits
+                const storageUrl = await Backend.uploadFormData(file);
                 
                 let newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
                 if (typeof slotIndex === 'number') {

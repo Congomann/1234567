@@ -160,19 +160,6 @@ export const Home: React.FC = () => {
           </div>
         </div>
 
-        {(companySettings.heroBackgroundType === "video" ||
-          companySettings.heroBackgroundType === "youtube") && (
-            <button
-              onClick={() => setIsMuted(!isMuted)}
-              className="absolute bottom-10 right-10 p-4 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-lg border border-white/10 transition-all z-20 pointer-events-auto"
-            >
-              {isMuted ? (
-                <VolumeX className="h-6 w-6" />
-              ) : (
-                <Volume2 className="h-6 w-6" />
-              )}
-            </button>
-          )}
       </div>
 
 
