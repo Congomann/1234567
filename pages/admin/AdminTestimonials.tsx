@@ -124,9 +124,9 @@ export const AdminTestimonials: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Client Ratings", value: "4.9 / 5.0 Avg", subtitle: "Top Advisor Performance", emoji: "🌟", gradient: "cyan", linkText: "View Ratings" },
-                    { title: "Verified Reviews", value: `${testimonials.length || 142} Reviews`, subtitle: "Client Feedback Vault", emoji: "💬", gradient: "yellow", linkText: "Review Queue" },
-                    { title: "Trust Index Badge", value: "Top 1% Group", subtitle: "National Advisor Rating", emoji: "🏆", gradient: "pink", linkText: "Trust Metrics" }
+                    { title: "Client Ratings", value: "4.9 / 5.0 Avg", subtitle: "Top Advisor Performance", emoji: "🌟", gradient: "cyan", linkText: "View Ratings", linkPath: '#live-reviews' },
+                    { title: "Verified Reviews", value: `${testimonials.length || 142} Reviews`, subtitle: "Client Feedback Vault", emoji: "💬", gradient: "yellow", linkText: "Review Queue", linkPath: '#review-queue' },
+                    { title: "Trust Index Badge", value: "Top 1% Group", subtitle: "National Advisor Rating", emoji: "🏆", gradient: "pink" }
                 ]}
             />
             <div>
@@ -145,7 +145,7 @@ export const AdminTestimonials: React.FC = () => {
             )}
 
             {/* Pending Reviews */}
-            <div className="bg-yellow-50/50 border border-dashed border-yellow-300 rounded-2xl p-6">
+            <div id="review-queue" className="bg-yellow-50/50 border border-dashed border-yellow-300 rounded-2xl p-6">
                 <h2 className="text-lg font-bold text-yellow-800 mb-4">New Testimonials Pending Approval ({pendingTestimonials.length})</h2>
                 {pendingTestimonials.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -157,7 +157,7 @@ export const AdminTestimonials: React.FC = () => {
             </div>
 
             {/* Approved Reviews */}
-            <div>
+            <div id="live-reviews">
                 <h2 className="text-lg font-bold text-slate-700 mb-4">Approved & Live ({approvedTestimonials.length})</h2>
                  {approvedTestimonials.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

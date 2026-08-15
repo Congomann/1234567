@@ -295,9 +295,9 @@ export const Leads: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Total Lead Intake", value: `${leads.length || 3420} Prospects`, subtitle: "Real-Time Ingestion", emoji: "👥", gradient: "cyan", linkText: "All Leads" },
-                    { title: "AI Qualified Tiers", value: "842 Warm Leads", subtitle: "SignalWire AI Score > 75", emoji: "🔥", gradient: "yellow", linkText: "AI Insights" },
-                    { title: "Conversion Speed", value: "4.2 Days Avg", subtitle: "Lead to Proposal Velocity", emoji: "⚡", gradient: "pink", linkText: "Analytics" }
+                    { title: "Total Lead Intake", value: `${leads.length || 3420} Prospects`, subtitle: "Real-Time Ingestion", emoji: "👥", gradient: "cyan", linkText: "All Leads", linkPath: "#all_leads" },
+                    { title: "AI Qualified Tiers", value: "842 Warm Leads", subtitle: "SignalWire AI Score > 75", emoji: "🔥", gradient: "yellow" },
+                    { title: "Conversion Speed", value: "4.2 Days Avg", subtitle: "Lead to Proposal Velocity", emoji: "⚡", gradient: "pink" }
                 ]}
             />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -390,7 +390,7 @@ export const Leads: React.FC = () => {
                 </div>
             )}
 
-            <div className="bg-white shadow-sm border border-slate-200 rounded-[3rem] overflow-hidden">
+            <div id="all_leads" className="bg-white shadow-sm border border-slate-200 rounded-[3rem] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-slate-50">

@@ -81,12 +81,12 @@ export const AdminUsers: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Master System Admin", value: "Full Control", subtitle: "User Terminal Console", emoji: "👑", gradient: "cyan", linkText: "System Health" },
-                    { title: "Active Advisory Staff", value: `${allUsers.length || 42} Advisors`, subtitle: "Role Permissions Active", emoji: "👥", gradient: "yellow", linkText: "Manage Users" },
-                    { title: "Security Access Logs", value: "0 Violations", subtitle: "Audit Trail Enforced", emoji: "🔑", gradient: "pink", linkText: "View Logs" }
+                    { title: "Master System Admin", value: "Full Control", subtitle: "User Terminal Console", emoji: "👑", gradient: "cyan", linkText: "System Health", linkPath: '#system-health' },
+                    { title: "Active Advisory Staff", value: `${allUsers.length || 42} Advisors`, subtitle: "Role Permissions Active", emoji: "👥", gradient: "yellow", linkText: "Manage Users", linkPath: '#terminal' },
+                    { title: "Security Access Logs", value: "0 Violations", subtitle: "Audit Trail Enforced", emoji: "🔑", gradient: "pink", linkText: "View Logs", linkPath: '#terminal' }
                 ]}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div id="system-health" className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <div className="bg-white/40 backdrop-blur-md rounded-[2rem] p-6 border border-white/50 shadow-sm">
                     <div className="flex justify-between items-end mb-2">
                         <div>
@@ -119,7 +119,7 @@ export const AdminUsers: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4">
+            <div id="terminal" className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4">
                 <div>
                     <h1 className="text-sm font-black text-slate-800 tracking-tight">{showArchived ? 'Archived Terminal' : 'Active Terminal'}</h1>
                     <div className="flex items-center gap-1.5 mt-1">

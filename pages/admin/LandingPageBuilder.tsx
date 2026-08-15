@@ -84,9 +84,9 @@ export const LandingPageBuilder: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Product Landing Pages", value: "18 Dynamic Sites", subtitle: "High-Converting Funnels", emoji: "🌐", gradient: "cyan", linkText: "View Pages" },
-                    { title: "Drag & Drop Builder", value: "Responsive Layouts", subtitle: "Visual Page Editor", emoji: "🎨", gradient: "yellow", linkText: "Open Editor" },
-                    { title: "Campaign Conversions", value: "+24% Lead Yield", subtitle: "Real-Time Lead Tracking", emoji: "🚀", gradient: "pink", linkText: "Page Metrics" }
+                    { title: "Product Landing Pages", value: "18 Dynamic Sites", subtitle: "High-Converting Funnels", emoji: "🌐", gradient: "cyan", linkText: "View Pages", linkPath: "#pages_list" },
+                    { title: "Drag & Drop Builder", value: "Responsive Layouts", subtitle: "Visual Page Editor", emoji: "🎨", gradient: "yellow" },
+                    { title: "Campaign Conversions", value: "+24% Lead Yield", subtitle: "Real-Time Lead Tracking", emoji: "🚀", gradient: "pink" }
                 ]}
             />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -122,7 +122,7 @@ export const LandingPageBuilder: React.FC = () => {
             </div>
 
             {viewMode === 'list' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div id="pages_list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {landingPages.map((page: any) => (
                         <div key={page.id} className="bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm group hover:shadow-2xl transition-all relative overflow-hidden">
                             <div className="flex justify-between items-start mb-6">

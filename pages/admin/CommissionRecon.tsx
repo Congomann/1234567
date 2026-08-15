@@ -114,9 +114,9 @@ export const CommissionRecon: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Monthly Carrier Statements", value: "$840,000 Recon", subtitle: "Carrier Payout Audits", emoji: "💵", gradient: "cyan", linkText: "Statements" },
-                    { title: "Statement Discrepancy", value: "0 Unmatched", subtitle: "100% Policy Match", emoji: "🔍", gradient: "yellow", linkText: "Audit Queue" },
-                    { title: "Direct Advisor Payouts", value: "85% - 110% Paid", subtitle: "Direct ACH Wire", emoji: "🏦", gradient: "pink", linkText: "Payout Logs" }
+                    { title: "Monthly Carrier Statements", value: "$840,000 Recon", subtitle: "Carrier Payout Audits", emoji: "💵", gradient: "cyan" },
+                    { title: "Statement Discrepancy", value: "0 Unmatched", subtitle: "100% Policy Match", emoji: "🔍", gradient: "yellow", linkText: "Audit Queue", linkPath: "#audit_queue" },
+                    { title: "Direct Advisor Payouts", value: "85% - 110% Paid", subtitle: "Direct ACH Wire", emoji: "🏦", gradient: "pink" }
                 ]}
             />
             <div className="max-w-7xl mx-auto space-y-8">
@@ -185,7 +185,7 @@ export const CommissionRecon: React.FC = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
+            <div id="audit_queue" className="bg-white rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
                 <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-6">
                         <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">Audit Trail</h3>

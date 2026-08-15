@@ -117,9 +117,9 @@ export default function AdminOnboarding() {
             <div className="max-w-7xl mx-auto">
                 <Tab3DBanner
                     cards={[
-                        { title: "Pending Advisor Applications", value: `${pendingCount || 14} Applications`, subtitle: "Awaiting License Review", emoji: "📋", gradient: "cyan", linkText: "Review Apps" },
-                        { title: "NPN & FINRA Verification", value: "Series 7 & 66 Verified", subtitle: "Automated FINRA Check", emoji: "🎓", gradient: "yellow", linkText: "License Check" },
-                        { title: "Approved Contracts", value: "28 Advisors Joined", subtitle: "Contracts Issued", emoji: "🤝", gradient: "pink", linkText: "View Approved" }
+                        { title: "Pending Advisor Applications", value: `${pendingCount || 14} Applications`, subtitle: "Awaiting License Review", emoji: "📋", gradient: "cyan", linkText: "Review Apps", linkPath: '#applications' },
+                        { title: "NPN & FINRA Verification", value: "Series 7 & 66 Verified", subtitle: "Automated FINRA Check", emoji: "🎓", gradient: "yellow" },
+                        { title: "Approved Contracts", value: "28 Advisors Joined", subtitle: "Contracts Issued", emoji: "🤝", gradient: "pink" }
                     ]}
                 />
 
@@ -164,7 +164,7 @@ export default function AdminOnboarding() {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div id="applications" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* List */}
                     <div className="lg:col-span-2 space-y-4">
                         {loading ? (

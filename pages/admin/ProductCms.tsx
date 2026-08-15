@@ -76,12 +76,12 @@ export const ProductCms: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Financial Product Suite", value: "Life, RE, Securities", subtitle: "Managed Offerings Catalog", emoji: "💼", gradient: "cyan", linkText: "View Products" },
-          { title: "Commission Tier Matrix", value: "85% - 110% Split", subtitle: "Advisor Payout Scales", emoji: "🏷️", gradient: "yellow", linkText: "Commission Tiers" },
-          { title: "Instant Catalog Sync", value: "Live Sync Active", subtitle: "Dynamic CMS Updates", emoji: "⚡", gradient: "pink", linkText: "Catalog Settings" }
+          { title: "Financial Product Suite", value: "Life, RE, Securities", subtitle: "Managed Offerings Catalog", emoji: "💼", gradient: "cyan", linkText: "View Products", linkPath: "#products_section" },
+          { title: "Commission Tier Matrix", value: "85% - 110% Split", subtitle: "Advisor Payout Scales", emoji: "🏷️", gradient: "yellow" },
+          { title: "Instant Catalog Sync", value: "Live Sync Active", subtitle: "Dynamic CMS Updates", emoji: "⚡", gradient: "pink" }
         ]}
       />
-      <div className="flex justify-between items-center">
+      <div id="products_section" className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-[#0B2240]">Product Listings CMS</h1>
           <p className="text-slate-500">Manage the products displayed on the Home and Services pages.</p>

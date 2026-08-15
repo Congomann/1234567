@@ -80,12 +80,12 @@ export const RealEstateAdmin: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Commercial & Residential", value: "$18.4M Value", subtitle: "Active Escrow & Listings", emoji: "🏡", gradient: "cyan", linkText: "Listings" },
-          { title: "Pending Listing Reviews", value: "6 Listings", subtitle: "Awaiting Admin Approval", emoji: "🔑", gradient: "yellow", linkText: "Review Queue" },
-          { title: "Escrow Transactions", value: "18 Open Deals", subtitle: "Title & Escrow Locked", emoji: "📜", gradient: "pink", linkText: "Escrow Hub" }
+          { title: "Commercial & Residential", value: "$18.4M Value", subtitle: "Active Escrow & Listings", emoji: "🏡", gradient: "cyan", linkText: "Listings", linkPath: "#listing_management" },
+          { title: "Pending Listing Reviews", value: "6 Listings", subtitle: "Awaiting Admin Approval", emoji: "🔑", gradient: "yellow", linkText: "Review Queue", linkPath: "#listing_management" },
+          { title: "Escrow Transactions", value: "18 Open Deals", subtitle: "Title & Escrow Locked", emoji: "📜", gradient: "pink" }
         ]}
       />
-      <div className="pb-10 animate-fade-in">
+      <div id="listing_management" className="pb-10 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Listing Management</h1>

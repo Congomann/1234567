@@ -383,9 +383,9 @@ export const CampaignManager: React.FC = () => {
 
       {/* 3D Banners */}
       <Tab3DBanner cards={[
-        { title: 'Active Campaigns', value: `${campaigns.filter(c => c.status === 'Active').length} Live`, subtitle: `$${totalSpend.toLocaleString()} Total Spend`, emoji: '📢', gradient: 'cyan', linkText: 'Manage' },
-        { title: 'Total Conversions', value: `${totalLeads.toLocaleString()} Leads`, subtitle: `${avgRoi.toFixed(0)}% Avg ROI`, emoji: '🎯', gradient: 'yellow', linkText: 'View Leads' },
-        { title: 'Revenue Generated', value: `$${totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`, subtitle: 'Campaign-attributed revenue', emoji: '🚀', gradient: 'pink', linkText: 'Analytics' },
+        { title: 'Active Campaigns', value: `${campaigns.filter(c => c.status === 'Active').length} Live`, subtitle: `$${totalSpend.toLocaleString()} Total Spend`, emoji: '📢', gradient: 'cyan' },
+        { title: 'Total Conversions', value: `${totalLeads.toLocaleString()} Leads`, subtitle: `${avgRoi.toFixed(0)}% Avg ROI`, emoji: '🎯', gradient: 'yellow' },
+        { title: 'Revenue Generated', value: `$${totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`, subtitle: 'Campaign-attributed revenue', emoji: '🚀', gradient: 'pink' },
       ]} />
 
       {error && (

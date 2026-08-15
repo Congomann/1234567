@@ -128,9 +128,9 @@ export const AnnualReportAdmin: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Public Disclosure Audit", value: "SEC Compliant", subtitle: "2026 Audit Report", emoji: "📊", gradient: "cyan", linkText: "Audit Filings" },
-          { title: "Regulatory Filings", value: "100% Up to Date", subtitle: "48 Active States", emoji: "⚖️", gradient: "yellow", linkText: "State Disclosures" },
-          { title: "Annual Financial Metric", value: "$142.8M AUM", subtitle: "0 Active Lawsuits", emoji: "📜", gradient: "pink", linkText: "Financial Metrics" }
+          { title: "Public Disclosure Audit", value: "SEC Compliant", subtitle: "2026 Audit Report", emoji: "📊", gradient: "cyan", linkText: "Audit Filings", linkPath: '#quarterly-reports' },
+          { title: "Regulatory Filings", value: "100% Up to Date", subtitle: "48 Active States", emoji: "⚖️", gradient: "yellow", linkText: "State Disclosures", linkPath: '#transparency-ledger' },
+          { title: "Annual Financial Metric", value: "$142.8M AUM", subtitle: "0 Active Lawsuits", emoji: "📜", gradient: "pink", linkText: "Financial Metrics", linkPath: '#metrics-editor' }
         ]}
       />
 
@@ -165,7 +165,7 @@ export const AnnualReportAdmin: React.FC = () => {
       </div>
 
       {/* Quarterly Reports Section (Every 3 months) */}
-      <div className="bg-white/70 backdrop-blur-xl p-10 rounded-[3rem] border border-white/40 shadow-sm">
+      <div id="quarterly-reports" className="bg-white/70 backdrop-blur-xl p-10 rounded-[3rem] border border-white/40 shadow-sm">
         <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
                 <Layers className="text-blue-600" size={20} /> Quarterly Disclosures
@@ -203,7 +203,7 @@ export const AnnualReportAdmin: React.FC = () => {
       </div>
 
       {/* Quick Metrics Editor */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div id="metrics-editor" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
@@ -293,7 +293,7 @@ export const AnnualReportAdmin: React.FC = () => {
       </div>
 
       {/* Audit Log Editor */}
-      <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div id="transparency-ledger" className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-10 border-b border-slate-50 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">Transparency Ledger</h2>

@@ -133,9 +133,9 @@ export const ProfileSettings: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-8 pb-10">
       <Tab3DBanner
         cards={[
-          { title: "Advisor Profile & Microsite", value: "Public & Active", subtitle: "Personalized Lead Portal", emoji: "👤", gradient: "cyan", linkText: "View Microsite" },
-          { title: "NPN & State Licenses", value: "12 States Active", subtitle: "Series 7, 66, Life & Health", emoji: "🎖️", gradient: "yellow", linkText: "License Vault" },
-          { title: "Client Trust Score", value: "4.9 / 5.0 Rating", subtitle: "142 Verified Reviews", emoji: "⭐", gradient: "pink", linkText: "Client Reviews" }
+          { title: "Advisor Profile & Microsite", value: "Public & Active", subtitle: "Personalized Lead Portal", emoji: "👤", gradient: "cyan", linkText: "View Microsite", linkPath: "#microsite" },
+          { title: "NPN & State Licenses", value: "12 States Active", subtitle: "Series 7, 66, Life & Health", emoji: "🎖️", gradient: "yellow", linkText: "License Vault", linkPath: "#licensing" },
+          { title: "Client Trust Score", value: "4.9 / 5.0 Rating", subtitle: "142 Verified Reviews", emoji: "⭐", gradient: "pink", linkText: "Client Reviews", linkPath: "#client_reviews" }
         ]}
       />
 
@@ -235,7 +235,7 @@ export const ProfileSettings: React.FC = () => {
         </div>
         
         {/* Public Profile Visibility - Admin Only Toggle */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+        <div id="microsite" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
             <h3 className="text-lg font-bold text-[#0B2240] mb-4 flex items-center gap-2">
                 <Globe className="h-5 w-5 text-blue-600" /> Public Profile Settings
             </h3>
@@ -333,7 +333,7 @@ export const ProfileSettings: React.FC = () => {
         </div>
 
         {/* Licensing */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+        <div id="licensing" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
           <div className="flex items-center gap-3 mb-6">
              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><MapPin className="h-6 w-6" /></div>
              <h3 className="text-lg font-bold text-[#0B2240]">Licensing</h3>
@@ -415,7 +415,7 @@ export const ProfileSettings: React.FC = () => {
         )}
         
         {/* Testimonials */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+        <div id="client_reviews" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Award className="h-6 w-6" /></div>
                 <h3 className="text-lg font-bold text-[#0B2240]">My Public Testimonials</h3>

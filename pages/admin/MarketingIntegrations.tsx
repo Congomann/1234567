@@ -113,9 +113,9 @@ export const MarketingIntegrations: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Meta & Google Webhooks", value: "Real-Time Direct", subtitle: "Instant Lead Capture", emoji: "🔗", gradient: "cyan", linkText: "Webhooks" },
-                    { title: "SignalWire LAML REST API", value: "Connected", subtitle: "Voice & SMS Protocol", emoji: "📡", gradient: "yellow", linkText: "API Credentials" },
-                    { title: "Plaid Production API", value: "Verified Active", subtitle: "Live Banking Protocol", emoji: "⚡", gradient: "pink", linkText: "API Logs" }
+                    { title: "Meta & Google Webhooks", value: "Real-Time Direct", subtitle: "Instant Lead Capture", emoji: "🔗", gradient: "cyan" },
+                    { title: "SignalWire LAML REST API", value: "Connected", subtitle: "Voice & SMS Protocol", emoji: "📡", gradient: "yellow" },
+                    { title: "Plaid Production API", value: "Verified Active", subtitle: "Live Banking Protocol", emoji: "⚡", gradient: "pink" }
                 ]}
             />
             <div className="min-h-screen bg-[#050b14] text-gray-200 p-8 rounded-3xl pb-20 border border-gray-800 font-sans shadow-2xl">

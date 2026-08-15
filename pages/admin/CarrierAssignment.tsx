@@ -68,9 +68,9 @@ export const CarrierAssignment: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Insurance Carriers", value: "35 Partners", subtitle: "Mutual of Omaha, AIG, Lincoln", emoji: "🛡️", gradient: "cyan", linkText: "View Carriers" },
-          { title: "Contracting Portal", value: "Active Contracting", subtitle: "Direct Advisor Appointments", emoji: "📝", gradient: "yellow", linkText: "Contracting" },
-          { title: "Carrier Auto-Provisioning", value: "Live Sync", subtitle: "Tier-Based Contracting", emoji: "⚡", gradient: "pink", linkText: "Tier Settings" }
+          { title: "Insurance Carriers", value: "35 Partners", subtitle: "Mutual of Omaha, AIG, Lincoln", emoji: "🛡️", gradient: "cyan", linkText: "View Carriers", linkPath: "#insurance_carriers" },
+          { title: "Contracting Portal", value: "Active Contracting", subtitle: "Direct Advisor Appointments", emoji: "📝", gradient: "yellow" },
+          { title: "Carrier Auto-Provisioning", value: "Live Sync", subtitle: "Tier-Based Contracting", emoji: "⚡", gradient: "pink" }
         ]}
       />
         <div>
@@ -122,7 +122,7 @@ export const CarrierAssignment: React.FC = () => {
             </div>
 
             {/* Right Col: Carriers */}
-            <div className="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-[800px]">
+            <div id="insurance_carriers" className="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-[800px]">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <h3 className="text-lg font-bold text-[#0B2240]">2. Select Carriers</h3>
                     <div className="text-sm text-slate-500">

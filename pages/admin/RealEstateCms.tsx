@@ -91,12 +91,12 @@ export const RealEstateCms: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Property Portal CMS", value: "Active Content", subtitle: "Real Estate Page Manager", emoji: "🏙️", gradient: "cyan", linkText: "View Portal" },
-          { title: "Virtual Tour Assets", value: "120 HD Uploads", subtitle: "Property Photos & Media", emoji: "📸", gradient: "yellow", linkText: "Media Vault" },
-          { title: "Localized SEO Pages", value: "50 Cities Live", subtitle: "Dynamic Search Engine Pages", emoji: "🌐", gradient: "pink", linkText: "SEO Controls" }
+          { title: "Property Portal CMS", value: "Active Content", subtitle: "Real Estate Page Manager", emoji: "🏙️", gradient: "cyan", linkText: "View Portal", linkPath: "#portal_cms" },
+          { title: "Virtual Tour Assets", value: "120 HD Uploads", subtitle: "Property Photos & Media", emoji: "📸", gradient: "yellow" },
+          { title: "Localized SEO Pages", value: "50 Cities Live", subtitle: "Dynamic Search Engine Pages", emoji: "🌐", gradient: "pink" }
         ]}
       />
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+      <div id="portal_cms" className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Real Estate CMS</h1>
           <p className="text-slate-500 font-medium mt-1">Manage specialized content for the high-end real estate portal.</p>

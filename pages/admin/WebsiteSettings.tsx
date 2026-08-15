@@ -474,12 +474,12 @@ export const WebsiteSettings: React.FC = () => {
         >
             <Tab3DBanner
                 cards={[
-                    { title: "Global Website CMS", value: "v4.2 Live", subtitle: "Public Theme & Assets", emoji: "⚙️", gradient: "cyan", linkText: "Site Config" },
-                    { title: "Apple Glassmorphism", value: "iOS 18 Theme", subtitle: "Design System Active", emoji: "🎨", gradient: "yellow", linkText: "Theme Settings" },
-                    { title: "Domain & DNS Health", value: "100% Uptime", subtitle: "Production SSL Active", emoji: "🚀", gradient: "pink", linkText: "DNS Status" }
+                    { title: "Global Website CMS", value: "v4.2 Live", subtitle: "Public Theme & Assets", emoji: "⚙️", gradient: "cyan", linkText: "Site Config", linkPath: "#site_config" },
+                    { title: "Apple Glassmorphism", value: "iOS 18 Theme", subtitle: "Design System Active", emoji: "🎨", gradient: "yellow", linkText: "Theme Settings", linkPath: "#theme_settings" },
+                    { title: "Domain & DNS Health", value: "100% Uptime", subtitle: "Production SSL Active", emoji: "🚀", gradient: "pink" }
                 ]}
             />
-            <div>
+            <div id="site_config">
                 <h1 className="text-2xl font-bold text-[#0B2240]">Website Settings</h1>
                 <p className="text-slate-500">Manage global company information and public resources.</p>
             </div>
@@ -521,7 +521,7 @@ export const WebsiteSettings: React.FC = () => {
             </div>
 
             {/* Theme & Branding Configuration */}
-            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+            <div id="theme_settings" className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <span className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xs">✨</span>
                     Theme & Global Branding Settings

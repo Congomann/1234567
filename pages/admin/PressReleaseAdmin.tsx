@@ -84,9 +84,9 @@ export const PressReleaseAdmin: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Official Newsroom", value: `${releases.length || 24} Publications`, subtitle: "Media Announcements", emoji: "📰", gradient: "cyan", linkText: "View Newsroom" },
-          { title: "PR Wire Syndication", value: "Bloomberg & Reuters", subtitle: "Global Media Distribution", emoji: "📡", gradient: "yellow", linkText: "Syndication" },
-          { title: "Media Impressions", value: "1.2M Reach", subtitle: "+28% Month-over-Month", emoji: "📢", gradient: "pink", linkText: "Media Analytics" }
+          { title: "Official Newsroom", value: `${releases.length || 24} Publications`, subtitle: "Media Announcements", emoji: "📰", gradient: "cyan", linkText: "View Newsroom", linkPath: "#newsroom_grid" },
+          { title: "PR Wire Syndication", value: "Bloomberg & Reuters", subtitle: "Global Media Distribution", emoji: "📡", gradient: "yellow" },
+          { title: "Media Impressions", value: "1.2M Reach", subtitle: "+28% Month-over-Month", emoji: "📢", gradient: "pink" }
         ]}
       />
       
@@ -129,7 +129,7 @@ export const PressReleaseAdmin: React.FC = () => {
       </div>
 
       {/* Release Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div id="newsroom_grid" className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {releases.map((release) => (
           <div key={release.id} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
             <div className="flex items-center justify-between mb-8">

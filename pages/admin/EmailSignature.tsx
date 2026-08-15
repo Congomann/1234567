@@ -535,9 +535,9 @@ export const EmailSignature: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "HTML Signature Builder", value: "NHFG Brand", subtitle: "Outlook & Gmail Compatible", emoji: "✉️", gradient: "cyan", linkText: "Copy Signature" },
-                    { title: "FINRA & SEC Compliance", value: "Verified Footer", subtitle: "Mandatory Regulatory Notice", emoji: "✒️", gradient: "yellow", linkText: "Legal Settings" },
-                    { title: "1-Click HTML Generator", value: "Active Template", subtitle: "Responsive Email Format", emoji: "📱", gradient: "pink", linkText: "Export HTML" }
+                    { title: "HTML Signature Builder", value: "NHFG Brand", subtitle: "Outlook & Gmail Compatible", emoji: "✉️", gradient: "cyan" },
+                    { title: "FINRA & SEC Compliance", value: "Verified Footer", subtitle: "Mandatory Regulatory Notice", emoji: "✒️", gradient: "yellow" },
+                    { title: "1-Click HTML Generator", value: "Active Template", subtitle: "Responsive Email Format", emoji: "📱", gradient: "pink" }
                 ]}
             />
             {isCropping && (

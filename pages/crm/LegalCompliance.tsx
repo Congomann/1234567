@@ -40,9 +40,9 @@ export const LegalCompliance: React.FC = () => {
     <div className="space-y-8 pb-10">
       <Tab3DBanner
         cards={[
-          { title: "SEC & FINRA Standards", value: "100% Compliant", subtitle: "2026 Audit Complete", emoji: "⚖️", gradient: "cyan", linkText: "View Filings" },
-          { title: "Solicitor Agreements", value: "115 Active", subtitle: "Signed Advisor Contracts", emoji: "📜", gradient: "yellow", linkText: "Agreements" },
-          { title: "Data Risk Protection", value: "0 Discrepancies", subtitle: "256-Bit Encrypted Vault", emoji: "🛡️", gradient: "pink", linkText: "Vault Logs" }
+          { title: "SEC & FINRA Standards", value: "100% Compliant", subtitle: "2026 Audit Complete", emoji: "⚖️", gradient: "cyan" },
+          { title: "Solicitor Agreements", value: "115 Active", subtitle: "Signed Advisor Contracts", emoji: "📜", gradient: "yellow", linkText: "Agreements", linkPath: "#agreements" },
+          { title: "Data Risk Protection", value: "0 Discrepancies", subtitle: "256-Bit Encrypted Vault", emoji: "🛡️", gradient: "pink" }
         ]}
       />
 
@@ -51,7 +51,7 @@ export const LegalCompliance: React.FC = () => {
         <p className="text-slate-500">Corporate policies, advisor agreements, and data privacy standards.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div id="agreements" className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PolicyCard 
             title="Terms of Use" 
             icon={FileText} 

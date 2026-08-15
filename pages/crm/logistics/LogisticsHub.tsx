@@ -196,9 +196,9 @@ export const LogisticsHub: React.FC = () => {
     <div className="space-y-10 animate-in fade-in duration-700">
       <Tab3DBanner
         cards={[
-          { title: "Active Freight Loads", value: loads.length + " Freight Loads", subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board" },
-          { title: "Fleet GPS Dispatch", value: "42 Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow", linkText: "GPS Telematics" },
-          { title: "Carrier Rate Confirmations", value: "$420,000 Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink", linkText: "Freight Invoices" }
+          { title: "Active Freight Loads", value: loads.length + " Freight Loads", subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board", linkPath: "#load_board" },
+          { title: "Fleet GPS Dispatch", value: "42 Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow" },
+          { title: "Carrier Rate Confirmations", value: "$420,000 Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink" }
         ]}
       />
 
@@ -244,7 +244,7 @@ export const LogisticsHub: React.FC = () => {
       </div>
 
       {/* Kanban Board */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[3.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-8 lg:p-12">
+      <div id="load_board" className="bg-white/70 backdrop-blur-xl rounded-[3.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-8 lg:p-12">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-[0.2em]">{activeNiche} Pipeline</h3>
           <button 

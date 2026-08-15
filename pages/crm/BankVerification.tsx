@@ -1088,14 +1088,14 @@ export const BankVerification: React.FC = () => {
 
             <Tab3DBanner
                 cards={[
-                    { title: "Plaid Production ACH", value: "Live Direct Link", subtitle: "Instant Bank Verification", emoji: "🏦", gradient: "cyan", linkText: "Connect Bank" },
-                    { title: "Instant Auth Speed", value: "< 2.0 Seconds", subtitle: "Balance & Identity Verified", emoji: "⚡", gradient: "yellow", linkText: "Verification Status" },
-                    { title: "ABA Routing Checksum", value: "100% Validated", subtitle: "Micro-Deposit Protection", emoji: "🛡️", gradient: "pink", linkText: "Security Logs" }
+                    { title: "Plaid Production ACH", value: "Live Direct Link", subtitle: "Instant Bank Verification", emoji: "🏦", gradient: "cyan", linkText: "Connect Bank", linkPath: "#bank_verification" },
+                    { title: "Instant Auth Speed", value: "< 2.0 Seconds", subtitle: "Balance & Identity Verified", emoji: "⚡", gradient: "yellow", linkText: "Verification Status", linkPath: "#records_table" },
+                    { title: "ABA Routing Checksum", value: "100% Validated", subtitle: "Micro-Deposit Protection", emoji: "🛡️", gradient: "pink" }
                 ]}
             />
 
             {/* ── Header ── */}
-            <div style={{ marginBottom: 24 }}>
+            <div id="bank_verification" style={{ marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -1211,7 +1211,7 @@ export const BankVerification: React.FC = () => {
             </div>
 
             {/* ── Records Table ── */}
-            <div style={{ background: '#fff', borderRadius: 18, border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+            <div id="records_table" style={{ background: '#fff', borderRadius: 18, border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                 {/* Header row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1fr 1fr 110px', padding: '12px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
                     {['Client', 'Bank / Account', 'Routing #', 'Type', 'Status', 'Risk', 'Actions'].map(h => (

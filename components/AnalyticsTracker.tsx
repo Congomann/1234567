@@ -19,8 +19,34 @@ export const AnalyticsTracker: React.FC = () => {
             AnalyticsService.sendHeartbeat();
         }, 30000); // Send heartbeat every 30 seconds
 
+        const handleExit = () => {
+            const visitorId = AnalyticsService.getVisitorId();
+            const sessionId = AnalyticsService.getSessionId();
+            if (!visitorId || !sessionId) return;
+
+            const payload = JSON.stringify({
+                visitorId,
+                sessionId,
+                url: window.location.href,
+                path: window.location.pathname,
+                eventMetadata: { type: 'exit', leaveTime: new Date().toISOString() }
+            });
+            
+            // sendBeacon reliably posts data even as the tab is closing
+            navigator.sendBeacon('/api/analytics/collect', payload);
+        };
+
+        window.addEventListener('pagehide', handleExit);
+        window.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                handleExit();
+            }
+        });
+
         return () => {
             clearInterval(heartbeatInterval);
+            window.removeEventListener('pagehide', handleExit);
+            window.removeEventListener('visibilitychange', handleExit);
         };
     }, [location.pathname]);
 
