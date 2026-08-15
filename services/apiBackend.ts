@@ -536,27 +536,27 @@ class NHFGBackend {
     }
 
     async uploadDirectToSupabase(file: File): Promise<string> {
+        // 1. Get signed URL from our backend to bypass RLS and Vercel payload limits securely
+        const res = await fetch(`${this.baseUrl}/upload/signed-url`, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify({ filename: file.name })
+        });
+        const data = await this.handleResponse(res);
+        const { signedUrl, token, path, publicUrl } = data;
+
+        // 2. Upload directly to Supabase using the signed URL
         const { supabase } = await import('./supabaseClient');
-        
-        // Generate a clean, unique filename
-        const cleanName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-        const uniqueName = `${Date.now()}_${cleanName}`;
-        
-        // Upload directly from browser to Supabase Storage, bypassing Vercel limits
-        const { data, error } = await supabase.storage
+        const { data: uploadData, error } = await supabase.storage
             .from('uploads')
-            .upload(uniqueName, file, {
-                cacheControl: '3600',
-                upsert: false
-            });
-            
+            .uploadToSignedUrl(path, token, file);
+
         if (error) {
-            console.error('[Supabase Client Upload Error]', error);
-            throw new Error(`Direct upload failed: ${error.message}`);
+            console.error('[Supabase Signed Upload Error]', error);
+            throw new Error(`Upload failed: ${error.message || JSON.stringify(error)}`);
         }
         
-        const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(uniqueName);
-        console.log(`[Upload-Direct] File saved directly to Supabase: ${publicUrl}`);
+        console.log(`[Upload-Direct] File saved via signed URL: ${publicUrl}`);
         return publicUrl;
     }
 

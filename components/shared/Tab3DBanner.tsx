@@ -51,7 +51,15 @@ export const Tab3DBanner: React.FC<Tab3DBannerProps> = ({ cards }) => {
             transition={{ duration: 0.4, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             whileHover={{ y: -4, scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
-            onClick={() => card.linkPath && navigate(card.linkPath)}
+            onClick={() => {
+              if (card.linkPath) {
+                if (card.linkPath.startsWith('#')) {
+                  document.getElementById(card.linkPath.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  navigate(card.linkPath);
+                }
+              }
+            }}
             className={`${gradientClass} p-6 sm:p-7 rounded-[2rem] shadow-xl ${
               card.linkPath ? 'cursor-pointer' : ''
             } relative overflow-hidden flex items-center justify-between min-h-[160px] group transition-all duration-300 border border-white/20`}

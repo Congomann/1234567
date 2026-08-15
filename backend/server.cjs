@@ -542,6 +542,39 @@ app.post('/api/upload', async (req, res) => {
   }
 });
 
+// Endpoint to generate signed URLs for direct-to-Supabase uploads (bypassing Vercel limits securely)
+app.post('/api/upload/signed-url', async (req, res) => {
+  try {
+    const { filename } = req.body;
+    if (!filename) return res.status(400).json({ error: 'Filename is required' });
+
+    const supabase = require('./supabaseClient.cjs');
+    const cleanName = filename.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+    const uniqueName = `${Date.now()}_${cleanName}`;
+
+    // Generate signed upload URL valid for 60 seconds
+    const { data, error } = await supabase.storage.from('uploads').createSignedUploadUrl(uniqueName);
+    
+    if (error) {
+        console.error('[Supabase Signed URL Error]', error);
+        throw error;
+    }
+    
+    // Also return the public URL it will have
+    const { data: publicData } = supabase.storage.from('uploads').getPublicUrl(uniqueName);
+    
+    res.json({ 
+        signedUrl: data.signedUrl, 
+        token: data.token, 
+        path: data.path, 
+        publicUrl: publicData.publicUrl 
+    });
+  } catch (err) {
+    console.error('[API] Signed URL creation error:', err);
+    res.status(500).json({ error: 'Failed to create signed URL', details: err.message });
+  }
+});
+
 // New multipart upload endpoint using multer to prevent OOM
 app.post('/api/upload-multipart', upload.single('file'), async (req, res) => {
   try {

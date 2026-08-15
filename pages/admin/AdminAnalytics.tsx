@@ -110,9 +110,9 @@ export const AdminAnalytics: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Real-Time Web Traffic", value: `${stats?.totalVisitors || 4250} Sessions`, subtitle: "Global Unique Visitors", emoji: "📈", gradient: "cyan", linkText: "View Traffic" },
-                    { title: "Active Live Sessions", value: `${stats?.activeSessions || 128} Online`, subtitle: "Real-Time Page Tracking", emoji: "👁️", gradient: "yellow", linkText: "Live Stream" },
-                    { title: "Lead Form Conversion", value: "18.4% Rate", subtitle: "High Conversion Intent", emoji: "🎯", gradient: "pink", linkText: "Funnel Metrics" }
+                    { title: "Real-Time Web Traffic", value: `${stats?.totalVisitors || 4250} Sessions`, subtitle: "Global Unique Visitors", emoji: "📈", gradient: "cyan", linkText: "View Traffic", linkPath: '#traffic' },
+                    { title: "Active Live Sessions", value: `${stats?.activeSessions || 128} Online`, subtitle: "Real-Time Page Tracking", emoji: "👁️", gradient: "yellow", linkText: "Live Stream", linkPath: '#sessions' },
+                    { title: "Lead Form Conversion", value: "18.4% Rate", subtitle: "High Conversion Intent", emoji: "🎯", gradient: "pink", linkText: "Funnel Metrics", linkPath: '#funnel' }
                 ]}
             />
             <div className="max-w-7xl mx-auto space-y-8">
@@ -142,7 +142,7 @@ export const AdminAnalytics: React.FC = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div id="traffic" className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Users size={80} /></div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Visitors</p>
@@ -167,7 +167,7 @@ export const AdminAnalytics: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Top Pages Table */}
-                <div className="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+                <div id="funnel" className="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
                     <div className="p-8 border-b border-slate-100 bg-slate-50/50">
                         <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">High Engagement Nodes</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Most visited pages</p>
@@ -189,7 +189,7 @@ export const AdminAnalytics: React.FC = () => {
                 </div>
 
                 {/* Visitor Feed */}
-                <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+                <div id="sessions" className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
                     <div className="p-8 border-b border-slate-100 flex justify-between items-center">
                         <div>
                             <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">Visitor Logs</h3>
