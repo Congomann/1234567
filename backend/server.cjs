@@ -598,34 +598,53 @@ app.get('/api/storage/:filename', async (req, res) => {
   try {
     const filePath = await storageService.getFile(req.params.filename);
     if (filePath && fs.existsSync(filePath)) {
-      // READ ENCRYPTED FILE
-      const encryptedData = fs.readFileSync(filePath, 'utf8');
-      
-      try {
-        // TRY TO DECRYPT (FOR NEW ENCRYPTED FILES)
-        const decryptedBuffer = encryptionService.decrypt(encryptedData);
-        
-        // Determine content type based on extension
-        const ext = path.extname(req.params.filename).toLowerCase();
-        const mimeTypes = {
-          '.pdf': 'application/pdf',
-          '.jpg': 'image/jpeg',
-          '.jpeg': 'image/jpeg',
-          '.png': 'image/png',
-          '.mp4': 'video/mp4',
-          '.webm': 'video/webm',
-          '.mov': 'video/quicktime',
-          '.avi': 'video/x-msvideo',
-          '.mkv': 'video/x-matroska',
-          '.txt': 'text/plain'
-        };
-        res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
-        res.end(decryptedBuffer);
-      } catch (e) {
-        // FALLBACK FOR LEGACY UNENCRYPTED FILES
-        console.log(`[Storage] Legacy file detected or decryption failed: ${req.params.filename}`);
-        res.sendFile(filePath);
+      // Determine content type based on extension
+      const ext = path.extname(req.params.filename).toLowerCase();
+      const mimeTypes = {
+        '.pdf': 'application/pdf',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.mov': 'video/quicktime',
+        '.avi': 'video/x-msvideo',
+        '.mkv': 'video/x-matroska',
+        '.txt': 'text/plain'
+      };
+
+      const isVideo = ['.mp4', '.webm', '.mov', '.avi', '.mkv'].includes(ext);
+
+      if (isVideo) {
+        // Direct stream with Range header support for fast, seamless video playback
+        return res.sendFile(filePath, {
+          headers: {
+            'Content-Type': mimeTypes[ext] || 'video/mp4',
+            'Accept-Ranges': 'bytes'
+          }
+        });
       }
+
+      // For non-video files, check for encrypted format if small enough
+      try {
+        const stat = fs.statSync(filePath);
+        if (stat.size < 50 * 1024 * 1024) {
+          const fileData = fs.readFileSync(filePath, 'utf8');
+          if (fileData.includes(':')) {
+            const decryptedBuffer = encryptionService.decrypt(fileData);
+            res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+            return res.end(decryptedBuffer);
+          }
+        }
+      } catch (e) {
+        // Fallback to res.sendFile below
+      }
+
+      return res.sendFile(filePath, {
+        headers: {
+          'Content-Type': mimeTypes[ext] || 'application/octet-stream'
+        }
+      });
     } else {
       res.status(404).json({ error: 'File not found' });
     }

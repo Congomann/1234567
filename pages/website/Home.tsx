@@ -52,9 +52,10 @@ export const Home: React.FC = () => {
     : (companySettings.heroBackgroundUrl ? [companySettings.heroBackgroundUrl] : []);
 
   const isDirectMp4 = Boolean(
-    companySettings.heroBackgroundUrl?.match(/\.(mp4|webm|mov)(\?.*)?$/i) || 
+    companySettings.heroBackgroundUrl?.match(/\.(mp4|webm|mov|mkv|avi)(\?.*)?$/i) || 
     companySettings.heroBackgroundUrl?.startsWith('data:video') ||
-    companySettings.heroBackgroundUrl?.includes('/api/storage/')
+    companySettings.heroBackgroundUrl?.includes('/api/storage/') ||
+    companySettings.heroBackgroundUrl?.includes('/uploads/')
   );
   const isVideoType = companySettings.heroBackgroundType === "video" || playlist.length > 0 || isDirectMp4;
 

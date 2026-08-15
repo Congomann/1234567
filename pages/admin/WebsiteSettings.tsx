@@ -153,6 +153,10 @@ export const WebsiteSettings: React.FC = () => {
         setUploadError('');
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size > 90 * 1024 * 1024) {
+                alert("File size exceeds 90MB maximum limit. Please compress your video or choose a smaller file.");
+                return;
+            }
             setIsUploading(true);
             const isVideo = file.type.startsWith('video/');
             
@@ -219,8 +223,9 @@ export const WebsiteSettings: React.FC = () => {
             try {
                 const storageUrl = await Backend.uploadDirectToSupabase(file);
                 setNewResource(prev => ({ ...prev, thumbnail: storageUrl }));
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Resource thumbnail upload failed:", err);
+                alert("Upload failed: " + err.message);
             }
             setIsUploading(false);
         }
@@ -229,8 +234,8 @@ export const WebsiteSettings: React.FC = () => {
     const handleResourceFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 1024 * 1024 * 1024) {
-                alert("File is too large (>1GB).");
+            if (file.size > 90 * 1024 * 1024) {
+                alert("File size exceeds 90MB maximum limit. Please compress your video or choose a smaller file.");
                 return;
             }
 
@@ -931,11 +936,11 @@ export const WebsiteSettings: React.FC = () => {
                                                             />
                                                             <label className="cursor-pointer flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-600 border border-slate-300 hover:border-blue-300 px-4 py-2 rounded-xl transition-all font-medium text-xs">
                                                                 <Upload className="h-4 w-4 text-blue-500" />
-                                                                <span>Upload Local MP4</span>
+                                                                <span>Upload Local MP4 / Video</span>
                                                                 <input
                                                                     type="file"
                                                                     className="hidden"
-                                                                    accept="video/mp4,video/webm,video/mov"
+                                                                    accept="video/mp4,video/webm,video/quicktime,video/*,.mp4,.webm,.mov,.mkv,.avi"
                                                                     onChange={(e) => handleFileUploadForSlot(e, slotIdx)}
                                                                 />
                                                             </label>

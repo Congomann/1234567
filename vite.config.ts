@@ -26,6 +26,9 @@ export default defineConfig(({ mode }) => {
           }
         }
       },
+      optimizeDeps: {
+        include: ['lucide-react', 'framer-motion', 'date-fns']
+      },
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
