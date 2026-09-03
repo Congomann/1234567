@@ -974,7 +974,7 @@ export const TelephonyHub: React.FC = () => {
                 {/* CSS Bar Chart Simulation */}
                 <div className="flex items-end gap-3 h-32 w-full px-8 mt-8">
                   {[40, 60, 45, 80, 55, 90, 75].map((h, i) => (
-                    <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-400" style={{ height: \`\${h}%\` }}></div>
+                    <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-400" style={{ height: `${h}%` }}></div>
                   ))}
                 </div>
                 <div className="flex justify-between w-full px-8 mt-3 text-[10px] font-bold text-slate-400 uppercase">
@@ -997,7 +997,7 @@ export const TelephonyHub: React.FC = () => {
                         <span>{agent.value} hrs</span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: \`\${agent.value}%\` }}></div>
+                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${agent.value}%` }}></div>
                       </div>
                     </div>
                   ))}
