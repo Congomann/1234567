@@ -111,7 +111,7 @@ export const BookingPage: React.FC = () => {
               <CalendarIcon className="w-5 h-5 text-blue-400" />
               <span>
                 {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
-                {selectedTime && ` at ${format(new Date(\`2000-01-01T\${selectedTime}\`), 'h:mm a')}`}
+                {selectedTime && ` at ${format(new Date(`2000-01-01T\${selectedTime}`), 'h:mm a')}`}
               </span>
             </div>
           </div>
@@ -154,11 +154,11 @@ export const BookingPage: React.FC = () => {
                       <button
                         key={d.toISOString()}
                         onClick={() => handleDateSelect(d)}
-                        className={\`flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all \${
+                        className={`flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all \${
                           isSelected 
                             ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' 
                             : 'border-slate-100 bg-white hover:border-slate-300 text-slate-600'
-                        }\`}
+                        }`}
                       >
                         <span className="text-xs font-bold uppercase mb-1">{format(d, 'EEE')}</span>
                         <span className="text-xl font-black">{format(d, 'd')}</span>
@@ -184,15 +184,15 @@ export const BookingPage: React.FC = () => {
                               key={time}
                               disabled={isBooked}
                               onClick={() => handleTimeSelect(time)}
-                              className={\`py-3 px-4 rounded-xl font-bold text-sm transition-all \${
+                              className={`py-3 px-4 rounded-xl font-bold text-sm transition-all \${
                                 isBooked
                                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
                                   : isSelected
                                     ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                                     : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-blue-600 hover:text-blue-600'
-                              }\`}
+                              }`}
                             >
-                              {format(new Date(\`2000-01-01T\${time}\`), 'h:mm a')}
+                              {format(new Date(`2000-01-01T\${time}`), 'h:mm a')}
                             </button>
                           );
                         })}

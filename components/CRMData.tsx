@@ -59,32 +59,57 @@ import { CRMCommandPalette } from './CRMCommandPalette';
  * EXHAUSTIVE TOUR DEFINITION
  * Covers all 16 requested modules.
  */
-const ADMIN_TOUR_STEPS = [
-    { id: 'nav-dashboard', title: 'Dashboard', text: 'Overview of system-wide KPIs and health.', targetId: 'nav-dashboard', path: '/crm/dashboard' },
-    { id: 'nav-automation', title: 'Automation Studio', text: 'Configure neural-chain logic for lead follow-ups.', targetId: 'nav-automation', path: '/crm/automation' },
-    { id: 'nav-leads', title: 'Leads DB', text: 'Central repository for all incoming prospect data.', targetId: 'nav-leads', path: '/crm/leads' },
-    { id: 'nav-calendar', title: 'Calendar', text: 'Coordinate organization-wide meetings and events.', targetId: 'nav-calendar', path: '/crm/calendar' },
-    { id: 'nav-legal', title: 'Legal & Compliance', text: 'Corporate policies and signed solicitor agreements.', targetId: 'nav-legal', path: '/crm/legal' },
-    { id: 'nav-profile', title: 'Profile', text: 'Manage your bio and public microsite presence.', targetId: 'nav-profile', path: '/crm/profile' },
+const TOUR_EXPLANATIONS: Record<string, string> = {
+    'nav-dashboard': 'Overview of system-wide KPIs and health.',
+    'nav-campaigns': 'Manage and deploy multi-channel marketing campaigns.',
+    'nav-leads': 'Central repository for all incoming prospect data.',
+    'nav-clients': 'Manage active clients and view their full interaction history.',
+    'nav-calendar': 'Coordinate meetings, view schedules, and block time.',
+    'nav-intake': 'Securely capture structured lead data into the CRM.',
+    
+    // Verticals
+    'nav-applications': 'Track life and health insurance policy applications.',
+    'nav-commissions': 'View pending and paid carrier commissions.',
+    'nav-auto': 'Generate and manage auto insurance quotes.',
+    'nav-commercial': 'Handle complex commercial and business insurance.',
+    'nav-fleet': 'Manage commercial vehicle and logistics fleets.',
+    'nav-properties': 'View active property listings, buyers, and sellers.',
+    'nav-market-intel': 'Real Estate yield modeling and property analytics.',
+    'nav-escrow': 'Track real estate transactions through to closing.',
+    'nav-loans': 'Process and underwrite mortgage applications.',
+    'nav-rates': 'View daily interest rates and lock-in options.',
+    'nav-refi': 'Calculate refinance scenarios for active clients.',
+    'nav-portfolio': 'Manage client investment portfolios and assets.',
+    'nav-portfolio-viz': 'Quantitative modeling tool for securities advisory.',
+    'nav-securities': 'Overview of wealth management and securities pipeline.',
+    'nav-compliance': 'Secure vault for FINRA/SEC compliance documentation.',
+    'nav-fees': 'Automated advisory billing and AUM fee deduction.',
+    'nav-logistics': 'Commercial load posting terminal and fleet operations.',
 
-    // ADMINISTRATION SECTION
-    { id: 'nav-user-terminal', title: 'Administration / User Terminal', text: 'The master switch for user permissions and advisor management.', targetId: 'nav-user-terminal', path: '/crm/admin' },
-    { id: 'nav-onboarding', title: 'Advisor Applications', text: 'Review and approve new advisor applications.', targetId: 'nav-onboarding', path: '/crm/onboarding' },
-    { id: 'nav-re-approval', title: 'Listing Approval', text: 'Review and approve Real Estate property listings across the firm.', targetId: 'nav-re-approval', path: '/crm/admin/real-estate' },
-    { id: 'nav-re-cms', title: 'Real Estate CMS', text: 'Manage localized content for the Real Estate portal.', targetId: 'nav-re-cms', path: '/crm/admin/real-estate-cms' },
-    { id: 'nav-site-config', title: 'Site Config', text: 'CMS controls for the public-facing corporate website.', targetId: 'nav-site-config', path: '/crm/admin/website' },
-    { id: 'nav-transparency', title: 'Transparency Manager', text: 'Manage annual reports, lawsuits, and regulatory disclosures.', targetId: 'nav-transparency', path: '/crm/admin/transparency' },
-    { id: 'nav-press-admin', title: 'Newsroom Manager', text: 'Create and publish official press releases.', targetId: 'nav-press-admin', path: '/crm/admin/press' },
-    { id: 'nav-carrier-setup', title: 'Carrier Setup', text: 'Provision specific insurance carriers to advisor tiers.', targetId: 'nav-carrier-setup', path: '/crm/admin/carriers' },
-    { id: 'nav-client-reviews', title: 'Client Reviews', text: 'Moderate and approve testimonials before they go live.', targetId: 'nav-client-reviews', path: '/crm/admin/testimonials' },
-    { id: 'nav-email-signature', title: 'Email Signature', text: 'Generate branded HTML signatures for the whole group.', targetId: 'nav-email-signature', path: '/crm/admin/signature' },
-    { id: 'nav-api-integrations', title: 'API Integrations', text: 'Trace raw webhook data from Google and Meta Ads.', targetId: 'nav-api-integrations', path: '/crm/admin/marketing' },
-    { id: 'nav-analytics', title: 'User Analytics', text: 'Real-time tracking of website visitors, sessions, and behavior.', targetId: 'nav-analytics', path: '/crm/admin/analytics' },
-    { id: 'nav-commissions-recon', title: 'Commission Recon', text: 'Match carrier statements with client data to identify discrepancies.', targetId: 'nav-commissions-recon', path: '/crm/admin/commissions' },
-    { id: 'nav-landing-pages', title: 'Landing Pages', text: 'Create and deploy custom product-specific marketing pages.', targetId: 'nav-landing-pages', path: '/crm/admin/landing-pages' },
-    { id: 'nav-portfolio-viz', title: 'Portfolio Visualizer', text: 'Quantitative modeling tool for securities and investment advisory.', targetId: 'nav-portfolio-viz', path: '/crm/securities-portfolio' },
-    { id: 'nav-market-intel', title: 'Market Intelligence', text: 'Real Estate yield modeling and property analytics terminal.', targetId: 'nav-market-intel', path: '/crm/real-estate-intelligence' }
-];
+    // Shared
+    'nav-telephony': 'Corporate softphone, AI Lead Qualification, and IVR.',
+    'nav-legal': 'Corporate policies, solicitor agreements, and document generation.',
+    'nav-bank-verification': '1-click Plaid ACH and balance verification.',
+    'nav-profile': 'Manage your bio and public microsite presence.',
+
+    // Admin
+    'nav-user-terminal': 'The master switch for user permissions and advisor management.',
+    'nav-logistics-admin': 'Oversee all logistics dispatchers and active loads.',
+    'nav-onboarding': 'Review and approve new advisor applications.',
+    'nav-re-approval': 'Review and approve Real Estate property listings across the firm.',
+    'nav-re-cms': 'Manage localized content for the Real Estate portal.',
+    'nav-site-config': 'CMS controls for the public-facing corporate website.',
+    'nav-transparency': 'Manage annual reports, lawsuits, and regulatory disclosures.',
+    'nav-press-admin': 'Create and publish official press releases.',
+    'nav-product-cms': 'Manage products available in the public catalog.',
+    'nav-carrier-setup': 'Provision specific insurance carriers to advisor tiers.',
+    'nav-client-reviews': 'Moderate and approve testimonials before they go live.',
+    'nav-email-signature': 'Generate branded HTML signatures for the whole group.',
+    'nav-api-integrations': 'Trace raw webhook data from Google and Meta Ads.',
+    'nav-analytics': 'Real-time tracking of website visitors, sessions, and behavior.',
+    'nav-commissions-recon': 'Match carrier statements with client data to identify discrepancies.',
+    'nav-landing-pages': 'Create and deploy custom product-specific marketing pages.'
+};
 
 interface CRMLayoutProps {
     children: React.ReactNode;
@@ -122,18 +147,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     const isSuperAdmin = user?.role === UserRole.ADMIN;
     const isManagerOrAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER;
 
-    // Filter tour steps based on user visibility
-    const currentTourSteps = useMemo(() => {
-        if (user?.role === UserRole.ADMIN) return ADMIN_TOUR_STEPS;
-        if (user?.role === UserRole.MANAGER) {
-            return ADMIN_TOUR_STEPS.filter(step =>
-                !['nav-site-config', 'nav-carrier-setup', 'nav-client-reviews', 'nav-email-signature', 'nav-api-integrations'].includes(step.id)
-            );
-        }
-        return ADMIN_TOUR_STEPS.filter(step => !step.id.includes('nav-') || !['nav-user-terminal', 'nav-onboarding', 'nav-re-approval', 'nav-re-cms', 'nav-site-config', 'nav-carrier-setup', 'nav-client-reviews', 'nav-email-signature', 'nav-api-integrations'].includes(step.id));
-    }, [user?.role]);
-
-    const currentStep = currentTourSteps[currentStepIndex];
+    // (currentTourSteps is now defined below navStructure so it's perfectly accurate to the UI)
 
     // --- AUTO-SCROLL LOGIC ---
     useEffect(() => {
@@ -190,7 +204,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 { path: '/crm/leads', label: 'Leads DB', icon: Users, tourId: 'nav-leads' },
                 { path: '/crm/clients', label: 'Client Management', icon: CircleUser, tourId: 'nav-clients' },
                 { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
-                { path: '/crm/intake', label: 'Lead Intake', icon: ClipboardCheck },
+                { path: '/crm/intake', label: 'Lead Intake', icon: ClipboardCheck, tourId: 'nav-intake' },
             ] : []),
         ];
 
@@ -198,38 +212,38 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         const products = user.productsSold || [];
 
         if (user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.LIFE)) {
-            vertical.push({ path: '/crm/applications', label: 'Policies & Apps', icon: FileText });
-            vertical.push({ path: '/crm/commissions', label: 'Commissions', icon: LineChart });
+            vertical.push({ path: '/crm/applications', label: 'Policies & Apps', icon: FileText, tourId: 'nav-applications' });
+            vertical.push({ path: '/crm/commissions', label: 'Commissions', icon: LineChart, tourId: 'nav-commissions' });
         }
 
         if (user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.AUTO) || products.includes(ProductType.COMMERCIAL)) {
-            vertical.push({ path: '/crm/auto-quotes', label: 'Auto Quotes', icon: Car });
-            vertical.push({ path: '/crm/commercial-quotes', label: 'Commercial Hub', icon: Truck });
-            vertical.push({ path: '/crm/fleet', label: 'Fleet Manager', icon: Briefcase });
+            vertical.push({ path: '/crm/auto-quotes', label: 'Auto Quotes', icon: Car, tourId: 'nav-auto' });
+            vertical.push({ path: '/crm/commercial-quotes', label: 'Commercial Hub', icon: Truck, tourId: 'nav-commercial' });
+            vertical.push({ path: '/crm/fleet', label: 'Fleet Manager', icon: Briefcase, tourId: 'nav-fleet' });
         }
 
         if (user.category === AdvisorCategory.REAL_ESTATE || products.includes(ProductType.REAL_ESTATE)) {
-            vertical.push({ path: '/crm/properties', label: 'Property Pipeline', icon: Building2 });
+            vertical.push({ path: '/crm/properties', label: 'Property Pipeline', icon: Building2, tourId: 'nav-properties' });
             vertical.push({ path: '/crm/real-estate-intelligence', label: 'Market Intelligence', icon: MapIcon, tourId: 'nav-market-intel' });
-            vertical.push({ path: '/crm/escrow', label: 'Transactions & Escrow', icon: Key });
+            vertical.push({ path: '/crm/escrow', label: 'Transactions & Escrow', icon: Key, tourId: 'nav-escrow' });
         }
 
         if (user.category === AdvisorCategory.MORTGAGE || products.includes(ProductType.MORTGAGE)) {
-            vertical.push({ path: '/crm/loans', label: 'Loan Applications', icon: FileText });
-            vertical.push({ path: '/crm/rates', label: 'Rate Tools', icon: Percent });
-            vertical.push({ path: '/crm/refi-calc', label: 'Refinance Calc', icon: Calculator });
+            vertical.push({ path: '/crm/loans', label: 'Loan Applications', icon: FileText, tourId: 'nav-loans' });
+            vertical.push({ path: '/crm/rates', label: 'Rate Tools', icon: Percent, tourId: 'nav-rates' });
+            vertical.push({ path: '/crm/refi-calc', label: 'Refinance Calc', icon: Calculator, tourId: 'nav-refi' });
         }
 
         if (user.category === AdvisorCategory.SECURITIES || products.includes(ProductType.SECURITIES)) {
-            vertical.push({ path: '/crm/portfolio', label: 'Portfolio Mgmt', icon: TrendingUp });
+            vertical.push({ path: '/crm/portfolio', label: 'Portfolio Mgmt', icon: TrendingUp, tourId: 'nav-portfolio' });
             vertical.push({ path: '/crm/securities-portfolio', label: 'Portfolio Visualizer', icon: Activity, tourId: 'nav-portfolio-viz' });
             vertical.push({ path: '/crm/securities', label: 'Securities & Wealth', icon: TrendingUp, tourId: 'nav-securities' });
-            vertical.push({ path: '/crm/compliance', label: 'Compliance Vault', icon: FileCheck });
-            vertical.push({ path: '/crm/fees', label: 'Advisory Billing', icon: BadgeDollarSign });
+            vertical.push({ path: '/crm/compliance', label: 'Compliance Vault', icon: FileCheck, tourId: 'nav-compliance' });
+            vertical.push({ path: '/crm/fees', label: 'Advisory Billing', icon: BadgeDollarSign, tourId: 'nav-fees' });
         }
 
         if (user.category === AdvisorCategory.LOGISTICS || products.includes(ProductType.LOGISTICS)) {
-            vertical.push({ path: '/crm/logistics', label: 'Logistics Hub', icon: Truck });
+            vertical.push({ path: '/crm/logistics', label: 'Logistics Hub', icon: Truck, tourId: 'nav-logistics' });
         }
 
         const shared = [
@@ -263,7 +277,21 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
 
         return { main, vertical, shared, admin };
-    }, [user, isSuperAdmin, isManagerOrAdmin]);
+    }, [user, enabledModules, isSuperAdmin, isManagerOrAdmin]);
+
+    // Build the tour exactly based on what the user can see right now
+    const currentTourSteps = useMemo(() => {
+        const allItems = [...navStructure.main, ...navStructure.vertical, ...navStructure.shared, ...navStructure.admin];
+        return allItems.map(item => ({
+            id: item.tourId,
+            title: item.label,
+            text: TOUR_EXPLANATIONS[item.tourId] || 'Access this module to manage related tasks and configurations.',
+            targetId: item.tourId,
+            path: item.path
+        }));
+    }, [navStructure]);
+
+    const currentStep = currentTourSteps[currentStepIndex];
 
     const renderNavLink = (item: any) => {
         const isActive = location.pathname === item.path;
