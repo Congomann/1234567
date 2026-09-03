@@ -5,7 +5,8 @@ import {
   ArrowUpRight, RefreshCw, Radio, Volume2, Delete, X
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
-
+import { useSoftphone } from '../../context/SoftphoneContext';
+import { useData } from '../../context/DataContext';
 
 const apiFetch = (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('nhfg_access_token');
@@ -57,7 +58,8 @@ interface SMSMessage {
 type CallState = 'idle' | 'connecting' | 'in-progress' | 'ended' | 'failed';
 
 export const TelephonyHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'logs'>('softphone');
+  const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'power_dialer' | 'logs' | 'supervisor_dashboard'>('softphone');
+  const softphone = useSoftphone();
   
   // Credentials & Telephony State
   const [credentials, setCredentials] = useState<{ spaceUrl: string; projectId: string; phoneNumber: string; status: string } | null>(null);
@@ -65,9 +67,42 @@ export const TelephonyHub: React.FC = () => {
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [smsHistory, setSmsHistory] = useState<SMSMessage[]>([]);
 
+  // CRM Integration State
+  const { leads, clients } = useData();
+  const [matchedCRMRecord, setMatchedCRMRecord] = useState<any | null>(null);
+
   // Softphone State & Status Machine
   const [dialNumber, setDialNumber] = useState('');
   const [selectedExtension, setSelectedExtension] = useState('101');
+
+  // Search CRM whenever dialNumber or incoming remoteNumber changes
+  useEffect(() => {
+    const activeNumber = softphone.remoteNumber || dialNumber;
+    if (!activeNumber) {
+      setMatchedCRMRecord(null);
+      return;
+    }
+    const cleanNum = (n: string) => n.replace(/\D/g, '');
+    const activeClean = cleanNum(activeNumber);
+    if (activeClean.length < 7) {
+      setMatchedCRMRecord(null);
+      return;
+    }
+    
+    const leadMatch = leads.find(l => l.phone && cleanNum(l.phone).includes(activeClean));
+    if (leadMatch) {
+      setMatchedCRMRecord({ type: 'Lead', ...leadMatch });
+      return;
+    }
+    
+    const clientMatch = clients.find(c => c.phone && cleanNum(c.phone).includes(activeClean));
+    if (clientMatch) {
+      setMatchedCRMRecord({ type: 'Client', ...clientMatch });
+      return;
+    }
+
+    setMatchedCRMRecord(null);
+  }, [dialNumber, softphone.remoteNumber, leads, clients]);
   const [callState, setCallState] = useState<CallState>('idle');
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const [currentCallSid, setCurrentCallSid] = useState<string | null>(null);
@@ -136,72 +171,45 @@ export const TelephonyHub: React.FC = () => {
 
   const handleStartCall = async () => {
     if (!dialNumber) return;
-    setCallState('connecting');
-    setCallErrorMessage(null);
-    setCallDuration(0);
-
     try {
-      const res = await apiFetch('/api/signalwire/call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: dialNumber,
-          toNumber: dialNumber,
-          leadName: 'Direct Softphone Call',
-          extension: selectedExtension,
-          advisorExtension: selectedExtension
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setCurrentCallId(data.callId || data.call?.id || null);
-        setCurrentCallSid(data.sid || data.call?.call_sid || null);
-        setCallState('in-progress');
-        fetchData();
-      } else {
-        setCallState('failed');
-        setCallErrorMessage(data.error || 'Failed to connect call');
-        setTimeout(() => setCallState('idle'), 3500);
-      }
+      await softphone.makeCall(dialNumber);
+      // Wait for ringing state
     } catch (err: any) {
-      setCallState('failed');
       setCallErrorMessage(err.message || 'Network error connecting call');
-      setTimeout(() => setCallState('idle'), 3500);
     }
   };
 
   const handleEndCall = async () => {
-    const durationToSave = callDuration;
-    const callIdToSave = currentCallId;
-    const callSidToSave = currentCallSid;
-
-    setCallState('ended');
-
-    if (callIdToSave || callSidToSave) {
-      try {
-        await apiFetch('/api/signalwire/hangup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            callId: callIdToSave,
-            callSid: callSidToSave,
-            status: 'completed',
-            durationSeconds: durationToSave
-          })
-        });
-      } catch (err) {
-        console.error('Failed to log call end status:', err);
-      }
+    try {
+      await softphone.endCall();
+      
+      // Update backend CRM log
+      await apiFetch('/api/signalwire/hangup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          durationSeconds: softphone.callDuration,
+          status: 'completed',
+          leadId: matchedCRMRecord?.type === 'Lead' ? matchedCRMRecord.id : null,
+          clientId: matchedCRMRecord?.type === 'Client' ? matchedCRMRecord.id : null
+        })
+      });
+      fetchData();
+    } catch (err) {
+      console.error('Failed to end call:', err);
     }
-
-    fetchData();
-    setTimeout(() => {
-      setCallState('idle');
-      setCurrentCallId(null);
-      setCurrentCallSid(null);
-    }, 2500);
   };
+
+  const handleRegister = async () => {
+    // Attempt registration
+    if (softphone.status === 'offline') {
+      await softphone.register('current-agent');
+    }
+  };
+
+  useEffect(() => {
+    handleRegister();
+  }, []);
 
   // Handle SMS Send
   const handleSendSMS = async () => {
@@ -295,13 +303,15 @@ export const TelephonyHub: React.FC = () => {
       </div>
 
       {/* APPLE SEGMENTED CONTROL TABS */}
-      <div className="bg-slate-200/60 backdrop-blur-xl p-1.5 rounded-2xl inline-flex items-center gap-1 mb-8 border border-slate-300/40">
+      <div className="bg-slate-200/60 backdrop-blur-xl p-1.5 rounded-2xl inline-flex items-center gap-1 mb-8 border border-slate-300/40 flex-wrap">
         {[
           { id: 'softphone', label: 'Corporate Softphone', icon: Phone },
+          { id: 'power_dialer', label: 'Power Dialer', icon: Play },
+          { id: 'supervisor_dashboard', label: 'Supervisor Screen', icon: Shield },
           { id: 'extensions', label: 'Advisor Extensions', icon: Users },
           { id: 'sms', label: '2-Way SMS Inbox', icon: MessageSquare },
-          { id: 'ai_qualifier', label: 'AI Lead Qualifier Bot', icon: Bot },
-          { id: 'logs', label: 'Call Recordings & AI Ratings', icon: Volume2 }
+          { id: 'ai_qualifier', label: 'AI Lead Qualifier', icon: Bot },
+          { id: 'logs', label: 'Call Recordings', icon: Volume2 }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -385,7 +395,7 @@ export const TelephonyHub: React.FC = () => {
             </div>
 
             {/* Action Buttons with Status Machine */}
-            {callState === 'idle' && (
+            {(softphone.status === 'offline' || softphone.status === 'registered' || softphone.status === 'idle') && (
               <button
                 onClick={handleStartCall}
                 disabled={!dialNumber}
@@ -395,16 +405,16 @@ export const TelephonyHub: React.FC = () => {
               </button>
             )}
 
-            {callState === 'connecting' && (
+            {(softphone.status === 'registering' || softphone.status === 'ringing' || softphone.status === 'connecting') && (
               <button
                 disabled
                 className="w-full max-w-[280px] py-4 bg-amber-500 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
               >
-                <RefreshCw className="w-4 h-4 animate-spin" /> Connecting Call...
+                <RefreshCw className="w-4 h-4 animate-spin" /> {softphone.status === 'registering' ? 'Registering...' : 'Connecting Call...'}
               </button>
             )}
 
-            {callState === 'in-progress' && (
+            {softphone.status === 'active' && (
               <button
                 onClick={handleEndCall}
                 className="w-full max-w-[280px] py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all apple-card"
@@ -413,16 +423,7 @@ export const TelephonyHub: React.FC = () => {
               </button>
             )}
 
-            {callState === 'ended' && (
-              <button
-                disabled
-                className="w-full max-w-[280px] py-4 bg-emerald-600 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"
-              >
-                <CheckCircle2 className="w-4 h-4" /> Call Ended
-              </button>
-            )}
-
-            {callState === 'failed' && (
+            {softphone.status === 'error' && (
               <button
                 disabled
                 className="w-full max-w-[280px] py-4 bg-rose-600 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg"
@@ -430,6 +431,41 @@ export const TelephonyHub: React.FC = () => {
                 <AlertCircle className="w-4 h-4" /> Call Failed
               </button>
             )}
+
+            {/* CRM MATCH UI */}
+            <div className="w-full mt-6 pt-6 border-t border-slate-200/50">
+              {matchedCRMRecord ? (
+                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 flex items-start gap-3 w-full">
+                  <div className="p-2 bg-blue-600 rounded-xl text-white">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                        CRM MATCH: {matchedCRMRecord.type}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-black text-slate-900 truncate">{matchedCRMRecord.name}</h4>
+                    <p className="text-xs text-slate-500 font-medium truncate mb-2">{matchedCRMRecord.email || 'No email'}</p>
+                    
+                    <button className="w-full py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5">
+                      <ArrowUpRight className="w-3.5 h-3.5" /> View Full Profile
+                    </button>
+                  </div>
+                </div>
+              ) : dialNumber.length >= 7 ? (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center text-center w-full">
+                  <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center mb-2">
+                    <Users className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <h4 className="text-xs font-black text-slate-700 mb-1">No CRM Match Found</h4>
+                  <p className="text-[10px] text-slate-500 font-medium mb-3">This number is not saved in the database.</p>
+                  <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all">
+                    Create New Lead
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
 
           {/* Active Call Console */}
@@ -438,45 +474,56 @@ export const TelephonyHub: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-black text-slate-900 mb-1">Active Call Console</h2>
-                  <p className="text-xs text-slate-400 font-medium">SignalWire LAML Voice Protocol • Dual Channel Recording</p>
+                  <p className="text-xs text-slate-400 font-medium">SignalWire WebRTC • Browser Softphone</p>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-slate-100 font-mono text-xs font-bold text-slate-600 border border-slate-200">
-                  Status: {callState.toUpperCase()}
+                  Status: {softphone.status.toUpperCase()}
                 </span>
               </div>
 
-              {callState === 'connecting' && (
+              {(softphone.status === 'registering' || softphone.status === 'ringing') && (
                 <div className="my-8 p-8 bg-amber-50/80 rounded-3xl border border-amber-200 text-center">
                   <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                     <Radio className="w-8 h-8 text-amber-600 animate-pulse" />
                   </div>
-                  <h3 className="text-2xl font-black text-slate-900 mb-1">Connecting to SignalWire...</h3>
-                  <p className="text-sm text-slate-500 font-mono">Target: {dialNumber} • Ext {selectedExtension}</p>
+                  <h3 className="text-2xl font-black text-slate-900 mb-1">{softphone.status === 'registering' ? 'Registering Softphone...' : 'Dialing...'}</h3>
+                  <p className="text-sm text-slate-500 font-mono">Target: {dialNumber || softphone.remoteNumber}</p>
                 </div>
               )}
 
-              {callState === 'in-progress' && (
-                <div className="my-8 p-8 bg-blue-50/80 rounded-3xl border border-blue-200 text-center">
+              {softphone.status === 'active' && (
+                <div className="my-8 p-8 bg-blue-50/80 rounded-3xl border border-blue-200 text-center relative overflow-hidden">
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <span className="px-2 py-1 bg-white border border-slate-200 rounded-md text-[10px] font-black tracking-widest text-slate-400">PHASE 8</span>
+                  </div>
                   <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-ping">
                     <Phone className="w-8 h-8 text-blue-600" />
                   </div>
                   <h3 className="text-2xl font-black text-slate-900 mb-1">Call in Progress</h3>
-                  <p className="text-sm text-slate-500 font-mono mb-4">{dialNumber} • Ext {selectedExtension}</p>
-                  <div className="inline-block px-6 py-2 rounded-full bg-white text-blue-600 font-mono text-xl font-black shadow-sm border border-blue-200">
-                    {formatTime(callDuration)}
+                  <p className="text-sm text-slate-500 font-mono mb-4">{softphone.remoteNumber || dialNumber}</p>
+                  <div className="inline-block px-6 py-2 rounded-full bg-white text-blue-600 font-mono text-xl font-black shadow-sm border border-blue-200 mb-6">
+                    {formatTime(softphone.callDuration)}
+                  </div>
+
+                  {/* Transfer & Supervisor Controls */}
+                  <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-blue-200">
+                    <button 
+                      onClick={() => softphone.blindTransfer('102')}
+                      className="py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      Blind Transfer (Ext)
+                    </button>
+                    <button 
+                      onClick={() => softphone.warmTransfer('102')}
+                      className="py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      Warm Transfer
+                    </button>
                   </div>
                 </div>
               )}
 
-              {callState === 'ended' && (
-                <div className="my-8 p-8 bg-emerald-50/80 rounded-3xl border border-emerald-200 text-center">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                  <h3 className="text-2xl font-black text-slate-900 mb-1">Call Completed & Persisted</h3>
-                  <p className="text-sm text-slate-600 font-mono">Total Duration: {formatTime(callDuration)} • Updated DB log</p>
-                </div>
-              )}
-
-              {callState === 'failed' && (
+              {softphone.status === 'error' && (
                 <div className="my-8 p-8 bg-rose-50/80 rounded-3xl border border-rose-200 text-center">
                   <AlertCircle className="w-12 h-12 text-rose-600 mx-auto mb-4" />
                   <h3 className="text-2xl font-black text-slate-900 mb-1">Call Connection Failed</h3>
@@ -484,7 +531,7 @@ export const TelephonyHub: React.FC = () => {
                 </div>
               )}
 
-              {callState === 'idle' && (
+              {(softphone.status === 'offline' || softphone.status === 'registered') && (
                 <div className="my-8 p-8 bg-white/60 rounded-3xl border border-slate-200 text-center">
                   <PhoneOff className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                   <h3 className="text-lg font-extrabold text-slate-800">Softphone Ready</h3>
@@ -538,6 +585,134 @@ export const TelephonyHub: React.FC = () => {
                 {isRecording ? 'Recording Active' : 'Recording Off'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 1.5: POWER DIALER ── */}
+      {activeTab === 'power_dialer' && (
+        <div className="apple-glass border border-white/80 rounded-[2.5rem] p-8 shadow-2xl max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">Campaign Power Dialer</h2>
+              <p className="text-sm text-slate-500 font-medium">Auto-dials the next pending lead in your active campaign.</p>
+            </div>
+            <span className="px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-black tracking-wider uppercase">
+              Phase 6 Preview
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white/60 p-6 rounded-3xl border border-slate-200 text-center flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4 text-white shadow-lg shadow-blue-600/20">
+                <Play className="w-8 h-8 ml-1" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 mb-2">Ready to Dial</h3>
+              <p className="text-xs text-slate-500 mb-6">Queue: Q3 Medicare Renewals (42 pending)</p>
+              
+              <button 
+                onClick={async () => {
+                  // Simulate fetching next lead and dialing
+                  const res = await apiFetch('/api/telephony-webhook/campaigns/dummy-campaign-id/next-lead');
+                  const data = await res.json();
+                  if (data.nextLead) {
+                    setDialNumber(data.nextLead.phone_number);
+                    setActiveTab('softphone');
+                    softphone.makeCall(data.nextLead.phone_number);
+                  } else {
+                    alert('No leads remaining in campaign!');
+                  }
+                }}
+                disabled={softphone.status !== 'registered'}
+                className="w-full py-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg"
+              >
+                Fetch Next Lead & Dial
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Campaign Settings</h4>
+              <div className="p-4 bg-white/80 rounded-2xl border border-slate-200">
+                <label className="text-xs font-extrabold text-slate-700 block mb-1">Active Campaign</label>
+                <select className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs p-2 rounded-xl">
+                  <option>Q3 Medicare Renewals</option>
+                  <option>Annuity Prospecting (Cold)</option>
+                  <option>Lost Clients 2024</option>
+                </select>
+              </div>
+              
+              <div className="p-4 bg-white/80 rounded-2xl border border-slate-200">
+                <label className="text-xs font-extrabold text-slate-700 block mb-1">Wrap-up Time</label>
+                <select className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs p-2 rounded-xl">
+                  <option>Manual (Require Click)</option>
+                  <option>30 Seconds</option>
+                  <option>60 Seconds</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 1.75: SUPERVISOR DASHBOARD (PHASE 9) ── */}
+      {activeTab === 'supervisor_dashboard' && (
+        <div className="apple-glass border border-white/80 rounded-[2.5rem] p-8 shadow-2xl max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">Supervisor Screen</h2>
+              <p className="text-sm text-slate-500 font-medium">Real-time active call monitoring (Listen, Whisper, Barge).</p>
+            </div>
+            <span className="px-4 py-1.5 bg-rose-100 text-rose-700 rounded-full text-xs font-black tracking-wider uppercase">
+              Phase 9 Preview
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {/* Mock Active Calls for Supervisor View */}
+            {[
+              { id: '1', agent: 'Sarah Jenkins', ext: '102', lead: 'Michael Chang', duration: '03:45', status: 'In-progress' },
+              { id: '2', agent: 'David Ross', ext: '104', lead: 'Unknown Caller', duration: '00:45', status: 'In-progress' },
+            ].map(call => (
+              <div key={call.id} className="bg-white/80 p-5 rounded-3xl border border-slate-200 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-slate-900">{call.agent} (Ext {call.ext})</h3>
+                    <p className="text-xs text-slate-500 font-medium">Talking with: {call.lead}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="text-right">
+                    <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Duration</span>
+                    <span className="font-mono text-sm font-bold text-slate-800">{call.duration}</span>
+                  </div>
+
+                  <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                    <button 
+                      onClick={() => alert(`Silently listening to ${call.agent}'s call...`)}
+                      className="px-3 py-1.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
+                    >
+                      Listen
+                    </button>
+                    <button 
+                      onClick={() => alert(`Whispering to ${call.agent} (Caller cannot hear)...`)}
+                      className="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
+                    >
+                      Whisper
+                    </button>
+                    <button 
+                      onClick={() => alert(`Barging into ${call.agent}'s call (3-way conference started)...`)}
+                      className="px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
+                    >
+                      Barge
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

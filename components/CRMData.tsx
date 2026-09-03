@@ -64,7 +64,6 @@ const ADMIN_TOUR_STEPS = [
     { id: 'nav-automation', title: 'Automation Studio', text: 'Configure neural-chain logic for lead follow-ups.', targetId: 'nav-automation', path: '/crm/automation' },
     { id: 'nav-leads', title: 'Leads DB', text: 'Central repository for all incoming prospect data.', targetId: 'nav-leads', path: '/crm/leads' },
     { id: 'nav-calendar', title: 'Calendar', text: 'Coordinate organization-wide meetings and events.', targetId: 'nav-calendar', path: '/crm/calendar' },
-    { id: 'nav-chat', title: 'Team Chat', text: 'Encrypted real-time messaging for internal collaboration.', targetId: 'nav-chat', path: '/crm/chat' },
     { id: 'nav-legal', title: 'Legal & Compliance', text: 'Corporate policies and signed solicitor agreements.', targetId: 'nav-legal', path: '/crm/legal' },
     { id: 'nav-profile', title: 'Profile', text: 'Manage your bio and public microsite presence.', targetId: 'nav-profile', path: '/crm/profile' },
 
@@ -154,7 +153,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
     }, [currentStepIndex, isTourActive, currentStep?.targetId]);
 
-    const handleLogout = () => { logout(); navigate('/'); };
+    const handleLogout = () => { logout(); };
 
     const startTour = () => {
         setIsTourActive(true);
@@ -187,9 +186,11 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         const main = [
             { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, tourId: 'nav-dashboard' },
             { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
-            { path: '/crm/leads', label: 'Leads DB', icon: Database, tourId: 'nav-leads' },
-            { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
-            { path: '/crm/chat', label: 'Team Chat', icon: MessageCircle, tourId: 'nav-chat' },
+            ...(enabledModules.sales ? [
+                { path: '/crm/leads', label: 'Leads DB', icon: Users, tourId: 'nav-leads' },
+                { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
+                { path: '/crm/intake', label: 'Lead Intake', icon: ClipboardCheck },
+            ] : []),
         ];
 
         const vertical = [];

@@ -4,7 +4,6 @@ import { Lead, LeadStatus, UserRole, ProductType, ApplicationStatus } from '../.
 import { Filter, Search, X, Eye, ChevronDown, Edit2, Save, Globe, CheckSquare, Square, Trash2, CheckCircle2, AlertTriangle, Clock, Info, UserCheck, Archive, History, FileText, MousePointer2, ExternalLink, Download, MessageSquare, MoreVertical, Plus, Send, Shield, Sparkles, Star, Tag, Activity, Briefcase, Building2, Calendar, Mail, MapPin, Phone, User as UserIcon, ChevronLeft, ChevronRight, Wrench, Hammer, TrendingUp, Home, Landmark } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
-import { CaseChat } from '../../components/chat/CaseChat';
 import { Link } from 'react-router-dom';
 import { AnalyticsService } from '../../services/analyticsService';
 import { Backend } from '../../services/apiBackend';
@@ -850,7 +849,7 @@ export const Leads: React.FC = () => {
 
                         {activeTab === 'underwriting' && viewingLead && (
                             <div className="animate-fade-in">
-                                <CaseChat caseId={viewingLead.id} clientName={viewingLead.name} />
+                                {/* CaseChat removed */}
                             </div>
                         )}
 

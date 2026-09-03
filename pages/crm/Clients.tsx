@@ -6,7 +6,6 @@ import { Search, Filter, Download, Edit2, X, Mail, Phone, Shield, MessageSquare,
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
-import { CaseChat } from '../../components/chat/CaseChat';
 
 export const Clients: React.FC = () => {
     const { clients, updateClient, user } = useData();
@@ -374,7 +373,7 @@ export const Clients: React.FC = () => {
                             </form>
                         ) : (
                             <div className="animate-fade-in overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 min-h-[500px]">
-                                {editingClient && <CaseChat caseId={editingClient.id} clientName={editingClient.name} />}
+                                {/* CaseChat removed */}
                             </div>
                         )}
                     </div>

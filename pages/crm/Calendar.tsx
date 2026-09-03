@@ -8,7 +8,7 @@ import { GridWeek } from '../../components/calendar/GridWeek';
 import { GridDay } from '../../components/calendar/GridDay';
 import { EventModal } from '../../components/calendar/EventModal';
 import { MeetingsDashboard } from '../../components/calendar/MeetingsDashboard';
-import { LayoutDashboard, Calendar as CalendarIcon } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Link as LinkIcon } from 'lucide-react';
 
 export type CalendarViewType = 'month' | 'week' | 'day';
 export type MainViewMode = 'dashboard' | 'calendar';
@@ -216,6 +216,20 @@ export const Calendar: React.FC = () => {
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all"
                 >
                   Next →
+                </button>
+
+                <div className="w-px h-6 bg-slate-200 mx-1"></div>
+
+                <button 
+                  onClick={() => {
+                    const url = `${window.location.origin}/book/${user?.id || 'admin'}`;
+                    navigator.clipboard.writeText(url);
+                    alert(`Public booking link copied to clipboard!\n${url}`);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl shadow-lg shadow-slate-900/20 transition-all"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                  Copy Booking Link
                 </button>
               </div>
             </div>

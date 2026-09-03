@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
+import { SoftphoneProvider } from './context/SoftphoneContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -24,6 +25,7 @@ import { Partnership } from './pages/website/Partnership';
 import { CampaignLandingPage } from './pages/website/CampaignLandingPage';
 import { Resources } from './pages/website/Resources';
 import { Contact } from './pages/website/Contact';
+import { BookingPage } from './pages/website/BookingPage';
 import { SecuritiesPortfolio } from './pages/website/SecuritiesPortfolio';
 import { RealEstateIntelligence } from './pages/website/RealEstateIntelligence';
 import { ExploreSolutions } from './pages/website/ExploreSolutions';
@@ -40,7 +42,6 @@ import { LeadIntake } from './pages/crm/LeadIntake';
 import { Clients } from './pages/crm/Clients';
 import { Commissions } from './pages/crm/Commissions';
 const Calendar = React.lazy(() => import('./pages/crm/Calendar').then(m => ({ default: m.Calendar })));
-const Chat = React.lazy(() => import('./pages/crm/Chat').then(m => ({ default: m.Chat })));
 import { Inbox } from './pages/crm/Inbox';
 import { ProfileSettings } from './pages/crm/ProfileSettings';
 import { AdminUsers } from './pages/admin/AdminUsers';
@@ -179,6 +180,7 @@ const App: React.FC = () => {
     <DataProvider>
       <ThemeProvider>
         <SystemStatus />
+        <SoftphoneProvider>
         <Router>
           <SEO />
           <AnalyticsTracker />
@@ -215,6 +217,7 @@ const App: React.FC = () => {
             <Route path="/transparency" element={<PublicLayout><AnnualReport /></PublicLayout>} />
             <Route path="/press" element={<PublicLayout><PressReleases /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
+            <Route path="/book/:id" element={<BookingPage />} />
             <Route path="/track/:token" element={<LoadTracking />} />
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
@@ -238,7 +241,6 @@ const App: React.FC = () => {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="onboarding-flow" element={<AdvisorOnboardingFlow />} />
               <Route path="inbox" element={<Inbox />} />
-              <Route path="chat" element={<Chat />} />
               <Route path="leads" element={<Leads />} />
               <Route path="intake" element={<LeadIntake />} />
               <Route path="clients" element={<Clients />} />
@@ -299,6 +301,7 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
+        </SoftphoneProvider>
       </ThemeProvider>
     </DataProvider>
   );

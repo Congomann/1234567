@@ -19,6 +19,7 @@ const supabase = require('./supabaseClient.cjs');
 const webhooksRouter = require('./routes/webhooks.cjs');
 const marketingRouter = require('./routes/marketing.cjs');
 const signalwireRouter = require('./routes/signalwire.cjs');
+const telephonyWebhookRouter = require('./routes/telephonyWebhook.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -135,6 +136,7 @@ app.use('/api/webhooks', webhooksRouter);
 app.use('/api/marketing', marketingRouter);
 // Mount SignalWire Corporate Telephony Router
 app.use('/api/signalwire', signalwireRouter);
+app.use('/api/telephony-webhook', telephonyWebhookRouter);
 
 // Database Connection - Google Cloud SQL Support
 let poolConfig;
@@ -247,23 +249,128 @@ const initDB = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS telephony_agents (
+        id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        status VARCHAR(50) DEFAULT 'offline',
+        current_call_id UUID,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_phone_numbers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        phone_number VARCHAR(50) UNIQUE NOT NULL,
+        capabilities JSONB,
+        queue_id UUID,
+        agent_id UUID REFERENCES users(id),
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_call_dispositions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        trigger_workflow VARCHAR(100),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_transfers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        type VARCHAR(50), -- 'blind' or 'warm'
+        from_agent_id UUID REFERENCES users(id),
+        to_agent_id UUID REFERENCES users(id),
+        to_number VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'initiated',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- We drop and recreate telephony_calls for this upgrade if needed, or just let it exist. 
+      -- In a real prod environment we'd use migrations.
       CREATE TABLE IF NOT EXISTS telephony_calls (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        call_sid VARCHAR(255) UNIQUE NOT NULL,
+        agent_id UUID REFERENCES users(id),
+        lead_id UUID REFERENCES leads(id),
+        client_id UUID REFERENCES clients(id),
+        phone_number_id UUID REFERENCES telephony_phone_numbers(id),
         direction VARCHAR(20) NOT NULL,
         from_number VARCHAR(50) NOT NULL,
         to_number VARCHAR(50) NOT NULL,
-        lead_name VARCHAR(255),
-        lead_id VARCHAR(255),
-        advisor_extension VARCHAR(10),
         status VARCHAR(50) NOT NULL DEFAULT 'initiated',
-        duration_seconds INT DEFAULT 0,
+        started_at TIMESTAMP WITH TIME ZONE,
+        answered_at TIMESTAMP WITH TIME ZONE,
+        ended_at TIMESTAMP WITH TIME ZONE,
+        duration INT DEFAULT 0,
         recording_url TEXT,
+        disposition_id UUID REFERENCES telephony_call_dispositions(id),
+        transfer_id UUID REFERENCES telephony_transfers(id),
+        signalwire_call_id VARCHAR(255) UNIQUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_call_events (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        call_id UUID REFERENCES telephony_calls(id) ON DELETE CASCADE,
+        event_type VARCHAR(100) NOT NULL,
+        event_data JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_recordings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        call_id UUID REFERENCES telephony_calls(id) ON DELETE CASCADE,
+        duration INT,
+        storage_url TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_queues (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        strategy VARCHAR(50) DEFAULT 'longest_idle',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_queue_members (
+        queue_id UUID REFERENCES telephony_queues(id) ON DELETE CASCADE,
+        agent_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        priority INT DEFAULT 1,
+        PRIMARY KEY (queue_id, agent_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_agent_status_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        agent_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        status VARCHAR(50) NOT NULL,
+        started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        ended_at TIMESTAMP WITH TIME ZONE
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_voicemails (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        call_id UUID REFERENCES telephony_calls(id) ON DELETE CASCADE,
+        recording_url TEXT NOT NULL,
         transcript TEXT,
-        ai_rating VARCHAR(20),
-        ai_qualification_summary TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        listened BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- PHASE 6: POWER DIALER
+      CREATE TABLE IF NOT EXISTS telephony_campaigns (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        status VARCHAR(50) DEFAULT 'draft',
+        assigned_queue_id UUID REFERENCES telephony_queues(id),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS telephony_campaign_leads (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        campaign_id UUID REFERENCES telephony_campaigns(id) ON DELETE CASCADE,
+        lead_id UUID REFERENCES leads(id),
+        phone_number VARCHAR(50) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending', -- pending, called, skipped
+        attempts INT DEFAULT 0,
+        last_attempt_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS telephony_sms (
@@ -276,6 +383,25 @@ const initDB = async () => {
         message_text TEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'delivered',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS events (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        title VARCHAR(255) NOT NULL,
+        date DATE,
+        time TIME,
+        end_time TIME,
+        type VARCHAR(50),
+        status VARCHAR(50),
+        description TEXT,
+        has_google_meet BOOLEAN DEFAULT false,
+        meeting_link VARCHAR(255),
+        participants JSONB DEFAULT '[]',
+        creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        creator_name VARCHAR(255),
+        visibility VARCHAR(20) DEFAULT 'private',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
 
@@ -2157,12 +2283,62 @@ app.post('/api/events', authenticateToken, async (req, res) => {
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query('DELETE FROM events WHERE id = $1', [id]);
-    res.json({ success: true, message: 'Event deleted successfully' });
+    await pool.query('DELETE FROM events WHERE id = $1 AND creator_id = $2', [id, req.user.id]);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// --- Public Booking Endpoints ---
+
+app.get('/api/public/availability/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { date } = req.query; // YYYY-MM-DD
+    
+    // Get all events for that user on that date to find conflicts
+    const result = await pool.query(
+      'SELECT time, end_time FROM events WHERE creator_id = $1 AND date = $2',
+      [userId, date]
+    );
+    
+    res.json({ bookedTimes: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/public/book', async (req, res) => {
+  try {
+    const { advisorId, name, email, date, time, endTime } = req.body;
+    
+    const advisorRes = await pool.query('SELECT name FROM users WHERE id = $1', [advisorId]);
+    const advisorName = advisorRes.rows[0]?.name || 'Advisor';
+
+    const eventId = crypto.randomUUID();
+    await pool.query(`
+      INSERT INTO events (id, creator_id, creator_name, title, date, time, end_time, type, status, description, participants, visibility)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'meeting', 'Upcoming', $8, $9, 'public')
+    `, [
+      eventId, 
+      advisorId, 
+      advisorName, 
+      `Client Meeting: ${name}`, 
+      date, 
+      time, 
+      endTime, 
+      `Booked via Public Portal by ${email}`,
+      JSON.stringify([{ name, email }])
+    ]);
+
+    res.json({ success: true, eventId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 app.get('/api/settings', async (req, res) => {
   try {
@@ -4843,306 +5019,6 @@ const isRestrictedMessage = (senderRole, receiverRole, content) => {
   return false;
 };
 
-/**
- * @swagger
- * /api/chat/channels:
- *   get:
- *     summary: Get all channels the user is a member of
- */
-app.get('/api/chat/channels', authenticateToken, async (req, res) => {
-  try {
-    let result;
-    const isPrivileged = ['Administrator', 'Manager', 'Admin', 'Sub-Admin'].includes(req.user.role);
-
-    if (isPrivileged) {
-      // Oversight Role: All channels optimized with CTE single aggregation pass
-      result = await pool.query(
-        `WITH channel_stats AS (
-          SELECT 
-            cm.channel_id,
-            COUNT(DISTINCT cm.user_id) AS member_count,
-            COALESCE(json_agg(DISTINCT u.name) FILTER (WHERE u.name IS NOT NULL), '[]'::json) AS members
-          FROM chat_channel_members cm
-          LEFT JOIN users u ON cm.user_id = u.id
-          GROUP BY cm.channel_id
-        ),
-        last_msgs AS (
-          SELECT DISTINCT ON (channel_id)
-            channel_id,
-            content AS last_message,
-            created_at AS last_message_at
-          FROM chat_messages
-          ORDER BY channel_id, created_at DESC
-        )
-        SELECT 
-          c.*,
-          COALESCE(cs.members, '[]'::json) AS members,
-          lm.last_message,
-          COALESCE(cs.member_count, 0)::int AS member_count
-        FROM chat_channels c
-        LEFT JOIN channel_stats cs ON c.id = cs.channel_id
-        LEFT JOIN last_msgs lm ON c.id = lm.channel_id
-        ORDER BY lm.last_message_at DESC NULLS LAST, c.created_at DESC`
-      );
-    } else {
-      // Standard Role: Only joined channels optimized with CTE single aggregation pass
-      result = await pool.query(
-        `WITH user_channels AS (
-          SELECT channel_id FROM chat_channel_members WHERE user_id = $1
-        ),
-        channel_stats AS (
-          SELECT 
-            cm.channel_id,
-            COUNT(DISTINCT cm.user_id) AS member_count,
-            COALESCE(json_agg(DISTINCT u.name) FILTER (WHERE u.name IS NOT NULL), '[]'::json) AS members
-          FROM chat_channel_members cm
-          JOIN user_channels uc ON cm.channel_id = uc.channel_id
-          LEFT JOIN users u ON cm.user_id = u.id
-          GROUP BY cm.channel_id
-        ),
-        last_msgs AS (
-          SELECT DISTINCT ON (m.channel_id)
-            m.channel_id,
-            m.content AS last_message,
-            m.created_at AS last_message_at
-          FROM chat_messages m
-          JOIN user_channels uc ON m.channel_id = uc.channel_id
-          ORDER BY m.channel_id, m.created_at DESC
-        )
-        SELECT 
-          c.*,
-          COALESCE(cs.members, '[]'::json) AS members,
-          lm.last_message,
-          COALESCE(cs.member_count, 0)::int AS member_count
-        FROM chat_channels c
-        JOIN user_channels uc ON c.id = uc.channel_id
-        LEFT JOIN channel_stats cs ON c.id = cs.channel_id
-        LEFT JOIN last_msgs lm ON c.id = lm.channel_id
-        ORDER BY lm.last_message_at DESC NULLS LAST, c.created_at DESC`,
-        [req.user.id]
-      );
-    }
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/chat/channels', authenticateToken, async (req, res) => {
-  try {
-    const { name, type, product_type } = req.body;
-
-    // Authorization check: Administrator, Manager, and now Sub-Admin allowed
-    if (!['Administrator', 'Manager', 'Sub-Admin'].includes(req.user.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions to create channels.' });
-    }
-
-    const channelRes = await pool.query(
-      `INSERT INTO chat_channels (name, type, product_type, created_by)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [name, type || 'group', product_type || null, req.user.id]
-    );
-
-    const channel = channelRes.rows[0];
-
-    // Auto-add creator as member
-    await pool.query(
-      'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2)',
-      [channel.id, req.user.id]
-    );
-
-    // If it's an advisor channel, auto-add all relevant roles
-    if (type === 'advisor_channel') {
-      await pool.query(
-        `INSERT INTO chat_channel_members (channel_id, user_id)
-         SELECT $1, id FROM users WHERE role IN ('Administrator', 'Manager', 'Sub-Admin')
-         ON CONFLICT DO NOTHING`,
-        [channel.id]
-      );
-    }
-    res.json(channel);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/channels/{id}/invite:
- *   post:
- *     summary: Invite a user to a channel (Up to 50 members)
- */
-app.post('/api/chat/channels/:id/invite', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { userId, email, name } = req.body;
-
-  try {
-    // 1. Check current member count
-    const countRes = await pool.query('SELECT COUNT(*) FROM chat_channel_members WHERE channel_id = $1', [id]);
-    if (parseInt(countRes.rows[0].count) >= 50) {
-      return res.status(400).json({ error: 'Channel is full. Maximum 50 members allowed.' });
-    }
-
-    let targetUserId = userId;
-
-    // 2. Handle external email invitation
-    if (!targetUserId && email) {
-      const userRes = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-      if (userRes.rows.length > 0) {
-        targetUserId = userRes.rows[0].id;
-      } else {
-        // Create a basic External user account
-        const newId = crypto.randomUUID();
-        const externalUser = await pool.query(
-          `INSERT INTO users (id, email, name, role, category)
-           VALUES ($1, $2, $3, 'External', 'Admin') RETURNING id`,
-          [newId, email, name || email.split('@')[0]]
-        );
-        targetUserId = externalUser.rows[0].id;
-        console.log(`[Chat] Created external user for invite: ${email}`);
-      }
-    }
-
-    if (!targetUserId) {
-      return res.status(400).json({ error: 'User info required for invitation.' });
-    }
-
-    // 3. Add to channel
-    await pool.query(
-      'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [id, targetUserId]
-    );
-
-    res.json({ success: true, userId: targetUserId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/messages/{channelId}:
- *   get:
- *     summary: Get messages for a specific channel
- */
-app.get('/api/chat/messages/:channelId', authenticateToken, async (req, res) => {
-  try {
-    const { channelId } = req.params;
-    const result = await pool.query(
-      `SELECT m.*, u.name as sender_name, u.role as sender_role, u.avatar as sender_avatar
-       FROM chat_messages m
-       JOIN users u ON m.sender_id = u.id
-       WHERE m.channel_id = $1
-       ORDER BY m.created_at ASC`,
-      [channelId]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/messages:
- *   post:
- *     summary: Send a new message
- */
-app.post('/api/chat/messages', authenticateToken, async (req, res) => {
-  try {
-    const { channelId, content, metadata } = req.body;
-    const senderId = req.user.id;
-    const senderRole = req.user.role;
-
-    // Fetch channel and members to check restrictions
-    const channelRes = await pool.query('SELECT * FROM chat_channels WHERE id = $1', [channelId]);
-    if (channelRes.rows.length === 0) return res.status(404).json({ error: 'Channel not found' });
-    const channel = channelRes.rows[0];
-
-    const membersRes = await pool.query(
-      'SELECT u.id, u.role FROM chat_channel_members cm JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = $1',
-      [channelId]
-    );
-    const members = membersRes.rows;
-
-    // Check Advisor -> Sub-Admin restriction
-    const hasSubAdmin = members.some(m => m.role === 'Sub-Admin');
-    if (senderRole === 'Advisor' && hasSubAdmin && channel.type !== 'direct' && channel.type !== 'group') {
-      // In Case Chats or specialized Sub-Admin channels, advisors must use predefined text
-      if (isRestrictedMessage('Advisor', 'Sub-Admin', content)) {
-        return res.status(403).json({ error: 'Advisors can only send predefined messages to Sub-Admins.' });
-      }
-    }
-
-    const messageRes = await pool.query(
-      `INSERT INTO chat_messages (channel_id, sender_id, content, metadata)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [channelId, senderId, content, metadata || {}]
-    );
-
-    const newMessage = {
-      ...messageRes.rows[0],
-      sender_name: req.user.name || 'User',
-      sender_role: senderRole
-    };
-
-    // Broadcast via WebSocket
-    broadcast({ type: 'NEW_MESSAGE', channelId, message: newMessage });
-
-    res.json(newMessage);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /api/chat/case/{caseId}:
- *   get:
- *     summary: Get or create a Case Chat for a client/lead
- */
-app.get('/api/chat/case/:caseId', authenticateToken, async (req, res) => {
-  try {
-    const { caseId } = req.params;
-
-    // Check if channel exists for this case
-    let channelRes = await pool.query('SELECT * FROM chat_channels WHERE case_id = $1', [caseId]);
-
-    if (channelRes.rows.length === 0) {
-      // Create new case channel
-      const leadRes = await pool.query('SELECT name FROM leads WHERE id = $1', [caseId]);
-      const caseName = leadRes.rows[0]?.name || 'Unknown Client';
-
-      const newChannel = await pool.query(
-        "INSERT INTO chat_channels (name, type, case_id, created_by) VALUES ($1, 'case_chat', $2, $3) RETURNING *",
-        [`Case: ${caseName}`, caseId, req.user.id]
-      );
-
-      const channel = newChannel.rows[0];
-
-      // Auto-add default members: Creator, and all Sub-Admins/Admins
-      // In production, you might want to only add assigned advisor
-      await pool.query(
-        `INSERT INTO chat_channel_members (channel_id, user_id)
-         SELECT $1, id FROM users WHERE role IN ('Administrator', 'Manager', 'Sub-Admin')
-         ON CONFLICT DO NOTHING`,
-        [channel.id]
-      );
-
-      // Add current user if not already added
-      await pool.query(
-        'INSERT INTO chat_channel_members (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-        [channel.id, req.user.id]
-      );
-
-      channelRes = { rows: [channel] };
-    }
-
-    res.json(channelRes.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 /**
  * @swagger

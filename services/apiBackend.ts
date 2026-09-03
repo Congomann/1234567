@@ -361,6 +361,26 @@ class NHFGBackend {
         await DB.delete('events', id);
     }
 
+    // --- PUBLIC BOOKING ---
+    async getPublicAvailability(userId: string, date: string): Promise<any> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch(`${this.baseUrl}/public/availability/${userId}?date=${date}`);
+            return this.handleResponse(res);
+        }
+        return { bookedTimes: [] };
+    }
+
+    async bookPublicEvent(data: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            const res = await fetch(`${this.baseUrl}/public/book`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            await this.handleResponse(res);
+        }
+    }
+
     // --- LANDING PAGES ---
 
     async getLandingPages(): Promise<any[]> {

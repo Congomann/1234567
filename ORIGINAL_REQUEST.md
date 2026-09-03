@@ -1,56 +1,45 @@
 # Original User Request
 
-## Initial Request — 2026-08-13T17:40:20Z
+## Initial Request — 2026-08-15T06:39:17Z
 
-You are the Milestone Sub-orchestrator for Milestone M4 (Ad Campaign Ingestion & Simulator).
-Working directory: /Users/newholland/1234567/.agents/sub_orch_m4
-Workspace directory: /Users/newholland/1234567
-Parent Conversation ID: cb240e04-7e4a-47c4-9153-c26e2e8e7951
+You are the Project Orchestrator for the Phase 1 CRM Technical Audit & SignalWire Telephony Implementation Plan.
 
-Scope:
-Milestone M4 in /Users/newholland/1234567/PROJECT.md
-Features:
-- R4.1 Campaign Webhook Endpoint (Expose POST `/api/webhooks/campaigns` accepting Meta, Google, and TV ad lead payloads)
-- R4.2 Automated Ad Lead Simulator (Background loop streaming simulated Meta, Google, TV ad payloads to campaign webhook)
+Working directory: /Users/newholland/1234567/.agents/teamwork_preview_orchestrator_1
+Workspace root: /Users/newholland/1234567
+Authoritative request: /Users/newholland/1234567/.agents/ORIGINAL_REQUEST.md
+Parent conversation ID: dc59db59-af95-4025-8a70-43c4349aa857
 
-Code locations:
-- `backend/routes/webhooks.cjs`
-- `backend/scripts/adSimulator.cjs`
+Mission:
+Perform a complete Phase 1 audit of the existing CRM to prepare for a standalone call-center/telephony system using SignalWire.
+Do not modify any existing CRM code during this phase (Strict Read-Only Policy).
 
-Execute the full iteration loop (Explorer -> Worker -> Reviewer -> Challenger -> Auditor -> Gate Evaluation).
-Include mandatory integrity warning to Worker.
-Evaluate gate in GATE_STATUS.md. Pass criteria: build/tests pass, all Reviewers APPROVE, Challengers pass, Forensic Auditor CLEAN.
-When gate passes, update PROJECT.md status for M4 to DONE, and report completion back to parent (conversation ID: cb240e04-7e4a-47c4-9153-c26e2e8e7951).
+Requirements:
+R1. Technical Audit:
+Inspect the entire existing application and determine:
+1. Current frontend framework and structure.
+2. Current backend/API structure.
+3. Database schema and authentication.
+4. Where users/agents are stored.
+5. How leads and contacts are stored.
+6. Current hosting/deployment configuration.
+7. Existing SignalWire credentials/configuration (and whether the SDK is installed).
+8. Existing environment variables related to SignalWire.
+9. Whether the application already has WebSocket/WebRTC infrastructure.
 
-## Follow-up — 2026-08-15T05:02:29Z
+R2. Technical Implementation Plan:
+Produce a technical implementation plan for adding a standalone call-center/telephony system without breaking the existing CRM. The plan should outline how to cleanly implement a TelephonyService, database schemas for calls, WebRTC softphone integrations, and CRM lead matching.
 
-<USER_REQUEST>
-# Teamwork Project Prompt — Draft
+R3. Strict Read-Only Policy:
+You must only read files and write the resulting audit/plan document. Do not change existing authentication, database tables, or business logic. Zero source code files in the CRM may be modified.
 
-> Status: Ready for launch — awaiting user approval
-> Goal: Craft prompt → get user approval → delegate to teamwork_preview
-> Requested team: A small focused team (best for a single self-contained fix)
+Acceptance Criteria:
+- The final output is a comprehensive Markdown document containing the findings for all items listed in R1.
+- The document includes a proposed architecture and data model for the telephony system that references existing CRM tables.
+- Zero source code files in the CRM are modified during this process.
 
-Fix the video upload issue to allow video files (including video/mp4) up to 120MB, and resolve the performance delay in displaying the calendar and team chat.
-
-Working directory: /Users/newholland/1234567
-Integrity mode: demo
-
-This is a single self-contained fix; keep it small and focused.
-
-## Requirements
-
-### R1. Fix Video Upload Mime Type and Size Limit
-The system must allow uploading video files, specifically fixing the "Upload failed: mime type video/mp4 is not supported" error, and permit file sizes up to 120 MB.
-
-### R2. Fix Calendar and Team Chat Delay
-Identify and fix the issue causing delays in displaying the calendar and team chat.
-
-## Acceptance Criteria
-
-### Verify Video Upload Fix
-- [ ] A programmatic test or script confirms that a `video/mp4` file up to 120 MB can be successfully uploaded without mime type or size restriction errors.
-
-### Verify Performance Fix
-- [ ] A programmatic test or script measures the fetch time for the calendar and team chat before and after the fix, demonstrating a noticeable reduction in delay.
-</USER_REQUEST>
+Protocol:
+1. Initialize BRIEFING.md, plan.md, and progress.md in your working directory.
+2. Decompose the task and dispatch to specialist subagents (explorers, workers, reviewers) to inspect the codebase and synthesize the audit.
+3. Produce the comprehensive report (e.g., /Users/newholland/1234567/TELEPHONY_PHASE1_AUDIT_PLAN.md).
+4. Review and verify the document against all acceptance criteria and ensure zero CRM source files were changed.
+5. Write your handoff.md and send completion message back to parent.
