@@ -57,7 +57,7 @@ export const Footer: React.FC = () => {
                     required
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="Enter your email addres"
+                    placeholder="Enter your email address"
                     className="w-full pl-12 pr-6 py-3.5 bg-slate-900/60 border border-slate-800 rounded-full text-xs font-semibold text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-inner"
                   />
                 </div>
@@ -262,10 +262,9 @@ export const Footer: React.FC = () => {
 
             <div className="space-y-1">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">DIRECT EMAIL</span>
-              <div className="text-white text-sm block transition-colors break-all">
-                <span className="font-semibold text-slate-300">General:</span> <a href="mailto:info@newhollandfinancial.com" className="hover:text-blue-400 font-bold">info@newhollandfinancial.com</a>
-                <br />
-                <span className="font-semibold text-slate-300">Sales:</span> <a href="mailto:sales@newhollandfinancial.com" className="hover:text-blue-400 font-bold">sales@newhollandfinancial.com</a>
+              <div className="text-white text-sm flex flex-col gap-1 transition-colors">
+                <a href="mailto:info@newhollandfinancial.com" className="hover:text-blue-400 font-bold truncate">info@nhfg.com</a>
+                <a href="mailto:sales@newhollandfinancial.com" className="hover:text-blue-400 font-bold text-slate-400 truncate">sales@nhfg.com</a>
               </div>
             </div>
 

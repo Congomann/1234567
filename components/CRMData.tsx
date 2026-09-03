@@ -188,6 +188,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
             ...(enabledModules.sales ? [
                 { path: '/crm/leads', label: 'Leads DB', icon: Users, tourId: 'nav-leads' },
+                { path: '/crm/clients', label: 'Client Management', icon: CircleUser, tourId: 'nav-clients' },
                 { path: '/crm/calendar', label: 'Calendar', icon: Calendar, tourId: 'nav-calendar' },
                 { path: '/crm/intake', label: 'Lead Intake', icon: ClipboardCheck },
             ] : []),
@@ -222,6 +223,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         if (user.category === AdvisorCategory.SECURITIES || products.includes(ProductType.SECURITIES)) {
             vertical.push({ path: '/crm/portfolio', label: 'Portfolio Mgmt', icon: TrendingUp });
             vertical.push({ path: '/crm/securities-portfolio', label: 'Portfolio Visualizer', icon: Activity, tourId: 'nav-portfolio-viz' });
+            vertical.push({ path: '/crm/securities', label: 'Securities & Wealth', icon: TrendingUp, tourId: 'nav-securities' });
             vertical.push({ path: '/crm/compliance', label: 'Compliance Vault', icon: FileCheck });
             vertical.push({ path: '/crm/fees', label: 'Advisory Billing', icon: BadgeDollarSign });
         }
@@ -231,7 +233,6 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
 
         const shared = [
-            { path: '/crm/securities', label: 'Securities & Wealth', icon: TrendingUp, tourId: 'nav-securities' },
             { path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },

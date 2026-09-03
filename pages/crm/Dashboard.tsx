@@ -162,10 +162,12 @@ export const Dashboard: React.FC = () => {
       {/* ── 3D VIBRANT ANIMATED BANNER CARDS ── */}
       <Tab3DBanner
         cards={[
-          { title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" },
+          ...(user?.category === 'SECURITIES' || user?.role === 'ADMIN' ? [{ title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
+          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: "18", subtitle: "Total Value: $18.4M", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
+          ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "42", subtitle: "Total Loads: 128", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
           { title: "Applications In Line", value: "750", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
-          { title: "New HNW Clients", value: "150", subtitle: "Q3 Onboarded Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
-        ]}
+          { title: "New Clients Onboarded", value: "150", subtitle: "Q3 New Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
+        ].slice(0, 3)}
       />
 
       {/* ── ANIMATED ANALYTICS CHARTS & NEON GLOW DASHBOARD ── */}
@@ -221,6 +223,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         
         {/* 1. Wealth & Securities */}
+        {(user?.category === 'SECURITIES' || user?.productsSold?.includes('securities') || user?.role === 'ADMIN') && (
         <div 
           onClick={() => navigate('/crm/portfolio')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -245,8 +248,10 @@ export const Dashboard: React.FC = () => {
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
+        )}
 
         {/* 2. Real Estate & Escrow */}
+        {(user?.category === 'REAL_ESTATE' || user?.productsSold?.includes('real_estate') || user?.role === 'ADMIN') && (
         <div 
           onClick={() => navigate('/crm/properties')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -271,8 +276,10 @@ export const Dashboard: React.FC = () => {
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
+        )}
 
         {/* 3. Life & Commercial Insurance */}
+        {(user?.category === 'INSURANCE' || user?.productsSold?.includes('life') || user?.role === 'ADMIN') && (
         <div 
           onClick={() => navigate('/crm/applications')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -297,8 +304,10 @@ export const Dashboard: React.FC = () => {
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
+        )}
 
         {/* 4. Mortgage & Lending */}
+        {(user?.category === 'MORTGAGE' || user?.productsSold?.includes('mortgage') || user?.role === 'ADMIN') && (
         <div 
           onClick={() => navigate('/crm/loans')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -323,8 +332,10 @@ export const Dashboard: React.FC = () => {
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
+        )}
 
         {/* 5. Logistics & Fleet */}
+        {(user?.category === 'LOGISTICS' || user?.productsSold?.includes('logistics') || user?.role === 'ADMIN') && (
         <div 
           onClick={() => navigate('/crm/logistics')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -349,6 +360,7 @@ export const Dashboard: React.FC = () => {
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
+        )}
 
         {/* 6. SignalWire Telephony & AI */}
         <div 
