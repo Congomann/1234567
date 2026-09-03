@@ -93,7 +93,7 @@ interface CRMLayoutProps {
 export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, logout } = useData();
+    const { user, logout, login } = useData();
     const sidebarRef = useRef<HTMLDivElement>(null);
 
     // --- TOUR & CONCEPT MODAL STATES ---
@@ -438,10 +438,34 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                                 Tour
                             </button>
 
-                            <div className="flex items-center gap-4 pl-6 border-l border-slate-200/60 h-6">
+                            <div className="flex items-center gap-4 pl-6 border-l border-slate-200/60 h-6 relative group cursor-pointer">
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                                    <div className="px-3 py-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                        Fast Dev Switcher
+                                    </div>
+                                    <div className="py-1">
+                                        {[
+                                            { name: 'Admin', email: 'info@newhollandfinancial.com' },
+                                            { name: 'Life Insurance', email: 'insurance@nhfg.com' },
+                                            { name: 'Real Estate', email: 'realestate@nhfg.com' },
+                                            { name: 'Mortgage', email: 'mortgage@nhfg.com' },
+                                            { name: 'Dispatcher', email: 'logistics@nhfg.com' }
+                                        ].map(mockUser => (
+                                            <div 
+                                                key={mockUser.email}
+                                                onClick={() => {
+                                                    login(mockUser.email, 'password').then(() => window.location.reload());
+                                                }}
+                                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                                            >
+                                                Switch to {mockUser.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-[12px] font-semibold text-slate-700 leading-none">NHFG ADMIN</p>
-                                    <p className="text-[10px] font-medium text-slate-400 mt-1">Administrator</p>
+                                    <p className="text-[12px] font-semibold text-slate-700 leading-none">{user?.name}</p>
+                                    <p className="text-[10px] font-medium text-slate-400 mt-1 capitalize">{user?.category || user?.role}</p>
                                 </div>
                                 <div className="h-8 w-8 rounded-full overflow-hidden bg-slate-100 border border-slate-200">
                                     {user?.avatar ? <img src={user.avatar} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center font-semibold text-slate-400 text-xs">{user?.name[0]}</div>}

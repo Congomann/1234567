@@ -232,7 +232,7 @@ This Agreement represents the understanding between the Company and Contractor r
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = \`Contractor_Agreement_\${contractorName.replace(/\\s+/g, '_')}_\${country}.txt\`;
+                  a.download = `Contractor_Agreement_${contractorName.replace(/\s+/g, '_')}_${country}.txt`;
                   a.click();
                 }}
                 className="text-xs font-bold bg-white text-slate-600 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
@@ -244,10 +244,10 @@ This Agreement represents the understanding between the Company and Contractor r
                 onClick={() => {
                   const printWindow = window.open('', '', 'width=800,height=900');
                   if (printWindow) {
-                    printWindow.document.write(\`
+                    printWindow.document.write(`
                       <html>
                         <head>
-                          <title>Contractor Agreement - \${contractorName}</title>
+                          <title>Contractor Agreement - ${contractorName}</title>
                           <style>
                             body { font-family: 'Times New Roman', serif; padding: 40px; line-height: 1.6; color: #000; position: relative; }
                             .watermark {
@@ -271,13 +271,13 @@ This Agreement represents the understanding between the Company and Contractor r
                         </head>
                         <body>
                           <img src="/logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png'" class="watermark" />
-                          <pre>\${contractText}</pre>
+                          <pre>${contractText}</pre>
                           <script>
                             window.onload = () => { window.print(); window.close(); }
                           </script>
                         </body>
                       </html>
-                    \`);
+                    `);
                     printWindow.document.close();
                   }
                 }}
