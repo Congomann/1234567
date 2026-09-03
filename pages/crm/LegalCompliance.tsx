@@ -222,26 +222,85 @@ This Agreement represents the understanding between the Company and Contractor r
       </button>
 
       {showContract && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <div className="bg-slate-100 rounded-2xl border border-slate-200 p-8 shadow-inner">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-slate-800">Preview: Contract Document</h3>
-            <button 
-              onClick={() => {
-                const blob = new Blob([contractText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = \`Contractor_Agreement_\${contractorName.replace(/\\s+/g, '_')}_\${country}.txt\`;
-                a.click();
-              }}
-              className="text-xs font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" /> Download .txt
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  const blob = new Blob([contractText], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = \`Contractor_Agreement_\${contractorName.replace(/\\s+/g, '_')}_\${country}.txt\`;
+                  a.click();
+                }}
+                className="text-xs font-bold bg-white text-slate-600 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" /> Save .txt
+              </button>
+              
+              <button 
+                onClick={() => {
+                  const printWindow = window.open('', '', 'width=800,height=900');
+                  if (printWindow) {
+                    printWindow.document.write(\`
+                      <html>
+                        <head>
+                          <title>Contractor Agreement - \${contractorName}</title>
+                          <style>
+                            body { font-family: 'Times New Roman', serif; padding: 40px; line-height: 1.6; color: #000; position: relative; }
+                            .watermark {
+                              position: fixed;
+                              top: 50%;
+                              left: 50%;
+                              transform: translate(-50%, -50%) rotate(-45deg);
+                              opacity: 0.08;
+                              pointer-events: none;
+                              z-index: -1;
+                              width: 80%;
+                              max-width: 600px;
+                            }
+                            h1 { font-size: 18px; text-align: center; text-transform: uppercase; margin-bottom: 30px; }
+                            pre { font-family: 'Times New Roman', serif; white-space: pre-wrap; font-size: 12px; margin: 0; }
+                            @media print {
+                              body { padding: 0; margin: 15mm; }
+                              .watermark { opacity: 0.1 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <img src="/logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png'" class="watermark" />
+                          <pre>\${contractText}</pre>
+                          <script>
+                            window.onload = () => { window.print(); window.close(); }
+                          </script>
+                        </body>
+                      </html>
+                    \`);
+                    printWindow.document.close();
+                  }
+                }}
+                className="text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+              >
+                Print / Save PDF (Watermarked)
+              </button>
+            </div>
           </div>
-          <pre className="whitespace-pre-wrap font-mono text-[11px] md:text-xs text-slate-600 bg-slate-50 p-6 rounded-xl overflow-x-auto border border-slate-100 leading-relaxed">
-            {contractText}
-          </pre>
+          
+          <div className="bg-white p-8 md:p-12 shadow-md mx-auto max-w-3xl relative overflow-hidden min-h-[800px]">
+            {/* Visual Watermark in Preview */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none z-0">
+              <div className="transform -rotate-45 text-8xl font-black text-slate-900 flex flex-col items-center">
+                 <img src="/logo.png" alt="" className="w-96 grayscale" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                 <span>AUTHENTIC</span>
+              </div>
+            </div>
+            
+            <pre className="whitespace-pre-wrap font-serif text-[13px] text-slate-900 relative z-10 leading-relaxed">
+              {contractText}
+            </pre>
+          </div>
         </div>
       )}
     </div>
