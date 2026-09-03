@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Phone, PhoneCall, PhoneOff, Mic, MicOff, MessageSquare, Send, Bot, 
   Users, Play, Pause, Sparkles, Shield, CheckCircle2, AlertCircle, 
-  ArrowUpRight, RefreshCw, Radio, Volume2, Delete, X
+  ArrowUpRight, RefreshCw, Radio, Volume2, Delete, X, Activity
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
 import { useSoftphone } from '../../context/SoftphoneContext';
@@ -58,7 +58,7 @@ interface SMSMessage {
 type CallState = 'idle' | 'connecting' | 'in-progress' | 'ended' | 'failed';
 
 export const TelephonyHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'power_dialer' | 'logs' | 'supervisor_dashboard'>('softphone');
+  const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'power_dialer' | 'logs' | 'supervisor_dashboard' | 'analytics'>('softphone');
   const softphone = useSoftphone();
   
   // Credentials & Telephony State
@@ -308,6 +308,7 @@ export const TelephonyHub: React.FC = () => {
           { id: 'softphone', label: 'Corporate Softphone', icon: Phone },
           { id: 'power_dialer', label: 'Power Dialer', icon: Play },
           { id: 'supervisor_dashboard', label: 'Supervisor Screen', icon: Shield },
+          { id: 'analytics', label: 'Manager Analytics', icon: Activity },
           { id: 'extensions', label: 'Advisor Extensions', icon: Users },
           { id: 'sms', label: '2-Way SMS Inbox', icon: MessageSquare },
           { id: 'ai_qualifier', label: 'AI Lead Qualifier', icon: Bot },
@@ -927,6 +928,87 @@ export const TelephonyHub: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ── TAB 6: MANAGER ANALYTICS (PHASE 12) ── */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          <div className="apple-glass border border-white/80 rounded-[2.5rem] p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 mb-1">Manager Dashboard & Analytics</h2>
+                <p className="text-sm text-slate-500 font-medium">Historic metrics, agent performance, and call volume trends.</p>
+              </div>
+              <span className="px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-black tracking-wider uppercase">
+                Phase 12
+              </span>
+            </div>
+
+            {/* Top KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Call Volume</span>
+                <span className="text-3xl font-black text-slate-800">1,248</span>
+                <span className="text-xs font-bold text-emerald-500 mt-2 flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> 12% vs last week</span>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Avg Handle Time</span>
+                <span className="text-3xl font-black text-slate-800">4m 12s</span>
+                <span className="text-xs font-bold text-emerald-500 mt-2 flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> -30s vs last week</span>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Avg Queue Wait</span>
+                <span className="text-3xl font-black text-slate-800">45s</span>
+                <span className="text-xs font-bold text-rose-500 mt-2 flex items-center gap-1"><ArrowUpRight className="w-3 h-3 transform rotate-180"/> +5s vs last week</span>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Dropped Calls</span>
+                <span className="text-3xl font-black text-slate-800">2.1%</span>
+                <span className="text-xs font-bold text-emerald-500 mt-2 flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> -0.5% vs last week</span>
+              </div>
+            </div>
+
+            {/* Mock Charts Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-64 flex flex-col items-center justify-center relative overflow-hidden">
+                <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-600">Call Volume by Day</h3>
+                {/* CSS Bar Chart Simulation */}
+                <div className="flex items-end gap-3 h-32 w-full px-8 mt-8">
+                  {[40, 60, 45, 80, 55, 90, 75].map((h, i) => (
+                    <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-400" style={{ height: \`\${h}%\` }}></div>
+                  ))}
+                </div>
+                <div className="flex justify-between w-full px-8 mt-3 text-[10px] font-bold text-slate-400 uppercase">
+                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+              </div>
+              
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-64 flex flex-col relative">
+                <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-600">Top Performing Agents (Talk Time)</h3>
+                <div className="mt-12 space-y-4 w-full">
+                  {[
+                    { name: "Sarah Jenkins", value: 85 },
+                    { name: "Michael Ross", value: 72 },
+                    { name: "Jessica Alba", value: 64 },
+                    { name: "David Chen", value: 45 }
+                  ].map((agent, i) => (
+                    <div key={i} className="w-full">
+                      <div className="flex justify-between text-xs font-bold mb-1 text-slate-700">
+                        <span>{agent.name}</span>
+                        <span>{agent.value} hrs</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: \`\${agent.value}%\` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
