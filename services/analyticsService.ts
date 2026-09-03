@@ -29,10 +29,43 @@ const setSessionId = (id: string) => {
 
 const getDeviceType = () => {
     if (typeof navigator === 'undefined') return 'Unknown';
+    const ua = navigator.userAgent || '';
+    
+    // Explicit Device Identification
+    if (/iPhone/i.test(ua)) return 'iPhone';
+    if (/iPad/i.test(ua)) return 'iPad';
+    if (/Pixel/i.test(ua)) return 'Google Pixel';
+    if (/Samsung|SM-|SGH-|SCH-/i.test(ua)) return 'Samsung';
+    if (/Android/i.test(ua)) return 'Android Device';
+    if (/Macintosh|Mac OS X/i.test(ua)) return 'Mac / MacBook';
+    if (/Windows NT/i.test(ua)) return 'Windows Laptop/PC';
+    if (/Linux/i.test(ua)) return 'Linux Machine';
+    
+    // Fallback broad categorizations
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "Tablet";
+    if (/Mobile|iP(hone|od)|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "Mobile";
+    return "Desktop/Laptop";
+};
+
+// Generates a robust cross-site tracking fingerprint (without using 3rd party cookies which are being phased out)
+const generateFingerprint = () => {
+    if (typeof window === 'undefined') return '';
+    const screen = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
+    const lang = navigator.language;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const cores = navigator.hardwareConcurrency || 1;
+    const memory = (navigator as any).deviceMemory || 1;
     const ua = navigator.userAgent;
-    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
-    if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "mobile";
-    return "desktop";
+    
+    // Simple hash function for fingerprint string
+    const str = `${screen}-${lang}-${tz}-${cores}-${memory}-${ua}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16);
 };
 
 export const AnalyticsService = {
@@ -55,9 +88,11 @@ export const AnalyticsService = {
                     referrer: document.referrer,
                     metadata: {
                         deviceType: getDeviceType(),
+                        trackingFingerprint: generateFingerprint(),
                         screenResolution: `${window.screen.width}x${window.screen.height}`,
                         language: navigator.language,
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        entryTime: new Date().toISOString(),
                         ...extraMetadata
                     }
                 })
