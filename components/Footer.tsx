@@ -72,8 +72,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* 4-COLUMN FOOTER GRID MATCHING SCREENSHOT */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+        {/* 5-COLUMN FOOTER GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
           
           {/* COLUMN 1: BRAND SUMMARY */}
           <div className="space-y-6">
@@ -128,6 +128,11 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-4">
               <li>
+                <Link to="/products" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                  Solutions Overview
+                </Link>
+              </li>
+              <li>
                 <Link to="/real-estate" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
                   Real Estate
                 </Link>
@@ -160,32 +165,46 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* COLUMN 3: ECOSYSTEM & CORPORATE */}
+          {/* COLUMN 3: RESOURCES */}
           <div>
             <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6">
-              ECOSYSTEM &amp; CORPORATE
+              RESOURCES
             </h4>
             <ul className="space-y-4">
-              <li>
-                <Link to="/products" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Solutions Overview
-                </Link>
-              </li>
               <li>
                 <Link to="/advisors" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
                   Advisors Directory
                 </Link>
               </li>
               <li>
-                <Link to="/advisors" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                <Link to="/schedule" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
                   Schedule Advisory
                 </Link>
               </li>
               <li>
                 <Link to="/login" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Client Portal
+                  Agent Portal
                 </Link>
               </li>
+              <li>
+                <Link to="/join" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                  Partner With Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/resources" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                  Financial Resources
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 4: COMPANY */}
+          <div>
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6">
+              COMPANY
+            </h4>
+            <ul className="space-y-4">
               <li>
                 <Link to="/about" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
                   About New Holland
@@ -202,6 +221,11 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/partnership" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                  Our Partners
+                </Link>
+              </li>
+              <li>
                 <Link to="/join" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
                   Careers &amp; Join Team
                 </Link>
@@ -211,15 +235,10 @@ export const Footer: React.FC = () => {
                   Developer APIs
                 </Link>
               </li>
-              <li>
-                <Link to="/resources" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Financial Resources
-                </Link>
-              </li>
             </ul>
           </div>
-
-          {/* COLUMN 4: CONTACT US */}
+          
+          {/* COLUMN 5: CONTACT US */}
           <div className="space-y-6">
             <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
               CONTACT US
