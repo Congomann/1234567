@@ -228,8 +228,9 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             vertical.push({ path: '/crm/logistics', label: 'Logistics Hub', icon: Truck, tourId: 'nav-logistics' });
         }
 
-        const shared = [
+                const shared = [
             { path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
+            { path: '/crm/precision-intelligence', label: 'Precision Intel', icon: Calculator, tourId: 'nav-precision-intel' },
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },
             { path: '/crm/profile', label: 'Profile', icon: CircleUser, tourId: 'nav-profile' },

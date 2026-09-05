@@ -17,7 +17,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { TrillionCalculatorHub } from '../../components/TrillionCalculatorHub';
 
 /**
  * NHFG EXPLORE SOLUTIONS HUB
@@ -117,10 +116,7 @@ export const ExploreSolutions: React.FC = () => {
           ))}
         </div>
 
-        {/* Trillion Calculator Hub */}
-        <div className="mt-20">
-          <TrillionCalculatorHub />
-        </div>
+
 
         {/* Featured Section (Bottom Panel) */}
         <div className="mt-32 relative overflow-hidden bg-[#0B2240] rounded-[3rem] p-12 md:p-20 text-white shadow-2xl shadow-blue-900/20">

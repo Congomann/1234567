@@ -89,6 +89,7 @@ import {
 import { BookingPage as PublicBookingPage } from './pages/public/BookingPage';
 import { AutomationStudio } from './pages/crm/AutomationStudio';
 import { BankVerification } from './pages/crm/BankVerification';
+import { TrillionCalculatorHub } from './components/TrillionCalculatorHub';
 import ClientVerify from './pages/verify/ClientVerify';
 import { RealEstateAdmin } from './pages/admin/RealEstateAdmin';
 import { RealEstateCms } from './pages/admin/RealEstateCms';
@@ -250,6 +251,7 @@ const App: React.FC = () => {
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
               <Route path="bank-verification" element={<BankVerification />} />
+              <Route path="precision-intelligence" element={<TrillionCalculatorHub />} />
               <Route path="telephony" element={<TelephonyHub />} />
               <Route path="securities" element={<SecuritiesWealth />} />
 
