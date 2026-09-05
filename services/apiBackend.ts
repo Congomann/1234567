@@ -65,7 +65,7 @@ class NHFGBackend {
                 // Attempt to parse JSON error detail
                 const text = await res.clone().text();
                 const errorData = JSON.parse(text);
-                errorMessage = errorData.message || errorData.error || errorData.detail || errorMessage;
+                errorMessage = errorData.message || (typeof errorData.error === 'string' ? errorData.error : (errorData.error ? JSON.stringify(errorData.error) : null)) || (typeof errorData.detail === 'string' ? errorData.detail : (errorData.detail ? JSON.stringify(errorData.detail) : null)) || errorMessage;
                 console.error(`[Backend Response Error JSON]`, errorData);
             } catch (e) {
                 // If not JSON, attempt to read as plain text

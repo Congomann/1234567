@@ -162,7 +162,7 @@ export const WebsiteSettings: React.FC = () => {
             
             try {
                 // Use the multipart form-data upload to handle massive files without memory/tier limits
-                const storageUrl = await Backend.uploadFormData(file);
+                const storageUrl = await Backend.uploadDirectToSupabase(file);
                 
                 let newPlaylist = [...(settingsForm.heroVideoPlaylist || [])];
                 if (typeof slotIndex === 'number') {
@@ -189,7 +189,7 @@ export const WebsiteSettings: React.FC = () => {
                 }
             } catch (err: any) {
                 console.error("FormData Upload failed:", err);
-                setUploadError(err.message || 'Upload failed. File might be too large.');
+                setUploadError(err instanceof Error ? err.message : (err?.message || (typeof err === 'object' ? JSON.stringify(err) : String(err)) || 'Upload failed. File might be too large.'));
             }
             
             setIsUploading(false);
