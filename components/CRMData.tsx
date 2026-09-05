@@ -149,24 +149,6 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
 
     // (currentTourSteps is now defined below navStructure so it's perfectly accurate to the UI)
 
-    // --- AUTO-SCROLL LOGIC ---
-    useEffect(() => {
-        if (isTourActive && currentStep?.targetId) {
-            const timer = setTimeout(() => {
-                const element = document.getElementById(currentStep.targetId);
-                if (element && sidebarRef.current) {
-                    const elementRect = element.getBoundingClientRect();
-                    const sidebarRect = sidebarRef.current.getBoundingClientRect();
-
-                    if (elementRect.top < sidebarRect.top || elementRect.bottom > sidebarRect.bottom) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
-            }, 200);
-            return () => clearTimeout(timer);
-        }
-    }, [currentStepIndex, isTourActive, currentStep?.targetId]);
-
     const handleLogout = () => { logout(); };
 
     const startTour = () => {
@@ -292,6 +274,26 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     }, [navStructure]);
 
     const currentStep = currentTourSteps[currentStepIndex];
+
+
+    // --- AUTO-SCROLL LOGIC ---
+    useEffect(() => {
+        if (isTourActive && currentStep?.targetId) {
+            const timer = setTimeout(() => {
+                const element = document.getElementById(currentStep.targetId);
+                if (element && sidebarRef.current) {
+                    const elementRect = element.getBoundingClientRect();
+                    const sidebarRect = sidebarRef.current.getBoundingClientRect();
+
+                    if (elementRect.top < sidebarRect.top || elementRect.bottom > sidebarRect.bottom) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [currentStepIndex, isTourActive, currentStep?.targetId]);
+
 
     const renderNavLink = (item: any) => {
         const isActive = location.pathname === item.path;
