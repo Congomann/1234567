@@ -68,7 +68,7 @@ export const Tab3DBanner: React.FC<Tab3DBannerProps> = ({ cards }) => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10 pointer-events-none" />
 
             {/* Left Content Area (Guaranteed No Overlap) */}
-            <div className="relative z-10 flex-1 pr-4 max-w-[68%]">
+            <div className="relative z-20 flex-1 pr-6 max-w-[70%] flex flex-col justify-center">
               <span
                 className={`text-[11px] font-black uppercase tracking-widest block mb-1.5 ${
                   isDarkText ? 'text-slate-900/75' : 'text-white/80'
@@ -77,7 +77,7 @@ export const Tab3DBanner: React.FC<Tab3DBannerProps> = ({ cards }) => {
                 {card.title}
               </span>
               <p
-                className={`text-2xl sm:text-3xl font-black tracking-tight leading-none mb-1.5 ${
+                className={`text-2xl sm:text-3xl font-black tracking-tight leading-none mb-1.5 break-words ${
                   isDarkText ? 'text-slate-950' : 'text-white'
                 }`}
               >
@@ -86,7 +86,7 @@ export const Tab3DBanner: React.FC<Tab3DBannerProps> = ({ cards }) => {
 
               {card.subtitle && (
                 <p
-                  className={`text-xs font-semibold truncate ${
+                  className={`text-xs font-semibold line-clamp-2 ${
                     isDarkText ? 'text-slate-900/80' : 'text-white/80'
                   }`}
                 >
@@ -114,7 +114,7 @@ export const Tab3DBanner: React.FC<Tab3DBannerProps> = ({ cards }) => {
                 ease: 'easeInOut',
                 delay: index * 0.4
               }}
-              className="relative z-10 flex-shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/25 backdrop-blur-xl border border-white/40 shadow-lg flex items-center justify-center text-3xl sm:text-4xl shadow-inner group-hover:scale-110 transition-transform duration-300"
+              className="relative z-20 flex-shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/25 backdrop-blur-xl border border-white/40 shadow-lg flex items-center justify-center text-3xl sm:text-4xl shadow-inner group-hover:scale-110 transition-transform duration-300"
             >
               {card.emoji}
             </motion.div>

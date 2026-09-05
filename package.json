@@ -11,6 +11,9 @@
     "simulator": "node backend/scripts/adSimulator.cjs",
     "simulator:once": "node backend/scripts/adSimulator.cjs --once",
     "test": "node --test backend/tests/*.test.cjs",
+    "test:session": "node scripts/verify-session-tracking.mjs",
+    "test:carrier": "node scripts/verify-carrier-adapter.mjs",
+    "test:all": "node --test backend/tests/*.test.cjs && node scripts/verify-session-tracking.mjs && node scripts/verify-carrier-adapter.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "typescript --noEmit"

@@ -859,7 +859,7 @@ export const Leads: React.FC = () => {
                                     <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
                                         <FileText className="text-blue-500" /> Digital Document Vault
                                     </h3>
-                                    <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
+                                    <button onClick={() => alert('Document request sent to client.')} className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
                                         + Request Signed Doc
                                     </button>
                                 </div>
@@ -880,7 +880,7 @@ export const Leads: React.FC = () => {
                                                 <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-green-100 text-green-700`}>
                                                     Ready
                                                 </span>
-                                                <button className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
+                                                <button onClick={() => alert('Opening document in secure viewer...')} className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
                                             </div>
                                         </div>
                                     ))}

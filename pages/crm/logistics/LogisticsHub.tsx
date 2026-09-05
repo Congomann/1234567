@@ -270,7 +270,7 @@ export const LogisticsHub: React.FC = () => {
                     <div>
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{deal.id}</span>
-                        <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer">
+                        <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer" onClick={() => alert('Options menu coming soon')}>
                           <MoreVertical size={14} className="text-slate-300" />
                         </div>
                       </div>

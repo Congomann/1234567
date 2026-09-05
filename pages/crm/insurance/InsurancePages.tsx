@@ -107,7 +107,7 @@ export const PoliciesApps: React.FC = () => {
                                         <Send size={12} /> Submit
                                     </button>
                                 ) : (
-                                    <button className="w-full py-2 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-blue-600 transition-all">
+                                    <button onClick={() => alert('Feature in development')} className="w-full py-2 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-blue-600 transition-all">
                                         Details
                                     </button>
                                 )}
@@ -172,7 +172,7 @@ export const CommercialQuotes: React.FC = () => {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                             <span className="text-xs font-bold text-slate-400">Score: {lead.score} ({lead.qualification})</span>
-                            <button className="px-5 py-2 bg-purple-600 text-white rounded-full text-xs font-bold hover:bg-purple-700 transition-colors">
+                            <button onClick={() => alert('Feature in development')} className="px-5 py-2 bg-purple-600 text-white rounded-full text-xs font-bold hover:bg-purple-700 transition-colors">
                                 View Quote
                             </button>
                         </div>
@@ -201,8 +201,8 @@ export const PoliciesRenewals: React.FC = () => {
 
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex gap-2">
-                    <button className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">Upcoming (30 Days)</button>
-                    <button className="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50">All Active</button>
+                    <button onClick={() => alert('Feature in development')} className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">Upcoming (30 Days)</button>
+                    <button onClick={() => alert('Feature in development')} className="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50">All Active</button>
                 </div>
                 <div className="divide-y divide-slate-100">
                     {upcomingRenewals.map(client => {
@@ -261,8 +261,8 @@ export const AutoQuotes: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <button className="flex-1 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">View</button>
-                            <button className="flex-1 py-2 bg-[#0B2240] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Quote</button>
+                            <button onClick={() => alert('Feature in development')} className="flex-1 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">View</button>
+                            <button onClick={() => alert('Feature in development')} className="flex-1 py-2 bg-[#0B2240] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Quote</button>
                         </div>
                     </div>
                 ))}
@@ -290,7 +290,7 @@ export const FleetManager: React.FC = () => {
                     <h1 className="text-2xl font-bold text-[#0B2240]">Fleet Manager</h1>
                     <p className="text-slate-500">Commercial fleet policies and vehicle schedules.</p>
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors">
+                <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors">
                     <Plus className="h-4 w-4" /> Add Fleet
                 </button>
             </div>
@@ -342,7 +342,7 @@ export const Claims: React.FC = () => {
                     <h1 className="text-2xl font-bold text-[#0B2240]">Claims Center center</h1>
                     <p className="text-slate-500">Track and manage active insurance claims.</p>
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-full font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-200">
+                <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-full font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-200">
                     <AlertTriangle className="h-4 w-4" /> Report New Claim
                 </button>
             </div>

@@ -120,10 +120,10 @@ export const PortfolioMgmt: React.FC = () => {
                                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Last Rebalanced: {new Date(selectedPortfolio.lastRebalanced).toLocaleDateString()}</p>
                                     </div>
                                     <div className="flex gap-3">
-                                        <button className="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-slate-600 transition-all">
+                                        <button onClick={() => alert('Feature in development')} className="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-slate-600 transition-all">
                                             <Download className="h-5 w-5" />
                                         </button>
-                                        <button className="px-6 py-3 bg-[#0A62A7] text-white rounded-2xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/10">
+                                        <button onClick={() => alert('Feature in development')} className="px-6 py-3 bg-[#0A62A7] text-white rounded-2xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/10">
                                             Rebalance Portfolio
                                         </button>
                                     </div>
@@ -276,7 +276,7 @@ export const ComplianceDocs: React.FC = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-blue-600 font-bold hover:underline">View</button>
+                                    <button onClick={() => alert('Feature in development')} className="text-blue-600 font-bold hover:underline">View</button>
                                 </td>
                             </tr>
                         ))}

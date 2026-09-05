@@ -20,6 +20,7 @@ const webhooksRouter = require('./routes/webhooks.cjs');
 const marketingRouter = require('./routes/marketing.cjs');
 const signalwireRouter = require('./routes/signalwire.cjs');
 const telephonyWebhookRouter = require('./routes/telephonyWebhook.cjs');
+const analyticsRouter = require('./routes/analytics.cjs');
 // ════════════════════════════════════════════════════════════════════════════════
 // DEPLOYMENT NOTES: VERCEL & SUPABASE INTEGRATION
 // ════════════════════════════════════════════════════════════════════════════════
@@ -137,6 +138,8 @@ app.use('/api/marketing', marketingRouter);
 // Mount SignalWire Corporate Telephony Router
 app.use('/api/signalwire', signalwireRouter);
 app.use('/api/telephony-webhook', telephonyWebhookRouter);
+// Mount Behavioral Tracking & Analytics Router (Milestone M1)
+app.use('/api', analyticsRouter);
 
 // Database Connection - Google Cloud SQL Support
 let poolConfig;

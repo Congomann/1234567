@@ -564,7 +564,7 @@ export const CampaignManager: React.FC = () => {
                       </pre>
                     )}
 
-                    <button className="w-full py-2.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2">
+                    <button onClick={() => showToast('Synced to ad platforms!')} className="w-full py-2.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2">
                       <Share2 size={13} /> Sync to Ad Platforms
                     </button>
                   </div>

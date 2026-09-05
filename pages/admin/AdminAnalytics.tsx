@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { AnalyticsService } from '../../services/analyticsService';
 import {
@@ -16,9 +15,15 @@ import {
     Search,
     ShieldAlert,
     Copy,
-    CheckCircle2
+    CheckCircle2,
+    Target,
+    Flame,
+    Sparkles,
+    UserCheck,
+    Eye
 } from 'lucide-react';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
+import { UserSessionProfileModal } from '../../components/analytics/UserSessionProfileModal';
 
 interface Visitor {
     visitor_id: string;
@@ -46,6 +51,15 @@ export const AdminAnalytics: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [copied, setCopied] = useState(false);
 
+    // Intelligence Inspector State
+    const [inspectorInput, setInspectorInput] = useState('');
+    const [selectedIdentifier, setSelectedIdentifier] = useState<string | null>(null);
+    const [trackedEntities, setTrackedEntities] = useState<{
+        ips: string[];
+        visitors: string[];
+        leads: Array<{ id: string; name: string; email: string | null; phone: string | null }>;
+    }>({ ips: [], visitors: [], leads: [] });
+
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('nhfg_access_token');
@@ -62,8 +76,20 @@ export const AdminAnalytics: React.FC = () => {
         }
     };
 
+    const fetchTrackedEntities = async () => {
+        try {
+            const res = await AnalyticsService.getTrackedEntities();
+            if (res.success && res.entities) {
+                setTrackedEntities(res.entities);
+            }
+        } catch (err) {
+            console.error('[AdminAnalytics] Error loading tracked entities:', err);
+        }
+    };
+
     useEffect(() => {
         fetchStats();
+        fetchTrackedEntities();
         const interval = setInterval(fetchStats, 60000);
         return () => clearInterval(interval);
     }, []);
@@ -94,6 +120,13 @@ export const AdminAnalytics: React.FC = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleInspect = (idOrIp: string) => {
+        if (!idOrIp || !idOrIp.trim()) return;
+        const target = idOrIp.trim();
+        setInspectorInput(target);
+        setSelectedIdentifier(target);
+    };
+
     const filteredVisitors = stats?.recentVisitors.filter(v =>
         v.visitor_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         v.ip_address?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -115,193 +148,324 @@ export const AdminAnalytics: React.FC = () => {
                     { title: "Lead Form Conversion", value: "18.4% Rate", subtitle: "High Conversion Intent", emoji: "🎯", gradient: "pink", linkText: "Funnel Metrics", linkPath: '#funnel' }
                 ]}
             />
+
             <div className="max-w-7xl mx-auto space-y-8">
-            {/* Top Bar */}
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">System Intelligence Terminal</h1>
-                    <div className="flex items-center gap-2 mt-1">
-                        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Real-time Data Stream Active</span>
-                    </div>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        onClick={fetchStats}
-                        className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
-                    >
-                        Sync Data
-                    </button>
-                    <button
-                        onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-                        className="px-4 py-2 bg-[#0A62A7] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
-                    >
-                        View Pixel Setup
-                    </button>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div id="traffic" className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Users size={80} /></div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Visitors</p>
-                    <h3 className="text-3xl font-black text-slate-900">{stats?.totalVisitors.toLocaleString()}</h3>
-                </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Activity size={80} /></div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active Sessions</p>
-                    <h3 className="text-3xl font-black text-blue-600">{stats?.activeSessions}</h3>
-                </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><MousePointer2 size={80} /></div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avg. CTR</p>
-                    <h3 className="text-3xl font-black text-slate-900">4.2<span className="text-lg">%</span></h3>
-                </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Clock size={80} /></div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mean Duration</p>
-                    <h3 className="text-3xl font-black text-slate-900">2:45</h3>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Top Pages Table */}
-                <div id="funnel" className="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
-                    <div className="p-8 border-b border-slate-100 bg-slate-50/50">
-                        <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">High Engagement Nodes</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Most visited pages</p>
-                    </div>
-                    <div className="divide-y divide-slate-50">
-                        {stats?.topPages.map((page, idx) => (
-                            <div key={idx} className="p-6 flex justify-between items-center hover:bg-slate-50 transition-colors">
-                                <div className="min-w-0">
-                                    <p className="text-xs font-black text-slate-700 truncate">{page.path}</p>
-                                    <p className="text-[9px] text-slate-400 uppercase font-black">Route</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-black text-blue-600">{page.views}</p>
-                                    <p className="text-[9px] text-slate-400 uppercase font-black">hits</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Visitor Feed */}
-                <div id="sessions" className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
-                    <div className="p-8 border-b border-slate-100 flex justify-between items-center">
-                        <div>
-                            <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">Visitor Logs</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
-                                <ShieldAlert size={12} className="text-blue-500" /> Subject to GDPR Deletion Requests
-                            </p>
+                {/* Top Bar */}
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-800 tracking-tight">System Intelligence Terminal</h1>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Real-time Data Stream Active</span>
                         </div>
-                        <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={fetchStats}
+                            className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                        >
+                            Sync Data
+                        </button>
+                        <button
+                            onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                            className="px-4 py-2 bg-[#0A62A7] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                        >
+                            View Pixel Setup
+                        </button>
+                    </div>
+                </div>
+
+                {/* ═══════════════════════════════════════════════════════════════════ */}
+                {/* R1: INTERACTIVE USER / IP INTELLIGENCE SELECTOR BAR */}
+                {/* ═══════════════════════════════════════════════════════════════════ */}
+                <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-xl relative overflow-hidden">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3.5 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl shadow-lg shadow-blue-600/20">
+                                <Target size={22} />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-black text-[#0B2240] tracking-tight">
+                                    User / IP Intelligence & Behavioral Profile Inspector
+                                </h3>
+                                <p className="text-xs text-slate-400 font-medium">
+                                    Select or enter any tracked entity to analyze 15-minute grouped sessions, purchase intent scores, and targeted ad campaigns.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Quick Tracked Entity Dropdown */}
+                        <div className="flex items-center gap-3 w-full lg:w-auto">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 whitespace-nowrap">
+                                Tracked Entity:
+                            </span>
+                            <select
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-inner w-full lg:w-64"
+                                onChange={(e) => {
+                                    if (e.target.value) handleInspect(e.target.value);
+                                }}
+                                defaultValue=""
+                            >
+                                <option value="" disabled>Choose tracked entity...</option>
+                                <optgroup label="Tracked Client IPs">
+                                    {trackedEntities.ips.map(ip => (
+                                        <option key={ip} value={ip}>{ip}</option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Active Visitor IDs">
+                                    {trackedEntities.visitors.map(vid => (
+                                        <option key={vid} value={vid}>{vid}</option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Identified CRM Leads">
+                                    {trackedEntities.leads.map(lead => (
+                                        <option key={lead.id} value={lead.email || lead.id}>
+                                            {lead.name} ({lead.email || lead.id})
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Search Input Bar */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
-                                className="w-full bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-2 text-[11px] font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                placeholder="Search Visitor ID or IP..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
+                                type="text"
+                                value={inspectorInput}
+                                onChange={(e) => setInspectorInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && inspectorInput.trim()) {
+                                        handleInspect(inspectorInput);
+                                    }
+                                }}
+                                placeholder="Enter Visitor ID (vis_...), Client IP Address (e.g. 192.168.1.105), or Lead Email..."
+                                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-inner"
                             />
                         </div>
+                        <button
+                            onClick={() => handleInspect(inspectorInput)}
+                            className="px-8 py-4 bg-[#0B2240] hover:bg-blue-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <Target size={16} />
+                            <span>Inspect Profile</span>
+                        </button>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50 border-b border-slate-100">
-                                <tr>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Device / ID</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">IP Address</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Seen</th>
-                                    <th className="px-8 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {filteredVisitors?.map(visitor => (
-                                    <tr key={visitor.visitor_id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-8 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                                                    {visitor.device_type === 'desktop' ? <Monitor size={16} /> :
-                                                        visitor.device_type === 'mobile' ? <Smartphone size={16} /> : <Tablet size={16} />}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-[11px] font-black text-slate-700 truncate w-32">{visitor.visitor_id}</p>
-                                                    <p className="text-[9px] text-slate-400 font-bold">{visitor.screen_resolution}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-4">
-                                            <p className="text-xs font-black text-slate-600 font-mono">{visitor.ip_address || 'Hidden'}</p>
-                                        </td>
-                                        <td className="px-8 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <Globe size={12} className="text-slate-300" />
-                                                <p className="text-[11px] font-bold text-slate-500">Global Citizen</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-4">
-                                            <p className="text-xs font-bold text-slate-500">{new Date(visitor.last_seen).toLocaleTimeString()}</p>
-                                        </td>
-                                        <td className="px-8 py-4 text-center">
-                                            <button
-                                                onClick={() => handleDelete(visitor.visitor_id)}
-                                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                title="Delete all visitor data"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+
+                    {/* Quick Test Preset Buttons */}
+                    <div className="mt-5 pt-5 border-t border-slate-100 flex items-center gap-3 flex-wrap">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                            <Sparkles size={12} className="text-amber-500" /> Quick Test Presets:
+                        </span>
+                        <button
+                            onClick={() => handleInspect('192.168.1.105')}
+                            className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-slate-200 rounded-xl text-[11px] font-mono font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                            <Globe size={12} />
+                            <span>IP: 192.168.1.105</span>
+                        </button>
+                        <button
+                            onClick={() => handleInspect('vis_user_test_01')}
+                            className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-slate-200 rounded-xl text-[11px] font-mono font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                            <Monitor size={12} />
+                            <span>Visitor: vis_user_test_01</span>
+                        </button>
+                        <button
+                            onClick={() => handleInspect('alexander.anderson@example.com')}
+                            className="px-3.5 py-1.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 rounded-xl text-[11px] font-mono font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                            <UserCheck size={12} />
+                            <span>Lead: alexander.anderson@example.com</span>
+                        </button>
+                        <button
+                            onClick={() => handleInspect('73.140.22.88')}
+                            className="px-3.5 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border border-slate-200 rounded-xl text-[11px] font-mono font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                            <Flame size={12} className="text-rose-500" />
+                            <span>High-Intent IP: 73.140.22.88</span>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            {/* Tracking Snippet Section */}
-            <div className="bg-[#0B2240] rounded-[3rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-blue-900/40">
-                <div className="absolute top-0 right-0 p-12 opacity-5"><Activity size={200} strokeWidth={1} /></div>
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <div>
-                        <h2 className="text-3xl font-black tracking-tight mb-4">Cross-Domain Tracking</h2>
-                        <p className="text-blue-200/60 font-medium leading-relaxed mb-8 max-w-md">
-                            Continue tracking users on third-party websites by deploying the NHFG Intelligence Pixel.
-                            This allows you to unify user identity across your entire marketing ecosystem.
-                        </p>
-                        <ul className="space-y-4">
-                            {[
-                                "Real-time browse behavior analysis",
-                                "UTM dynamic metadata capture",
-                                "Implicit identity resolution",
-                                "GDPR compliance built-in"
-                            ].map(item => (
-                                <li key={item} className="flex items-center gap-3 text-sm font-black text-blue-100 uppercase tracking-wider">
-                                    <div className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_#60a5fa]"></div>
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
+                {/* Stats Cards */}
+                <div id="traffic" className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Users size={80} /></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Visitors</p>
+                        <h3 className="text-3xl font-black text-slate-900">{stats?.totalVisitors.toLocaleString()}</h3>
                     </div>
-                    <div className="bg-black/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-8">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-2">
-                                <Code size={18} className="text-blue-400" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Head Installation Pixel</span>
-                            </div>
-                            <button
-                                onClick={copySnippet}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${copied ? 'bg-green-500 text-white' : 'bg-white/10 hover:bg-white/20 text-blue-100'}`}
-                            >
-                                {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-                                <span className="text-[10px] font-black uppercase tracking-widest">{copied ? 'Copied' : 'Copy Snippet'}</span>
-                            </button>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Activity size={80} /></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active Sessions</p>
+                        <h3 className="text-3xl font-black text-blue-600">{stats?.activeSessions}</h3>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><MousePointer2 size={80} /></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avg. CTR</p>
+                        <h3 className="text-3xl font-black text-slate-900">4.2<span className="text-lg">%</span></h3>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Clock size={80} /></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mean Duration</p>
+                        <h3 className="text-3xl font-black text-slate-900">2:45</h3>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Top Pages Table */}
+                    <div id="funnel" className="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+                        <div className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">High Engagement Nodes</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Most visited pages</p>
                         </div>
-                        <pre className="text-[11px] font-mono leading-relaxed text-blue-100/80 overflow-x-auto p-4 bg-black/20 rounded-xl border border-white/5 no-scrollbar">
-                            {`<!-- NHFG Tracking Pixel -->
+                        <div className="divide-y divide-slate-50">
+                            {stats?.topPages.map((page, idx) => (
+                                <div key={idx} className="p-6 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-black text-slate-700 truncate">{page.path}</p>
+                                        <p className="text-[9px] text-slate-400 uppercase font-black">Route</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-black text-blue-600">{page.views}</p>
+                                        <p className="text-[9px] text-slate-400 uppercase font-black">hits</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Visitor Feed */}
+                    <div id="sessions" className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+                        <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+                            <div>
+                                <h3 className="font-black text-sm text-slate-800 uppercase tracking-tight">Visitor Logs</h3>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
+                                    <ShieldAlert size={12} className="text-blue-500" /> Click any visitor to inspect their behavioral intelligence profile
+                                </p>
+                            </div>
+                            <div className="relative w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+                                <input
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-2 text-[11px] font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="Search Visitor ID or IP..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50 border-b border-slate-100">
+                                    <tr>
+                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Device / ID</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">IP Address</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Seen</th>
+                                        <th className="px-8 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {filteredVisitors?.map(visitor => (
+                                        <tr
+                                            key={visitor.visitor_id}
+                                            className="hover:bg-blue-50/40 transition-colors group cursor-pointer"
+                                        >
+                                            <td className="px-8 py-4" onClick={() => handleInspect(visitor.visitor_id)}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-8 w-8 rounded-lg bg-blue-50 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center text-blue-600 transition-colors">
+                                                        {visitor.device_type === 'desktop' ? <Monitor size={16} /> :
+                                                            visitor.device_type === 'mobile' ? <Smartphone size={16} /> : <Tablet size={16} />}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[11px] font-black text-slate-700 truncate w-32 group-hover:text-blue-600 transition-colors">{visitor.visitor_id}</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold">{visitor.screen_resolution}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-4" onClick={() => handleInspect(visitor.ip_address || visitor.visitor_id)}>
+                                                <p className="text-xs font-black text-slate-600 font-mono group-hover:text-blue-600 transition-colors">{visitor.ip_address || 'Hidden'}</p>
+                                            </td>
+                                            <td className="px-8 py-4" onClick={() => handleInspect(visitor.visitor_id)}>
+                                                <div className="flex items-center gap-2">
+                                                    <Globe size={12} className="text-slate-300" />
+                                                    <p className="text-[11px] font-bold text-slate-500">Global Citizen</p>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-4" onClick={() => handleInspect(visitor.visitor_id)}>
+                                                <p className="text-xs font-bold text-slate-500">{new Date(visitor.last_seen).toLocaleTimeString()}</p>
+                                            </td>
+                                            <td className="px-8 py-4 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={() => handleInspect(visitor.ip_address || visitor.visitor_id)}
+                                                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                                                        title="Inspect Session & Behavioral Profile"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(visitor.visitor_id);
+                                                        }}
+                                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete all visitor data"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tracking Snippet Section */}
+                <div className="bg-[#0B2240] rounded-[3rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-blue-900/40">
+                    <div className="absolute top-0 right-0 p-12 opacity-5"><Activity size={200} strokeWidth={1} /></div>
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <div>
+                            <h2 className="text-3xl font-black tracking-tight mb-4">Cross-Domain Tracking</h2>
+                            <p className="text-blue-200/60 font-medium leading-relaxed mb-8 max-w-md">
+                                Continue tracking users on third-party websites by deploying the NHFG Intelligence Pixel.
+                                This allows you to unify user identity across your entire marketing ecosystem.
+                            </p>
+                            <ul className="space-y-4">
+                                {[
+                                    "Real-time browse behavior analysis",
+                                    "UTM dynamic metadata capture",
+                                    "Implicit identity resolution",
+                                    "GDPR compliance built-in"
+                                ].map(item => (
+                                    <li key={item} className="flex items-center gap-3 text-sm font-black text-blue-100 uppercase tracking-wider">
+                                        <div className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_#60a5fa]"></div>
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="bg-black/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex items-center gap-2">
+                                    <Code size={18} className="text-blue-400" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Head Installation Pixel</span>
+                                </div>
+                                <button
+                                    onClick={copySnippet}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${copied ? 'bg-green-500 text-white' : 'bg-white/10 hover:bg-white/20 text-blue-100'}`}
+                                >
+                                    {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{copied ? 'Copied' : 'Copy Snippet'}</span>
+                                </button>
+                            </div>
+                            <pre className="text-[11px] font-mono leading-relaxed text-blue-100/80 overflow-x-auto p-4 bg-black/20 rounded-xl border border-white/5 no-scrollbar">
+                                {`<!-- NHFG Tracking Pixel -->
 <script>
   (function(n,h,f,g){
     var s=n.createElement('script');
@@ -310,14 +474,22 @@ export const AdminAnalytics: React.FC = () => {
     n.head.appendChild(s);
   })(document);
 </script>`}
-                        </pre>
-                        <p className="mt-6 text-[10px] text-blue-400/50 font-medium flex items-center gap-2">
-                            <ShieldAlert size={12} /> Place this code immediately before the closing <code>&lt;/head&gt;</code> tag.
-                        </p>
+                            </pre>
+                            <p className="mt-6 text-[10px] text-blue-400/50 font-medium flex items-center gap-2">
+                                <ShieldAlert size={12} /> Place this code immediately before the closing <code>&lt;/head&gt;</code> tag.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* Modal: Behavioral Intelligence Profile & 15-Minute Session History */}
+            {selectedIdentifier && (
+                <UserSessionProfileModal
+                    identifier={selectedIdentifier}
+                    onClose={() => setSelectedIdentifier(null)}
+                />
+            )}
         </div>
     );
 };

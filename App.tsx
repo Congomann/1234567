@@ -86,7 +86,7 @@ import {
   RateTools,
   RefinanceCalc
 } from './pages/crm/mortgage/MortgagePages';
-import { BookingPage } from './pages/public/BookingPage';
+import { BookingPage as PublicBookingPage } from './pages/public/BookingPage';
 import { AutomationStudio } from './pages/crm/AutomationStudio';
 import { BankVerification } from './pages/crm/BankVerification';
 import ClientVerify from './pages/verify/ClientVerify';
@@ -142,7 +142,7 @@ const ProtectedCRMRoute: React.FC = () => {
 
   return (
     <CRMLayout>
-      <React.Suspense fallback={<div className="h-full w-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>}>
+      <React.Suspense fallback={<div className="h-full w-full flex items-center justify-center animate-pulse"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>}>
         <Outlet />
       </React.Suspense>
     </CRMLayout>
@@ -217,7 +217,7 @@ const App: React.FC = () => {
             <Route path="/transparency" element={<PublicLayout><AnnualReport /></PublicLayout>} />
             <Route path="/press" element={<PublicLayout><PressReleases /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
-            <Route path="/book/:id" element={<BookingPage />} />
+            <Route path="/book/:id" element={<PublicBookingPage />} />
             <Route path="/track/:token" element={<LoadTracking />} />
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />

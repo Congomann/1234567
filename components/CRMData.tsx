@@ -323,10 +323,11 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center p-0 sm:p-4 font-sans text-slate-900 overflow-hidden bg-[#E2E8F0]">
 
+            <AnimatePresence>
             {isTourActive && currentStep && (
                 <>
-                    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-[2px] z-[60] animate-fade-in" onClick={() => setIsTourActive(false)} />
-                    <div className="fixed bottom-10 right-10 w-[420px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.4)] z-[100] border border-slate-200 animate-slide-up overflow-hidden">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-[60]" onClick={() => setIsTourActive(false)} />
+                    <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="fixed bottom-10 right-10 w-[420px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.4)] z-[100] border border-slate-200 overflow-hidden">
                         <div className="bg-[#0B2240] p-8 text-white relative">
                             <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles size={100} /></div>
                             <div className="flex justify-between items-start relative z-10">
@@ -350,9 +351,10 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </>
             )}
+            </AnimatePresence>
 
             <div className="w-full h-full max-w-[1920px] bg-white sm:rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex relative overflow-hidden ring-1 ring-slate-200/60 m-0 sm:m-4">
                 <aside ref={sidebarRef} className={`hidden lg:flex flex-col w-[260px] bg-[#f5f5f7]/80 backdrop-blur-2xl text-slate-900 h-full overflow-y-auto py-5 flex-shrink-0 no-scrollbar border-r border-slate-200/50 relative ${isTourActive ? 'z-[65]' : 'z-10'}`}>

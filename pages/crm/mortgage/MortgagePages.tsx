@@ -287,7 +287,7 @@ export const LoanApplications: React.FC = () => {
                                             ))}
                                         </div>
                                         <div className="mt-12">
-                                            <button className="w-full py-4 bg-[#0A62A7] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-900/20 hover:bg-blue-700 transition-all transform active:scale-95">Accelerate Pipeline</button>
+                                            <button onClick={() => alert('Feature in development')} className="w-full py-4 bg-[#0A62A7] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-900/20 hover:bg-blue-700 transition-all transform active:scale-95">Accelerate Pipeline</button>
                                         </div>
                                     </div>
                                 </div>
@@ -296,12 +296,12 @@ export const LoanApplications: React.FC = () => {
 
                         <div className="bg-white p-8 border-t border-slate-100 flex justify-between items-center px-10">
                             <div className="flex gap-4">
-                                <button className="px-6 py-3 border border-slate-200 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Client Portal Invite</button>
-                                <button className="px-6 py-3 border border-slate-200 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Document Checklist</button>
+                                <button onClick={() => alert('Feature in development')} className="px-6 py-3 border border-slate-200 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Client Portal Invite</button>
+                                <button onClick={() => alert('Feature in development')} className="px-6 py-3 border border-slate-200 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Document Checklist</button>
                             </div>
                             <div className="flex items-center gap-6">
                                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500"/> Compliant & Secure</span>
-                                <button className="px-10 py-4 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 shadow-xl transition-all flex items-center gap-3">
+                                <button onClick={() => alert('Feature in development')} className="px-10 py-4 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 shadow-xl transition-all flex items-center gap-3">
                                     <FileText size={16} /> Generate Strategy Report
                                 </button>
                             </div>
@@ -434,7 +434,7 @@ export const RateTools: React.FC = () => {
                         <h2 className="text-3xl font-black tracking-tight uppercase">Lock Engine Connectivity</h2>
                     </div>
                     <p className="text-blue-100 max-w-2xl mb-10 text-lg leading-relaxed font-medium">Pricing updated every 15 minutes via national wholesale API. Final quotes subject to LTV/DTI underwriting verification.</p>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.25em] transition-all shadow-xl shadow-blue-900/40 flex items-center gap-3 active:scale-95">
+                    <button onClick={() => alert('Feature in development')} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.25em] transition-all shadow-xl shadow-blue-900/40 flex items-center gap-3 active:scale-95">
                         <RefreshCw size={20} className="animate-spin-slow" /> Trigger Manual Pricing Sync
                     </button>
                 </div>
@@ -558,7 +558,7 @@ export const RefinanceCalc: React.FC = () => {
                         </div>
                     </div>
                     <div className="pt-12 relative z-10">
-                        <button className="w-full py-6 bg-blue-600 hover:bg-blue-500 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <button onClick={() => alert('Feature in development')} className="w-full py-6 bg-blue-600 hover:bg-blue-500 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-3">
                             <Plus size={20}/> Generate Refi Strategy
                         </button>
                     </div>

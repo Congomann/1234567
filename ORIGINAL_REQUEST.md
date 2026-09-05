@@ -43,3 +43,35 @@ Protocol:
 3. Produce the comprehensive report (e.g., /Users/newholland/1234567/TELEPHONY_PHASE1_AUDIT_PLAN.md).
 4. Review and verify the document against all acceptance criteria and ensure zero CRM source files were changed.
 5. Write your handoff.md and send completion message back to parent.
+
+## Follow-up — 2026-09-03T09:29:38Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+> Requested team: Full build team
+
+Implement an advanced behavioral tracking system for marketing profiling, and build a modular Carrier API integration framework to synchronize client policy data, payments, and lifecycle events.
+
+Working directory: `/Users/newholland/1234567`
+Integrity mode: demo
+
+## Requirements
+
+### R1. Behavioral Profiling & Analytics System
+Build a tracking mechanism that groups user visits/actions into 15-minute sessions. Store this tracking data in the database (Firestore) so it links seamlessly to existing CRM leads. Create an admin view in the CRM where administrators can select a user/IP to view their session history, visited pages, and behavioral profile to guide targeted advertising.
+
+### R2. Modular Carrier API Framework
+Develop a plug-and-play Carrier API system in the CRM. Build a universal interface/framework and include 1-2 mocked example carriers. The system must track and display client policies, missed payments, birthdays, policy status (active/inactive/lapsed), coverage/premium amounts, and policy duration.
+
+## Acceptance Criteria
+
+### Behavioral Analytics
+- [ ] A programmatic test or script simulates a user visiting 3 different pages within a 15-minute window and successfully stores it as a unified session in the database.
+- [ ] The CRM includes a reachable admin UI component that fetches and displays this session history and behavioral profile when provided with the simulated user's IP/ID.
+
+### Carrier Integrations
+- [ ] The codebase contains a universal TypeScript interface/adapter for carriers.
+- [ ] A programmatic test or script executes the mock carrier adapter with a dummy API payload, and the adapter correctly normalizes the data (extracting active status, premium, and birthday).
+- [ ] The CRM UI includes a section that displays this normalized policy data for a client.

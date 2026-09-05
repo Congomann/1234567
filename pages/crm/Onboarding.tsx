@@ -242,7 +242,7 @@ export const Onboarding: React.FC = () => {
                                         <p className="font-bold text-slate-900 text-sm">{selectedApp.resumeName}</p>
                                         <p className="text-xs text-slate-400">Resume / CV</p>
                                     </div>
-                                    <button className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600" title="Download (Demo)">
+                                    <button onClick={() => alert('Downloading resume...')} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600" title="Download (Demo)">
                                         <Download className="h-5 w-5" />
                                     </button>
                                 </div>
