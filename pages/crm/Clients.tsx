@@ -1,11 +1,12 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Client, ProductType, UserRole } from '../../types';
-import { Search, Filter, Download, Edit2, X, Mail, Phone, Shield, MessageSquare, Activity } from 'lucide-react';
+import { Search, Filter, Download, Edit2, X, Mail, Phone, Shield, MessageSquare, Activity, ShieldCheck, Building2 } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { PDFBrandingService } from '../../services/pdfBrandingService';
+import { NormalizedPolicySection } from '../../components/crm/NormalizedPolicySection';
+import { NormalizedPolicyData } from '../../services/carrier';
 
 export const Clients: React.FC = () => {
     const { clients, updateClient, user } = useData();
@@ -16,6 +17,7 @@ export const Clients: React.FC = () => {
     // Edit State
     const [editingClient, setEditingClient] = useState<Client | null>(null);
     const [editForm, setEditForm] = useState<Partial<Client>>({});
+    const [modalTab, setModalTab] = useState<'info' | 'carrier_policy' | 'chat'>('info');
 
     // Auto-update clock for "real-time" feel
     useEffect(() => {
@@ -46,17 +48,11 @@ export const Clients: React.FC = () => {
         return result;
     }, [clients, user, productFilter, searchTerm]);
 
-    const [modalTab, setModalTab] = useState<'info' | 'chat'>('info');
-
-    const handleEdit = (client: Client) => {
+    const handleEdit = (client: Client, defaultTab: 'info' | 'carrier_policy' | 'chat' = 'info') => {
         setEditingClient(client);
         setEditForm({ ...client });
-        setModalTab('info');
+        setModalTab(defaultTab);
     };
-
-    // ... handleSave same ...
-
-    // --- Modal Tab Render ---
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,6 +60,23 @@ export const Clients: React.FC = () => {
             updateClient(editingClient.id, editForm);
             setEditingClient(null);
         }
+    };
+
+    const handleCarrierPolicyUpdated = (normalized: NormalizedPolicyData) => {
+        if (!editingClient) return;
+
+        const updatedPartial: Partial<Client> = {
+            carrier: normalized.carrierName,
+            premium: normalized.premiumAmount,
+            renewalDate: normalized.duration.expirationDate || editingClient.renewalDate
+        };
+
+        setEditForm(prev => ({
+            ...prev,
+            ...updatedPartial
+        }));
+
+        updateClient(editingClient.id, updatedPartial);
     };
 
     const getStatusText = (renewalDate: string) => {
@@ -159,70 +172,94 @@ export const Clients: React.FC = () => {
                 </div>
 
                 <div className="flex-1 overflow-x-auto px-4 pb-10">
-                    <table className="w-full text-left">
-                        <thead className="text-[10px] uppercase font-black tracking-[0.25em]">
-                            <tr>
-                                <th className="px-8 py-6 bg-slate-50 text-slate-400 rounded-l-3xl">Client Name</th>
-                                <th className="px-8 py-6 bg-blue-50 text-blue-400">Policy Info</th>
-                                <th className="px-8 py-6 bg-indigo-50 text-indigo-400">Premium</th>
-                                <th className="px-8 py-6 bg-amber-50 text-amber-400">Status</th>
-                                <th className="px-8 py-6 bg-emerald-50 text-emerald-400">Contact</th>
-                                <th className="px-8 py-6 bg-purple-50 text-purple-400 rounded-r-3xl">Carrier</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredClients.map(client => (
-                                <tr key={client.id} className="group hover:bg-slate-50/50 transition-all cursor-pointer border-b border-slate-50">
-                                    <td className="px-8 py-8" onClick={() => handleEdit(client)}>
-                                        <div className="font-black text-[#0B2240] text-sm">{client.name}</div>
-                                        <div className="text-[10px] text-slate-300 font-black mt-1 uppercase tracking-tighter">Account Registered</div>
-                                    </td>
-                                    <td className="px-8 py-8" onClick={() => handleEdit(client)}>
-                                        <div className="font-bold text-slate-600 text-xs">{client.product}</div>
-                                        <div className="text-[10px] text-blue-500 font-mono mt-1 font-black">{client.policyNumber}</div>
-                                    </td>
-                                    <td className="px-8 py-8 font-mono font-black text-slate-700" onClick={() => handleEdit(client)}>
-                                        ${client.premium.toLocaleString()}
-                                    </td>
-                                    <td className="px-8 py-8" onClick={() => handleEdit(client)}>
-                                        <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${getStatusText(client.renewalDate) === 'Active' ? 'bg-green-100 text-green-700' :
-                                            getStatusText(client.renewalDate) === 'Expired' ? 'bg-red-100 text-red-700' :
-                                                'bg-orange-100 text-orange-700'
-                                            }`}>
-                                            {getStatusText(client.renewalDate)}
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-8">
-                                        <div className="flex gap-2">
-                                            {client.email && (
-                                                <a href={`mailto:${client.email}`} className="p-2.5 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-blue-500 hover:border-blue-100 transition-all shadow-sm">
-                                                    <Mail className="h-4 w-4" />
-                                                </a>
-                                            )}
-                                            {client.phone && (
-                                                <a href={`tel:${client.phone}`} className="p-2.5 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-blue-500 hover:border-blue-100 transition-all shadow-sm">
-                                                    <Phone className="h-4 w-4" />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                                        {client.carrier || 'Pending'}
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredClients.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-10 py-48 text-center">
-                                        <div className="flex flex-col items-center justify-center opacity-10">
-                                            <Shield className="h-32 w-32 mb-6" strokeWidth={1} />
-                                            <h2 className="text-4xl font-black uppercase tracking-[0.4em]">Database Empty</h2>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                    <div className="space-y-4">
+                    {/* Header Row of Boxes with Specific Request Colors */}
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
+                        <div className="bg-[#A8DADC] p-4 rounded-t-3xl md:rounded-3xl border border-[#90C4C6] text-center shadow-sm">
+                            <span className="text-[10px] font-black text-[#1D3557] uppercase tracking-[0.2em]">Client</span>
+                        </div>
+                        <div className="bg-blue-500 p-4 md:rounded-3xl border border-blue-600 text-center shadow-sm">
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Carrier</span>
+                        </div>
+                        <div className="bg-indigo-500 p-4 md:rounded-3xl border border-indigo-600 text-center shadow-sm">
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Policy / Quote #</span>
+                        </div>
+                        <div className="bg-yellow-400 p-4 md:rounded-3xl border border-yellow-500 text-center shadow-sm">
+                            <span className="text-[10px] font-black text-yellow-900 uppercase tracking-[0.2em]">Est. Premium</span>
+                        </div>
+                        <div className="bg-slate-700 p-4 md:rounded-3xl border border-slate-800 text-center shadow-sm">
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</span>
+                        </div>
+                        <div className="bg-slate-100 p-4 rounded-b-3xl md:rounded-3xl border border-slate-200 text-center shadow-sm">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</span>
+                        </div>
+                    </div>
+
+                    {/* Data Rows */}
+                    {filteredClients.map(client => {
+                        const status = getStatusText(client.renewalDate);
+                        const isActiveStatus = status === 'Active';
+                        const isInactiveStatus = status === 'Expired';
+                        
+                        return (
+                            <div key={client.id} className="grid grid-cols-1 md:grid-cols-6 gap-2 group cursor-pointer" onClick={() => handleEdit(client, 'info')}>
+                                {/* Client Column */}
+                                <div className="bg-[#A8DADC]/10 p-6 rounded-3xl border border-[#A8DADC]/30 flex flex-col justify-center text-center md:text-left transition-all group-hover:bg-[#A8DADC]/20">
+                                    <div className="font-black text-slate-900 text-sm">{client.name}</div>
+                                    <span className="text-[9px] text-[#457B9D] font-black uppercase tracking-tighter mt-1">{client.product}</span>
+                                </div>
+                                
+                                {/* Carrier Column */}
+                                <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100 flex items-center justify-center transition-all group-hover:bg-blue-100/50" onClick={(e) => { e.stopPropagation(); handleEdit(client, 'carrier_policy'); }}>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <span className="text-xs font-black text-blue-700 uppercase tracking-tight text-center">{client.carrier || 'Pending'}</span>
+                                        <span className="px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[8px] font-mono font-bold">API SYNC</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Policy Column */}
+                                <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 flex items-center justify-center transition-all group-hover:bg-indigo-100/50">
+                                    <span className="text-xs font-mono font-black text-indigo-700 tracking-wider">{client.policyNumber}</span>
+                                </div>
+                                
+                                {/* Premium Column */}
+                                <div className="bg-yellow-50 p-6 rounded-3xl border border-yellow-100 flex items-center justify-center transition-all group-hover:bg-yellow-100">
+                                    <span className="text-sm font-black text-yellow-700">$\u007Bclient.premium.toLocaleString()\u007D</span>
+                                </div>
+                                
+                                {/* Status Column */}
+                                <div className={`p-6 rounded-3xl border flex items-center justify-center transition-all ${isActiveStatus ? 'bg-green-50 border-green-100 group-hover:bg-green-100' : isInactiveStatus ? 'bg-red-50 border-red-100 group-hover:bg-red-100' : 'bg-orange-50 border-orange-100 group-hover:bg-orange-100'}`}>
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isActiveStatus ? 'bg-green-600 text-white shadow-sm' : isInactiveStatus ? 'bg-red-600 text-white shadow-sm' : 'bg-orange-500 text-white shadow-sm'}`}>
+                                        {status}
+                                    </span>
+                                </div>
+                                
+                                {/* Actions Column */}
+                                <div className="bg-slate-50/30 p-4 rounded-3xl border border-slate-100 flex items-center justify-center gap-2 transition-all group-hover:bg-white" onClick={(e) => e.stopPropagation()}>
+                                    {client.email && (
+                                        <a href={`mailto:\u0024\u007Bclient.email\u007D`} className="p-2.5 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-blue-500 hover:border-blue-100 transition-all shadow-sm">
+                                            <Mail className="h-4 w-4" />
+                                        </a>
+                                    )}
+                                    {client.phone && (
+                                        <a href={`tel:\u0024\u007Bclient.phone\u007D`} className="p-2.5 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-blue-500 hover:border-blue-100 transition-all shadow-sm">
+                                            <Phone className="h-4 w-4" />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {filteredClients.length === 0 && (
+                        <div className="py-32 text-center">
+                            <div className="flex flex-col items-center justify-center opacity-10">
+                                <Shield className="h-32 w-32 mb-6" strokeWidth={1} />
+                                <h2 className="text-4xl font-black uppercase tracking-[0.4em]">Database Empty</h2>
+                            </div>
+                        </div>
+                    )}
+                </div>
                 </div>
 
                 {/* SYNC INDICATOR */}
@@ -236,27 +273,40 @@ export const Clients: React.FC = () => {
                 </div>
             </div>
 
-            {/* Edit Modal */}
+            {/* Edit / Details Modal */}
             {editingClient && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-xl p-6 animate-fade-in">
-                    <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-2xl p-12 relative max-h-[90vh] overflow-y-auto border border-white/20">
-                        <div className="flex justify-between items-center mb-10">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-xl p-4 md:p-6 animate-fade-in overflow-y-auto">
+                    <div className={`bg-white rounded-[3.5rem] shadow-2xl w-full p-8 md:p-12 relative max-h-[92vh] overflow-y-auto border border-white/20 my-auto transition-all ${
+                        modalTab === 'carrier_policy' ? 'max-w-4xl' : 'max-w-2xl'
+                    }`}>
+                        <div className="flex justify-between items-center mb-8">
                             <div className="flex items-center gap-5">
                                 <div className="p-5 bg-blue-600 text-white rounded-[1.5rem] shadow-xl shadow-blue-600/20">
                                     <Edit2 className="h-8 w-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">{modalTab === 'chat' ? 'Underwriting Case Chat' : 'Edit Client Account'}</h2>
-                                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">Advisor Administrative Console</p>
+                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">
+                                        {modalTab === 'carrier_policy'
+                                            ? 'Carrier API Policy Integration'
+                                            : modalTab === 'chat'
+                                            ? 'Underwriting Case Chat'
+                                            : 'Edit Client Account'}
+                                    </h2>
+                                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">
+                                        Advisor Administrative Console • Client: {editingClient.name}
+                                    </p>
                                 </div>
                             </div>
-                            <button onClick={() => setEditingClient(null)} className="p-4 hover:bg-slate-100 rounded-full transition-colors"><X className="h-8 w-8 text-slate-300" /></button>
+                            <button onClick={() => setEditingClient(null)} className="p-4 hover:bg-slate-100 rounded-full transition-colors">
+                                <X className="h-8 w-8 text-slate-300" />
+                            </button>
                         </div>
 
-                        <div className="flex gap-4 mb-10 border-b border-slate-100 pb-1">
+                        {/* Modal Navigation Tabs */}
+                        <div className="flex gap-4 mb-8 border-b border-slate-100 pb-1 flex-wrap">
                             <button
                                 onClick={() => setModalTab('info')}
-                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'info' ? 'text-blue-600' : 'text-slate-400'}`}
+                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'info' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 <div className="flex items-center gap-2">
                                     <Shield size={14} /> Profile & Policy
@@ -264,8 +314,17 @@ export const Clients: React.FC = () => {
                                 {modalTab === 'info' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
                             </button>
                             <button
+                                onClick={() => setModalTab('carrier_policy')}
+                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'carrier_policy' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck size={14} /> Carrier Policy
+                                </div>
+                                {modalTab === 'carrier_policy' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full"></div>}
+                            </button>
+                            <button
                                 onClick={() => setModalTab('chat')}
-                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'chat' ? 'text-blue-600' : 'text-slate-400'}`}
+                                className={`pb-4 px-6 text-xs font-black uppercase tracking-widest transition-all relative ${modalTab === 'chat' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 <div className="flex items-center gap-2">
                                     <MessageSquare size={14} /> Case Chat
@@ -274,9 +333,10 @@ export const Clients: React.FC = () => {
                             </button>
                         </div>
 
-                        {modalTab === 'info' ? (
+                        {/* TAB 1: PROFILE & BASIC POLICY */}
+                        {modalTab === 'info' && (
                             <form onSubmit={handleSave} className="space-y-8">
-                                {/* Identitiy Block */}
+                                {/* Identity Block */}
                                 <div className="bg-slate-50 p-10 rounded-[2.5rem] border-2 border-slate-100 space-y-8">
                                     <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
                                         <span className="h-1.5 w-1.5 bg-blue-600 rounded-full"></span>
@@ -371,9 +431,26 @@ export const Clients: React.FC = () => {
                                     <button type="submit" className="flex-1 py-6 rounded-full font-black bg-[#0B2240] text-white hover:bg-blue-800 transition-all shadow-2xl shadow-blue-900/30 transform active:scale-95 uppercase tracking-widest text-xs">Commit Updates</button>
                                 </div>
                             </form>
-                        ) : (
-                            <div className="animate-fade-in overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 min-h-[500px]">
-                                {/* CaseChat removed */}
+                        )}
+
+                        {/* TAB 2: R2 NORMALIZED POLICY SECTION */}
+                        {modalTab === 'carrier_policy' && (
+                            <NormalizedPolicySection
+                                client={editingClient}
+                                onPolicyUpdated={handleCarrierPolicyUpdated}
+                            />
+                        )}
+
+                        {/* TAB 3: CASE CHAT */}
+                        {modalTab === 'chat' && (
+                            <div className="animate-fade-in overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 min-h-[500px] flex items-center justify-center text-slate-400">
+                                <div className="text-center p-8">
+                                    <MessageSquare size={48} className="mx-auto mb-4 opacity-30 text-blue-600" />
+                                    <h4 className="text-base font-black text-slate-700">Case Underwriting Discussion</h4>
+                                    <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                                        Case chat communication channel for advisor underwriters.
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -382,3 +459,5 @@ export const Clients: React.FC = () => {
         </div>
     );
 };
+
+export default Clients;
