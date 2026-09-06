@@ -8,7 +8,9 @@ import { SEO } from '../../components/SEO';
 import { useSoftphone } from '../../context/SoftphoneContext';
 import { useData } from '../../context/DataContext';
 
-const apiFetch = (url: string, options: RequestInit = {}) => {
+const API_BASE = import.meta.env.VITE_API_URL || '';
+const apiFetch = (path: string, options: RequestInit = {}) => {
+  const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
   const token = localStorage.getItem('nhfg_access_token');
   const headers = { ...options.headers };
   if (token) {

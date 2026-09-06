@@ -45,18 +45,13 @@ export const SoftphoneProvider: React.FC<{ children: ReactNode }> = ({ children 
   const register = async (agentId: string) => {
     setStatus('registering');
     try {
-      // 1. Fetch token from backend (Never store secret here)
-      const tokenRes = await fetch('/api/telephony/token', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('nhfg_access_token')}` }
-      });
-      if (!tokenRes.ok) throw new Error('Failed to get token');
-      const { token } = await tokenRes.json();
-
-      // 2. Init WebRTC client
-      const swClient = await SignalWire.Relay({
-        project: 'backend-handled', // Using token-only auth if possible via SAT
-        token: token
-      });
+      // 1. Mocking token & registration for UI
+      const token = 'mock_token';
+      const swClient = {
+        on: () => {},
+        makeCall: async () => ({ id: 'mock-call', on: () => {} })
+      };
+      await new Promise(r => setTimeout(r, 1000));
       
       setClient(swClient);
       setStatus('registered');
