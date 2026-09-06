@@ -193,7 +193,7 @@ const App: React.FC = () => {
             <Route path="/partnership" element={<PublicLayout><Partnership /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><ExploreSolutions /></PublicLayout>} />
             <Route path="/life-insurance" element={<PublicLayout><LifeInsurance /></PublicLayout>} />
-            <Route path="/life-insurance/quote" element={<PublicLayout><LifeInsuranceFunnel /></PublicLayout>} />
+            
             <Route path="/real-estate" element={<PublicLayout><RealEstate /></PublicLayout>} />
 
             <Route path="/dsm-property-solutions" element={<PublicLayout><HomeRepair /></PublicLayout>} />

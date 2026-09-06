@@ -113,7 +113,7 @@ export const Leads: React.FC = () => {
         }
         if (searchTerm) {
             const q = searchTerm.toLowerCase();
-            list = list.filter(l => l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q) || l.interest.toLowerCase().includes(q));
+            list = list.filter(l => (l.name || '').toLowerCase().includes(q) || (l.email || '').toLowerCase().includes(q) || (l.interest || '').toLowerCase().includes(q));
         }
         return list.sort((a, b) => {
             if (sortConfig) {

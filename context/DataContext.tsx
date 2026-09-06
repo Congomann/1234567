@@ -321,6 +321,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const res = await Backend.savePublicLead(leadData);
           if (res.success) {
+              setLeads(prev => [res.lead || newLead, ...prev]);
               pushNotification('Inquiry Submitted', `Thank you ${leadData.name}, we will contact you shortly.`, 'success');
           }
         } catch (e) {
