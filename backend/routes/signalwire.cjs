@@ -13,7 +13,7 @@ const pool = new Pool({
 // SignalWire Environment Credentials
 const SIGNALWIRE_SPACE_URL = process.env.SIGNALWIRE_SPACE_URL || 'newhollandfinancialgroup.signalwire.com';
 const SIGNALWIRE_PROJECT_ID = process.env.SIGNALWIRE_PROJECT_ID || '3b3475f1-9582-41fb-b2e2-7e6453821fb2';
-const SIGNALWIRE_API_TOKEN = process.env.SIGNALWIRE_API_TOKEN || 'PT5b546759c1617e256c38864661f64f54fbe6b3f7e17b89e4';
+const SIGNALWIRE_API_TOKEN = process.env.SIGNALWIRE_API_TOKEN || 'PT5b546759c1617e256cd38864661f64f54fbe6b3fe17b89e4';
 const SIGNALWIRE_PHONE_NUMBER = process.env.SIGNALWIRE_PHONE_NUMBER || '+18885550199';
 
 // In-Memory Fallback Stores for Zero-Downtime Reliability
