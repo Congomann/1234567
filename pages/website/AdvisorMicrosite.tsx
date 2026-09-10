@@ -255,7 +255,7 @@ END:VCARD`;
   };
 
   return (
-    <div className="bg-[#fbfbfd] min-h-screen font-sans text-gray-900 pb-20 selection:bg-blue-100 selection:text-blue-900">
+    <div className="bg-[#0B2240] min-h-screen font-sans text-white pb-20 selection:bg-blue-900 selection:text-blue-100">
       <SEO 
         title={`${advisor.name} | NHFG Licensed Advisor`} 
         description={advisor.bio || `Connect with ${advisor.name}, a licensed financial professional at New Holland Financial Group.`}
@@ -263,7 +263,7 @@ END:VCARD`;
       <div className="fixed top-8 left-4 md:left-8 z-40">
         <Link
           to="/advisors"
-          className="bg-white/80 backdrop-blur-xl p-3 rounded-full shadow-sm border border-gray-200/50 text-gray-600 hover:text-gray-900 hover:scale-105 transition-all flex items-center justify-center"
+          className="bg-white/10 backdrop-blur-xl p-3 rounded-full shadow-sm border border-white/10 text-white hover:bg-white/20 hover:scale-105 transition-all flex items-center justify-center"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -274,68 +274,68 @@ END:VCARD`;
           <img
             src={
               advisor.avatar ||
-              `https://ui-avatars.com/api/?name=${advisor.name}&background=f5f5f7&color=333`
+              `https://ui-avatars.com/api/?name=${advisor.name}&background=0B2240&color=fff`
             }
             alt={advisor.name}
-            className="w-40 h-40 rounded-full object-cover shadow-sm mx-auto border-[6px] border-white"
+            className="w-40 h-40 rounded-full object-cover shadow-sm mx-auto border-[6px] border-white/10"
           />
-          <div className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow-sm border border-gray-100">
-            <VerifiedBadge className="h-8 w-8 text-blue-500 fill-blue-50" />
+          <div className="absolute bottom-1 right-1 bg-[#112A4F] p-1 rounded-full shadow-sm border border-white/10">
+            <VerifiedBadge className="h-8 w-8 text-[#F5A524] fill-[#F5A524]/20" />
           </div>
         </div>
         
-        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-gray-900 mb-3">
+        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-white mb-3">
           {advisor.name}
         </h1>
-        <p className="text-xl text-gray-500 font-medium mb-10 tracking-tight">
+        <p className="text-xl text-blue-200 font-medium mb-10 tracking-tight">
           {advisor.title || `${advisor.category} Specialist`}
         </p>
         
         <div className="flex flex-wrap justify-center gap-3 md:gap-4">
           <Link
             to={`/book/${advisor.id}`}
-            className="px-8 py-3.5 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+            className="px-8 py-3.5 bg-[#F5A524] text-[#0B2240] rounded-full font-medium hover:bg-[#E0941F] transition-colors flex items-center gap-2 shadow-sm"
           >
             <Calendar className="h-5 w-5" /> Book Meeting
           </Link>
           
           <button
             onClick={() => scrollToSection("quote-form")}
-            className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+            className="px-8 py-3.5 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors flex items-center gap-2 shadow-sm border border-white/10"
           >
-            <FileText className="h-5 w-5 text-gray-500" /> Free Quote
+            <FileText className="h-5 w-5 text-slate-300" /> Free Quote
           </button>
 
           <button
             onClick={handleShare}
-            className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+            className="px-8 py-3.5 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors flex items-center gap-2 shadow-sm border border-white/10"
           >
-            <Share2 className="h-5 w-5 text-gray-500" /> Share
+            <Share2 className="h-5 w-5 text-slate-300" /> Share
           </button>
           
           <button
             onClick={handleDownloadVCard}
-            className="p-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+            className="p-3.5 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors flex items-center gap-2 shadow-sm border border-white/10"
             title="Save Contact"
           >
-            <User className="h-5 w-5 text-gray-500" />
+            <User className="h-5 w-5 text-slate-300" />
           </button>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 space-y-6">
-        <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-6 flex items-center gap-2">
+        <section className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-12 shadow-sm border border-white/10">
+          <h2 className="text-2xl font-semibold tracking-tight text-white mb-6 flex items-center gap-2">
             About Me
           </h2>
-          <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap text-lg">
+          <div className="prose prose-invert max-w-none text-slate-300 leading-relaxed whitespace-pre-wrap text-lg">
             {advisor.bio ||
               "I am dedicated to helping my clients achieve their financial goals through comprehensive planning and tailored insurance solutions."}
           </div>
 
           {advisor.socialLinks && advisor.socialLinks.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-gray-100">
-              <h3 className="text-sm font-semibold tracking-tight text-gray-900 mb-4">
+            <div className="mt-12 pt-8 border-t border-white/10">
+              <h3 className="text-sm font-semibold tracking-tight text-white mb-4">
                 Connect
               </h3>
               <div className="flex gap-3">
@@ -345,7 +345,7 @@ END:VCARD`;
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-2xl transition-colors border border-gray-200"
+                    className="p-3 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white rounded-2xl transition-colors border border-white/10"
                   >
                     {getSocialIcon(link.platform)}
                   </a>
@@ -356,20 +356,20 @@ END:VCARD`;
         </section>
 
         {advisor.productsSold && advisor.productsSold.length > 0 && (
-          <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-8 flex items-center gap-2">
+          <section className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-12 shadow-sm border border-white/10">
+            <h2 className="text-2xl font-semibold tracking-tight text-white mb-8 flex items-center gap-2">
               Areas of Expertise
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {advisor.productsSold.map((product) => (
                 <div
                   key={product}
-                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100"
+                  className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10"
                 >
-                  <div className="bg-white p-2 rounded-full shadow-sm text-blue-600">
+                  <div className="bg-[#F5A524]/20 p-2 rounded-full shadow-sm text-[#F5A524]">
                     <Check className="h-4 w-4" />
                   </div>
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-white">
                     {product}
                   </span>
                 </div>
@@ -378,12 +378,12 @@ END:VCARD`;
           </section>
         )}
 
-        <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
+        <section className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-12 shadow-sm border border-white/10">
           <div className="flex justify-between items-end mb-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
               Client Reviews
             </h2>
-            <span className="text-sm font-medium text-gray-500">
+            <span className="text-sm font-medium text-slate-300">
               {advisorTestimonials.length} Reviews
             </span>
           </div>
@@ -393,25 +393,25 @@ END:VCARD`;
               advisorTestimonials.map((t) => (
                 <div
                   key={t.id}
-                  className="p-6 md:p-8 bg-gray-50 rounded-[24px] border border-gray-100"
+                  className="p-6 md:p-8 bg-white/5 rounded-[24px] border border-white/10"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <div className="font-semibold tracking-tight text-gray-900 text-lg">
+                    <div className="font-semibold tracking-tight text-white text-lg">
                       {t.clientName}
                     </div>
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-4 w-4 ${i < t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`}
+                          className={`h-4 w-4 ${i < t.rating ? "text-[#F5A524] fill-[#F5A524]" : "text-white/20"}`}
                         />
                       ))}
                     </div>
                   </div>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-slate-300 leading-relaxed">
                     "{t.reviewText}"
                   </p>
-                  <p className="text-sm text-gray-400 font-medium mt-4">
+                  <p className="text-sm text-slate-400 font-medium mt-4">
                     {new Date(t.date).toLocaleDateString([], {
                       month: "long",
                       day: "numeric",
@@ -421,18 +421,18 @@ END:VCARD`;
                 </div>
               ))
             ) : (
-              <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-[24px] border border-gray-100">
+              <div className="text-center py-10 text-slate-400 font-medium bg-white/5 rounded-[24px] border border-white/10">
                 No reviews yet. Be the first to share your experience!
               </div>
             )}
           </div>
 
-          <div className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100">
-            <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-6">
+          <div className="bg-white/5 p-6 md:p-8 rounded-[24px] border border-white/10">
+            <h3 className="text-lg font-semibold tracking-tight text-white mb-6">
               Submit Feedback
             </h3>
             {formSubmitted === "testimonial" ? (
-              <div className="flex items-center gap-3 text-green-700 font-medium bg-green-50 p-6 rounded-2xl border border-green-200">
+              <div className="flex items-center gap-3 text-green-300 font-medium bg-green-900/30 p-6 rounded-2xl border border-green-500/30">
                 <CheckCircle2 className="h-6 w-6" /> Your review has been
                 submitted for verification.
               </div>
@@ -443,7 +443,7 @@ END:VCARD`;
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
-                    className="w-full p-4 bg-white rounded-2xl border border-gray-200 text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-shadow"
+                    className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:ring-2 focus:ring-[#F5A524] outline-none shadow-sm transition-all"
                     placeholder="Full Name"
                     required
                     value={testimonialForm.name}
@@ -454,8 +454,8 @@ END:VCARD`;
                       })
                     }
                   />
-                  <div className="flex items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-                    <span className="text-sm font-medium text-gray-500 mr-2">
+                  <div className="flex items-center gap-2 bg-white/5 p-4 rounded-2xl border border-white/10 shadow-sm">
+                    <span className="text-sm font-medium text-slate-300 mr-2">
                       Rating:
                     </span>
                     {[1, 2, 3, 4, 5].map((r) => (
@@ -471,14 +471,14 @@ END:VCARD`;
                         }
                       >
                         <Star
-                          className={`h-6 w-6 transition-colors ${testimonialForm.rating >= r ? "text-yellow-400 fill-yellow-400" : "text-gray-200 hover:text-yellow-200"}`}
+                          className={`h-6 w-6 transition-colors ${testimonialForm.rating >= r ? "text-[#F5A524] fill-[#F5A524]" : "text-white/20 hover:text-white/40"}`}
                         />
                       </button>
                     ))}
                   </div>
                 </div>
                 <textarea
-                  className="w-full p-4 bg-white rounded-2xl border border-gray-200 text-base focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-sm transition-shadow"
+                  className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:ring-2 focus:ring-[#F5A524] outline-none resize-none shadow-sm transition-all"
                   rows={4}
                   placeholder="How was your experience?"
                   required
@@ -492,7 +492,7 @@ END:VCARD`;
                 ></textarea>
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                  className="w-full py-4 bg-[#F5A524] text-[#0B2240] rounded-2xl font-medium hover:bg-[#E0941F] transition-colors shadow-sm"
                 >
                   Submit Experience
                 </button>
@@ -503,28 +503,28 @@ END:VCARD`;
 
         <section
           id="quote-form"
-          className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100 overflow-hidden relative"
+          className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-12 shadow-sm border border-white/10 overflow-hidden relative"
         >
           <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-            <Send className="h-40 w-40 text-blue-600" />
+            <Send className="h-40 w-40 text-white" />
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2 relative z-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-white mb-2 relative z-10">
             Get a Free Quote
           </h2>
-          <p className="text-base text-gray-500 mb-8 relative z-10 font-medium">
+          <p className="text-base text-slate-300 mb-8 relative z-10 font-medium">
             Connect directly with {advisor.name.split(" ")[0]} for a custom
             strategy.
           </p>
 
           {formSubmitted === "quote" ? (
-            <div className="bg-green-50 p-10 rounded-[24px] text-center border border-green-100">
-              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-green-900/30 p-10 rounded-[24px] text-center border border-green-500/30">
+              <div className="w-16 h-16 bg-green-500/20 text-green-300 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold tracking-tight text-gray-900">
+              <h3 className="text-xl font-semibold tracking-tight text-white">
                 Success!
               </h3>
-              <p className="text-base text-gray-600 mt-2">
+              <p className="text-base text-green-100 mt-2">
                 Your request has been received. {advisor.name.split(" ")[0]}{" "}
                 will contact you shortly.
               </p>
@@ -535,11 +535,11 @@ END:VCARD`;
               className="space-y-4 relative z-10"
             >
               <div>
-                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                <label className="text-sm font-semibold tracking-tight text-slate-300 ml-1 mb-2 block">
                   Full Name
                 </label>
                 <input
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:bg-white/10 focus:ring-2 focus:ring-[#F5A524] outline-none transition-all"
                   placeholder="Ethan Wright"
                   required
                   value={quoteForm.name}
@@ -549,12 +549,12 @@ END:VCARD`;
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                <label className="text-sm font-semibold tracking-tight text-slate-300 ml-1 mb-2 block">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:bg-white/10 focus:ring-2 focus:ring-[#F5A524] outline-none transition-all"
                   placeholder="ethan@example.com"
                   required
                   value={quoteForm.email}
@@ -564,11 +564,11 @@ END:VCARD`;
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                <label className="text-sm font-semibold tracking-tight text-slate-300 ml-1 mb-2 block">
                   Product Focus
                 </label>
                 <select
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer transition-all"
+                  className="w-full p-4 bg-[#0B2240] border border-white/10 rounded-2xl text-white focus:ring-2 focus:ring-[#F5A524] outline-none cursor-pointer transition-all appearance-none"
                   value={quoteForm.interest}
                   onChange={(e) =>
                     setQuoteForm({
@@ -585,11 +585,11 @@ END:VCARD`;
                 </select>
               </div>
               <div>
-                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                <label className="text-sm font-semibold tracking-tight text-slate-300 ml-1 mb-2 block">
                   Additional Details
                 </label>
                 <textarea
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all"
+                  className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:bg-white/10 focus:ring-2 focus:ring-[#F5A524] outline-none resize-none transition-all"
                   rows={4}
                   placeholder="How can I assist you today?"
                   value={quoteForm.message}
@@ -600,7 +600,7 @@ END:VCARD`;
               </div>
               <button
                 type="submit"
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-medium text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group"
+                className="w-full py-4 bg-[#F5A524] text-[#0B2240] rounded-2xl font-medium text-lg hover:bg-[#E0941F] transition-colors flex items-center justify-center gap-2 group"
               >
                 Submit Inquiry{" "}
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -611,15 +611,15 @@ END:VCARD`;
       </main>
 
       {isShareModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] p-8 md:p-10 w-full max-w-sm shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-[#112A4F] rounded-[32px] p-8 md:p-10 w-full max-w-sm shadow-2xl relative border border-white/10">
             <button
               onClick={() => setIsShareModalOpen(false)}
-              className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+              className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
             >
-              <X className="h-5 w-5 text-gray-600" />
+              <X className="h-5 w-5 text-white" />
             </button>
-            <h3 className="text-2xl font-semibold tracking-tight text-gray-900 mb-8 text-center">
+            <h3 className="text-2xl font-semibold tracking-tight text-white mb-8 text-center">
               Share Profile
             </h3>
 
@@ -632,7 +632,7 @@ END:VCARD`;
                 <div className="w-14 h-14 bg-[#1877F2] rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <FacebookIcon className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-xs font-medium text-slate-300">
                   Facebook
                 </span>
               </a>
@@ -641,10 +641,10 @@ END:VCARD`;
                 target="_blank"
                 className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-14 h-14 bg-black rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 bg-black rounded-[18px] flex items-center justify-center text-white shadow-sm border border-white/10 group-hover:scale-105 transition-transform">
                   <XIcon className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-xs font-medium text-slate-300">
                   X
                 </span>
               </a>
@@ -656,7 +656,7 @@ END:VCARD`;
                 <div className="w-14 h-14 bg-[#0A66C2] rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <LinkedInIcon className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-xs font-medium text-slate-300">
                   LinkedIn
                 </span>
               </a>
@@ -664,25 +664,25 @@ END:VCARD`;
                 href={`mailto:?subject=Check out ${advisor.name}&body=${window.location.href}`}
                 className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-14 h-14 bg-gray-500 rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 bg-white/20 rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <Mail className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-xs font-medium text-slate-300">
                   Email
                 </span>
               </a>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200">
-              <LinkIcon className="h-5 w-5 text-gray-400 ml-2" />
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10">
+              <LinkIcon className="h-5 w-5 text-slate-400 ml-2" />
               <input
-                className="flex-1 bg-transparent text-sm font-medium text-gray-700 outline-none truncate"
+                className="flex-1 bg-transparent text-sm font-medium text-white outline-none truncate"
                 readOnly
                 value={window.location.href}
               />
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 bg-[#F5A524] text-[#0B2240] text-sm font-medium rounded-xl hover:bg-[#E0941F] transition-colors flex items-center gap-2 shrink-0"
               >
                 {copyText === 'Copied!' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copyText}
