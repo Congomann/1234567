@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useData } from "../../context/DataContext";
 import { SEO } from "../../components/SEO";
 import { ProductType } from "../../types";
 import {
   Mail,
-  Phone,
   CheckCircle2,
   ArrowLeft,
   Star,
   Send,
   Share2,
   X,
-  ShieldCheck,
-  MapPin,
   Check,
   User,
   Copy,
   Link as LinkIcon,
-  Languages,
   BadgeCheck,
   ArrowRight,
-  Smartphone,
-  MessageSquare,
-  PhoneIncoming,
+  Calendar,
   FileText,
   BadgeCheck as VerifiedBadge,
 } from "lucide-react";
@@ -105,7 +99,6 @@ export const AdvisorMicrosite: React.FC = () => {
     testimonials,
     addLead,
     addTestimonial,
-    addCallback,
     companySettings,
   } = useData();
   const [formSubmitted, setFormSubmitted] = useState<string | null>(null);
@@ -155,7 +148,6 @@ export const AdvisorMicrosite: React.FC = () => {
   const handleDownloadVCard = () => {
     if (!advisor) return;
     
-    // Create vCard content
     const vcard = `BEGIN:VCARD
 VERSION:3.0
 N:${advisor.name.split(' ').slice(1).join(' ') || ''};${advisor.name.split(' ')[0] || ''};;;
@@ -167,7 +159,6 @@ EMAIL;TYPE=PREF,INTERNET:${advisor.email || companySettings.email || ''}
 URL:${window.location.href}
 END:VCARD`;
 
-    // Create a blob and download link
     const blob = new Blob([vcard], { type: 'text/vcard' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -181,19 +172,6 @@ END:VCARD`;
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const initiateCall = () => {
-    if (!advisor) return;
-    const rawPhone = advisor.phone || companySettings.phone;
-    // Robust cleaning: Keep only digits, or a leading '+' for international dialing
-    const cleanPhone = rawPhone.startsWith("+")
-      ? "+" + rawPhone.replace(/\D/g, "")
-      : rawPhone.replace(/\D/g, "");
-
-    if (cleanPhone) {
-      window.location.href = `tel:${cleanPhone}`;
-    }
   };
 
   if (!advisor || !advisor.micrositeEnabled) {
@@ -210,12 +188,6 @@ END:VCARD`;
     email: "",
     interest: advisor.productsSold?.[0] || ProductType.LIFE,
     message: "",
-  });
-  const [callbackForm, setCallbackForm] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    time: "Anytime",
   });
   const [testimonialForm, setTestimonialForm] = useState({
     name: "",
@@ -244,29 +216,6 @@ END:VCARD`;
       interest: advisor.productsSold?.[0] || ProductType.LIFE,
       message: "",
     });
-    setTimeout(() => setFormSubmitted(null), 5000);
-  };
-
-  const handleCallbackSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addCallback({
-      name: callbackForm.name,
-      phone: callbackForm.phone,
-      timeRequested: callbackForm.time,
-    });
-    addLead(
-      {
-        name: callbackForm.name,
-        phone: callbackForm.phone,
-        email: callbackForm.email,
-        interest: ProductType.LIFE,
-        message: `Callback requested for ${callbackForm.time}`,
-        source: `advisor:${advisor.id}`,
-      },
-      advisor.id,
-    );
-    setFormSubmitted("callback");
-    setCallbackForm({ name: "", phone: "", email: "", time: "Anytime" });
     setTimeout(() => setFormSubmitted(null), 5000);
   };
 
@@ -306,538 +255,434 @@ END:VCARD`;
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans">
+    <div className="bg-[#fbfbfd] min-h-screen font-sans text-gray-900 pb-20 selection:bg-blue-100 selection:text-blue-900">
       <SEO 
         title={`${advisor.name} | NHFG Licensed Advisor`} 
         description={advisor.bio || `Connect with ${advisor.name}, a licensed financial professional at New Holland Financial Group.`}
       />
-      <div className="fixed top-24 left-4 z-40 md:left-8">
+      <div className="fixed top-8 left-4 md:left-8 z-40">
         <Link
           to="/advisors"
-          className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg border border-slate-200 text-slate-600 hover:text-blue-600 hover:scale-110 transition-all flex items-center justify-center"
+          className="bg-white/80 backdrop-blur-xl p-3 rounded-full shadow-sm border border-gray-200/50 text-gray-600 hover:text-gray-900 hover:scale-105 transition-all flex items-center justify-center"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
       </div>
 
-      <div className="relative bg-[#0B2240] text-white overflow-hidden pb-20 pt-32 lg:pt-40 rounded-b-[3rem] shadow-2xl">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-30"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row gap-10 items-center">
-            <div className="relative">
-              <div className="w-48 h-48 md:w-64 md:h-64 rounded-full p-2 bg-gradient-to-br from-blue-400 to-transparent">
-                <img
-                  src={
-                    advisor.avatar ||
-                    `https://ui-avatars.com/api/?name=${advisor.name}&background=random`
-                  }
-                  alt={advisor.name}
-                  className="w-full h-full rounded-full object-cover border-4 border-[#0B2240] shadow-2xl"
-                />
-              </div>
-            </div>
-
-            <div className="text-center md:text-left flex-1">
-              <div className="inline-flex items-center gap-2 bg-[#1A3A5F] px-4 py-1.5 rounded-full border border-blue-400/30 mb-6 backdrop-blur-sm">
-                <div className="w-4 h-4 rounded-full border border-blue-300 flex items-center justify-center">
-                  <Check className="h-2.5 w-2.5 text-blue-300" />
-                </div>
-                <span className="text-[10px] font-black text-blue-100 tracking-widest uppercase">
-                  Verified Advisor
-                </span>
-              </div>
-
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-3 mb-2">
-                <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                  {advisor.name}
-                </h1>
-                <VerifiedBadge className="h-8 w-8 text-blue-400 mb-1.5 fill-blue-400/10" />
-              </div>
-
-              <p className="text-xl text-blue-200 font-medium mb-10">
-                {advisor.title || `${advisor.category} Specialist`}
-              </p>
-
-              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                <button
-                  onClick={() => scrollToSection("quote-form")}
-                  className="px-10 py-4 bg-[#FBBF24] text-slate-900 rounded-full font-black text-xs uppercase tracking-widest shadow-xl shadow-yellow-500/20 hover:bg-yellow-300 transition-all flex items-center gap-2 transform hover:scale-105"
-                >
-                  <FileText className="h-4 w-4" /> Get a Free Quote
-                </button>
-
-                <button
-                  onClick={initiateCall}
-                  className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-white/20 transition-all flex items-center gap-2 transform active:scale-95"
-                >
-                  <Phone className="h-4 w-4" /> Speak to Advisor
-                </button>
-
-                <button
-                  onClick={() => scrollToSection("callback-form")}
-                  className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-white/20 transition-all flex items-center gap-2"
-                >
-                  <PhoneIncoming className="h-4 w-4" /> Request Call Back
-                </button>
-
-                <button
-                  onClick={handleDownloadVCard}
-                  className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:bg-white/20 transition-all flex items-center gap-2"
-                >
-                  <User className="h-4 w-4" /> Save Contact
-                </button>
-
-                <button
-                  onClick={handleShare}
-                  className="p-4 bg-white/10 rounded-full hover:bg-white/20 transition-all text-white border border-white/10 shadow-xl"
-                  title="Share Profile"
-                >
-                  <Share2 className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+      <header className="pt-24 pb-16 px-4 text-center max-w-4xl mx-auto">
+        <div className="mb-6 relative inline-block">
+          <img
+            src={
+              advisor.avatar ||
+              `https://ui-avatars.com/api/?name=${advisor.name}&background=f5f5f7&color=333`
+            }
+            alt={advisor.name}
+            className="w-40 h-40 rounded-full object-cover shadow-sm mx-auto border-[6px] border-white"
+          />
+          <div className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow-sm border border-gray-100">
+            <VerifiedBadge className="h-8 w-8 text-blue-500 fill-blue-50" />
           </div>
         </div>
-      </div>
+        
+        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-gray-900 mb-3">
+          {advisor.name}
+        </h1>
+        <p className="text-xl text-gray-500 font-medium mb-10 tracking-tight">
+          {advisor.title || `${advisor.category} Specialist`}
+        </p>
+        
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+          <Link
+            to={`/book/${advisor.id}`}
+            className="px-8 py-3.5 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <Calendar className="h-5 w-5" /> Book Meeting
+          </Link>
+          
+          <button
+            onClick={() => scrollToSection("quote-form")}
+            className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+          >
+            <FileText className="h-5 w-5 text-gray-500" /> Free Quote
+          </button>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 -mt-10 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-[2rem] p-10 shadow-2xl border border-slate-100">
-              <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                <User className="h-6 w-6 text-blue-600" /> About Me
-              </h2>
-              <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">
-                {advisor.bio ||
-                  "I am dedicated to helping my clients achieve their financial goals through comprehensive planning and tailored insurance solutions."}
-              </div>
+          <button
+            onClick={handleShare}
+            className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+          >
+            <Share2 className="h-5 w-5 text-gray-500" /> Share
+          </button>
+          
+          <button
+            onClick={handleDownloadVCard}
+            className="p-3.5 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm border border-gray-200"
+            title="Save Contact"
+          >
+            <User className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+      </header>
 
-              {advisor.socialLinks && advisor.socialLinks.length > 0 && (
-                <div className="mt-10 pt-8 border-t border-slate-100">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">
-                    Connect with me
-                  </h3>
-                  <div className="flex gap-4">
-                    {advisor.socialLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-4 bg-slate-50 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-all border border-slate-100"
-                      >
-                        {getSocialIcon(link.platform)}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+      <main className="max-w-4xl mx-auto px-4 space-y-6">
+        <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-6 flex items-center gap-2">
+            About Me
+          </h2>
+          <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap text-lg">
+            {advisor.bio ||
+              "I am dedicated to helping my clients achieve their financial goals through comprehensive planning and tailored insurance solutions."}
+          </div>
 
-            <div className="bg-white rounded-[2rem] p-10 shadow-2xl border border-slate-100">
-              <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                <BadgeCheck className="h-6 w-6 text-green-600" /> Areas of
-                Expertise
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {advisor.productsSold?.map((product) => (
-                  <div
-                    key={product}
-                    className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100"
+          {advisor.socialLinks && advisor.socialLinks.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-gray-100">
+              <h3 className="text-sm font-semibold tracking-tight text-gray-900 mb-4">
+                Connect
+              </h3>
+              <div className="flex gap-3">
+                {advisor.socialLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-2xl transition-colors border border-gray-200"
                   >
-                    <div className="bg-white p-2.5 rounded-xl shadow-sm text-blue-600">
-                      <Check className="h-4 w-4" />
-                    </div>
-                    <span className="font-bold text-slate-800 text-sm">
-                      {product}
-                    </span>
-                  </div>
+                    {getSocialIcon(link.platform)}
+                  </a>
                 ))}
               </div>
             </div>
+          )}
+        </section>
 
-            <div className="bg-white rounded-[2rem] p-10 shadow-2xl border border-slate-100">
-              <div className="flex justify-between items-center mb-10">
-                <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                  <Star className="h-6 w-6 text-yellow-400 fill-yellow-400" />{" "}
-                  Client Reviews
-                </h2>
-                <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  {advisorTestimonials.length} Verified Reviews
+        {advisor.productsSold && advisor.productsSold.length > 0 && (
+          <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
+            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-8 flex items-center gap-2">
+              Areas of Expertise
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {advisor.productsSold.map((product) => (
+                <div
+                  key={product}
+                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100"
+                >
+                  <div className="bg-white p-2 rounded-full shadow-sm text-blue-600">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium text-gray-800">
+                    {product}
+                  </span>
                 </div>
-              </div>
-
-              <div className="space-y-6 mb-12">
-                {advisorTestimonials.length > 0 ? (
-                  advisorTestimonials.map((t) => (
-                    <div
-                      key={t.id}
-                      className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 relative group overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 p-8 opacity-5">
-                        <Star size={100} />
-                      </div>
-                      <div className="flex justify-between items-start mb-4 relative z-10">
-                        <div className="font-black text-slate-900 text-lg">
-                          {t.clientName}
-                        </div>
-                        <div className="flex gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${i < t.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-slate-600 italic leading-relaxed text-sm relative z-10">
-                        "{t.reviewText}"
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6 relative z-10">
-                        {new Date(t.date).toLocaleDateString([], {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12 text-slate-300 italic font-medium">
-                    No reviews yet. Be the first to share your experience!
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-[#0B2240]/5 p-8 rounded-[2.5rem] border border-blue-100/50">
-                <h3 className="text-lg font-black text-[#0B2240] mb-6 uppercase tracking-tight">
-                  Submit Feedback
-                </h3>
-                {formSubmitted === "testimonial" ? (
-                  <div className="flex items-center gap-3 text-green-700 font-black bg-green-50 p-6 rounded-2xl border border-green-100">
-                    <CheckCircle2 className="h-6 w-6" /> Your review has been
-                    submitted for verification.
-                  </div>
-                ) : (
-                  <form
-                    onSubmit={handleTestimonialSubmit}
-                    className="space-y-5"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <input
-                        className="w-full p-4 bg-white rounded-2xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                        placeholder="Full Name"
-                        required
-                        value={testimonialForm.name}
-                        onChange={(e) =>
-                          setTestimonialForm({
-                            ...testimonialForm,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                      <div className="flex items-center gap-1 bg-white p-4 rounded-2xl border border-slate-200 justify-center shadow-inner">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-3">
-                          Rating:
-                        </span>
-                        {[1, 2, 3, 4, 5].map((r) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() =>
-                              setTestimonialForm({
-                                ...testimonialForm,
-                                rating: r,
-                              })
-                            }
-                          >
-                            <Star
-                              className={`h-6 w-6 transition-all hover:scale-125 ${testimonialForm.rating >= r ? "text-yellow-400 fill-yellow-400" : "text-slate-200"}`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <textarea
-                      className="w-full p-5 bg-white rounded-2xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-inner"
-                      rows={4}
-                      placeholder="How was your experience?"
-                      required
-                      value={testimonialForm.text}
-                      onChange={(e) =>
-                        setTestimonialForm({
-                          ...testimonialForm,
-                          text: e.target.value,
-                        })
-                      }
-                    ></textarea>
-                    <button
-                      type="submit"
-                      className="w-full py-4 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-900 transition-colors shadow-xl shadow-blue-900/10"
-                    >
-                      Submit Experience
-                    </button>
-                  </form>
-                )}
-              </div>
+              ))}
             </div>
+          </section>
+        )}
+
+        <section className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-end mb-8">
+            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
+              Client Reviews
+            </h2>
+            <span className="text-sm font-medium text-gray-500">
+              {advisorTestimonials.length} Reviews
+            </span>
           </div>
 
-          <div className="space-y-8" id="contact-section">
-            <div
-              id="quote-form"
-              className="bg-white rounded-[3rem] p-10 shadow-2xl border-t-[12px] border-blue-600 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-5">
-                <Send className="h-32 w-32 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-black text-slate-900 mb-2 relative z-10 uppercase tracking-tight">
-                Get a Free Quote
-              </h2>
-              <p className="text-sm text-slate-500 mb-10 relative z-10 font-medium">
-                Connect directly with {advisor.name.split(" ")[0]} for a custom
-                strategy.
-              </p>
-
-              {formSubmitted === "quote" ? (
-                <div className="bg-green-50 p-10 rounded-[2.5rem] text-center border border-green-100 animate-fade-in">
-                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <CheckCircle2 className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900">
-                    Success!
-                  </h3>
-                  <p className="text-sm text-slate-500 mt-2 font-medium">
-                    Your request has been received. {advisor.name.split(" ")[0]}{" "}
-                    will contact you shortly.
-                  </p>
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleQuoteSubmit}
-                  className="space-y-5 relative z-10"
+          <div className="space-y-4 mb-12">
+            {advisorTestimonials.length > 0 ? (
+              advisorTestimonials.map((t) => (
+                <div
+                  key={t.id}
+                  className="p-6 md:p-8 bg-gray-50 rounded-[24px] border border-gray-100"
                 >
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1.5 block">
-                      Full Name
-                    </label>
-                    <input
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                      placeholder="Ethan Wright"
-                      required
-                      value={quoteForm.name}
-                      onChange={(e) =>
-                        setQuoteForm({ ...quoteForm, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1.5 block">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                      placeholder="ethan@example.com"
-                      required
-                      value={quoteForm.email}
-                      onChange={(e) =>
-                        setQuoteForm({ ...quoteForm, email: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1.5 block">
-                      Product Focus
-                    </label>
-                    <select
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer shadow-inner"
-                      value={quoteForm.interest}
-                      onChange={(e) =>
-                        setQuoteForm({
-                          ...quoteForm,
-                          interest: e.target.value as ProductType,
-                        })
-                      }
-                    >
-                      {advisor.productsSold?.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="font-semibold tracking-tight text-gray-900 text-lg">
+                      {t.clientName}
+                    </div>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`}
+                        />
                       ))}
-                    </select>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1.5 block">
-                      Additional Details
-                    </label>
-                    <textarea
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-inner"
-                      rows={4}
-                      placeholder="How can I assist you today?"
-                      value={quoteForm.message}
-                      onChange={(e) =>
-                        setQuoteForm({ ...quoteForm, message: e.target.value })
-                      }
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-2xl shadow-blue-900/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-3 group active:scale-95"
-                  >
-                    Submit Inquiry{" "}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
-                  </button>
-                </form>
-              )}
-            </div>
-
-            <div
-              id="callback-form"
-              className="bg-[#0B2240] rounded-[3rem] p-10 shadow-2xl text-white relative overflow-hidden group"
-            >
-              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500 rounded-full mix-blend-overlay filter blur-[60px] opacity-20 transition-all group-hover:scale-125"></div>
-              <h2 className="text-2xl font-black mb-4 flex items-center gap-3 uppercase tracking-tight">
-                <Smartphone className="h-6 w-6 text-blue-400" /> Secure Callback
-              </h2>
-              <p className="text-xs text-blue-200/70 mb-8 uppercase font-black tracking-widest">
-                Connect with an agent on your schedule
-              </p>
-
-              {formSubmitted === "callback" ? (
-                <div className="bg-white/10 p-10 rounded-[2.5rem] text-center backdrop-blur-md border border-white/10">
-                  <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-400" />
-                  <p className="font-black text-lg">Call Scheduled!</p>
-                  <p className="text-xs text-blue-200 mt-2">
-                    Expect a call at your chosen time.
+                  <p className="text-gray-600 leading-relaxed">
+                    "{t.reviewText}"
+                  </p>
+                  <p className="text-sm text-gray-400 font-medium mt-4">
+                    {new Date(t.date).toLocaleDateString([], {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-              ) : (
-                <form
-                  onSubmit={handleCallbackSubmit}
-                  className="space-y-5 relative z-10"
-                >
+              ))
+            ) : (
+              <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-[24px] border border-gray-100">
+                No reviews yet. Be the first to share your experience!
+              </div>
+            )}
+          </div>
+
+          <div className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100">
+            <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-6">
+              Submit Feedback
+            </h3>
+            {formSubmitted === "testimonial" ? (
+              <div className="flex items-center gap-3 text-green-700 font-medium bg-green-50 p-6 rounded-2xl border border-green-200">
+                <CheckCircle2 className="h-6 w-6" /> Your review has been
+                submitted for verification.
+              </div>
+            ) : (
+              <form
+                onSubmit={handleTestimonialSubmit}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-sm text-white placeholder-blue-300 font-bold focus:bg-white/20 outline-none transition-all shadow-inner"
+                    className="w-full p-4 bg-white rounded-2xl border border-gray-200 text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-shadow"
                     placeholder="Full Name"
                     required
-                    value={callbackForm.name}
+                    value={testimonialForm.name}
                     onChange={(e) =>
-                      setCallbackForm({ ...callbackForm, name: e.target.value })
-                    }
-                  />
-                  <input
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-sm text-white placeholder-blue-300 font-bold focus:bg-white/20 outline-none transition-all shadow-inner"
-                    placeholder="Contact Phone"
-                    required
-                    value={callbackForm.phone}
-                    onChange={(e) =>
-                      setCallbackForm({
-                        ...callbackForm,
-                        phone: e.target.value,
+                      setTestimonialForm({
+                        ...testimonialForm,
+                        name: e.target.value,
                       })
                     }
                   />
-                  <select
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-sm text-white placeholder-blue-300 font-black focus:bg-white/20 outline-none transition-all [&>option]:text-slate-900 shadow-inner appearance-none cursor-pointer"
-                    value={callbackForm.time}
-                    onChange={(e) =>
-                      setCallbackForm({ ...callbackForm, time: e.target.value })
-                    }
-                  >
-                    <option value="Anytime">Anytime</option>
-                    <option value="Morning">Morning (8am - 12pm)</option>
-                    <option value="Afternoon">Afternoon (12pm - 5pm)</option>
-                    <option value="Evening">Evening (5pm - 8pm)</option>
-                  </select>
-                  <button
-                    type="submit"
-                    className="w-full py-5 bg-white text-[#0B2240] rounded-2xl font-black text-xs uppercase tracking-[0.25em] hover:bg-blue-50 transition-colors shadow-2xl active:scale-95"
-                  >
-                    Request Callback
-                  </button>
-                </form>
-              )}
-            </div>
+                  <div className="flex items-center gap-2 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                    <span className="text-sm font-medium text-gray-500 mr-2">
+                      Rating:
+                    </span>
+                    {[1, 2, 3, 4, 5].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        className="focus:outline-none"
+                        onClick={() =>
+                          setTestimonialForm({
+                            ...testimonialForm,
+                            rating: r,
+                          })
+                        }
+                      >
+                        <Star
+                          className={`h-6 w-6 transition-colors ${testimonialForm.rating >= r ? "text-yellow-400 fill-yellow-400" : "text-gray-200 hover:text-yellow-200"}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <textarea
+                  className="w-full p-4 bg-white rounded-2xl border border-gray-200 text-base focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-sm transition-shadow"
+                  rows={4}
+                  placeholder="How was your experience?"
+                  required
+                  value={testimonialForm.text}
+                  onChange={(e) =>
+                    setTestimonialForm({
+                      ...testimonialForm,
+                      text: e.target.value,
+                    })
+                  }
+                ></textarea>
+                <button
+                  type="submit"
+                  className="w-full py-4 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                >
+                  Submit Experience
+                </button>
+              </form>
+            )}
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section
+          id="quote-form"
+          className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-gray-100 overflow-hidden relative"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+            <Send className="h-40 w-40 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2 relative z-10">
+            Get a Free Quote
+          </h2>
+          <p className="text-base text-gray-500 mb-8 relative z-10 font-medium">
+            Connect directly with {advisor.name.split(" ")[0]} for a custom
+            strategy.
+          </p>
+
+          {formSubmitted === "quote" ? (
+            <div className="bg-green-50 p-10 rounded-[24px] text-center border border-green-100">
+              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-semibold tracking-tight text-gray-900">
+                Success!
+              </h3>
+              <p className="text-base text-gray-600 mt-2">
+                Your request has been received. {advisor.name.split(" ")[0]}{" "}
+                will contact you shortly.
+              </p>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleQuoteSubmit}
+              className="space-y-4 relative z-10"
+            >
+              <div>
+                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                  Full Name
+                </label>
+                <input
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  placeholder="Ethan Wright"
+                  required
+                  value={quoteForm.name}
+                  onChange={(e) =>
+                    setQuoteForm({ ...quoteForm, name: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  placeholder="ethan@example.com"
+                  required
+                  value={quoteForm.email}
+                  onChange={(e) =>
+                    setQuoteForm({ ...quoteForm, email: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                  Product Focus
+                </label>
+                <select
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer transition-all"
+                  value={quoteForm.interest}
+                  onChange={(e) =>
+                    setQuoteForm({
+                      ...quoteForm,
+                      interest: e.target.value as ProductType,
+                    })
+                  }
+                >
+                  {advisor.productsSold?.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-semibold tracking-tight text-gray-700 ml-1 mb-2 block">
+                  Additional Details
+                </label>
+                <textarea
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all"
+                  rows={4}
+                  placeholder="How can I assist you today?"
+                  value={quoteForm.message}
+                  onChange={(e) =>
+                    setQuoteForm({ ...quoteForm, message: e.target.value })
+                  }
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-medium text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group"
+              >
+                Submit Inquiry{" "}
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </form>
+          )}
+        </section>
+      </main>
 
       {isShareModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/80 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-white rounded-[3rem] p-10 w-full max-w-sm shadow-2xl relative border border-white/20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] p-8 md:p-10 w-full max-w-sm shadow-2xl relative border border-gray-100">
             <button
               onClick={() => setIsShareModalOpen(false)}
-              className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-all"
+              className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
             >
-              <X className="h-5 w-5 text-slate-400" />
+              <X className="h-5 w-5 text-gray-600" />
             </button>
-            <h3 className="text-2xl font-black text-slate-900 mb-8 text-center uppercase tracking-tight">
-              Spread the Word
+            <h3 className="text-2xl font-semibold tracking-tight text-gray-900 mb-8 text-center">
+              Share Profile
             </h3>
 
-            <div className="grid grid-cols-4 gap-4 mb-10">
+            <div className="grid grid-cols-4 gap-4 mb-8">
               <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`}
                 target="_blank"
-                className="flex flex-col items-center gap-3 group"
+                className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all">
+                <div className="w-14 h-14 bg-[#1877F2] rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <FacebookIcon className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  FB
+                <span className="text-xs font-medium text-gray-600">
+                  Facebook
                 </span>
               </a>
               <a
                 href={`https://twitter.com/intent/tweet?url=${window.location.href}&text=Check out ${advisor.name}`}
                 target="_blank"
-                className="flex flex-col items-center gap-3 group"
+                className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-all">
-                  <TwitterIcon className="h-6 w-6" />
+                <div className="w-14 h-14 bg-black rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                  <XIcon className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-medium text-gray-600">
                   X
                 </span>
               </a>
               <a
                 href={`https://www.linkedin.com/shareArticle?mini=true&url=${window.location.href}`}
                 target="_blank"
-                className="flex flex-col items-center gap-3 group"
+                className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-blue-700 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all">
+                <div className="w-14 h-14 bg-[#0A66C2] rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <LinkedInIcon className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  IN
+                <span className="text-xs font-medium text-gray-600">
+                  LinkedIn
                 </span>
               </a>
               <a
                 href={`mailto:?subject=Check out ${advisor.name}&body=${window.location.href}`}
-                className="flex flex-col items-center gap-3 group"
+                className="flex flex-col items-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-slate-500 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-all">
+                <div className="w-14 h-14 bg-gray-500 rounded-[18px] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                   <Mail className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Mail
+                <span className="text-xs font-medium text-gray-600">
+                  Email
                 </span>
               </a>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-inner">
-              <LinkIcon className="h-5 w-5 text-slate-400" />
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200">
+              <LinkIcon className="h-5 w-5 text-gray-400 ml-2" />
               <input
-                className="flex-1 bg-transparent text-xs font-bold text-slate-600 outline-none truncate"
+                className="flex-1 bg-transparent text-sm font-medium text-gray-700 outline-none truncate"
                 readOnly
                 value={window.location.href}
               />
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-2 bg-[#0B2240] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-blue-900 transition-colors flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2 shrink-0"
               >
                 {copyText === 'Copied!' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copyText}
