@@ -34,7 +34,6 @@ function generateJitsiToken(roomName, userName, userEmail, isModerator) {
   return jwt.sign(payload, appSecret, { algorithm: 'HS256', expiresIn: '2h' });
 }
 
-const jwt = require('jsonwebtoken');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const http = require('http');
