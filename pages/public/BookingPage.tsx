@@ -317,17 +317,19 @@ export const BookingPage: React.FC = () => {
 
                 {/* Advisor Selector Grid */}
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Available Advisors</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {activeAdvisors.map(adv => {
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">
+                    {advisorParam ? "Your Selected Advisor" : "Available Advisors"}
+                  </label>
+                  <div className={`grid ${advisorParam ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
+                    {(advisorParam && selectedAdvisor ? [selectedAdvisor] : activeAdvisors).map(adv => {
                       const isSelected = selectedAdvisor?.id === adv.id;
                       return (
                         <button
                           key={adv.id}
-                          onClick={() => setSelectedAdvisor(adv)}
+                          onClick={() => !advisorParam && setSelectedAdvisor(adv)}
                           className={`flex items-center gap-3 p-3.5 rounded-2xl border text-left transition-all ${
                             isSelected
-                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg'
+                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg cursor-default'
                               : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                           }`}
                         >
