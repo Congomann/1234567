@@ -24,6 +24,15 @@ import { jsPDF } from "jspdf";
 import { PDFBrandingService } from "../../services/pdfBrandingService";
 
 export const AdvisorResources: React.FC = () => {
+  const [toast, setToast] = React.useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const toastRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+      setToast({ msg, type });
+      clearTimeout(toastRef.current);
+      toastRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
   const {
     resources,
     likeResource,
@@ -92,7 +101,7 @@ export const AdvisorResources: React.FC = () => {
     e.stopPropagation();
     shareResource(id);
     navigator.clipboard.writeText(window.location.href);
-    alert("Link copied to clipboard!");
+    showToast("Link copied to clipboard!");
   };
 
   const handleCommentSubmit = (e: React.FormEvent) => {
@@ -144,6 +153,12 @@ export const AdvisorResources: React.FC = () => {
 
   return (
     <div className="w-full">
+            {toast && (
+              <div style={{ position: 'fixed', top: 20, right: 24, zIndex: 9999, background: toast.type === 'success' ? '#ecfdf5' : '#fff1f2', border: `1px solid ${toast.type === 'success' ? '#a7f3d0' : '#fecdd3'}`, color: toast.type === 'success' ? '#065f46' : '#9f1239', padding: '12px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                  {toast.msg}
+              </div>
+            )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Advisor Training & Resources</h1>
         <p className="text-sm text-slate-500 font-medium">

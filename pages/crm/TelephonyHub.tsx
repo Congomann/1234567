@@ -60,6 +60,15 @@ interface SMSMessage {
 type CallState = 'idle' | 'connecting' | 'in-progress' | 'ended' | 'failed';
 
 export const TelephonyHub: React.FC = () => {
+  const [toast, setToast] = React.useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const toastRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+      setToast({ msg, type });
+      clearTimeout(toastRef.current);
+      toastRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
   const [activeTab, setActiveTab] = useState<'softphone' | 'extensions' | 'sms' | 'ai_qualifier' | 'power_dialer' | 'logs' | 'supervisor_dashboard' | 'analytics'>('softphone');
   const softphone = useSoftphone();
   
@@ -275,6 +284,12 @@ export const TelephonyHub: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-slate-900 pb-20 selection:bg-blue-500/20">
+            {toast && (
+              <div style={{ position: 'fixed', top: 20, right: 24, zIndex: 9999, background: toast.type === 'success' ? '#ecfdf5' : '#fff1f2', border: `1px solid ${toast.type === 'success' ? '#a7f3d0' : '#fecdd3'}`, color: toast.type === 'success' ? '#065f46' : '#9f1239', padding: '12px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                  {toast.msg}
+              </div>
+            )}
+
       <SEO />
 
       {/* HEADER & SIGNALWIRE STATUS (APPLE GLASS) */}
@@ -398,7 +413,7 @@ export const TelephonyHub: React.FC = () => {
             </div>
 
             {/* Action Buttons with Status Machine */}
-            {(softphone.status === 'offline' || softphone.status === 'registered' || softphone.status === 'idle') && (
+            {(softphone.status === 'offline' || softphone.status === 'registered' || false) && (
               <button
                 onClick={handleStartCall}
                 disabled={!dialNumber}
@@ -408,7 +423,7 @@ export const TelephonyHub: React.FC = () => {
               </button>
             )}
 
-            {(softphone.status === 'registering' || softphone.status === 'ringing' || softphone.status === 'connecting') && (
+            {(softphone.status === 'registering' || softphone.status === 'ringing' || false) && (
               <button
                 disabled
                 className="w-full max-w-[280px] py-4 bg-amber-500 text-white rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
@@ -623,7 +638,7 @@ export const TelephonyHub: React.FC = () => {
                     setActiveTab('softphone');
                     softphone.makeCall(data.nextLead.phone_number);
                   } else {
-                    alert('No leads remaining in campaign!');
+                    showToast('No leads remaining in campaign!');
                   }
                 }}
                 disabled={softphone.status !== 'registered'}
@@ -692,24 +707,24 @@ export const TelephonyHub: React.FC = () => {
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Duration</span>
-                    <span className="font-mono text-sm font-bold text-slate-800">{call.duration}</span>
+                    <span className="font-mono text-sm font-bold text-slate-800">{call.duration_seconds}</span>
                   </div>
 
                   <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
                     <button 
-                      onClick={() => alert(`Silently listening to ${call.agent}'s call...`)}
+                      onClick={() => showToast(`Silently listening to ${call.advisor_extension}'s call...`)}
                       className="px-3 py-1.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
                     >
                       Listen
                     </button>
                     <button 
-                      onClick={() => alert(`Whispering to ${call.agent} (Caller cannot hear)...`)}
+                      onClick={() => showToast(`Whispering to ${call.advisor_extension} (Caller cannot hear)...`)}
                       className="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
                     >
                       Whisper
                     </button>
                     <button 
-                      onClick={() => alert(`Barging into ${call.agent}'s call (3-way conference started)...`)}
+                      onClick={() => showToast(`Barging into ${call.advisor_extension}'s call (3-way conference started)...`)}
                       className="px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 text-xs font-bold rounded-lg shadow-sm border border-slate-200 transition-all"
                     >
                       Barge

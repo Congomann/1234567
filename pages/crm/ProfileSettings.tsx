@@ -5,6 +5,15 @@ import { Save, Plus, Trash2, Camera, Shield, CheckCircle2, Languages, Briefcase,
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const ProfileSettings: React.FC = () => {
+  const [toast, setToast] = React.useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const toastRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+      setToast({ msg, type });
+      clearTimeout(toastRef.current);
+      toastRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
   const { user, updateUser, getAdvisorAssignments, testimonials, submitTestimonialEdit } = useData();
   const [formData, setFormData] = useState<Partial<User>>({});
   const [isSaved, setIsSaved] = useState(false);
@@ -131,6 +140,12 @@ export const ProfileSettings: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-10">
+            {toast && (
+              <div style={{ position: 'fixed', top: 20, right: 24, zIndex: 9999, background: toast.type === 'success' ? '#ecfdf5' : '#fff1f2', border: `1px solid ${toast.type === 'success' ? '#a7f3d0' : '#fecdd3'}`, color: toast.type === 'success' ? '#065f46' : '#9f1239', padding: '12px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                  {toast.msg}
+              </div>
+            )}
+
       <Tab3DBanner
         cards={[
           { title: "Advisor Profile & Microsite", value: "Public & Active", subtitle: "Personalized Lead Portal", emoji: "👤", gradient: "cyan", linkText: "View Microsite", linkPath: "#microsite" },
@@ -273,7 +288,7 @@ export const ProfileSettings: React.FC = () => {
                             type="button"
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://newhollandfinancial.com/advisor/${user.name.toLowerCase().replace(/ /g, '-')}`);
-                                alert("Link copied to clipboard!");
+                                showToast("Link copied to clipboard!");
                             }}
                             className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                         >
@@ -537,7 +552,7 @@ export const ProfileSettings: React.FC = () => {
                       type="button"
                       onClick={() => {
                         navigator.clipboard.writeText(link);
-                        alert(`${room.title} link copied!`);
+                        showToast(`${room.title} link copied!`);
                       }}
                       className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                     >

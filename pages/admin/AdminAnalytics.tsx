@@ -160,8 +160,8 @@ export const AdminAnalytics: React.FC = () => {
         <div className="space-y-8 relative">
             <Tab3DBanner
                 cards={[
-                    { title: "Real-Time Web Traffic", value: `${stats?.totalVisitors || 4250} Sessions`, subtitle: "Global Unique Visitors", emoji: "📈", gradient: "cyan", linkText: "View Traffic", linkPath: '#traffic' },
-                    { title: "Active Live Sessions", value: `${stats?.activeSessions || 128} Online`, subtitle: "Real-Time Page Tracking", emoji: "👁️", gradient: "yellow", linkText: "Live Stream", linkPath: '#sessions' },
+                    { title: "Real-Time Web Traffic", value: `${stats?.totalVisitors || 0} Sessions`, subtitle: "Global Unique Visitors", emoji: "📈", gradient: "cyan", linkText: "View Traffic", linkPath: '#traffic' },
+                    { title: "Active Live Sessions", value: `${stats?.activeSessions || 0} Online`, subtitle: "Real-Time Page Tracking", emoji: "👁️", gradient: "yellow", linkText: "Live Stream", linkPath: '#sessions' },
                     { title: "Lead Form Conversion", value: "18.4% Rate", subtitle: "High Conversion Intent", emoji: "🎯", gradient: "pink", linkText: "Funnel Metrics", linkPath: '#funnel' }
                 ]}
             />

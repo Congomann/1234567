@@ -24,44 +24,7 @@ export const Dashboard: React.FC = () => {
   const { user, tasks, addTask, toggleTask, deleteTask } = useData();
   const navigate = useNavigate();
 
-  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([
-    {
-      id: 'evt-1',
-      type: 'signalwire_ai',
-      title: 'SignalWire AI Lead Qualification Complete',
-      subtitle: 'Jonathan Miller ($250k liquid capital) rated Warm 🔥',
-      timestamp: '2 mins ago',
-      badge: 'Warm',
-      color: 'bg-rose-500/10 text-rose-600 border-rose-200'
-    },
-    {
-      id: 'evt-2',
-      type: 'plaid_verify',
-      title: 'Plaid 1-Click Bank ACH Verification',
-      subtitle: 'Chase Bank checking account ending in ...4910 verified for $120,000 ACH draft',
-      timestamp: '14 mins ago',
-      badge: 'Verified',
-      color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200'
-    },
-    {
-      id: 'evt-3',
-      type: 'job_application',
-      title: 'New Advisor Application Submitted',
-      subtitle: 'David Vance submitted Series 7 & 66 License details via /join',
-      timestamp: '42 mins ago',
-      badge: 'Pending Review',
-      color: 'bg-blue-500/10 text-blue-600 border-blue-200'
-    },
-    {
-      id: 'evt-4',
-      type: 'marketing_payment',
-      title: 'Stripe Campaign Funding Approved',
-      subtitle: 'Q3 Wealth Growth Campaign funded for $15,000 via Stripe PaymentIntent',
-      timestamp: '1 hour ago',
-      badge: 'Approved',
-      color: 'bg-purple-500/10 text-purple-600 border-purple-200'
-    }
-  ]);
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
 

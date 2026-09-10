@@ -263,6 +263,15 @@ export const CampaignManager: React.FC = () => {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000); };
 
+  const handleSyncToAdPlatforms = async (audId: string) => {
+    try {
+      await apiFetch(`${API}/audiences/${audId}/sync`, { method: 'POST' });
+      showToast('Synced to ad platforms!');
+    } catch (e: any) {
+      showToast('Failed to sync: ' + (e.message || 'Unknown error'));
+    }
+  };
+
   const fetchAll = useCallback(async () => {
     setIsLoading(true);
     setError('');
@@ -567,7 +576,7 @@ export const CampaignManager: React.FC = () => {
                       </pre>
                     )}
 
-                    <button onClick={() => showToast('Synced to ad platforms!')} className="w-full py-2.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2">
+                    <button onClick={() => handleSyncToAdPlatforms(aud.id)} className="w-full py-2.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2">
                       <Share2 size={13} /> Sync to Ad Platforms
                     </button>
                   </div>

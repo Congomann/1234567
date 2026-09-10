@@ -125,7 +125,7 @@ export const AdminTestimonials: React.FC = () => {
             <Tab3DBanner
                 cards={[
                     { title: "Client Ratings", value: "4.9 / 5.0 Avg", subtitle: "Top Advisor Performance", emoji: "🌟", gradient: "cyan", linkText: "View Ratings", linkPath: '#live-reviews' },
-                    { title: "Verified Reviews", value: `${testimonials.length || 142} Reviews`, subtitle: "Client Feedback Vault", emoji: "💬", gradient: "yellow", linkText: "Review Queue", linkPath: '#review-queue' },
+                    { title: "Verified Reviews", value: `${testimonials.length || 0} Reviews`, subtitle: "Client Feedback Vault", emoji: "💬", gradient: "yellow", linkText: "Review Queue", linkPath: '#review-queue' },
                     { title: "Trust Index Badge", value: "Top 1% Group", subtitle: "National Advisor Rating", emoji: "🏆", gradient: "pink" }
                 ]}
             />

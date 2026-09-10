@@ -117,9 +117,9 @@ export default function AdminOnboarding() {
             <div className="max-w-7xl mx-auto">
                 <Tab3DBanner
                     cards={[
-                        { title: "Pending Advisor Applications", value: `${pendingCount || 14} Applications`, subtitle: "Awaiting License Review", emoji: "📋", gradient: "cyan", linkText: "Review Apps", linkPath: '#applications' },
-                        { title: "NPN & FINRA Verification", value: "Series 7 & 66 Verified", subtitle: "Automated FINRA Check", emoji: "🎓", gradient: "yellow" },
-                        { title: "Approved Contracts", value: "28 Advisors Joined", subtitle: "Contracts Issued", emoji: "🤝", gradient: "pink" }
+                        { title: "Pending Onboarding", value: `${pendingCount} Applications`, subtitle: "Awaiting Review", emoji: "⏳", gradient: "cyan" },
+                        { title: "State Licensing", value: "NIPR Sync Live", subtitle: "Background Checks", emoji: "🏛️", gradient: "yellow" },
+                        { title: "Approved Contracts", value: `${apps.filter(a => a.status === 'approved').length} Advisors Joined`, subtitle: "Contracts Issued", emoji: "🤝", gradient: "pink" }
                     ]}
                 />
 

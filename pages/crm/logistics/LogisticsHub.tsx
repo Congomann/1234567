@@ -117,27 +117,31 @@ export const LogisticsHub: React.FC = () => {
   const deals = getDeals();
 
   const getStats = () => {
+    const totalDeals = deals.length;
+    const totalValue = deals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+    const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalValue);
+
     switch(activeNiche) {
       case LogisticsNiche.TRUCKING:
         return [
-          { label: 'Active Fleet', value: '42', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Miles Driven YTD', value: '1.2M', icon: MapPin, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Revenue YTD', value: '$2.1M', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'On-Time Rate', value: '98.5%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+          { label: 'Active Fleet', value: totalDeals.toString(), icon: Truck, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Deals Count', value: totalDeals.toString(), icon: MapPin, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue Pipeline', value: formattedValue, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'On-Time Rate', value: '100%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
         ];
       case LogisticsNiche.FUEL:
         return [
-          { label: 'Active Contracts', value: '18', icon: Container, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Gallons Moved', value: '450k', icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Revenue YTD', value: '$1.4M', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'Margin Average', value: '8.2%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+          { label: 'Active Contracts', value: totalDeals.toString(), icon: Container, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Deals Pipeline', value: totalDeals.toString(), icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue Pipeline', value: formattedValue, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Margin Average', value: '10%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
         ];
       case LogisticsNiche.FREIGHT_BROKERAGE:
         return [
           { label: 'Active Loads', value: loads.length.toString(), icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Carrier Network', value: '156', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Revenue YTD', value: '$452.8k', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'System Health', value: '99.8%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
+          { label: 'Carrier Network', value: totalDeals.toString(), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Revenue Pipeline', value: formattedValue, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'System Health', value: '100%', icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' }
         ];
     }
   };
@@ -271,7 +275,7 @@ export const LogisticsHub: React.FC = () => {
                     <div>
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{deal.id}</span>
-                        <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer" onClick={() => alert('Options menu coming soon')}>
+                        <div className="p-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer" onClick={() => console.log('Options menu clicked')}>
                           <MoreVertical size={14} className="text-slate-300" />
                         </div>
                       </div>

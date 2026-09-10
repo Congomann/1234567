@@ -76,13 +76,18 @@ export const RealEstateAdmin: React.FC = () => {
     'Off Market': 'bg-slate-100 text-slate-800 border-slate-200'
   };
 
+  const totalValue = properties.reduce((sum, p) => sum + (p.price || 0), 0);
+  const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 1, notation: 'compact' }).format(totalValue);
+  const pendingCount = properties.filter(p => p.status === 'Pending Approval').length;
+  const activeCount = properties.filter(p => p.status === 'Active').length;
+
   return (
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Commercial & Residential", value: "$18.4M Value", subtitle: "Active Escrow & Listings", emoji: "🏡", gradient: "cyan", linkText: "Listings", linkPath: "#listing_management" },
-          { title: "Pending Listing Reviews", value: "6 Listings", subtitle: "Awaiting Admin Approval", emoji: "🔑", gradient: "yellow", linkText: "Review Queue", linkPath: "#listing_management" },
-          { title: "Escrow Transactions", value: "18 Open Deals", subtitle: "Title & Escrow Locked", emoji: "📜", gradient: "pink" }
+          { title: "Commercial & Residential", value: formattedValue, subtitle: "Total Portfolio Value", emoji: "🏡", gradient: "cyan", linkText: "Listings", linkPath: "#listing_management" },
+          { title: "Pending Listing Reviews", value: `${pendingCount} Listings`, subtitle: "Awaiting Admin Approval", emoji: "🔑", gradient: "yellow", linkText: "Review Queue", linkPath: "#listing_management" },
+          { title: "Active Listings", value: `${activeCount} Properties`, subtitle: "Currently on Market", emoji: "📜", gradient: "pink" }
         ]}
       />
       <div id="listing_management" className="pb-10 animate-fade-in">

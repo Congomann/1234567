@@ -82,7 +82,7 @@ export const AdminUsers: React.FC = () => {
             <Tab3DBanner
                 cards={[
                     { title: "Master System Admin", value: "Full Control", subtitle: "User Terminal Console", emoji: "👑", gradient: "cyan", linkText: "System Health", linkPath: '#system-health' },
-                    { title: "Active Advisory Staff", value: `${allUsers.length || 42} Advisors`, subtitle: "Role Permissions Active", emoji: "👥", gradient: "yellow", linkText: "Manage Users", linkPath: '#terminal' },
+                    { title: "Active Advisory Staff", value: `${allUsers.length} Advisors`, subtitle: "Role Permissions Active", emoji: "👥", gradient: "yellow", linkText: "Manage Users", linkPath: '#terminal' },
                     { title: "Security Access Logs", value: "0 Violations", subtitle: "Audit Trail Enforced", emoji: "🔑", gradient: "pink", linkText: "View Logs", linkPath: '#terminal' }
                 ]}
             />

@@ -62,15 +62,35 @@ export const CommissionRecon: React.FC = () => {
         fetchData();
     }, []);
 
-    const handleUploadSim = () => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
         setIsUploading(true);
-        // Simulate file processing
-        setTimeout(() => {
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const token = localStorage.getItem('nhfg_access_token');
+            const res = await fetch('/api/admin/commissions/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (res.ok) {
+                setUploadSuccess(true);
+                fetchData();
+                setTimeout(() => setUploadSuccess(false), 5000);
+            } else {
+                alert('Upload failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Upload error');
+        } finally {
             setIsUploading(false);
-            setUploadSuccess(true);
-            fetchData();
-            setTimeout(() => setUploadSuccess(false), 5000);
-        }, 3000);
+            if (e.target) e.target.value = '';
+        }
     };
 
     const filtered = reconciliations.filter(r =>
@@ -134,14 +154,11 @@ export const CommissionRecon: React.FC = () => {
                         <Download size={16} />
                         Export Audit
                     </button>
-                    <button
-                        onClick={handleUploadSim}
-                        disabled={isUploading}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0A62A7] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50"
-                    >
+                    <label className={`flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0A62A7] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                         {isUploading ? <RefreshCw size={16} className="animate-spin" /> : <Upload size={16} />}
                         {isUploading ? 'Processing CSV...' : 'Import Carrier Statement'}
-                    </button>
+                        <input type="file" className="hidden" accept=".csv,.xlsx" onChange={handleFileUpload} disabled={isUploading} />
+                    </label>
                 </div>
             </div>
 

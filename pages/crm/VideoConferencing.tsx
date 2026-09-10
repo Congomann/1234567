@@ -1,13 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SEO } from '../../components/SEO';
+import { useData } from '../../context/DataContext';
 import { Video, Settings, Users, Link as LinkIcon, ExternalLink, Shield } from 'lucide-react';
 
 export const VideoConferencing: React.FC = () => {
+  const { user } = useData();
+  const [toast, setToast] = React.useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const toastRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+      setToast({ msg, type });
+      clearTimeout(toastRef.current);
+      toastRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [jitsiApi, setJitsiApi] = useState<any>(null);
   const [roomName, setRoomName] = useState('NHFG-Advisory-Room-' + Math.floor(Math.random() * 10000));
   const [inMeeting, setInMeeting] = useState(false);
-  const [advisorName, setAdvisorName] = useState('NHFG Advisor');
+  const [advisorName, setAdvisorName] = useState(user?.name || 'NHFG Advisor');
 
   const startMeeting = () => {
     if (!containerRef.current) return;
@@ -95,11 +106,17 @@ export const VideoConferencing: React.FC = () => {
 
   const copyInviteLink = () => {
     navigator.clipboard.writeText(`https://meet.newhollandfinancial.com/${roomName}`);
-    alert('Meeting link copied to clipboard!');
+    showToast('Meeting link copied to clipboard!');
   };
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-slate-900 pb-20">
+            {toast && (
+              <div style={{ position: 'fixed', top: 20, right: 24, zIndex: 9999, background: toast.type === 'success' ? '#ecfdf5' : '#fff1f2', border: `1px solid ${toast.type === 'success' ? '#a7f3d0' : '#fecdd3'}`, color: toast.type === 'success' ? '#065f46' : '#9f1239', padding: '12px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                  {toast.msg}
+              </div>
+            )}
+
       <SEO />
 
       <div className="apple-glass p-8 md:p-10 rounded-[2.5rem] mb-8 border border-white/80 shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">

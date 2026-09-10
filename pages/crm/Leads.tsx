@@ -81,6 +81,9 @@ export const Leads: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'timeline' | 'underwriting' | 'vault'>('profile');
     const [browseHistory, setBrowseHistory] = useState<any[]>([]);
     const [loadingContext, setLoadingContext] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
     const isAdvisor = user?.role === UserRole.ADVISOR;
     const isAdminOrManager = user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER || user?.role === UserRole.SUB_ADMIN;
@@ -272,6 +275,25 @@ export const Leads: React.FC = () => {
             setIsEditing(false);
         }
     };
+    const handleRequestSignedDoc = async () => {
+        try {
+            // Mock API call for document request
+            await new Promise(resolve => setTimeout(resolve, 500));
+            showToast('Document request securely sent to client.');
+        } catch (err) {
+            showToast('Failed to send document request.');
+        }
+    };
+
+    const handleOpenSecureViewer = async (docId: string) => {
+        try {
+            // Mock API call for secure document viewing URL
+            await new Promise(resolve => setTimeout(resolve, 300));
+            showToast('Secure session initiated. Preparing document...');
+        } catch (err) {
+            showToast('Failed to open secure viewer.');
+        }
+    };
 
 
     const getStatusColor = (status: string) => {
@@ -292,6 +314,12 @@ export const Leads: React.FC = () => {
 
     return (
         <div className="space-y-8 relative">
+            {toast && (
+                <div className="fixed bottom-6 right-6 z-[100] animate-in slide-in-from-bottom-5 fade-in bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl font-bold flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                    {toast}
+                </div>
+            )}
             <Tab3DBanner
                 cards={[
                     { title: "Total Lead Intake", value: `${leads.length || 3420} Prospects`, subtitle: "Real-Time Ingestion", emoji: "👥", gradient: "cyan", linkText: "All Leads", linkPath: "#all_leads" },
@@ -859,7 +887,7 @@ export const Leads: React.FC = () => {
                                     <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
                                         <FileText className="text-blue-500" /> Digital Document Vault
                                     </h3>
-                                    <button onClick={() => alert('Document request sent to client.')} className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
+                                    <button onClick={handleRequestSignedDoc} className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
                                         + Request Signed Doc
                                     </button>
                                 </div>
@@ -880,7 +908,7 @@ export const Leads: React.FC = () => {
                                                 <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-green-100 text-green-700`}>
                                                     Ready
                                                 </span>
-                                                <button onClick={() => alert('Opening document in secure viewer...')} className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
+                                                <button onClick={() => handleOpenSecureViewer(doc.id)} className="text-blue-500 hover:text-blue-600 p-2"><ExternalLink size={14} /></button>
                                             </div>
                                         </div>
                                     ))}

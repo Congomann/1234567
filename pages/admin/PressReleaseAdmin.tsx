@@ -31,20 +31,36 @@ interface PressRelease {
   excerpt: string;
 }
 
+import { Backend } from '../../services/apiBackend';
+
 export const PressReleaseAdmin: React.FC = () => {
   const navigate = useNavigate();
-  const [releases, setReleases] = useState<PressRelease[]>([
-    { id: '1', title: 'New Holland Financial Group Surpasses $2B in Assets', date: '2026-05-12', status: 'Published', category: 'Corporate', excerpt: 'NHFG reaches a major milestone in growth...' },
-    { id: '2', title: 'AI-Powered Market Intelligence Terminal Launch', date: '2026-04-28', status: 'Published', category: 'Innovation', excerpt: 'The new proprietary platform provides predictive yield modeling...' },
-    { id: '3', title: 'Sustainable Infrastructure Financing Expansion', date: '2026-06-15', status: 'Scheduled', category: 'Corporate', excerpt: 'The strategic shift marks a pivotal moment in the group\'s investment history...' },
-  ]);
+  const [releases, setReleases] = useState<PressRelease[]>([]);
+
+  useEffect(() => {
+    fetchReleases();
+  }, []);
+
+  const fetchReleases = async () => {
+    try {
+      const data = await Backend.get<PressRelease[]>('/press-releases');
+      setReleases(data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const [currentRelease, setCurrentRelease] = useState<PressRelease | null>(null);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this press release?')) {
-        setReleases(releases.filter(r => r.id !== id));
+        try {
+            await Backend.delete(`/press-releases/${id}`);
+            setReleases(releases.filter(r => r.id !== id));
+        } catch (e) {
+            console.error(e);
+        }
     }
   };
 
@@ -59,7 +75,7 @@ export const PressReleaseAdmin: React.FC = () => {
 
   const handleAddNew = () => {
     setCurrentRelease({
-        id: Math.random().toString(36).substr(2, 9),
+        id: `new-${Math.random().toString(36).substr(2, 9)}`,
         title: '',
         date: new Date().toISOString().split('T')[0],
         status: 'Draft',
@@ -69,15 +85,23 @@ export const PressReleaseAdmin: React.FC = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!currentRelease) return;
-    const exists = releases.find(r => r.id === currentRelease.id);
-    if (exists) {
-        setReleases(releases.map(r => r.id === currentRelease.id ? currentRelease : r));
-    } else {
-        setReleases([...releases, currentRelease]);
+    try {
+        const exists = releases.find(r => r.id === currentRelease.id);
+        const isNew = !exists || currentRelease.id.startsWith('new-');
+        
+        if (isNew) {
+            const saved = await Backend.post<PressRelease>('/press-releases', currentRelease);
+            setReleases([...releases, saved]);
+        } else {
+            const updated = await Backend.put<PressRelease>(`/press-releases/${currentRelease.id}`, currentRelease);
+            setReleases(releases.map(r => r.id === currentRelease.id ? updated : r));
+        }
+        setIsEditing(false);
+    } catch (e) {
+        console.error(e);
     }
-    setIsEditing(false);
   };
 
   return (
