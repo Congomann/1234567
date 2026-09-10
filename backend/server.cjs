@@ -4,6 +4,36 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const crypto = require('crypto');
+
+const jwt = require('jsonwebtoken');
+
+function generateJitsiToken(roomName, userName, userEmail, isModerator) {
+  const appId = process.env.JITSI_APP_ID;
+  const appSecret = process.env.JITSI_APP_SECRET;
+  
+  if (!appId || !appSecret) return null;
+
+  const payload = {
+    aud: 'jitsi',
+    iss: appId,
+    sub: process.env.JITSI_DOMAIN || 'meet.jit.si',
+    room: roomName,
+    context: {
+      user: {
+        name: userName,
+        email: userEmail,
+        affiliation: isModerator ? 'owner' : 'member'
+      },
+      features: {
+        livestreaming: isModerator,
+        recording: isModerator
+      }
+    }
+  };
+
+  return jwt.sign(payload, appSecret, { algorithm: 'HS256', expiresIn: '2h' });
+}
+
 const jwt = require('jsonwebtoken');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -133,11 +163,17 @@ app.get('/api/heartbeat', async (req, res) => {
 
 // Mount Webhooks Router
 app.use('/api/webhooks', webhooksRouter);
+// Mount Integrations Router
+const integrationsRouter = require('./routes/integrations.cjs');
+app.use('/api/integrations', integrationsRouter);
 // Mount Marketing Router
 app.use('/api/marketing', marketingRouter);
 // Mount SignalWire Corporate Telephony Router
 app.use('/api/signalwire', signalwireRouter);
 app.use('/api/telephony-webhook', telephonyWebhookRouter);
+// Mount Integration Router
+const integrationRouter = require('./routes/integration.cjs');
+app.use('/api/integration', integrationRouter);
 // Mount Behavioral Tracking & Analytics Router (Milestone M1)
 app.use('/api', analyticsRouter);
 
@@ -186,8 +222,8 @@ if (process.env.INSTANCE_CONNECTION_NAME) {
   }
 
   poolConfig = {
-    connectionString: connectionString,
-    ssl: { rejectUnauthorized: false },
+    connectionString: connectionString.replace('?sslmode=require&pgbouncer=true', '').replace('?sslmode=require', ''),
+    ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false },
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000, // Increased for stability
@@ -356,6 +392,19 @@ const initDB = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS integration_health (
+        platform VARCHAR(50) PRIMARY KEY,
+        status VARCHAR(50) DEFAULT 'disconnected',
+        last_sync_at TIMESTAMP WITH TIME ZONE,
+        total_webhooks INT DEFAULT 0,
+        failed_webhooks INT DEFAULT 0,
+        webhook_health_percent NUMERIC(5,2) DEFAULT 100.00
+      );
+
+      INSERT INTO integration_health (platform, status) 
+      VALUES ('google', 'disconnected'), ('linkedin', 'disconnected'), ('tiktok', 'disconnected')
+      ON CONFLICT (platform) DO NOTHING;
+
       -- PHASE 6: POWER DIALER
       CREATE TABLE IF NOT EXISTS telephony_campaigns (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -405,6 +454,18 @@ const initDB = async () => {
         visibility VARCHAR(20) DEFAULT 'private',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS integration_accounts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        platform VARCHAR(50) NOT NULL,
+        access_token TEXT NOT NULL,
+        refresh_token TEXT,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        external_account_id VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -459,8 +520,8 @@ const logPlaidUsage = async (advisorId, action, status, metadata = {}) => {
 };
 
 const checkAdvisorBilling = async (req, res, next) => {
-  // Admins can always use Plaid (company billed) — accept both 'Admin' (mock) and 'Administrator' (real)
-  if (req.user.role === 'Administrator' || req.user.role === 'Admin' || req.user.role === 'Manager' || req.user.role === 'Sub-Admin') return next();
+  // Admins can always use Plaid (company billed)
+  if (req.user.role === 'Administrator' || req.user.role === 'Administrator' || req.user.role === 'Manager' || req.user.role === 'Sub-Admin') return next();
 
   try {
     const result = await pool.query(
@@ -508,57 +569,16 @@ const generateRefreshToken = (user) => {
 
 // --- JWT Middleware ---
 const authenticateToken = (req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
-
   const authHeader = req.headers['authorization'];
-  const mockUserId = req.headers['x-mock-user-id'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token && token !== 'null' && token !== 'undefined') {
-    try {
-      const decoded = jwt.verify(token, SECRET_KEY);
-      req.user = decoded;
-      req.supabaseQuery = async (table) => supabase.from(table);
-      req.dbQuery = async (text, params) => {
-        const client = await pool.connect();
-        try {
-          await client.query(
-            "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
-            [req.user.id || 'admin-main', req.user.role || 'Admin']
-          );
-          return await client.query(text, params);
-        } finally {
-          client.release();
-        }
-      };
-      return next();
-    } catch (err) {
-      console.warn('[AUTH] Invalid JWT token, checking session fallback:', err.message);
-    }
-  }
+  if (token == null) return res.status(401).json({ error: 'No token provided' });
 
-  // Session Fallback for Admin CMS settings and uploads
-  req.user = {
-    id: mockUserId || 'admin-main',
-    role: 'Administrator',
-    sub: 'info@newhollandfinancial.com'
-  };
-  req.supabaseQuery = async (table) => supabase.from(table);
-  req.dbQuery = async (text, params) => {
-    const client = await pool.connect();
-    try {
-      await client.query(
-        "SELECT set_config('app.user_id', $1, true), set_config('app.user_role', $2, true)",
-        [req.user.id, req.user.role]
-      );
-      return await client.query(text, params);
-    } finally {
-      client.release();
-    }
-  };
-  return next();
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
 };
 
 // --- HELPER: WEBHOOK NORMALIZERS ---
@@ -647,15 +667,20 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500
 
 app.post('/api/upload', async (req, res) => {
   try {
-    // Allow uploads with valid JWT OR a mock user ID header (dev/admin panel)
-    const mockUserId = req.headers['x-mock-user-id'];
+    // Require valid JWT for uploads
     const authHeader = req.headers['authorization'];
-    let userId = mockUserId || 'anonymous';
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader && authHeader.split(' ')[1];
+    let userId = 'anonymous';
+
+    if (token) {
       try {
-        const decoded = jwt.verify(authHeader.replace('Bearer ', ''), process.env.SECRET_KEY || 'nhfg_secret_key_2025');
-        userId = decoded.id || userId;
-      } catch (e) { /* continue with mockUserId or anonymous */ }
+        const decoded = jwt.verify(token, JWT_SECRET);
+        userId = decoded.id;
+      } catch (e) {
+         return res.status(401).json({ error: 'Unauthorized' });
+      }
+    } else {
+         return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const { filename, fileData } = req.body;
@@ -959,212 +984,235 @@ const createAutomatedTask = async (leadId, title, assignedTo) => {
   }
 };
 
-app.post('/api/leads', authenticateToken, async (req, res) => {
-  try {
-    const {
-      id, name, email, phone, interest, status, source, assignedTo, message,
-      lifeDetails, realEstateDetails, securitiesDetails, customDetails,
-      visitorId
-    } = req.body;
 
+// ── UNIFIED MARKETING LEAD INGESTION ──────────────────────────────────────────
+const normalizePhone = (p) => p ? p.replace(/\D/g, '').slice(-10) : null;
+
+app.post('/api/webhooks/ingest', async (req, res) => {
+  try {
+    const data = req.body;
+    let { name, email, phone, interest, message, source, campaign_id, custom_details } = data;
+
+    const utm_source = data.utm_source || null;
+    const utm_medium = data.utm_medium || null;
+    const utm_campaign = data.utm_campaign || data.campaign || null;
+    const utm_term = data.utm_term || null;
+    const utm_content = data.utm_content || null;
+    const gclid = data.gclid || null;
+    const fbclid = data.fbclid || null;
+    const campaign = data.campaign || campaign_id || null;
+
+    if (!name || (!email && !phone)) {
+      return res.status(400).json({ error: 'Name and either email or phone required' });
+    }
+
+    const normPhone = normalizePhone(phone);
     const score = calculateLeadScore(req.body);
     const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
 
-    const leadData = {
-      name,
-      email,
-      phone,
-      interest,
-      status: status || 'New',
-      source: source || 'Web Form',
-      assigned_to: assignedTo,
-      message,
-      life_details: lifeDetails,
-      real_estate_details: realEstateDetails,
-      securities_details: securitiesDetails,
-      custom_details: customDetails,
-      visitor_id: visitorId,
-      score,
-      qualification,
-      updated_at: new Date().toISOString()
-    };
-
-    let result;
-    if (id) {
-      // HANDLE UPDATE (UPSERT)
-      const { data: oldData, error: fetchError } = await (await req.supabaseQuery('leads'))
-        .select('status, assigned_to')
-        .eq('id', id)
-        .single();
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
       
-      const { data, error } = await (await req.supabaseQuery('leads'))
-        .update(leadData)
-        .eq('id', id)
-        .select();
+      const dupRes = await client.query(
+        "SELECT id FROM leads WHERE email = $1 OR (phone IS NOT NULL AND RIGHT(REGEXP_REPLACE(phone, '\\D', '', 'g'), 10) = $2) LIMIT 1",
+        [email, normPhone]
+      );
 
-      if (error) throw error;
-      result = { rows: data };
-
-      // AUTOMATION: Status change tasks
-      if (oldData && oldData.status !== status) {
-        // TRIGGER NOTIFICATION
-        await notificationService.triggerStatusChange(req.body, status);
+      let leadId;
+      if (dupRes.rows.length > 0) {
+        leadId = dupRes.rows[0].id;
+        await client.query(
+          `UPDATE leads SET updated_at = NOW(), score = $2, qualification = $3,
+            utm_source = COALESCE($4, utm_source), utm_campaign = COALESCE($5, utm_campaign),
+            gclid = COALESCE($6, gclid), fbclid = COALESCE($7, fbclid)
+           WHERE id = $1`,
+          [leadId, score, qualification, utm_source, utm_campaign, gclid, fbclid]
+        );
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'duplicate_ingested', 'Duplicate lead ingestion received')",
+          [leadId]
+        );
+      } else {
+        const insertRes = await client.query(
+          `INSERT INTO leads (name, email, phone, interest, status, source, campaign, utm_source, utm_medium, utm_campaign, utm_term, utm_content, gclid, fbclid, score, qualification, custom_details)
+           VALUES ($1, $2, $3, $4, 'New', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
+          [name, email, phone, interest, source, campaign, utm_source, utm_medium, utm_campaign, utm_term, utm_content, gclid, fbclid, score, qualification, custom_details]
+        );
+        leadId = insertRes.rows[0].id;
         
-        if (status === 'Contacted') {
-          await createAutomatedTask(id, `Follow up: Consultation with ${name}`, assignedTo || oldData.assigned_to);
-        } else if (status === 'Proposal') {
-          await createAutomatedTask(id, `Action: Build proposal for ${name}`, assignedTo || oldData.assigned_to);
-        }
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'lead_created', 'Lead created via webhook')",
+          [leadId]
+        );
       }
-    } else {
-      // HANDLE NEW INSERT
-      result = await client.query(insertQuery, [
-        name, email, phone, interest, status || 'New', source || 'Web Form', assignedTo, message,
-        lifeDetails, realEstateDetails, securitiesDetails, customDetails, visitorId,
-        score, qualification
-      ]);
-
-      // AUTOMATION: New lead task & Notification
-      if (result.rows[0]) {
-        await createAutomatedTask(result.rows[0].id, `Review new inquiry: ${name}`, assignedTo);
-        await notificationService.triggerNewLead(req.body);
-      }
+      
+      await client.query(
+        "INSERT INTO webhook_events (provider, event_type, payload, processed) VALUES ($1, $2, $3, true)",
+        [source || 'webhook', 'ingest', data]
+      );
+      
+      await client.query('COMMIT');
+      
+      broadcast({ type: 'LEAD_INGESTED', leadId });
+      
+      res.status(200).json({ success: true, leadId });
+    } catch (dbErr) {
+      await client.query('ROLLBACK');
+      throw dbErr;
+    } finally {
+      client.release();
     }
-
-    await client.query('COMMIT');
-    res.status(id ? 200 : 201).json({ id: result.rows[0].id, success: true, score, qualification });
   } catch (err) {
-    await client.query('ROLLBACK');
+    console.error(err);
     res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
   }
 });
- 
+
+app.post('/api/leads', authenticateToken, async (req, res) => {
+  try {
+    const data = req.body;
+    const { id } = data;
+
+    const normPhone = normalizePhone(data.phone);
+    const score = calculateLeadScore(req.body);
+    const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      let leadId = id;
+      
+      if (id) {
+        await client.query(
+          "UPDATE leads SET name=$1, email=$2, phone=$3, status=$4, updated_at=NOW() WHERE id=$5",
+          [data.name, data.email, data.phone, data.status, id]
+        );
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'lead_updated', 'Lead updated via UI')",
+          [id]
+        );
+
+        if (data.status === 'Converted' || data.status === 'Closed Won') {
+          const conversionService = require('./services/conversionService.cjs');
+          const leadRes = await client.query("SELECT * FROM leads WHERE id = $1", [id]);
+          if (leadRes.rows.length > 0) {
+            conversionService.reportConversion(leadRes.rows[0]);
+          }
+        }
+      } else {
+        const dupRes = await client.query(
+          "SELECT id FROM leads WHERE email = $1 OR (phone IS NOT NULL AND RIGHT(REGEXP_REPLACE(phone, '\\D', '', 'g'), 10) = $2) LIMIT 1",
+          [data.email, normPhone]
+        );
+
+        if (dupRes.rows.length > 0) {
+          leadId = dupRes.rows[0].id;
+          await client.query(
+            "UPDATE leads SET updated_at = NOW() WHERE id = $1", [leadId]
+          );
+        } else {
+          const insertRes = await client.query(
+            "INSERT INTO leads (name, email, phone, status, source, score, qualification) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+            [data.name, data.email, data.phone, data.status || 'New', data.source || 'Web Form', score, qualification]
+          );
+          leadId = insertRes.rows[0].id;
+          
+          await client.query(
+            "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'form_submitted', 'Form submitted via UI')",
+            [leadId]
+          );
+        }
+      }
+      
+      if (qualification === 'Hot') {
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'qualified', 'Lead qualified as Hot')",
+          [leadId]
+        );
+      }
+      
+      await client.query('COMMIT');
+      
+      broadcast({ type: 'LEAD_UPDATED', leadId });
+      
+      res.status(200).json({ success: true, leadId });
+    } catch (dbErr) {
+      await client.query('ROLLBACK');
+      throw dbErr;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 2.5 Public Lead Ingestion (No Auth Required)
 app.post('/api/leads/public', async (req, res) => {
   const { name, email, phone, interest, message, source, visitorId, customDetails } = req.body;
   
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Missing required fields: name and email' });
+  if (!name || (!email && !phone)) {
+    return res.status(400).json({ error: 'Name and either email or phone required' });
   }
 
   try {
     const score = calculateLeadScore(req.body);
     const qualification = score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Cold';
+    const normPhone = phone ? phone.replace(/\D/g, '').slice(-10) : null;
 
-    const query = `
-      INSERT INTO public.leads (name, email, phone, interest, message, source, visitor_id, score, qualification, status, custom_details)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING *
-    `;
-    const result = await pool.query(query, [
-      name, 
-      email, 
-      phone, 
-      interest || 'Life Insurance', 
-      message, 
-      source || 'Public Web Form', 
-      visitorId, 
-      score, 
-      qualification, 
-      'New',
-      customDetails ? JSON.stringify(customDetails) : null
-    ]);
-    const data = result.rows[0];
-
-    // Broadcast to advisors in the CRM
-    broadcast({ type: 'NEW_LEAD', payload: data });
-
-    // Automation: Create an initial task for the internal admin
+    const client = await pool.connect();
     try {
-      await pool.query(
-        "INSERT INTO public.tasks (title, priority, completed, related_lead_id) VALUES ($1, $2, $3, $4)",
-        [`Review public inquiry: ${name}`, 'Medium', false, data.id]
+      await client.query('BEGIN');
+      
+      const dupRes = await client.query(
+        "SELECT id FROM leads WHERE email = $1 OR (phone IS NOT NULL AND RIGHT(REGEXP_REPLACE(phone, '\\D', '', 'g'), 10) = $2) LIMIT 1",
+        [email, normPhone]
       );
-    } catch (taskErr) {
-      console.error('[Public Lead] Failed to create task:', taskErr.message);
+
+      let leadId;
+      if (dupRes.rows.length > 0) {
+        leadId = dupRes.rows[0].id;
+        await client.query(
+          "UPDATE leads SET updated_at = NOW(), score = $2, qualification = $3, message = $4 WHERE id = $1",
+          [leadId, score, qualification, message]
+        );
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'duplicate_ingested', 'Duplicate form submission received')",
+          [leadId]
+        );
+      } else {
+        const insertRes = await client.query(
+          `INSERT INTO leads (name, email, phone, interest, message, source, visitor_id, score, qualification, status, custom_details)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'New', $10) RETURNING *`,
+          [name, email, phone, interest || 'General', message, source || 'Web Form', visitorId, score, qualification, customDetails]
+        );
+        leadId = insertRes.rows[0].id;
+        
+        await client.query(
+          "INSERT INTO lead_activities (lead_id, activity_type, description) VALUES ($1, 'form_submitted', 'Form submitted via public UI')",
+          [leadId]
+        );
+      }
+      
+      await client.query('COMMIT');
+      
+      // SSE / WebSockets Broadcast
+      if (typeof broadcast === 'function') {
+        broadcast({ type: 'NEW_LEAD', leadId });
+      }
+      
+      res.status(200).json({ success: true, leadId });
+    } catch (dbErr) {
+      await client.query('ROLLBACK');
+      throw dbErr;
+    } finally {
+      client.release();
     }
-
-    res.status(201).json({ id: data.id, success: true, score, qualification });
   } catch (err) {
-    console.warn('[Public Lead] DB query warning (fallback mode):', err.message);
-    const fallbackId = `lead_${Date.now()}`;
-    res.status(201).json({ id: fallbackId, success: true, score: 85, qualification: 'Hot', fallback: true });
-  }
-});
-
-// 2.6 Consultation Callback Requests
-app.post('/api/callbacks', async (req, res) => {
-  const { name, phone, timeRequested, email, productType } = req.body;
-  if (!name || !phone) return res.status(400).json({ error: 'Name and Phone required' });
-
-  try {
-    const query = `
-      INSERT INTO public.callbacks (name, phone, time_requested, product_type)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
-    `;
-    const result = await pool.query(query, [name, phone, timeRequested, productType]);
-    const data = result.rows[0];
-
-    broadcast({ type: 'NEW_CALLBACK_REQUEST', payload: data });
-    console.log(`[Callbacks] New request from: ${name}`);
-    res.status(201).json({ success: true, id: data.id });
-  } catch (err) {
-    console.error('[Callbacks] Error:', err.message);
+    console.error(err);
     res.status(500).json({ error: err.message });
-  }
-});
-
-// 2.7 API Trace Logs
-app.get('/api/logs', authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM integration_logs ORDER BY created_at DESC LIMIT 50');
-    // Map snake_case to camelCase structure where needed or just pass directly
-    const logs = result.rows.map(row => ({
-      id: row.id,
-      platform: row.platform,
-      event: row.event_type,
-      status: row.status === 'failure' ? 'error' : 'success', // Frontend expects 'success' or 'error'
-      payload: row.payload || { error: row.error_message },
-      timestamp: row.created_at
-    }));
-    res.json(logs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 2.6 Webhook Verification Challenges (GET)
-// Meta-specific Verification Endpoint
-app.get('/api/meta/webhook', (req, res) => {
-  const VERIFY_TOKEN = "newholland_meta_verify_2026";
-
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    res.status(200).send(challenge);
-  } else {
-    res.sendStatus(403);
-  }
-});
-
-// Generic Fallback Verification
-app.get('/api/webhooks/:platform', (req, res) => {
-  const { platform } = req.params;
-  const challenge = req.query['hub.challenge'] || req.query.challenge;
-  const token = req.query['hub.verify_token'] || req.query.token;
-
-  console.log(`[API Webhook Verification] Platform: ${platform}, Token: ${token}`);
-
-  // Real-world validation (Mocked 'valid' for demo, in prod check against process.env.META_VERIFY_TOKEN)
-  if (challenge) {
-    res.status(200).send(challenge);
-  } else {
-    res.status(403).send('Verification failed');
   }
 });
 
@@ -1696,7 +1744,14 @@ app.get('/api/documents', authenticateToken, async (req, res) => {
 
 app.post('/api/documents', authenticateToken, async (req, res) => {
   try {
-    const { id, title, file_path, file_type, file_size, category, client_id, access_permissions } = req.body;
+    const id = req.body.id;
+    const title = req.body.title;
+    const file_path = req.body.file_path || req.body.filePath;
+    const file_type = req.body.file_type || req.body.fileType;
+    const file_size = req.body.file_size || req.body.fileSize;
+    const category = req.body.category;
+    const client_id = req.body.client_id || req.body.clientId;
+    const access_permissions = req.body.access_permissions || req.body.accessPermissions;
     const upsertQuery = `
       INSERT INTO documents (id, owner_id, client_id, title, file_path, file_type, file_size, category, access_permissions)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -1891,6 +1946,9 @@ const initMasterSchema = async () => {
     await pool.query('CREATE TABLE IF NOT EXISTS documents (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())').catch(() => {});
     await pool.query('CREATE TABLE IF NOT EXISTS user_preferences (user_id UUID PRIMARY KEY, theme VARCHAR(20) DEFAULT \'light\')').catch(() => {});
     await pool.query('CREATE TABLE IF NOT EXISTS analytics_visitors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), visitor_id VARCHAR(100) UNIQUE)').catch(() => {});
+
+    await pool.query('CREATE TABLE IF NOT EXISTS bank_accounts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID, institution_name VARCHAR(255), account_name VARCHAR(255), mask VARCHAR(10), type VARCHAR(50), balance DECIMAL, last_synced TIMESTAMPTZ, status VARCHAR(20) DEFAULT \'active\')').catch(console.error);
+    await pool.query('CREATE TABLE IF NOT EXISTS bank_transactions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), bank_account_id UUID, date DATE, merchant VARCHAR(255), amount DECIMAL, category VARCHAR(255), status VARCHAR(20) DEFAULT \'pending\', journal_entry_id UUID)').catch(console.error);
 
     // Ensure advisor_applications has resume_url
     await pool.query('ALTER TABLE advisor_applications ADD COLUMN IF NOT EXISTS resume_url TEXT').catch(() => {});
@@ -2273,7 +2331,7 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     `;
 
     const result = await pool.query(upsertQuery, [
-      id, title, date, time, endTime, type, status || 'scheduled', description,
+      id, title, date, time || null, endTime || null, type, status || 'scheduled', description,
       hasGoogleMeet || false, meetingLink, JSON.stringify(participants || []), creatorId, creatorName, visibility || 'public'
     ]);
 
@@ -2320,9 +2378,12 @@ app.post('/api/public/book', async (req, res) => {
     const advisorName = advisorRes.rows[0]?.name || 'Advisor';
 
     const eventId = crypto.randomUUID();
+    const jitsiDomain = process.env.JITSI_DOMAIN || 'meet.jit.si';
+    const meetingLink = `https://${jitsiDomain}/NHFG-${eventId}`;
+    
     await pool.query(`
-      INSERT INTO events (id, creator_id, creator_name, title, date, time, end_time, type, status, description, participants, visibility)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'meeting', 'Upcoming', $8, $9, 'public')
+      INSERT INTO events (id, creator_id, creator_name, title, date, time, end_time, type, status, description, participants, visibility, has_google_meet, meeting_link)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'meeting', 'Upcoming', $8, $9, 'public', true, $10)
     `, [
       eventId, 
       advisorId, 
@@ -2332,10 +2393,11 @@ app.post('/api/public/book', async (req, res) => {
       time, 
       endTime, 
       `Booked via Public Portal by ${email}`,
-      JSON.stringify([{ name, email }])
+      JSON.stringify([{ name, email }]),
+      meetingLink
     ]);
 
-    res.json({ success: true, eventId });
+    res.json({ success: true, eventId, meetingLink });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -2783,8 +2845,11 @@ const initPlaid = async () => {
     }
 
     const PLAID_CLIENT_ID = settings.plaidClientId || process.env.PLAID_CLIENT_ID;
-    const PLAID_SECRET = settings.plaidSecret || process.env.PLAID_SECRET;
     const PLAID_ENV = settings.plaidEnv || process.env.PLAID_ENV || 'sandbox';
+    let PLAID_SECRET = settings.plaidSecret || process.env.PLAID_SECRET;
+    if (PLAID_ENV === 'production' && process.env.PLAID_SECRET_PRODUCTION) {
+      PLAID_SECRET = process.env.PLAID_SECRET_PRODUCTION;
+    }
 
     if (!PLAID_CLIENT_ID || PLAID_CLIENT_ID === 'your_plaid_client_id_here') {
       console.warn('[Plaid] ⚠️  PLAID_CLIENT_ID not set in DB or .env — endpoints will return 503 until configured.');
@@ -3294,8 +3359,8 @@ VALUES($1, $2, $3, $4, $5, $6, $7)
       accountName: targetAcct?.official_name || targetAcct?.name || null,
       institutionName: resolvedInstitutionName || null,
       // Routing shown partially masked — full value is in DB only
-      routingNumberMasked: routingNumber ? `**** ${routingNumber.slice(-4)} ` : null,
-      wireRoutingMasked: wireRouting ? `**** ${wireRouting.slice(-4)} ` : null,
+      routingNumber: routingNumber ? `****${routingNumber.slice(-4)}` : null,
+      wireRouting: wireRouting ? `****${wireRouting.slice(-4)}` : null,
       // Risk & verification signals
       status: internalStatus,
       authMethod: authMethodFromItem,
@@ -4048,7 +4113,7 @@ app.post('/api/advisor/billing', authenticateToken, async (req, res) => {
          payment_method_id = EXCLUDED.payment_method_id,
          billing_status = 'active',
          updated_at = NOW()`,
-      [req.user.id, stripeCustomerId || `mock_cus_${req.user.id}`, paymentMethodId]
+      [req.user.id, stripeCustomerId, paymentMethodId]
     );
     res.json({ success: true, message: 'Billing method attached successfully' });
   } catch (err) {
@@ -5096,18 +5161,18 @@ app.get('/api/clients', authenticateToken, async (req, res) => {
 app.post('/api/clients', authenticateToken, async (req, res) => {
   try {
     const {
-      id, name, email, phone, street, city, state, zip, policyNumber, premium, product, renewalDate, commissionAmount, carrier
+      id, name, email, phone, street, city, state, zip, policyNumber, premium, product, renewalDate, commissionAmount, carrier, missedPayments, birthday, status, coverageAmount, policyDuration
     } = req.body;
     
     const clientId = id || require('crypto').randomUUID();
     const addressJson = JSON.stringify({ street, city, state, zip });
     
     await pool.query(
-      `INSERT INTO clients (id, advisor_id, name, email, phone, address, policy_number, premium, product, renewal_date, commission_amount, carrier, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP)
+      `INSERT INTO clients (id, advisor_id, name, email, phone, address, policy_number, premium, product, renewal_date, commission_amount, carrier, missed_payments, birthday, status, coverage_amount, policy_duration_months, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, CURRENT_TIMESTAMP)
        ON CONFLICT (id) DO UPDATE SET 
-         name=$3, email=$4, phone=$5, address=$6, policy_number=$7, premium=$8, product=$9, renewal_date=$10, commission_amount=$11, carrier=$12`,
-      [clientId, req.user.id, name, email, phone, addressJson, policyNumber, premium || 0, product, renewalDate, commissionAmount || 0, carrier]
+         name=$3, email=$4, phone=$5, address=$6, policy_number=$7, premium=$8, product=$9, renewal_date=$10, commission_amount=$11, carrier=$12, missed_payments=$13, birthday=$14, status=$15, coverage_amount=$16, policy_duration_months=$17`,
+      [clientId, req.user.id, name, email, phone, addressJson, policyNumber, premium || 0, product, renewalDate, commissionAmount || 0, carrier, missedPayments || 0, birthday || null, status || 'Active', coverageAmount || 0, policyDuration || 0]
     );
     res.json({ success: true, id: clientId });
   } catch (err) {
@@ -5619,6 +5684,9 @@ if (fs.existsSync(distPath)) {
     }
   });
 }
+
+const { injectTrackingRoutes } = require("./tracking_service.cjs");
+injectTrackingRoutes(app);
 
 if (require.main === module) {
   server.listen(PORT, () => {

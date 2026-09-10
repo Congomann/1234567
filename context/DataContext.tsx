@@ -148,12 +148,7 @@ const INITIAL_USERS: User[] = [
   { id: 'logistics-lead', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: '' }
 ];
 
-const MOCK_TASKS: Task[] = [
-  { id: 't1', title: 'Call Smith regarding IUL proposal', priority: TaskPriority.HIGH, completed: false, order: 0, advisorId: '1' },
-  { id: 't2', title: 'Verify property appraisal at 123 Main St', priority: TaskPriority.MEDIUM, completed: false, order: 1, advisorId: '1' },
-  { id: 't3', title: 'Email signature approval for Sarah', priority: TaskPriority.LOW, completed: false, order: 2, advisorId: '1' },
-  { id: 't4', title: 'Compliance audit: Q1 Disclosures', priority: TaskPriority.HIGH, completed: false, order: 3, advisorId: '1' },
-];
+
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -161,7 +156,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [allUsers, setAllUsers] = useState<User[]>(INITIAL_USERS);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -457,16 +452,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (backendUser) {
           setUser(backendUser);
           await refreshActiveData(backendUser);
-        } else {
-          // Restore mock session if present
-          const mockId = localStorage.getItem('nhfg_mock_user_id');
-          if (mockId) {
-            const mockUser = INITIAL_USERS.find(u => u.id === mockId);
-            if (mockUser) {
-              setUser(mockUser);
-              await refreshActiveData(mockUser);
-            }
-          }
         }
       } catch (err) {
         console.error("Bootstrap error:", err);
@@ -540,14 +525,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
     }
 
-    const found = allUsers.find(u => u.email.toLowerCase() === cleanEmail) || INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
-    if (found) {
-      console.log("Backend login failed, falling back to mock user:", cleanEmail);
-      setUser(found);
-      localStorage.setItem('nhfg_mock_user_id', found.id);
-      return true;
-    }
-
     pushNotification('Login Error', 'Invalid credentials or API unreachable.', 'alert');
     return false;
   };
@@ -599,7 +576,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAllUsers(prev => {
       const updated = prev.map(u => u.id === id ? { ...u, ...data } : u);
       const found = updated.find(u => u.id === id);
-      if (found) Backend.saveUser(found);
+      if (found) {
+        Backend.saveUser(found);
+        setUser(prevUser => (prevUser && prevUser.id === id) ? { ...prevUser, ...data } : prevUser);
+      }
       return updated;
     });
   };
@@ -642,6 +622,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (user) {
       updateUser(user.id, { onboardingCompleted: true }); 
       
+      if (signatureData) {
+        saveDoc({
+          title: 'Advisor Agreement Signature',
+          category: 'Legal',
+          fileType: 'image/png',
+          fileSize: Math.round(signatureData.length * 0.75),
+          filePath: signatureData,
+          ownerId: user.id
+        } as any);
+      }
+
       // Auto-generate onboarding strategic priorities for a smooth transition
       const initialTasks = [
         { title: "Complete Your Advisor Profile & Biography", priority: TaskPriority.HIGH },

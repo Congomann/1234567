@@ -33,9 +33,7 @@ export const PlaidConfigPanel: React.FC<Props> = ({ settingsForm, setSettingsFor
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       const token = localStorage.getItem('nhfg_access_token');
-      const mock = localStorage.getItem('nhfg_mock_user_id');
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      if (mock) headers['x-mock-user-id'] = mock;
 
       // Test 1: Try to get a link token (real Plaid API call)
       const res = await fetch('/api/plaid/create-link-token', {

@@ -191,6 +191,25 @@ export const EventModal: React.FC<EventModalProps> = ({ isOpen, close, selectedD
                     {/* External Link */}
                     {(type === 'meeting' || meetingLink) && (
                         <div>
+                            {type === 'meeting' && (
+                                <div className="mb-4">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Jitsi Video Room</label>
+                                    <select
+                                        onChange={e => {
+                                            if (e.target.value) setMeetingLink(e.target.value);
+                                        }}
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none"
+                                        value=""
+                                    >
+                                        <option value="">-- Select a Personal Room to Autofill --</option>
+                                        <option value={`https://meet.jit.si/crm-${user?.id}-client`}>Client Room</option>
+                                        <option value={`https://meet.jit.si/crm-${user?.id}-manager`}>Manager Room</option>
+                                        <option value={`https://meet.jit.si/crm-${user?.id}-peer`}>Peer-to-Peer Room</option>
+                                        <option value={`https://meet.jit.si/crm-${user?.id}-external`}>Third Party Room</option>
+                                    </select>
+                                </div>
+                            )}
+
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Meeting Link</label>
                             <div className="flex gap-2">
                                 <input

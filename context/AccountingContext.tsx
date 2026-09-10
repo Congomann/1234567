@@ -3,65 +3,50 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Account, AccountType, JournalEntry, JournalLine, TaxConfig, BankAccount, BankTransaction, ExpenseCategory, UserRole, BankRule } from '../types';
 import { useData } from './DataContext';
 
-// Local inline banking service for accounting/bank-feeds (mock for GL reconciliation)
+// Local inline banking service for accounting/bank-feeds 
 // The Plaid verification flow uses BankVerificationService in services/bankingService.ts
 const ACCT_STORAGE = { ACCOUNTS: 'nhfg_real_bank_accounts', TRANSACTIONS: 'nhfg_real_transactions' };
-const MOCK_INSTITUTIONS = [
-    { id: 'ins_1', name: 'Chase' }, { id: 'ins_2', name: 'Bank of America' },
-    { id: 'ins_3', name: 'Wells Fargo' }, { id: 'ins_4', name: 'American Express' },
-];
+
 const BankingService = {
-    createLinkToken: async (userId: string) => ({ link_token: `link-${Math.random().toString(36).substr(2)}` }),
+    createLinkToken: async (userId: string) => {
+        try {
+            const token = localStorage.getItem('nhfg_access_token');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/plaid/create-link-token`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            });
+            if (res.ok) return await res.json();
+        } catch(e) {}
+        return { link_token: null };
+    },
     exchangeTokenAndGetAccounts: async (publicToken: string, institutionId: string, userId: string) => {
-        const inst = MOCK_INSTITUTIONS.find(i => i.id === institutionId) || MOCK_INSTITUTIONS[0];
-        const isCredit = inst.name === 'American Express';
-        const acct: BankAccount = {
-            id: `ba_${Math.random().toString(36).substr(2, 9)}`, userId,
-            institutionName: inst.name,
-            accountName: isCredit ? `${inst.name} Platinum` : `${inst.name} Business Checking`,
-            mask: Math.floor(1000 + Math.random() * 9000).toString(),
-            type: isCredit ? 'Credit Card' : 'Checking',
-            balance: isCredit ? -(Math.floor(Math.random() * 5000)) : Math.floor(Math.random() * 150000),
-            lastSynced: new Date().toISOString(), status: 'active',
-        };
-        const cur = JSON.parse(localStorage.getItem(ACCT_STORAGE.ACCOUNTS) || '[]');
-        localStorage.setItem(ACCT_STORAGE.ACCOUNTS, JSON.stringify([...cur, acct]));
-        return acct;
+        return null; // Handle via Backend instead
     },
     syncTransactions: async (accountId: string): Promise<BankTransaction[]> => {
-        const merchants = [
-            { name: 'Starbucks', amountRange: [5, 25] }, { name: 'Delta Airlines', amountRange: [200, 800] },
-            { name: 'Amazon Web Services', amountRange: [50, 500] }, { name: 'Client Payment', amountRange: [1000, 5000], isIncome: true },
-        ] as any[];
-        const num = Math.floor(Math.random() * 5) + 2;
-        const txs: BankTransaction[] = [];
-        for (let i = 0; i < num; i++) {
-            const m = merchants[Math.floor(Math.random() * merchants.length)];
-            const amt = Math.floor(Math.random() * (m.amountRange[1] - m.amountRange[0])) + m.amountRange[0];
-            txs.push({
-                id: `tx_${Math.random().toString(36).substr(2, 12)}`, bankAccountId: accountId,
-                date: new Date().toISOString().split('T')[0], merchant: m.name, amount: m.isIncome ? amt : -amt,
-                category: '', status: 'pending'
+        return []; // Handle via Backend instead
+    },
+    getAccounts: async (userId: string) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/accounting/accounts`);
+            if (res.ok) return await res.json();
+        } catch(e) {}
+        return [];
+    },
+    getTransactions: async (accountId: string) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/accounting/transactions`);
+            if (res.ok) return (await res.json()).filter((t: any) => t.bank_account_id === accountId);
+        } catch(e) {}
+        return [];
+    },
+    reconcile: async (txId: string, category: string, journalEntryId: string) => {
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || ''}/api/accounting/reconcile`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ txId, category, journalEntryId })
             });
-        }
-        const cur = JSON.parse(localStorage.getItem(ACCT_STORAGE.TRANSACTIONS) || '[]');
-        const updated = [...txs, ...cur];
-        localStorage.setItem(ACCT_STORAGE.TRANSACTIONS, JSON.stringify(updated));
-        return updated.filter((t: any) => t.bankAccountId === accountId);
-    },
-    getAccounts: (userId: string) => {
-        const all = JSON.parse(localStorage.getItem(ACCT_STORAGE.ACCOUNTS) || '[]');
-        return all.filter((a: any) => a.userId === userId);
-    },
-    getTransactions: (accountId: string) => {
-        const all = JSON.parse(localStorage.getItem(ACCT_STORAGE.TRANSACTIONS) || '[]');
-        return all.filter((t: any) => t.bankAccountId === accountId);
-    },
-    reconcile: (txId: string, category: string, journalEntryId: string) => {
-        const all = JSON.parse(localStorage.getItem(ACCT_STORAGE.TRANSACTIONS) || '[]');
-        localStorage.setItem(ACCT_STORAGE.TRANSACTIONS, JSON.stringify(
-            all.map((t: any) => t.id === txId ? { ...t, status: 'reconciled', category, journalEntryId } : t)
-        ));
+        } catch(e) {}
     },
 };
 
@@ -206,19 +191,16 @@ export const AccountingProvider: React.FC<{ children: ReactNode }> = ({ children
         // Load banking data for current user
         if (user) {
             const userScopeId = user.role === UserRole.ADVISOR ? user.id : 'company';
-            const userAccounts = BankingService.getAccounts(userScopeId);
-            setBankAccounts(userAccounts);
-
-            // Collect transactions for all accounts
-            let allTx: BankTransaction[] = [];
-            userAccounts.forEach((acc: BankAccount) => {
-                const txs = BankingService.getTransactions(acc.id);
-                allTx = [...allTx, ...txs];
+            BankingService.getAccounts(userScopeId).then(userAccounts => {
+                setBankAccounts(userAccounts);
+                let allTx: BankTransaction[] = [];
+                Promise.all(userAccounts.map((acc: BankAccount) => BankingService.getTransactions(acc.id)))
+                    .then(results => {
+                        results.forEach(txs => allTx = [...allTx, ...txs]);
+                        const processedTxs = applyBankRules(allTx, bankRules);
+                        setBankTransactions(processedTxs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+                    });
             });
-
-            // Apply Rules immediately on load for any pending
-            const processedTxs = applyBankRules(allTx, bankRules);
-            setBankTransactions(processedTxs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         }
     }, [user]);
 

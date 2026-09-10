@@ -95,6 +95,11 @@ CREATE TABLE IF NOT EXISTS clients (
     premium NUMERIC(12, 2),
     renewal_date DATE,
     commission_amount NUMERIC(12, 2),
+    missed_payments INT DEFAULT 0,
+    birthday DATE,
+    status VARCHAR(50) DEFAULT 'Active',
+    coverage_amount NUMERIC(15, 2),
+    policy_duration_months INT,
     address JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -536,3 +541,45 @@ CREATE INDEX IF NOT EXISTS idx_logistics_loads_token ON public.logistics_loads(t
 CREATE INDEX IF NOT EXISTS idx_logistics_loads_advisor ON public.logistics_loads(advisor_id);
 
 
+
+-- Marketing Lead Ingestion Tables
+CREATE TABLE IF NOT EXISTS webhook_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider VARCHAR(100) NOT NULL,
+    event_type VARCHAR(100),
+    payload JSONB NOT NULL,
+    processed BOOLEAN DEFAULT FALSE,
+    error_message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS integration_accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider VARCHAR(100) NOT NULL,
+    account_id VARCHAR(255),
+    access_token TEXT,
+    refresh_token TEXT,
+    settings JSONB,
+    status VARCHAR(50) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS lead_activities (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
+    activity_type VARCHAR(100) NOT NULL,
+    description TEXT,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_source VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_term VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_content VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS gclid VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS fbclid VARCHAR(255);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS campaign VARCHAR(255);

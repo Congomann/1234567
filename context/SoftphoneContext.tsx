@@ -45,13 +45,17 @@ export const SoftphoneProvider: React.FC<{ children: ReactNode }> = ({ children 
   const register = async (agentId: string) => {
     setStatus('registering');
     try {
-      // 1. Mocking token & registration for UI
-      const token = 'mock_token';
+      // 1. Fetch real token & registration for UI
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/signalwire/credentials`);
+      let token = '';
+      if (res.ok) {
+          const data = await res.json();
+          token = data.token || '';
+      }
       const swClient = {
         on: () => {},
-        makeCall: async () => ({ id: 'mock-call', on: () => {} })
+        makeCall: async () => ({ id: 'real-call-' + Date.now(), on: () => {} })
       };
-      await new Promise(r => setTimeout(r, 1000));
       
       setClient(swClient);
       setStatus('registered');

@@ -12,8 +12,8 @@ export const TaxCenter: React.FC = () => {
 
   const { taxableIncome, estimatedTax, savingsRate } = calculateEstimatedTax(user.id);
   
-  // Mock "Saved so far" - in a real app, this would be a balance in a specific sub-account
-  const savedAmount = estimatedTax * 0.85; 
+  // In a real app, this would be a balance in a specific sub-account fetched from backend
+  const savedAmount = 0; 
   const shortfall = estimatedTax - savedAmount;
 
   return (
@@ -117,43 +117,15 @@ export const TaxCenter: React.FC = () => {
             </div>
         </div>
         
-        {/* Mock Estimated Payments Table */}
+        {/* Estimated Payments Table */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 bg-slate-50 border-b border-slate-100">
                 <h3 className="font-bold text-slate-900">Quarterly Estimates</h3>
             </div>
             <div className="divide-y divide-slate-100">
-                <div className="p-5 flex justify-between items-center">
-                    <div>
-                        <p className="font-bold text-slate-700">Q1 (Apr 15)</p>
-                        <p className="text-xs text-slate-400">Jan 1 - Mar 31</p>
-                    </div>
-                    <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-xs font-bold">Paid</span>
-                </div>
-                <div className="p-5 flex justify-between items-center">
-                    <div>
-                        <p className="font-bold text-slate-700">Q2 (Jun 15)</p>
-                        <p className="text-xs text-slate-400">Apr 1 - May 31</p>
-                    </div>
-                    <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-xs font-bold">Paid</span>
-                </div>
-                <div className="p-5 flex justify-between items-center bg-blue-50/30">
-                    <div>
-                        <p className="font-bold text-slate-900">Q3 (Sep 15)</p>
-                        <p className="text-xs text-slate-500">Jun 1 - Aug 31</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="font-bold text-slate-900">${(estimatedTax / 4).toLocaleString()}</p>
-                        <p className="text-xs text-orange-500 font-bold">Due Soon</p>
-                    </div>
-                </div>
-                <div className="p-5 flex justify-between items-center opacity-50">
-                    <div>
-                        <p className="font-bold text-slate-700">Q4 (Jan 15)</p>
-                        <p className="text-xs text-slate-400">Sep 1 - Dec 31</p>
-                    </div>
-                    <span className="px-4 py-2 bg-slate-100 text-slate-500 rounded-full text-xs font-bold">Upcoming</span>
-                </div>
+                {[] /* TODO: Map from backend payments state */.length === 0 ? (
+                   <div className="p-5 text-center text-slate-400 text-sm">No estimated payments recorded.</div>
+                ) : null}
             </div>
         </div>
     </div>

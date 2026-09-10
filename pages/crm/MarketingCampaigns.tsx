@@ -62,10 +62,8 @@ interface PaymentTxn {
 const API = '/api/marketing';
 const headers = () => {
   const token = localStorage.getItem('nhfg_access_token');
-  const mock = localStorage.getItem('nhfg_mock_user_id');
   const h: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) h['Authorization'] = `Bearer ${token}`;
-  if (mock) h['x-mock-user-id'] = mock;
   return h;
 };
 
@@ -238,9 +236,11 @@ const AudienceModal = ({ onClose, onCreated }: { onClose: () => void, onCreated:
   );
 };
 
+import { AttributionDashboard } from '../../components/marketing/AttributionDashboard';
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 export const CampaignManager: React.FC = () => {
-  type Tab = 'dashboard' | 'campaigns' | 'audiences' | 'email' | 'social' | 'payments';
+  type Tab = 'dashboard' | 'attribution' | 'campaigns' | 'audiences' | 'email' | 'social' | 'payments';
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -371,7 +371,7 @@ export const CampaignManager: React.FC = () => {
           <p className="text-slate-500 font-medium mt-2">Omnichannel campaigns · Audience segments · Email blasts · Budget approvals</p>
         </div>
         <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-full overflow-x-auto">
-          {(['dashboard','campaigns','audiences','email','social','payments'] as Tab[]).map(tab => (
+          {(['dashboard','attribution','campaigns','audiences','email','social','payments'] as Tab[]).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 capitalize whitespace-nowrap ${
                 activeTab === tab ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
@@ -396,6 +396,9 @@ export const CampaignManager: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200/60 shadow-sm p-8 lg:p-10 min-h-[500px]">
+
+        {/* ── ATTRIBUTION ── */}
+        {activeTab === 'attribution' && <AttributionDashboard />}
 
         {/* ── DASHBOARD ── */}
         {activeTab === 'dashboard' && (

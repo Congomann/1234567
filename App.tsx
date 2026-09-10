@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
 import { SoftphoneProvider } from './context/SoftphoneContext';
+import { TrackingProvider } from './context/TrackingContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -59,8 +60,10 @@ import { LoadTracking } from './pages/public/LoadTracking';
 import { Onboarding } from './pages/crm/Onboarding';
 import { AdvisorOnboardingFlow } from './pages/crm/AdvisorOnboardingFlow';
 import { TelephonyHub } from './pages/crm/TelephonyHub';
+import { VideoConferencing } from './pages/crm/VideoConferencing';
 import { SecuritiesWealth } from './pages/crm/SecuritiesWealth';
 import { LegalCompliance } from './pages/crm/LegalCompliance';
+import { AdvisorResources } from './pages/crm/AdvisorResources';
 import { PrivacyPolicy } from './pages/website/PrivacyPolicy';
 import { TermsOfUse } from './pages/website/TermsOfUse';
 import {
@@ -183,6 +186,7 @@ const App: React.FC = () => {
         <SystemStatus />
         <SoftphoneProvider>
         <Router>
+          <TrackingProvider>
           <SEO />
           <AnalyticsTracker />
           <Routes>
@@ -250,9 +254,11 @@ const App: React.FC = () => {
               <Route path="campaigns" element={<CampaignManager />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
+              <Route path="resources" element={<AdvisorResources />} />
               <Route path="bank-verification" element={<BankVerification />} />
               <Route path="precision-intelligence" element={<TrillionCalculatorHub />} />
               <Route path="telephony" element={<TelephonyHub />} />
+              <Route path="video-meetings" element={<VideoConferencing />} />
               <Route path="securities" element={<SecuritiesWealth />} />
 
               {/* VERTICAL HUBS */}
@@ -302,6 +308,7 @@ const App: React.FC = () => {
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </TrackingProvider>
         </Router>
         </SoftphoneProvider>
       </ThemeProvider>

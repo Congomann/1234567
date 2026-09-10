@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TrailerType, FreightLoad } from '../../types';
+import { Backend } from '../../services/apiBackend';
 
 /**
  * NHFG LOGISTICS - PUBLIC LOAD BOARD
@@ -26,15 +27,12 @@ export const LoadBoard: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const mockLoads: Partial<FreightLoad>[] = [
-    { id: 'LD-4491', origin: 'Chicago, IL', destination: 'Dallas, TX', distance: 960, totalRate: 2850, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T09:00:00Z' },
-    { id: 'LD-4492', origin: 'Miami, FL', destination: 'Atlanta, GA', distance: 660, totalRate: 1950, trailerType: TrailerType.REEFER, status: 'Available', createdAt: '2026-04-21T09:15:00Z' },
-    { id: 'LD-4493', origin: 'Houston, TX', destination: 'Phoenix, AZ', distance: 1170, totalRate: 3400, trailerType: TrailerType.FLATBED, status: 'Available', createdAt: '2026-04-21T09:30:00Z' },
-    { id: 'LD-4494', origin: 'Seattle, WA', destination: 'Denver, CO', distance: 1300, totalRate: 4100, trailerType: TrailerType.HAZMAT, status: 'Available', createdAt: '2026-04-21T09:45:00Z' },
-    { id: 'LD-4495', origin: 'Columbus, OH', destination: 'Charlotte, NC', distance: 430, totalRate: 1250, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:00:00Z' },
-  ];
+  const [loads, setLoads] = useState<Partial<FreightLoad>[]>([]);
+  useEffect(() => {
+    Backend.getLoads().then(setLoads).catch(console.error);
+  }, []);
 
-  const filteredLoads = mockLoads.filter(load => {
+  const filteredLoads = loads.filter(load => {
     const matchesSearch = load.origin?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          load.destination?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = activeFilter === 'All' || load.trailerType === activeFilter;

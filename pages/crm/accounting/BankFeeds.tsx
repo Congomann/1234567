@@ -1,18 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccounting } from '../../../context/AccountingContext';
 import { useData } from '../../../context/DataContext';
 import { UserRole, BankRule } from '../../../types';
 import { Plus, CreditCard, RefreshCw, CheckCircle2, ArrowUpRight, ArrowDownLeft, Building2, ChevronDown, Check, Loader2, ShieldCheck, Lock, Wand2, Trash2, Settings } from 'lucide-react';
-
-// MOCK PLAID INSTITUTIONS LIST
-const INSTITUTIONS = [
-    { id: 'ins_1', name: 'Chase', logo: 'https://logo.clearbit.com/chase.com' },
-    { id: 'ins_2', name: 'Bank of America', logo: 'https://logo.clearbit.com/bankofamerica.com' },
-    { id: 'ins_3', name: 'Wells Fargo', logo: 'https://logo.clearbit.com/wellsfargo.com' },
-    { id: 'ins_4', name: 'American Express', logo: 'https://logo.clearbit.com/americanexpress.com' },
-    { id: 'ins_5', name: 'Citi', logo: 'https://logo.clearbit.com/citi.com' },
-];
+import { Backend } from '../../../services/apiBackend';
 
 export const BankFeeds: React.FC = () => {
   const { 
@@ -29,6 +21,12 @@ export const BankFeeds: React.FC = () => {
   } = useAccounting();
   const { user } = useData();
   
+  const [institutions, setInstitutions] = useState<any[]>([]);
+  useEffect(() => {
+      // Backend.getPlaidInstitutions().then(setInstitutions).catch(console.error);
+      setInstitutions([]);
+  }, []);
+
   const [activeTab, setActiveTab] = useState<'feeds' | 'rules'>('feeds');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
@@ -347,7 +345,7 @@ export const BankFeeds: React.FC = () => {
                         <div className="flex-1 overflow-y-auto p-4">
                             <h3 className="text-xl font-bold text-slate-900 mb-6 px-2">Select your bank</h3>
                             <div className="space-y-2">
-                                {INSTITUTIONS.map(inst => (
+                                {institutions.map(inst => (
                                     <button 
                                         key={inst.id}
                                         onClick={() => handleSelectInstitution(inst)}

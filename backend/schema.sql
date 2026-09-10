@@ -87,6 +87,11 @@ CREATE TABLE clients (
     premium NUMERIC(12, 2),
     renewal_date DATE,
     commission_amount NUMERIC(12, 2),
+    missed_payments INT DEFAULT 0,
+    birthday DATE,
+    status VARCHAR(50) DEFAULT 'Active',
+    coverage_amount NUMERIC(15, 2),
+    policy_duration_months INT,
     
     address JSONB, -- { street, city, state, zip }
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

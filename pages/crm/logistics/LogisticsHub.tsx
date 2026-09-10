@@ -71,49 +71,50 @@ export const LogisticsHub: React.FC = () => {
     fetchLoads();
   }, []);
 
-  // Map Real Loads to Kanban Structure
-  const getFreightDeals = () => {
-    const stages: Record<string, KanbanDeal[]> = {
+  // Map Real Loads to Kanban Structure for all niches
+  const getDeals = () => {
+    const stages: Record<LogisticsNiche, Record<string, KanbanDeal[]>> = {
+      [LogisticsNiche.TRUCKING]: {
+        'Dispatched': [],
+        'En Route': [],
+        'Delivered': []
+      },
+      [LogisticsNiche.FUEL]: {
+        'Contract Sent': [],
+        'Delivered': [],
+        'Paid': []
+      },
+      [LogisticsNiche.FREIGHT_BROKERAGE]: {
         'available': [],
         'booked': [],
         'in_transit': [],
         'delivered': []
+      }
     };
 
     loads.forEach(load => {
-        const stage = load.status || 'available';
-        if (stages[stage]) {
-            stages[stage].push({
-                id: 'LD-' + load.id.substring(0, 5).toUpperCase(),
-                realId: load.id,
-                title: load.origin + ' to ' + load.destination,
-                value: load.totalRate || load.rate_usd || 0,
-                client: 'NH Brokerage',
-                nicheSpecificField: load.trailerType || load.equipment_type || 'Dry Van',
-                status: stage,
-                trackingToken: load.tracking_token,
-                driverPhone: load.carrier_driver_phone,
-                driverEmail: load.carrier_driver_email
-            });
-        }
+      const niche = load.niche || LogisticsNiche.FREIGHT_BROKERAGE;
+      const stage = load.status || (niche === LogisticsNiche.FREIGHT_BROKERAGE ? 'available' : niche === LogisticsNiche.TRUCKING ? 'Dispatched' : 'Contract Sent');
+      
+      if (stages[niche] && stages[niche][stage]) {
+        stages[niche][stage].push({
+          id: (niche === LogisticsNiche.FREIGHT_BROKERAGE ? 'LD-' : niche === LogisticsNiche.TRUCKING ? 'TRK-' : 'FUL-') + (load.id || 'xxxx').substring(0, 5).toUpperCase(),
+          realId: load.id,
+          title: load.origin + ' to ' + load.destination,
+          value: load.totalRate || load.rate_usd || 0,
+          client: load.client || 'NH Brokerage',
+          nicheSpecificField: load.trailerType || load.equipment_type || 'Dry Van',
+          status: stage,
+          trackingToken: load.tracking_token,
+          driverPhone: load.carrier_driver_phone,
+          driverEmail: load.carrier_driver_email
+        });
+      }
     });
     return stages;
   };
 
-  // Mock Deals for other niches
-  const mockDeals: Record<LogisticsNiche, Record<string, KanbanDeal[]>> = {
-    [LogisticsNiche.TRUCKING]: {
-      'Dispatched': [{ id: 'TRK-101', realId: 'mock-101', title: 'Chicago to Miami (FTL)', value: 4500, client: 'NH Transport', nicheSpecificField: 'Reefer', status: 'Dispatched' }],
-      'En Route': [{ id: 'TRK-102', realId: 'mock-102', title: 'Dallas to LA', value: 5200, client: 'CoolLink', nicheSpecificField: 'Flatbed', status: 'En Route' }],
-      'Delivered': [{ id: 'TRK-103', realId: 'mock-103', title: 'Atlanta to NY', value: 1200, client: 'SafeRoute', nicheSpecificField: 'Dry Van', status: 'Delivered' }]
-    },
-    [LogisticsNiche.FUEL]: {
-      'Contract Sent': [{ id: 'FUL-201', realId: 'mock-201', title: 'Weekly Diesel Supply', value: 12000, client: 'FleetCorp', nicheSpecificField: '4,000 Gallons', status: 'Contract Sent' }],
-      'Delivered': [{ id: 'FUL-202', realId: 'mock-202', title: 'Aviation Fuel Spot', value: 8500, client: 'SkyWest', nicheSpecificField: '2,500 Gallons', status: 'Delivered' }],
-      'Paid': []
-    },
-    [LogisticsNiche.FREIGHT_BROKERAGE]: getFreightDeals()
-  };
+  const deals = getDeals();
 
   const getStats = () => {
     switch(activeNiche) {
@@ -261,11 +262,11 @@ export const LogisticsHub: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{stage}</h4>
                 <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">
-                  {mockDeals[activeNiche][stage]?.length || 0}
+                  {deals[activeNiche][stage]?.length || 0}
                 </span>
               </div>
               <div className="space-y-4">
-                {mockDeals[activeNiche][stage]?.map((deal) => (
+                {deals[activeNiche][stage]?.map((deal) => (
                   <div key={deal.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between min-h-[220px]">
                     <div>
                       <div className="flex justify-between items-start mb-3">
@@ -322,7 +323,7 @@ export const LogisticsHub: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {(!mockDeals[activeNiche][stage] || mockDeals[activeNiche][stage].length === 0) && (
+                {(!deals[activeNiche][stage] || deals[activeNiche][stage].length === 0) && (
                   <div className="h-32 border-2 border-dashed border-slate-100 rounded-3xl flex items-center justify-center bg-slate-50/50">
                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">No Active Records</p>
                   </div>

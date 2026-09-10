@@ -182,4 +182,74 @@ const getTrackedEntitiesHandler = async (req, res) => {
 router.get('/admin/analytics/tracked-entities', getTrackedEntitiesHandler);
 router.get('/analytics/tracked-entities', getTrackedEntitiesHandler);
 
+// ════════════════════════════════════════════════════════════════════════════════
+// ATTRIBUTION DASHBOARD
+// ════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/analytics/attribution
+ * Fetches Leads, Qualified, Appointments, and estimated CPL grouped by source.
+ */
+router.get('/analytics/attribution', async (req, res) => {
+  try {
+    const { supabase } = require('../supabase.cjs');
+    
+    // 1. Fetch real spend data from marketing_campaigns
+    const { data: campaigns, error: campErr } = await supabase
+      .from('marketing_campaigns')
+      .select('type, spend');
+    if (campErr) throw campErr;
+
+    const spendBySource = {};
+    if (campaigns) {
+      campaigns.forEach(c => {
+        // Map campaign type to lead source if necessary, or just use as-is
+        let sourceName = c.type;
+        if (sourceName === 'LinkedIn') sourceName = 'LinkedIn Ads'; // match lead source names
+        if (!spendBySource[sourceName]) spendBySource[sourceName] = 0;
+        spendBySource[sourceName] += parseFloat(c.spend || 0);
+      });
+    }
+
+    // 2. Fetch leads data
+    const { data: leads, error: leadsErr } = await supabase
+      .from('leads')
+      .select('source, qualification, status');
+    if (leadsErr) throw leadsErr;
+
+    const agg = {};
+    if (leads) {
+      leads.forEach(l => {
+        const src = l.source || 'Organic';
+        if (!agg[src]) agg[src] = { leads: 0, qualified: 0, appointments: 0, spend: 0 };
+        agg[src].leads++;
+        if (l.qualification === 'Hot' || l.qualification === 'Warm') agg[src].qualified++;
+        if (l.status === 'Appointment Set') agg[src].appointments++;
+      });
+    }
+
+    // 3. Merge spend and compute CPL
+    const allSources = new Set([...Object.keys(agg), ...Object.keys(spendBySource)]);
+    const formatted = Array.from(allSources).map(src => {
+      const metrics = agg[src] || { leads: 0, qualified: 0, appointments: 0 };
+      const spend = spendBySource[src] || 0;
+      const cpl = metrics.leads > 0 ? (spend / metrics.leads).toFixed(2) : 0;
+      
+      return {
+        source: src,
+        leads: metrics.leads,
+        qualified: metrics.qualified,
+        appointments: metrics.appointments,
+        spend,
+        cpl: parseFloat(cpl)
+      };
+    });
+
+    res.status(200).json({ success: true, data: formatted });
+  } catch (error) {
+    console.error('[Analytics API] Error fetching attribution:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

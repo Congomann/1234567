@@ -155,6 +155,7 @@ export interface User {
   deletedAt?: string;
   calendarUrl?: string;
   onboardingCompleted?: boolean;
+  signature?: string;
   password?: string;
   permissions?: string[];
   lastLogin?: string;
@@ -348,6 +349,11 @@ export interface Client {
   renewalDate: string;
   commissionAmount?: number;
   carrier?: string;
+  missedPayments?: number;
+  birthday?: string;
+  status?: string;
+  coverageAmount?: number;
+  policyDuration?: number;
 }
 
 export interface CallbackRequest {

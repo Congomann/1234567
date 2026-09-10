@@ -509,6 +509,55 @@ export const ProfileSettings: React.FC = () => {
           </div>
         </div>
 
+        {/* Video Conferencing Hub */}
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 mb-6">
+             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <Globe className="h-6 w-6" />
+             </div>
+             <h3 className="text-lg font-bold text-[#0B2240]">Video Conferencing Hub (Jitsi)</h3>
+          </div>
+          <p className="text-sm text-slate-500 mb-6">
+             Use your dedicated personal rooms for video meetings. These links are static and unique to you.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { title: 'Client Room', type: 'client', desc: 'Advisors and their clients.' },
+              { title: 'Manager Room', type: 'manager', desc: 'Managers and advisors.' },
+              { title: 'Peer-to-Peer Room', type: 'peer', desc: 'Advisors to advisors.' },
+              { title: 'Third Party Room', type: 'external', desc: 'Advisors/Managers/Sales to Third Party.' },
+            ].map(room => {
+              const link = user ? `https://meet.jit.si/crm-${user.id}-${room.type}` : '';
+              return (
+                <div key={room.type} className="p-4 border border-slate-200 rounded-xl bg-slate-50 hover:bg-white transition-colors">
+                  <h4 className="font-bold text-slate-800 text-sm">{room.title}</h4>
+                  <p className="text-xs text-slate-500 mb-3">{room.desc}</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(link);
+                        alert(`${room.title} link copied!`);
+                      }}
+                      className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      Copy Link
+                    </button>
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition-colors"
+                    >
+                      Join Room
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Action Bar */}
         <div className="flex items-center justify-end gap-4">
            {isSaved && <span className="text-green-600 font-bold text-sm animate-fade-in">Profile Saved Successfully!</span>}

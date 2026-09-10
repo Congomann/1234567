@@ -31,15 +31,14 @@ export const AdvisorOnboardingFlow: React.FC = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            // Set canvas size based on container
             const rect = canvas.parentElement?.getBoundingClientRect();
             if (rect) {
                 canvas.width = rect.width;
                 canvas.height = 300;
             }
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
         }
     }
   }, [currentStepIndex]);
@@ -271,6 +270,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                                     onTouchMove={draw}
                                     onTouchEnd={stopDrawing}
                                     className="w-full h-full"
+                                    style={{ touchAction: 'none' }}
                                 />
                                 <div className="absolute bottom-4 right-4 flex gap-2 pointer-events-none">
                                     <span className="bg-white/80 backdrop-blur text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full border border-slate-200">

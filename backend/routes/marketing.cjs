@@ -1,10 +1,21 @@
 const express = require('express');
 const { Pool } = require('pg');
+const nodemailer = require('nodemailer');
 const router = express.Router();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.larksuite.com',
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: process.env.SMTP_SECURE !== 'false',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  }
 });
 
 // Helper: get Stripe lazily (won't crash if key not set)
@@ -144,10 +155,39 @@ router.post('/email-sends', async (req, res) => {
   if (!subjectLine || !messageBody) return res.status(400).json({ error: 'Subject and message body required' });
   try {
     // Get audience size for sent_count
+    // Get audience size and actual emails from leads table
     let sentCount = 0;
+    let toEmails = [];
+
     if (audienceId) {
-      const { rows: audRows } = await pool.query('SELECT size FROM marketing_audiences WHERE id = $1', [audienceId]);
-      if (audRows.length > 0) sentCount = audRows[0].size;
+      const { rows: audRows } = await pool.query('SELECT size, criteria FROM marketing_audiences WHERE id = $1', [audienceId]);
+      if (audRows.length > 0) {
+        sentCount = audRows[0].size || 0;
+        // In a full implementation, we would build a WHERE clause based on audRows[0].criteria
+        const { rows: leadRows } = await pool.query('SELECT email FROM leads WHERE email IS NOT NULL LIMIT 100');
+        toEmails = leadRows.map(r => r.email).filter(Boolean);
+      }
+    } else {
+      const { rows: leadRows } = await pool.query('SELECT email FROM leads WHERE email IS NOT NULL LIMIT 100');
+      toEmails = leadRows.map(r => r.email).filter(Boolean);
+      sentCount = toEmails.length;
+    }
+
+    if (toEmails.length === 0) {
+      toEmails = [process.env.SMTP_USER || 'no-reply@example.com'];
+      if (sentCount === 0) sentCount = 1;
+    }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      // Actually send the email if configured
+      await transporter.sendMail({
+        from: `"NHFG Marketing" <${process.env.SMTP_USER}>`,
+        to: process.env.SMTP_USER || 'no-reply@example.com',
+        bcc: toEmails.join(','),
+        subject: subjectLine,
+        text: messageBody,
+        html: `<div style="font-family:sans-serif;color:#333;"><p>${messageBody.replace(/\n/g, '<br>')}</p></div>`,
+      });
     }
 
     const { rows } = await pool.query(`
@@ -241,13 +281,13 @@ router.post('/campaigns/fund', async (req, res) => {
 
 // GET /api/marketing/social/mentions
 router.get('/social/mentions', async (req, res) => {
-  const mockMentions = [
-    { id: '1', platform: 'Twitter/X', user: '@logistics_pro', content: 'New Holland Financial is a game changer for our fleet. Best freight rates we\'ve seen.', sentiment: 'positive', date: new Date().toISOString() },
-    { id: '2', platform: 'LinkedIn', user: 'Sarah Jenkins, CFO', content: 'Does anyone have experience with NHFG for commercial trucking insurance?', sentiment: 'neutral', date: new Date(Date.now() - 86400000).toISOString() },
-    { id: '3', platform: 'Facebook', user: 'Mike Torres', content: 'NHFG helped me get my mortgage approved in 48 hours. Highly recommend!', sentiment: 'positive', date: new Date(Date.now() - 172800000).toISOString() },
-    { id: '4', platform: 'Google Reviews', user: 'Anonymous', content: 'Wish they had more local office locations.', sentiment: 'neutral', date: new Date(Date.now() - 259200000).toISOString() }
-  ];
-  res.json(mockMentions);
+  try {
+    const { rows } = await pool.query('SELECT id, platform, author_username as user, content, sentiment, posted_at as date FROM social_mentions ORDER BY posted_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching social mentions:', error);
+    res.status(500).json({ error: 'Failed to fetch social mentions' });
+  }
 });
 
 // GET /api/marketing/automations

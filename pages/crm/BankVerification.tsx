@@ -185,22 +185,6 @@ const PlaidLinkButton: React.FC<PlaidLinkButtonProps> = ({
         );
     }
 
-    const [isSandboxLoading, setIsSandboxLoading] = useState(false);
-
-    const handleSandboxTest = async () => {
-        setIsSandboxLoading(true);
-        const { data, error } = await BankVerificationService.createSandboxPublicToken('ins_1');
-        setIsSandboxLoading(false);
-        if (data?.public_token) {
-            onSuccess(data.public_token, {
-                institution: { institution_id: 'ins_1', name: 'JPMorgan Chase (Sandbox)' },
-                accounts: [{ id: 'sandbox_checking_001' }]
-            });
-        } else {
-            onError(error || 'Failed to create sandbox token');
-        }
-    };
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
             <button
@@ -218,22 +202,6 @@ const PlaidLinkButton: React.FC<PlaidLinkButtonProps> = ({
                 }}
             >
                 <Landmark size={16} /> {ready ? 'Open Plaid Bank Link' : 'Loading…'}
-            </button>
-
-            <button
-                onClick={handleSandboxTest}
-                disabled={isSandboxLoading}
-                style={{
-                    width: '100%', padding: '10px',
-                    background: '#f8fafc',
-                    color: '#0f172a',
-                    border: '1px border #cbd5e1', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                    transition: 'all 0.2s',
-                }}
-            >
-                {isSandboxLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} className="text-amber-500" />} 1-Click Instant Sandbox Verification Test
             </button>
         </div>
     );

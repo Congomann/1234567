@@ -5,6 +5,15 @@ import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
 
+const formatTime = (timeStr: string) => {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':');
+  const d = new Date();
+  d.setHours(parseInt(h, 10) || 0);
+  d.setMinutes(parseInt(m, 10) || 0);
+  return format(d, 'h:mm a');
+};
+
 export const BookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -15,6 +24,7 @@ export const BookingPage: React.FC = () => {
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '' });
+  const [meetingLink, setMeetingLink] = useState<string | null>(null);
 
   // Generate 7 days starting from currentDate
   const days = Array.from({ length: 7 }).map((_, i) => addDays(currentDate, i));
@@ -70,7 +80,7 @@ export const BookingPage: React.FC = () => {
       }
       const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}:00`;
 
-      await Backend.bookPublicEvent({
+      const res = await Backend.bookPublicEvent({
         advisorId: id,
         name: formData.name,
         email: formData.email,
@@ -78,6 +88,7 @@ export const BookingPage: React.FC = () => {
         time: selectedTime,
         endTime
       });
+      if (res && res.meetingLink) setMeetingLink(res.meetingLink);
       setStep(3);
     } catch (err) {
       console.error(err);
@@ -111,7 +122,7 @@ export const BookingPage: React.FC = () => {
               <CalendarIcon className="w-5 h-5 text-blue-400" />
               <span>
                 {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
-                {selectedTime && ` at ${format(new Date(`2000-01-01T\${selectedTime}`), 'h:mm a')}`}
+                {selectedTime && ` at ${formatTime(selectedTime)}`}
               </span>
             </div>
           </div>
@@ -192,7 +203,7 @@ export const BookingPage: React.FC = () => {
                                     : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-blue-600 hover:text-blue-600'
                               }`}
                             >
-                              {format(new Date(`2000-01-01T\${time}`), 'h:mm a')}
+                              {formatTime(time)}
                             </button>
                           );
                         })}
@@ -289,10 +300,20 @@ export const BookingPage: React.FC = () => {
                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
+                
                 <h3 className="text-3xl font-black text-slate-900 mb-4">You're Scheduled!</h3>
-                <p className="text-slate-500 font-medium mb-8 max-w-sm">
+                <p className="text-slate-500 font-medium mb-6 max-w-sm">
                   Your meeting has been confirmed. A calendar invitation has been sent to your email address.
                 </p>
+                {meetingLink && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 w-full max-w-md text-left">
+                    <p className="text-sm font-bold text-blue-900 mb-1">Video Meeting Link (Jitsi):</p>
+                    <a href={meetingLink} target="_blank" rel="noreferrer" className="text-blue-600 font-medium break-all hover:underline">
+                      {meetingLink}
+                    </a>
+                  </div>
+                )}
+
                 <button
                   onClick={() => window.location.href = '/'}
                   className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-black rounded-xl transition-colors"

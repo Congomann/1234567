@@ -9,6 +9,7 @@ import {
 import { TestimonialsSection } from "../../components/TestimonialsSection";
 import { SpeakToAdvisorForm } from "../../components/SpeakToAdvisorForm";
 import { ProductType, TrailerType, FreightLoad } from "../../types";
+import { Backend } from "../../services/apiBackend";
 
 export const LogisticsHub: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -74,16 +75,10 @@ export const LogisticsHub: React.FC = () => {
     { from: 'Seattle, WA', to: 'Denver, CO', loads: 6 },
   ];
 
-  // Data from LoadListing
-  const mockLoads: Partial<FreightLoad>[] = [
-    { id: 'LD-4491', origin: 'Chicago, IL', destination: 'Dallas, TX', distance: 960, totalRate: 2850, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T09:00:00Z' },
-    { id: 'LD-4492', origin: 'Miami, FL', destination: 'Atlanta, GA', distance: 660, totalRate: 1950, trailerType: TrailerType.REEFER, status: 'Available', createdAt: '2026-04-21T09:15:00Z' },
-    { id: 'LD-4493', origin: 'Houston, TX', destination: 'Phoenix, AZ', distance: 1170, totalRate: 3400, trailerType: TrailerType.FLATBED, status: 'Available', createdAt: '2026-04-21T09:30:00Z' },
-    { id: 'LD-4494', origin: 'Seattle, WA', destination: 'Denver, CO', distance: 1300, totalRate: 4100, trailerType: TrailerType.HAZMAT, status: 'Available', createdAt: '2026-04-21T09:45:00Z' },
-    { id: 'LD-4495', origin: 'Columbus, OH', destination: 'Charlotte, NC', distance: 430, totalRate: 1250, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:00:00Z' },
-    { id: 'LD-4496', origin: 'New York, NY', destination: 'Boston, MA', distance: 215, totalRate: 950, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:15:00Z' },
-    { id: 'LD-4497', origin: 'Los Angeles, CA', destination: 'San Francisco, CA', distance: 380, totalRate: 1400, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:30:00Z' },
-  ];
+  const [loads, setLoads] = useState<Partial<FreightLoad>[]>([]);
+  useEffect(() => {
+    Backend.getLoads().then(setLoads).catch(console.error);
+  }, []);
 
   const handleSearchClick = (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,7 +350,7 @@ export const LogisticsHub: React.FC = () => {
                  Refresh Feed <Globe size={14} className="animate-spin-slow text-blue-500" />
                </button>
             </div>
-            {mockLoads.map((load) => (
+            {loads.map((load) => (
               <div key={load.id} className="bg-white rounded-[3rem] border border-slate-100 p-8 md:p-12 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col lg:flex-row items-center gap-12">
                 <div className="flex-1 flex items-center gap-10">
                   <div className="w-20 h-20 bg-slate-900 text-white rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">

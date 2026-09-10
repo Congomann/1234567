@@ -2,22 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Truck, MapPin, ArrowRight, CheckCircle2, Globe, Filter, Navigation, DollarSign, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TrailerType, FreightLoad } from '../../types';
+import { Backend } from '../../services/apiBackend';
 
 export const LoadListing: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const mockLoads: Partial<FreightLoad>[] = [
-    { id: 'LD-4491', origin: 'Chicago, IL', destination: 'Dallas, TX', distance: 960, totalRate: 2850, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T09:00:00Z' },
-    { id: 'LD-4492', origin: 'Miami, FL', destination: 'Atlanta, GA', distance: 660, totalRate: 1950, trailerType: TrailerType.REEFER, status: 'Available', createdAt: '2026-04-21T09:15:00Z' },
-    { id: 'LD-4493', origin: 'Houston, TX', destination: 'Phoenix, AZ', distance: 1170, totalRate: 3400, trailerType: TrailerType.FLATBED, status: 'Available', createdAt: '2026-04-21T09:30:00Z' },
-    { id: 'LD-4494', origin: 'Seattle, WA', destination: 'Denver, CO', distance: 1300, totalRate: 4100, trailerType: TrailerType.HAZMAT, status: 'Available', createdAt: '2026-04-21T09:45:00Z' },
-    { id: 'LD-4495', origin: 'Columbus, OH', destination: 'Charlotte, NC', distance: 430, totalRate: 1250, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:00:00Z' },
-    { id: 'LD-4496', origin: 'New York, NY', destination: 'Boston, MA', distance: 215, totalRate: 950, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:15:00Z' },
-    { id: 'LD-4497', origin: 'Los Angeles, CA', destination: 'San Francisco, CA', distance: 380, totalRate: 1400, trailerType: TrailerType.VAN, status: 'Available', createdAt: '2026-04-21T10:30:00Z' },
-  ];
-
+  const [loads, setLoads] = useState<Partial<FreightLoad>[]>([]);
+  useEffect(() => {
+    Backend.getLoads().then(setLoads).catch(console.error);
+  }, []);
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Feed Header */}
@@ -35,7 +30,7 @@ export const LoadListing: React.FC = () => {
           <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2.5rem]">
              <div className="flex flex-col">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Available</span>
-                <span className="text-3xl font-black text-white tracking-tighter">{mockLoads.length} Loads</span>
+                <span className="text-3xl font-black text-white tracking-tighter">{loads.length} Loads</span>
              </div>
              <div className="h-10 w-px bg-white/10 mx-4 hidden md:block"></div>
              <button className="px-8 py-4 bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center gap-3">
@@ -47,7 +42,7 @@ export const LoadListing: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 pb-32">
         <div className="grid grid-cols-1 gap-6">
-          {mockLoads.map((load) => (
+          {loads.map((load) => (
             <div 
               key={load.id}
               className="bg-white rounded-[3rem] border border-slate-100 p-8 md:p-12 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col lg:flex-row items-center gap-12"

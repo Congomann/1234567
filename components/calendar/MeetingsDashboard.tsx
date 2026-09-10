@@ -140,8 +140,23 @@ export const MeetingsDashboard: React.FC<{ onOpenNewModal?: () => void }> = ({ o
         if (evStatus === 'completed' && statusFilter === 'all') return false;
       } else if (activeTab === 'previous') {
         if (evStatus !== 'completed' && evStatus !== 'canceled' && statusFilter === 'all') {
-          // Check if date is in past
-          const evDate = new Date(`${ev.date} ${ev.time || '00:00'}`);
+          // Robust date/time parsing
+          const evDate = new Date(`${ev.date}T00:00:00`);
+          if (ev.time) {
+            try {
+              const match = ev.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+              if (match) {
+                let [_, hStr, mStr, ampm] = match;
+                let h = parseInt(hStr, 10);
+                const m = parseInt(mStr, 10);
+                if (ampm) {
+                  if (ampm.toUpperCase() === 'PM' && h !== 12) h += 12;
+                  if (ampm.toUpperCase() === 'AM' && h === 12) h = 0;
+                }
+                evDate.setHours(h, m, 0, 0);
+              }
+            } catch(e) {}
+          }
           if (evDate >= new Date() && evStatus !== 'completed') return false;
         }
       }

@@ -12,9 +12,8 @@ export const ClientPortal: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Mock: Filter policies for "this" user (in a real app, filtered by user ID)
-  // Showing a subset of dummy clients for demo purposes
-  const myPolicies = clients.slice(0, 2); 
+  // Filter policies for "this" user
+  const myPolicies = clients.filter((c: any) => c.userId === user.id); 
 
   return (
     <div className="min-h-screen bg-slate-50">

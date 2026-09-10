@@ -65,74 +65,24 @@ export const NormalizedPolicySection: React.FC<NormalizedPolicySectionProps> = (
             const policyNumber = client.policyNumber || 'POL-882190';
             const basePremium = client.premium || 2400;
 
-            if (carrierId === 'acme-mutual') {
-                // Acme Mutual (Legacy Carrier System) Schema
-                const statusMap = {
-                    active: 'IN_FORCE',
-                    grace_period: 'GRACE_PERIOD',
-                    lapsed: 'LAPSED'
-                };
-
-                rawPayload = {
-                    carrier_code: 'ACME_MUTUAL_LIFE',
-                    contract_id: policyNumber.startsWith('ACM-') ? policyNumber : `ACM-${policyNumber}`,
-                    insured_party: {
-                        full_legal_name: clientName,
-                        dob: '1983-05-14',
-                        contact_email: clientEmail
-                    },
-                    policy_details: {
-                        plan_code: 'TERM_20_PREMIER',
-                        policy_status: statusMap[targetScenario],
-                        issue_date: '2021/04/15',
-                        expiry_date: '2041/04/15',
-                        term_years: 20,
-                        renewable_flag: true
-                    },
-                    coverage: {
-                        face_amount_cents: 50000000 // $500,000 in cents
-                    },
-                    billing: {
-                        modal_premium_cents: Math.round(basePremium * 100),
-                        frequency: 'ANNUAL',
-                        past_due_installments: targetScenario === 'grace_period' ? 1 : targetScenario === 'lapsed' ? 3 : 0,
-                        past_due_cents: targetScenario === 'grace_period' ? Math.round(basePremium * 100) : targetScenario === 'lapsed' ? Math.round(basePremium * 3 * 100) : 0,
-                        last_unpaid_due_date: targetScenario !== 'active' ? '2026-08-01' : undefined,
-                        grace_period_end: targetScenario === 'grace_period' ? '2026-09-18' : undefined
-                    }
-                };
-            } else {
-                // Apex Life (Modern InsurTech System) Schema
-                const statusMap = {
-                    active: 'CURRENT',
-                    grace_period: 'PAYMENT_PENDING',
-                    lapsed: 'TERMINATED'
-                };
-
-                rawPayload = {
-                    provider: 'ApexLife InsurTech',
-                    policyId: policyNumber.startsWith('APX-') ? policyNumber : `APX-${policyNumber}`,
-                    customer: {
-                        name: clientName,
-                        birthDate: '1979-11-28T00:00:00.000Z',
-                        email: clientEmail,
-                        phone: client.phone || '+1 (555) 723-9914'
-                    },
-                    state: statusMap[targetScenario],
-                    planType: 'Apex Universal Life Plus',
-                    benefitAmount: 750000.00,
-                    periodicRate: Math.round((basePremium / 12) * 100) / 100,
-                    billingSchedule: 'monthly',
-                    inceptionDate: '2022-02-01T00:00:00.000Z',
-                    expirationDate: '2052-02-01T00:00:00.000Z',
-                    termYears: 30,
-                    renewable: true,
-                    delinquentPayments: targetScenario === 'grace_period' ? 1 : targetScenario === 'lapsed' ? 3 : 0,
-                    totalPastDue: targetScenario === 'grace_period' ? Math.round((basePremium / 12) * 100) / 100 : targetScenario === 'lapsed' ? Math.round((basePremium / 12 * 3) * 100) / 100 : 0.00,
-                    lastPaymentFailureDate: targetScenario !== 'active' ? '2026-08-05T00:00:00.000Z' : undefined,
-                    gracePeriodEnd: targetScenario === 'grace_period' ? '2026-09-22T00:00:00.000Z' : undefined
-                };
-            }
+            const token = localStorage.getItem('nhfg_token') || localStorage.getItem('token');
+            const response = await fetch('http://localhost:3001/api/carrier/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    carrierId,
+                    scenario: targetScenario,
+                    clientId: client.id,
+                    clientName,
+                    clientEmail,
+                    policyNumber,
+                    basePremium
+                })
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch from carrier API');
+            const data = await response.json();
+            rawPayload = data.rawPayload;
 
             // Execute universal normalization through CarrierRegistry singleton
             const normalized = carrierRegistry.normalize(carrierId, rawPayload);

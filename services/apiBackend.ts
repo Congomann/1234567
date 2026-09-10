@@ -19,19 +19,12 @@ class NHFGBackend {
 
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem('nhfg_access_token');
-        const mockUserId = localStorage.getItem('nhfg_mock_user_id');
-        const headers: { [key: string]: string } = { 
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
         };
-        
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        if (mockUserId) {
-            headers['x-mock-user-id'] = mockUserId;
-        }
-        
         return headers;
     }
 
@@ -146,6 +139,16 @@ class NHFGBackend {
         } catch (e) {
             return null;
         }
+    }
+
+    async getSignalwireCalls(): Promise<any[]> {
+        try {
+            const res = await fetch(`${this.baseUrl}/signalwire/calls`, {
+                headers: this.getAuthHeaders()
+            });
+            if (res.ok) return await res.json();
+            return [];
+        } catch { return []; }
     }
 
     async login(email: string, password?: string): Promise<User | null> {
@@ -370,14 +373,14 @@ class NHFGBackend {
         return { bookedTimes: [] };
     }
 
-    async bookPublicEvent(data: any): Promise<void> {
+    async bookPublicEvent(data: any): Promise<any> {
         if (USE_REAL_BACKEND) {
             const res = await fetch(`${this.baseUrl}/public/book`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            await this.handleResponse(res);
+            return await this.handleResponse(res);
         }
     }
 

@@ -45,19 +45,58 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
     const loadData = async () => {
         setLoading(true);
         try {
-            const [profileRes, sessionsRes] = await Promise.all([
-                AnalyticsService.getProfile(identifier),
-                AnalyticsService.querySessions({
-                    ip: /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(identifier) ? identifier : undefined,
-                    visitorId: identifier.startsWith('vis_') ? identifier : undefined,
-                    user: identifier.includes('@') ? identifier : undefined,
-                    leadId: identifier.startsWith('lead_') ? identifier : undefined
-                })
-            ]);
-
-            setProfile(profileRes);
-            if (sessionsRes.sessions && sessionsRes.sessions.length > 0) {
-                setSessions(sessionsRes.sessions);
+            const res = await fetch('/api/tracking/all');
+            const data = await res.json();
+            
+            const session = data.find((s: any) => s.id === identifier);
+            
+            if (session) {
+                setProfile({
+                    success: true,
+                    identifier,
+                    visitorId: session.deviceId,
+                    linkedLead: null,
+                    behavioralProfile: {
+                        totalSessions: 1,
+                        totalPageViews: session.pagesVisited.length,
+                        totalDurationSeconds: session.pagesVisited.reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
+                        firstSeen: session.startTime,
+                        lastSeen: session.endTime || session.startTime,
+                        intentScore: session.behaviorScore === 'High Intent' ? 80 : session.behaviorScore === 'Medium Intent' ? 50 : 20,
+                        qualification: session.behaviorScore === 'High Intent' ? 'Hot' : session.behaviorScore === 'Medium Intent' ? 'Warm' : 'Cold',
+                        primaryCategory: 'General',
+                        categoryAffinity: {},
+                        targetedAdRecommendations: [{
+                            channel: 'Meta Ads',
+                            campaignTheme: 'General',
+                            suggestedHeadline: 'See our latest offerings',
+                            creativeHook: 'Based on your recent visit',
+                            targetProduct: 'Insurance',
+                            recommendedLandingPage: '/'
+                        }],
+                        marketingTags: [],
+                        recentPaths: session.pagesVisited.map((v: any) => v.path)
+                    }
+                } as any);
+                
+                setSessions([{
+                    id: session.id,
+                    visitor_id: session.deviceId,
+                    ip_address: session.ip || 'Unknown',
+                    is_active: !session.endTime,
+                    started_at: session.startTime,
+                    last_activity_at: session.endTime || session.startTime,
+                    ended_at: session.endTime || null,
+                    duration_seconds: session.pagesVisited.reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
+                    page_count: session.pagesVisited.length,
+                    pages_visited: session.pagesVisited.map((v: any) => ({
+                        path: v.path,
+                        url: v.path,
+                        title: v.path,
+                        viewed_at: v.timestamp,
+                        metadata: { timeSpent: v.timeSpent }
+                    }))
+                } as any]);
             }
         } catch (err) {
             console.error('[UserSessionProfileModal] Failed to load data:', err);

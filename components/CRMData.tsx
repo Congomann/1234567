@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutGrid,
+    LayoutGrid, Video,
     Inbox,
     Shield,
     FileText,
@@ -46,8 +46,9 @@ import {
     Newspaper,
     Map as MapIcon,
     Briefcase,
-    Phone,
-    Search
+    Phone, Video, 
+    Search,
+    BookOpen
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { UserRole, AdvisorCategory, ProductType } from '../types';
@@ -90,6 +91,7 @@ const TOUR_EXPLANATIONS: Record<string, string> = {
     'nav-telephony': 'Corporate softphone, AI Lead Qualification, and IVR.',
     'nav-legal': 'Corporate policies, solicitor agreements, and document generation.',
     'nav-bank-verification': '1-click Plaid ACH and balance verification.',
+    'nav-resources': 'Access training and materials related to the products you sell.',
     'nav-profile': 'Manage your bio and public microsite presence.',
 
     // Admin
@@ -180,7 +182,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         if (!user) return { main: [], vertical: [], shared: [], admin: [] };
 
         const main = [
-            { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, tourId: 'nav-dashboard' },
+            { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, Video, tourId: 'nav-dashboard' },
             { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
             ...(enabledModules.sales ? [
                 { path: '/crm/leads', label: 'Leads DB', icon: Users, tourId: 'nav-leads' },
@@ -229,10 +231,12 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         }
 
                 const shared = [
-            { path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
+{ path: '/crm/telephony', label: 'Telephony & AI Suite', icon: Phone, tourId: 'nav-telephony' },
+            { path: '/crm/video-meetings', label: 'Video Meetings', icon: Video, tourId: 'nav-video' },
             { path: '/crm/precision-intelligence', label: 'Precision Intel', icon: Calculator, tourId: 'nav-precision-intel' },
             { path: '/crm/legal', label: 'Legal & Compliance', icon: Scale, tourId: 'nav-legal' },
             { path: '/crm/bank-verification', label: 'Bank Verification', icon: Landmark, tourId: 'nav-bank-verification' },
+            { path: '/crm/resources', label: 'Resources & Training', icon: BookOpen, tourId: 'nav-resources' },
             { path: '/crm/profile', label: 'Profile', icon: CircleUser, tourId: 'nav-profile' },
         ];
 

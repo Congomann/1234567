@@ -62,13 +62,30 @@ export const AdminAnalytics: React.FC = () => {
 
     const fetchStats = async () => {
         try {
-            const token = localStorage.getItem('nhfg_access_token');
-            const res = await fetch('/api/admin/analytics/stats', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error('Verification failed or endpoint unreachable.');
+            const res = await fetch('/api/tracking/all');
+            if (!res.ok) throw new Error('Tracking API failed.');
             const data = await res.json();
-            setStats(data);
+            
+            // Reformat tracking sessions into stats
+            const activeSessions = data.filter((s: any) => !s.endTime).length;
+            const visitors = data.map((s: any) => ({
+                visitor_id: s.id,
+                ip_address: s.ip || 'Unknown',
+                user_agent: s.deviceId,
+                device_type: 'Unknown',
+                screen_resolution: 'Unknown',
+                language: 'en',
+                first_seen: s.startTime,
+                last_seen: s.endTime || s.startTime,
+                metadata: s
+            })).sort((a: any, b: any) => new Date(b.first_seen).getTime() - new Date(a.first_seen).getTime());
+            
+            setStats({
+                totalVisitors: data.length,
+                activeSessions,
+                topPages: [], // Can compute this if needed
+                recentVisitors: visitors
+            });
         } catch (err: any) {
             setError(err.message);
         } finally {

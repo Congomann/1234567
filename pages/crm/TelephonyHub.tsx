@@ -671,19 +671,21 @@ export const TelephonyHub: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            {/* Mock Active Calls for Supervisor View */}
-            {[
-              { id: '1', agent: 'Sarah Jenkins', ext: '102', lead: 'Michael Chang', duration: '03:45', status: 'In-progress' },
-              { id: '2', agent: 'David Ross', ext: '104', lead: 'Unknown Caller', duration: '00:45', status: 'In-progress' },
-            ].map(call => (
-              <div key={call.id} className="bg-white/80 p-5 rounded-3xl border border-slate-200 flex items-center justify-between">
+            {/* Active Calls for Supervisor View */}
+            {callLogs.filter(c => c.status === 'in-progress' || c.status === 'connecting').length === 0 ? (
+              <div className="bg-white/80 p-5 rounded-3xl border border-slate-200 text-center text-slate-500 text-sm">
+                No active calls right now.
+              </div>
+            ) : (
+            callLogs.filter(c => c.status === 'in-progress' || c.status === 'connecting').map((call, idx) => (
+              <div key={call.id || idx} className="bg-white/80 p-5 rounded-3xl border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <Phone className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900">{call.agent} (Ext {call.ext})</h3>
-                    <p className="text-xs text-slate-500 font-medium">Talking with: {call.lead}</p>
+                    <h3 className="font-extrabold text-slate-900">{call.advisor_extension ? `Ext ${call.advisor_extension}` : 'Unknown'}</h3>
+                    <p className="text-xs text-slate-500 font-medium">Talking with: {call.lead_name || call.to_number}</p>
                   </div>
                 </div>
 
@@ -715,7 +717,7 @@ export const TelephonyHub: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       )}
@@ -969,44 +971,6 @@ export const TelephonyHub: React.FC = () => {
               </div>
             </div>
 
-            {/* Mock Charts Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-64 flex flex-col items-center justify-center relative overflow-hidden">
-                <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-600">Call Volume by Day</h3>
-                {/* CSS Bar Chart Simulation */}
-                <div className="flex items-end gap-3 h-32 w-full px-8 mt-8">
-                  {[40, 60, 45, 80, 55, 90, 75].map((h, i) => (
-                    <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-400" style={{ height: `${h}%` }}></div>
-                  ))}
-                </div>
-                <div className="flex justify-between w-full px-8 mt-3 text-[10px] font-bold text-slate-400 uppercase">
-                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-                </div>
-              </div>
-              
-              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-64 flex flex-col relative">
-                <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-600">Top Performing Agents (Talk Time)</h3>
-                <div className="mt-12 space-y-4 w-full">
-                  {[
-                    { name: "Sarah Jenkins", value: 85 },
-                    { name: "Michael Ross", value: 72 },
-                    { name: "Jessica Alba", value: 64 },
-                    { name: "David Chen", value: 45 }
-                  ].map((agent, i) => (
-                    <div key={i} className="w-full">
-                      <div className="flex justify-between text-xs font-bold mb-1 text-slate-700">
-                        <span>{agent.name}</span>
-                        <span>{agent.value} hrs</span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${agent.value}%` }}></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
           </div>
         </div>
       )}
