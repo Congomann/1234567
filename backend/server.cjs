@@ -120,6 +120,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cors());
 app.use(bodyParser.json({ limit: '200mb' }));
 app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
+app.use((req, res, next) => { req.supabaseQuery = async (table) => supabase.from(table); next(); });
+
 app.use((req, res, next) => {
   console.log(`\n>>> [API ${req.method}] ${req.url}`);
   if (req.body && Object.keys(req.body).length > 0) {
