@@ -1308,7 +1308,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access)
     if (email === 'info@newhollandfinancial.com' && password === 'NewHollandAdmin@2025') {
       const u = {
-        id: 'admin-0000-0000-0000-000000000000',
+        id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2',
         name: 'System Admin',
         email: 'info@newhollandfinancial.com',
         role: 'Administrator',
@@ -1480,7 +1480,7 @@ app.post('/api/auth/refresh', async (req, res) => {
       const decoded = jwt.verify(refresh_token, process.env.SECRET_KEY || 'nhfg_secret_key_123');
       user_id = decoded.id;
       
-      if (user_id === 'admin-0000-0000-0000-000000000000') {
+      if (user_id === 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2') {
         const accessToken = generateAccessToken({
           id: user_id,
           role: 'Administrator',
@@ -1540,9 +1540,9 @@ app.post('/api/auth/logout', async (req, res) => {
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
     // Hardcoded admin backdoor (Bypasses DB entirely to guarantee access on refresh)
-    if (req.user && req.user.id === 'admin-0000-0000-0000-000000000000') {
+    if (req.user && req.user.id === 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2') {
       return res.json({
-        id: 'admin-0000-0000-0000-000000000000',
+        id: 'ba2e9046-e854-4d6f-9ec5-5ae1046003b2',
         name: 'System Admin',
         email: 'info@newhollandfinancial.com',
         role: 'Administrator',

@@ -136,16 +136,16 @@ export const useData = () => {
 };
 
 const INITIAL_USERS: User[] = [
-  { id: 'admin-0000-0000-0000-000000000000', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
-  { id: '2', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
-  { id: '4', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '5', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '6', name: 'Marcus Mortgage', email: 'mortgage@nhfg.com', phone: '(555) 444-3333', role: UserRole.ADVISOR, category: AdvisorCategory.MORTGAGE, productsSold: [ProductType.MORTGAGE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '7', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '8', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
-  { id: '9', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, avatar: '' },
-  { id: '10', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
-  { id: 'logistics-lead', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: '' }
+  { id: '00000000-0000-0000-0000-000000000001', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
+  { id: '00000000-0000-0000-0000-000000000002', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
+  { id: '00000000-0000-0000-0000-000000000004', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000005', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000006', name: 'Marcus Mortgage', email: 'mortgage@nhfg.com', phone: '(555) 444-3333', role: UserRole.ADVISOR, category: AdvisorCategory.MORTGAGE, productsSold: [ProductType.MORTGAGE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000007', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000008', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000009', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000010', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
+  { id: '00000000-0000-0000-0000-000000000011', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: '' }
 ];
 
 
@@ -234,8 +234,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       realEstateAbout: "Our entire team of agents with years of combined experience represents the gold standard in real estate. We don't just sell properties; we build communities and secure legacies.",
       realEstateContactCta: "Ready to start your real estate journey? Our team is standing by to provide expert guidance tailored to your specific goals.",
       realEstateResources: [
-        { id: '1', title: 'Home Buying Guide 2024', url: '#', description: 'Comprehensive roadmap for first-time buyers.', type: 'Buying' },
-        { id: '2', title: 'Market Trends Report', url: '#', description: 'Analysis of residential market shifts.', type: 'Investing' }
+        { id: '00000000-0000-0000-0000-000000000101', title: 'Home Buying Guide 2024', url: '#', description: 'Comprehensive roadmap for first-time buyers.', type: 'Buying' },
+        { id: '00000000-0000-0000-0000-000000000102', title: 'Market Trends Report', url: '#', description: 'Analysis of residential market shifts.', type: 'Investing' }
       ],
       customProducts: [
         { id: 'life', title: 'Life Insurance', description: "Ensure your family's financial security with our comprehensive life insurance plans.", features: ['Term Life', 'Whole Life', 'Universal Life', 'Final Expense'], image: "/assets/products/life.png", icon: 'ShieldCheck', color: 'blue', link: '/life-insurance', isHidden: false, order: 0 },
@@ -492,7 +492,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           title: `Follow-up with ${lead.name} regarding ${lead.interest}`,
           priority: TaskPriority.HIGH,
           completed: false,
-          advisorId: lead.assignedTo || 'admin-0000-0000-0000-000000000000',
+          advisorId: lead.assignedTo || '00000000-0000-0000-0000-000000000001',
           dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
         });
       }
