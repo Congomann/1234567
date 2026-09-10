@@ -28,8 +28,8 @@ export const AdvisorComp: React.FC = () => {
           description: `Commission Payout - ${name}`,
           reference: `PAY-${Math.floor(Math.random() * 10000)}`,
           lines: [
-              { id: '1', accountId: '2200', debit: amount, credit: 0, description: 'Clear Payable', advisorId: advisorId }, // Dr Comm Payable
-              { id: '2', accountId: '1000', debit: 0, credit: amount, description: 'Cash Payout' }   // Cr Cash
+              { id: '1', accountId: '00000000-0000-0000-0000-000000002200', debit: amount, credit: 0, description: 'Clear Payable', advisorId: advisorId }, // Dr Comm Payable
+              { id: '2', accountId: '00000000-0000-0000-0000-000000001000', debit: 0, credit: amount, description: 'Cash Payout' }   // Cr Cash
           ]
       });
       

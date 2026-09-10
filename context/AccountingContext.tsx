@@ -53,67 +53,67 @@ const BankingService = {
 // Initial Chart of Accounts (Standard GAAP structure)
 const INITIAL_ACCOUNTS: Account[] = [
     // ASSETS (1000-1999)
-    { id: '1000', code: '1000', name: 'Business Checking', type: AccountType.ASSET, category: 'Cash & Equivalents', normalBalance: 'debit', balance: 154200 },
-    { id: '1100', code: '1100', name: 'Accounts Receivable', type: AccountType.ASSET, category: 'Current Assets', normalBalance: 'debit', balance: 24500 },
-    { id: '1200', code: '1200', name: 'Undeposited Funds', type: AccountType.ASSET, category: 'Current Assets', normalBalance: 'debit', balance: 0 },
+    { id: '00000000-0000-0000-0000-000000001000', code: '1000', name: 'Business Checking', type: AccountType.ASSET, category: 'Cash & Equivalents', normalBalance: 'debit', balance: 154200 },
+    { id: '00000000-0000-0000-0000-000000001100', code: '1100', name: 'Accounts Receivable', type: AccountType.ASSET, category: 'Current Assets', normalBalance: 'debit', balance: 24500 },
+    { id: '00000000-0000-0000-0000-000000001200', code: '1200', name: 'Undeposited Funds', type: AccountType.ASSET, category: 'Current Assets', normalBalance: 'debit', balance: 0 },
 
     // LIABILITIES (2000-2999)
-    { id: '2000', code: '2000', name: 'Accounts Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 4200 },
-    { id: '2100', code: '2100', name: 'Tax Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 12500 },
-    { id: '2200', code: '2200', name: 'Commissions Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 0 },
-    { id: '2300', code: '2300', name: 'Corporate Credit Card', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 3450 },
+    { id: '00000000-0000-0000-0000-000000002000', code: '2000', name: 'Accounts Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 4200 },
+    { id: '00000000-0000-0000-0000-000000002100', code: '2100', name: 'Tax Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 12500 },
+    { id: '00000000-0000-0000-0000-000000002200', code: '2200', name: 'Commissions Payable', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 0 },
+    { id: '00000000-0000-0000-0000-000000002300', code: '2300', name: 'Corporate Credit Card', type: AccountType.LIABILITY, category: 'Current Liabilities', normalBalance: 'credit', balance: 3450 },
 
     // EQUITY (3000-3999)
-    { id: '3000', code: '3000', name: 'Retained Earnings', type: AccountType.EQUITY, category: 'Equity', normalBalance: 'credit', balance: 100000 },
-    { id: '3100', code: '3100', name: 'Owner Investment', type: AccountType.EQUITY, category: 'Equity', normalBalance: 'credit', balance: 50000 },
+    { id: '00000000-0000-0000-0000-000000003000', code: '3000', name: 'Retained Earnings', type: AccountType.EQUITY, category: 'Equity', normalBalance: 'credit', balance: 100000 },
+    { id: '00000000-0000-0000-0000-000000003100', code: '3100', name: 'Owner Investment', type: AccountType.EQUITY, category: 'Equity', normalBalance: 'credit', balance: 50000 },
 
     // REVENUE (4000-4999)
-    { id: '4000', code: '4000', name: 'Insurance Commissions', type: AccountType.REVENUE, category: 'Revenue', normalBalance: 'credit', balance: 185000 },
-    { id: '4100', code: '4100', name: 'Real Estate Fees', type: AccountType.REVENUE, category: 'Revenue', normalBalance: 'credit', balance: 65000 },
+    { id: '00000000-0000-0000-0000-000000004000', code: '4000', name: 'Insurance Commissions', type: AccountType.REVENUE, category: 'Revenue', normalBalance: 'credit', balance: 185000 },
+    { id: '00000000-0000-0000-0000-000000004100', code: '4100', name: 'Real Estate Fees', type: AccountType.REVENUE, category: 'Revenue', normalBalance: 'credit', balance: 65000 },
 
     // EXPENSES (5000-8999)
-    { id: '5000', code: '5000', name: 'Advisor Commission Exp', type: AccountType.EXPENSE, category: 'Cost of Goods Sold', normalBalance: 'debit', balance: 92500 },
-    { id: '6100', code: '6100', name: 'Rent Expense', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 24000 },
-    { id: '6200', code: '6200', name: 'Marketing Expense', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 15000 },
-    { id: '6300', code: '6300', name: 'Software & CRM', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 3500 },
-    { id: '6400', code: '6400', name: 'Travel & Meals', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 4200 },
-    { id: '6500', code: '6500', name: 'Office Supplies', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 1200 },
-    { id: '8000', code: '8000', name: 'Income Tax Expense', type: AccountType.EXPENSE, category: 'Tax', normalBalance: 'debit', balance: 12500 },
+    { id: '00000000-0000-0000-0000-000000005000', code: '5000', name: 'Advisor Commission Exp', type: AccountType.EXPENSE, category: 'Cost of Goods Sold', normalBalance: 'debit', balance: 92500 },
+    { id: '00000000-0000-0000-0000-000000006100', code: '6100', name: 'Rent Expense', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 24000 },
+    { id: '00000000-0000-0000-0000-000000006200', code: '6200', name: 'Marketing Expense', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 15000 },
+    { id: '00000000-0000-0000-0000-000000006300', code: '6300', name: 'Software & CRM', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 3500 },
+    { id: '00000000-0000-0000-0000-000000006400', code: '6400', name: 'Travel & Meals', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 4200 },
+    { id: '00000000-0000-0000-0000-000000006500', code: '6500', name: 'Office Supplies', type: AccountType.EXPENSE, category: 'Operating Expenses', normalBalance: 'debit', balance: 1200 },
+    { id: '00000000-0000-0000-0000-000000008000', code: '8000', name: 'Income Tax Expense', type: AccountType.EXPENSE, category: 'Tax', normalBalance: 'debit', balance: 12500 },
 ];
 
 const INITIAL_EXPENSE_CATEGORIES: ExpenseCategory[] = [
-    { id: 'cat-1', name: 'Office Supplies', glAccountId: '6500', taxDeductible: true, keywords: ['staples', 'office depot', 'amazon', 'paper', 'usps'] },
-    { id: 'cat-2', name: 'Travel', glAccountId: '6400', taxDeductible: true, keywords: ['uber', 'delta', 'marriott', 'airbnb', 'hotel', 'flight', 'shell', 'exxon'] },
-    { id: 'cat-3', name: 'Meals & Ent', glAccountId: '6400', taxDeductible: true, keywords: ['starbucks', 'restaurant', 'cafe', 'diner', 'grill'] },
-    { id: 'cat-4', name: 'Software/CRM', glAccountId: '6300', taxDeductible: true, keywords: ['adobe', 'salesforce', 'slack', 'zoom', 'google', 'aws'] },
-    { id: 'cat-5', name: 'Marketing', glAccountId: '6200', taxDeductible: true, keywords: ['facebook ads', 'google ads', 'linkedin', 'print'] },
-    { id: 'cat-6', name: 'Rent', glAccountId: '6100', taxDeductible: true, keywords: ['property management', 'lease'] },
-    { id: 'cat-7', name: 'Revenue/Income', glAccountId: '4000', taxDeductible: false, keywords: ['deposit', 'payment', 'commission'] }, // For deposits
+    { id: '00000000-0000-0000-0000-0000000000c1', name: 'Office Supplies', glAccountId: '00000000-0000-0000-0000-000000006500', taxDeductible: true, keywords: ['staples', 'office depot', 'amazon', 'paper', 'usps'] },
+    { id: '00000000-0000-0000-0000-0000000000c2', name: 'Travel', glAccountId: '00000000-0000-0000-0000-000000006400', taxDeductible: true, keywords: ['uber', 'delta', 'marriott', 'airbnb', 'hotel', 'flight', 'shell', 'exxon'] },
+    { id: '00000000-0000-0000-0000-0000000000c3', name: 'Meals & Ent', glAccountId: '00000000-0000-0000-0000-000000006400', taxDeductible: true, keywords: ['starbucks', 'restaurant', 'cafe', 'diner', 'grill'] },
+    { id: '00000000-0000-0000-0000-0000000000c4', name: 'Software/CRM', glAccountId: '00000000-0000-0000-0000-000000006300', taxDeductible: true, keywords: ['adobe', 'salesforce', 'slack', 'zoom', 'google', 'aws'] },
+    { id: '00000000-0000-0000-0000-0000000000c5', name: 'Marketing', glAccountId: '00000000-0000-0000-0000-000000006200', taxDeductible: true, keywords: ['facebook ads', 'google ads', 'linkedin', 'print'] },
+    { id: '00000000-0000-0000-0000-0000000000c6', name: 'Rent', glAccountId: '00000000-0000-0000-0000-000000006100', taxDeductible: true, keywords: ['property management', 'lease'] },
+    { id: '00000000-0000-0000-0000-0000000000c7', name: 'Revenue/Income', glAccountId: '00000000-0000-0000-0000-000000004000', taxDeductible: false, keywords: ['deposit', 'payment', 'commission'] }, // For deposits
 ];
 
 const DEFAULT_TAX_CONFIG: TaxConfig = {
-    id: 'tax-1',
+    id: '00000000-0000-0000-0000-0000000000t1',
     name: 'Corporate Tax',
     rate: 0.21,
-    liabilityAccountId: '2100',
-    expenseAccountId: '8000',
+    liabilityAccountId: '00000000-0000-0000-0000-000000002100',
+    expenseAccountId: '00000000-0000-0000-0000-000000008000',
     state: 'Federal'
 };
 
 const INITIAL_RULES: BankRule[] = [
     {
-        id: 'rule-1',
+        id: '00000000-0000-0000-0000-0000000000r1',
         name: 'Coffee Shops',
         conditions: [{ field: 'merchant', operator: 'contains', value: 'Starbucks' }],
-        assignCategory: 'cat-3',
-        userId: 'company'
+        assignCategory: '00000000-0000-0000-0000-0000000000c3',
+        userId: '00000000-0000-0000-0000-000000company'
     },
     {
-        id: 'rule-2',
+        id: '00000000-0000-0000-0000-0000000000r2',
         name: 'Software Subs',
         conditions: [{ field: 'merchant', operator: 'contains', value: 'Adobe' }],
-        assignCategory: 'cat-4',
-        userId: 'company'
+        assignCategory: '00000000-0000-0000-0000-0000000000c4',
+        userId: '00000000-0000-0000-0000-000000company'
     }
 ];
 
@@ -304,14 +304,14 @@ export const AccountingProvider: React.FC<{ children: ReactNode }> = ({ children
         const commissionAmount = revenue * commissionRate;
 
         const lines: JournalLine[] = [
-            { id: '1', accountId: '1100', debit: revenue, credit: 0, description: `AR - ${description}` },
-            { id: '2', accountId: '4000', debit: 0, credit: revenue, description: `Rev - ${description}` },
+            { id: '1', accountId: '00000000-0000-0000-0000-000000001100', debit: revenue, credit: 0, description: `AR - ${description}` },
+            { id: '2', accountId: '00000000-0000-0000-0000-000000004000', debit: 0, credit: revenue, description: `Rev - ${description}` },
         ];
 
         if (commissionAmount > 0) {
             lines.push(
-                { id: '3', accountId: '5000', debit: commissionAmount, credit: 0, description: `Comm Exp - ${description}` },
-                { id: '4', accountId: '2200', debit: 0, credit: commissionAmount, description: `Comm Payable - ${description}`, advisorId: advisorId }
+                { id: '3', accountId: '00000000-0000-0000-0000-000000005000', debit: commissionAmount, credit: 0, description: `Comm Exp - ${description}` },
+                { id: '4', accountId: '00000000-0000-0000-0000-000000002200', debit: 0, credit: commissionAmount, description: `Comm Payable - ${description}`, advisorId: advisorId }
             );
         }
 
@@ -332,7 +332,7 @@ export const AccountingProvider: React.FC<{ children: ReactNode }> = ({ children
         let balance = 0;
         journalEntries.forEach(entry => {
             entry.lines.forEach(line => {
-                if (line.accountId === '2200' && line.advisorId === advisorId) {
+                if (line.accountId === '00000000-0000-0000-0000-000000002200' && line.advisorId === advisorId) {
                     balance += (line.credit - line.debit);
                 }
             });
@@ -417,8 +417,8 @@ export const AccountingProvider: React.FC<{ children: ReactNode }> = ({ children
         // Determine the GL Account for the specific Bank Account
         // In a real system, bankAccount object would have a `glAccountId` field mapping it.
         // We will map dynamically based on type for this demo:
-        let bankGLId = '1000'; // Default Checking
-        if (bankAccount?.type === 'Credit Card') bankGLId = '2300'; // Corporate Card
+        let bankGLId = '00000000-0000-0000-0000-000000001000'; // Default Checking
+        if (bankAccount?.type === 'Credit Card') bankGLId = '00000000-0000-0000-0000-000000002300'; // Corporate Card
 
         const lines: JournalLine[] = [];
 
@@ -468,7 +468,7 @@ export const AccountingProvider: React.FC<{ children: ReactNode }> = ({ children
         // Look at GL for payments to this advisor (Debits to Comm Payable)
         journalEntries.forEach(je => {
             je.lines.forEach(line => {
-                if (line.accountId === '2200' && line.advisorId === userId && line.debit > 0) {
+                if (line.accountId === '00000000-0000-0000-0000-000000002200' && line.advisorId === userId && line.debit > 0) {
                     totalIncome += line.debit;
                 }
             });
