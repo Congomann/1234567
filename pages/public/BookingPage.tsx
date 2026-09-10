@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarEvent, LeadStatus, ProductType, User } from '../../types';
@@ -28,7 +28,8 @@ import {
 export const BookingPage: React.FC = () => {
   const { addEvent, addLead, events, allUsers, companySettings } = useData();
   const [searchParams] = useSearchParams();
-  const advisorParam = searchParams.get('advisor') || searchParams.get('advisor_id') || searchParams.get('agent');
+  const { id } = useParams();
+  const advisorParam = id || searchParams.get('advisor') || searchParams.get('advisor_id') || searchParams.get('agent');
 
   // Steps: 1 = Advisor & Meeting Type, 2 = Date & Time, 3 = Client Details, 4 = Confirmation
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
