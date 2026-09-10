@@ -573,7 +573,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) return res.status(401).json({ error: 'No token provided' });
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
@@ -673,7 +673,7 @@ app.post('/api/upload', async (req, res) => {
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, SECRET_KEY);
         userId = decoded.id;
       } catch (e) {
          return res.status(401).json({ error: 'Unauthorized' });
