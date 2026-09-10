@@ -136,7 +136,7 @@ export const useData = () => {
 };
 
 const INITIAL_USERS: User[] = [
-  { id: 'admin-main', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
+  { id: 'admin-0000-0000-0000-000000000000', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
   { id: '2', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
   { id: '4', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
   { id: '5', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
@@ -492,7 +492,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           title: `Follow-up with ${lead.name} regarding ${lead.interest}`,
           priority: TaskPriority.HIGH,
           completed: false,
-          advisorId: lead.assignedTo || 'admin-main',
+          advisorId: lead.assignedTo || 'admin-0000-0000-0000-000000000000',
           dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
         });
       }
