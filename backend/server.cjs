@@ -2356,7 +2356,8 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/public/availability/:userId', async (req, res) => {
   try {
-    const { userId } = req.params;
+    let { userId } = req.params;
+    if (userId === "system-admin") userId = "ba2e9046-e854-4d6f-9ec5-5ae1046003b2";
     const { date } = req.query; // YYYY-MM-DD
     
     // Get all events for that user on that date to find conflicts
@@ -2373,7 +2374,8 @@ app.get('/api/public/availability/:userId', async (req, res) => {
 
 app.post('/api/public/book', async (req, res) => {
   try {
-    const { advisorId, name, email, date, time, endTime } = req.body;
+    let { advisorId, name, email, date, time, endTime } = req.body;
+    if (advisorId === "system-admin") advisorId = "ba2e9046-e854-4d6f-9ec5-5ae1046003b2";
     
     const advisorRes = await pool.query('SELECT name FROM users WHERE id = $1', [advisorId]);
     const advisorName = advisorRes.rows[0]?.name || 'Advisor';

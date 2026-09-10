@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,7 +15,9 @@ const formatTime = (timeStr: string) => {
 };
 
 export const BookingPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const id = paramId || searchParams.get("advisor");
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [currentDate, setCurrentDate] = useState(new Date());
