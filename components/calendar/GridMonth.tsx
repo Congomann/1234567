@@ -136,7 +136,7 @@ export const GridMonth: React.FC<GridMonthProps> = ({ currentDate, visibleEvents
                             {isValid && (
                                 <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
                                     {dayEvents.map(event => (
-                                        <motion.div
+                                        <div
                                             key={event.id}
                                             draggable={event.status !== 'canceled'}
                                             onDragStart={(e: any) => handleEventDragStart(e, event)}
@@ -145,11 +145,11 @@ export const GridMonth: React.FC<GridMonthProps> = ({ currentDate, visibleEvents
                                                 openModalEdit(event);
                                             }}
                                             onMouseDown={e => e.stopPropagation()}
-                                            whileHover={{ scale: 0.98 }}
-                                            className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold truncate shadow-sm transition-all ${getEventBadgeStyle(event)}`}
+                                            
+                                            className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold truncate shadow-sm transition-all hover:scale-95 ${getEventBadgeStyle(event)}`}
                                         >
                                             {event.title}
-                                        </motion.div>
+                                        </div>
                                     ))}
                                 </div>
                             )}

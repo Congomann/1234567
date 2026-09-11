@@ -297,8 +297,9 @@ export const BookingPage: React.FC = () => {
           <div className="md:w-[68%] bg-white p-8 lg:p-10 flex flex-col justify-between relative">
             
             {/* STEP 1 */}
+            <AnimatePresence mode="wait">
             {step === 1 && (
-              <div className="space-y-8 animate-in fade-in duration-300">
+              <motion.div key="step1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-8">
                 <div>
                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-1">Step 1: Choose Session</h3>
                   <p className="text-slate-500 text-xs font-medium">Select your preferred advisor and consultation type.</p>
@@ -374,12 +375,12 @@ export const BookingPage: React.FC = () => {
                     Next: Date &amp; Time <ArrowRight size={14} />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* STEP 2 */}
             {step === 2 && (
-              <div className="space-y-6 animate-in fade-in duration-300 flex flex-col h-full">
+              <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6 flex flex-col h-full">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-1">Step 2: Date &amp; Time</h3>
@@ -473,12 +474,12 @@ export const BookingPage: React.FC = () => {
                     Next: Your Details <ArrowRight size={14} />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* STEP 3 */}
             {step === 3 && (
-              <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-300 flex flex-col h-full justify-between">
+              <motion.form key="step3" onSubmit={handleSubmit} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6 flex flex-col h-full justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -547,12 +548,12 @@ export const BookingPage: React.FC = () => {
                     {isSubmitting ? 'Scheduling...' : 'Confirm Appointment'} <CheckCircle2 size={14} />
                   </button>
                 </div>
-              </form>
+              </motion.form>
             )}
 
             {/* STEP 4 */}
             {step === 4 && (
-              <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500 my-auto">
+              <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="text-center py-12 space-y-6 my-auto">
                 <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-sm ring-1 ring-emerald-100">
                   <CheckCircle2 size={32} />
                 </div>
@@ -585,8 +586,9 @@ export const BookingPage: React.FC = () => {
                     Solutions
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
 
           </div>
         </div>
