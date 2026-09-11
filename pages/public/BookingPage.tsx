@@ -224,199 +224,189 @@ export const BookingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050A14] text-white pt-32 pb-20 font-sans relative overflow-hidden selection:bg-blue-500/30">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-xs font-black uppercase tracking-widest mb-4">
-            <Sparkles size={14} /> Official Advisor Booking Portal
-          </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight uppercase mb-4">
-            Schedule <span className="text-blue-500">Consultation.</span>
-          </h1>
-          <p className="text-slate-400 text-base font-medium leading-relaxed">
-            Select an advisor, pick your meeting type, and choose an available date &amp; time slot.
-          </p>
-        </div>
-
-        {/* Main Card Container */}
-        <div className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[640px]">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 sm:p-8 font-sans selection:bg-blue-500/30">
+      <div className="rounded-[24px] overflow-hidden border border-slate-200 bg-white w-full max-w-[900px] shadow-2xl flex flex-col">
+        <div className="flex flex-col md:flex-row min-h-[600px]">
           
-          {/* LEFT SIDEBAR: Selected Advisor Profile & Summary */}
-          <div className="lg:col-span-4 bg-slate-950 p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col justify-between">
-            <div className="space-y-6">
-              
+          {/* LEFT PANEL */}
+          <div className="md:w-[32%] bg-[#0c0d12] p-8 flex flex-col justify-between shrink-0">
+            <div>
+              {/* Logo Box */}
+              <div className="mb-8">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#F59E0B] to-amber-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20">
+                  <Shield size={20} className="text-white" />
+                </div>
+                <h2 className="text-[10px] font-black text-slate-400 tracking-[1.5px] uppercase leading-relaxed">
+                  New Holland<br />Financial Group
+                </h2>
+              </div>
+
               {/* Advisor Card */}
-              {selectedAdvisor ? (
-                <div className="space-y-4">
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">Selected Advisor</span>
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+              {selectedAdvisor && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Selected Advisor</span>
+                  <div className="flex items-center gap-3">
                     <img
                       src={selectedAdvisor.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedAdvisor.name)}&background=0A62A7&color=fff`}
                       alt={selectedAdvisor.name}
-                      className="w-14 h-14 rounded-full object-cover border-2 border-blue-500/50 shadow-md"
+                      className="w-12 h-12 rounded-full object-cover border border-white/10"
                     />
                     <div>
-                      <h3 className="font-bold text-white text-base leading-tight">{selectedAdvisor.name}</h3>
-                      <p className="text-xs text-blue-400 font-semibold mt-0.5">{selectedAdvisor.advisorCategory || selectedAdvisor.role}</p>
-                      <p className="text-[11px] text-slate-400 font-medium mt-1">{selectedAdvisor.phone || '(717) 847-9638'}</p>
+                      <h3 className="font-bold text-white text-sm leading-tight">{selectedAdvisor.name}</h3>
+                      <p className="text-[11px] text-[#F59E0B] font-semibold mt-0.5">{selectedAdvisor.advisorCategory || selectedAdvisor.role}</p>
                     </div>
                   </div>
                 </div>
-              ) : null}
+              )}
 
               {/* Selected Meeting Summary */}
-              <div className="space-y-4 pt-4 border-t border-white/10">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Meeting Summary</span>
-                <div className="space-y-3 text-xs font-semibold text-slate-300">
+              <div className="space-y-4 pt-6 mt-6 border-t border-white/10">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Meeting Details</span>
+                <div className="space-y-3 text-xs font-medium text-slate-300">
                   <div className="flex items-center gap-3">
-                    <Clock size={16} className="text-blue-400 shrink-0" />
-                    <span>{selectedMeetingType.duration} ({selectedMeetingType.name})</span>
+                    <Clock size={14} className="text-[#F59E0B] shrink-0" />
+                    <span>{selectedMeetingType.duration}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Video size={16} className="text-emerald-400 shrink-0" />
-                    <span>Google Meet Video / Direct Phone Call</span>
+                    <Video size={14} className="text-emerald-400 shrink-0" />
+                    <span>Google Meet / Phone</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Globe size={16} className="text-indigo-400 shrink-0" />
-                    <span>{Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ')} Time Zone</span>
+                    <Globe size={14} className="text-indigo-400 shrink-0" />
+                    <span className="truncate">{Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ')}</span>
                   </div>
                 </div>
               </div>
 
               {/* Selected Date/Time Badge */}
               {selectedDate && selectedTime && (
-                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-300 space-y-1">
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">Scheduled For</span>
+                <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Scheduled For</span>
                   <p className="font-bold text-sm text-white">{selectedDate.toDateString()}</p>
-                  <p className="text-xs font-semibold text-blue-300">@ {selectedTime}</p>
+                  <p className="text-xs font-semibold text-[#F59E0B]">@ {selectedTime}</p>
                 </div>
               )}
             </div>
 
-            <div className="pt-6 border-t border-white/10 text-slate-500 text-[11px] font-medium leading-relaxed">
-              Instant email confirmation dispatched upon completion.
+            <div className="pt-8 mt-8 border-t border-white/10 text-slate-500 text-[10px] font-medium leading-relaxed">
+              Instant confirmation will be dispatched to your email.
             </div>
           </div>
 
-          {/* RIGHT SIDE: 4-STEP INTERACTIVE BOOKING FLOW */}
-          <div className="lg:col-span-8 p-8 lg:p-12 flex flex-col justify-between">
+          {/* RIGHT PANEL */}
+          <div className="md:w-[68%] bg-white p-8 lg:p-10 flex flex-col justify-between relative">
             
-            {/* STEP 1: SELECT ADVISOR & MEETING TYPE */}
+            {/* STEP 1 */}
             {step === 1 && (
               <div className="space-y-8 animate-in fade-in duration-300">
                 <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Step 1: Choose Advisor &amp; Session</h3>
-                  <p className="text-slate-400 text-xs font-medium">Select your preferred advisor and the type of consultation you require.</p>
+                  <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-1">Step 1: Choose Session</h3>
+                  <p className="text-slate-500 text-xs font-medium">Select your preferred advisor and consultation type.</p>
                 </div>
 
-                {/* Advisor Selector Grid */}
-                <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">
-                    {advisorParam ? "Your Selected Advisor" : "Available Advisors"}
-                  </label>
-                  <div className={`grid ${advisorParam ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
-                    {(advisorParam && selectedAdvisor ? [selectedAdvisor] : activeAdvisors).map(adv => {
-                      const isSelected = selectedAdvisor?.id === adv.id;
-                      return (
-                        <button
-                          key={adv.id}
-                          onClick={() => !advisorParam && setSelectedAdvisor(adv)}
-                          className={`flex items-center gap-3 p-3.5 rounded-2xl border text-left transition-all ${
-                            isSelected
-                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg cursor-default'
-                              : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                          }`}
-                        >
-                          <img src={adv.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adv.name)}&background=0A62A7&color=fff`} alt={adv.name} className="w-10 h-10 rounded-full object-cover" />
-                          <div className="overflow-hidden">
-                            <span className="font-bold text-xs block text-white truncate">{adv.name}</span>
-                            <span className="text-[10px] text-slate-400 block truncate">{adv.advisorCategory || adv.role}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
+                <div className="space-y-6">
+                  {/* Advisor Selector */}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">
+                      {advisorParam ? "Your Selected Advisor" : "Available Advisors"}
+                    </label>
+                    <div className={`grid ${advisorParam ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
+                      {(advisorParam && selectedAdvisor ? [selectedAdvisor] : activeAdvisors).map(adv => {
+                        const isSelected = selectedAdvisor?.id === adv.id;
+                        return (
+                          <button
+                            key={adv.id}
+                            onClick={() => !advisorParam && setSelectedAdvisor(adv)}
+                            className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                              isSelected
+                                ? 'bg-blue-50 border-blue-500 shadow-sm cursor-default ring-1 ring-blue-500'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            <img src={adv.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adv.name)}&background=0A62A7&color=fff`} alt={adv.name} className="w-10 h-10 rounded-full object-cover" />
+                            <div className="overflow-hidden">
+                              <span className={`font-bold text-xs block truncate ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{adv.name}</span>
+                              <span className={`text-[10px] block truncate ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>{adv.advisorCategory || adv.role}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Meeting Type Selector */}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Select Session Type</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {meetingTypes.map(m => {
+                        const isSelected = selectedMeetingType.id === m.id;
+                        const Icon = m.icon;
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedMeetingType(m)}
+                            className={`p-4 rounded-xl border text-left transition-all space-y-2 ${
+                              isSelected
+                                ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <Icon size={16} className={isSelected ? 'text-blue-600' : 'text-slate-400'} />
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                                {m.duration}
+                              </span>
+                            </div>
+                            <h4 className={`font-bold text-xs ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{m.name}</h4>
+                            <p className={`text-[11px] leading-relaxed font-medium ${isSelected ? 'text-blue-700/80' : 'text-slate-500'}`}>{m.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                {/* Meeting Type Selector */}
-                <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Select Session Type</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {meetingTypes.map(m => {
-                      const isSelected = selectedMeetingType.id === m.id;
-                      const Icon = m.icon;
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => setSelectedMeetingType(m)}
-                          className={`p-4 rounded-2xl border text-left transition-all space-y-2 ${
-                            isSelected
-                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg'
-                              : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <Icon size={18} className={isSelected ? 'text-blue-400' : 'text-slate-400'} />
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-slate-300">{m.duration}</span>
-                          </div>
-                          <h4 className="font-bold text-xs text-white">{m.name}</h4>
-                          <p className="text-[11px] text-slate-400 leading-relaxed font-medium">{m.desc}</p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="pt-4 flex justify-end">
+                <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => setStep(2)}
-                    className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-full text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30 flex items-center gap-2"
+                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-full text-[11px] uppercase tracking-widest transition-all shadow-md flex items-center gap-2"
                   >
-                    Continue to Date &amp; Time <ArrowRight size={14} />
+                    Next: Date &amp; Time <ArrowRight size={14} />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: DATE & TIME PICKER */}
+            {/* STEP 2 */}
             {step === 2 && (
-              <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="space-y-6 animate-in fade-in duration-300 flex flex-col h-full">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-1">Step 2: Select Date &amp; Time</h3>
-                    <p className="text-slate-400 text-xs font-medium">Choose an available date and time slot for your appointment.</p>
+                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-1">Step 2: Date &amp; Time</h3>
+                    <p className="text-slate-500 text-xs font-medium">Choose an available slot for your appointment.</p>
                   </div>
-                  <button onClick={() => setStep(1)} className="text-xs text-slate-400 hover:text-white underline">Back</button>
+                  <button onClick={() => setStep(1)} className="text-[11px] font-bold text-slate-400 hover:text-slate-900 uppercase tracking-wider">Back</button>
                 </div>
 
-                {/* Calendar Month Navigation */}
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
+                {/* Calendar */}
+                <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-white">
+                    <span className="font-bold text-sm text-slate-900">
                       {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </span>
                     <div className="flex items-center gap-2">
-                      <button onClick={handlePrevMonth} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white"><ChevronLeft size={16} /></button>
-                      <button onClick={handleNextMonth} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white"><ChevronRight size={16} /></button>
+                      <button onClick={handlePrevMonth} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600"><ChevronLeft size={14} /></button>
+                      <button onClick={handleNextMonth} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600"><ChevronRight size={14} /></button>
                     </div>
                   </div>
 
-                  {/* Days Grid */}
-                  <div className="grid grid-cols-7 gap-2 text-center text-xs">
+                  <div className="grid grid-cols-7 gap-1 text-center">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                      <span key={d} className="text-slate-500 font-bold py-1 text-[10px] uppercase">{d}</span>
+                      <span key={d} className="text-slate-400 font-bold py-1 text-[9px] uppercase tracking-wider">{d}</span>
                     ))}
-
                     {Array.from({ length: firstDayOfWeek }).map((_, i) => (
                       <div key={`empty-${i}`} />
                     ))}
-
                     {Array.from({ length: daysInMonth }).map((_, i) => {
                       const dayNum = i + 1;
                       const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNum);
@@ -424,42 +414,42 @@ export const BookingPage: React.FC = () => {
                       const isSelected = selectedDate?.toDateString() === dateObj.toDateString();
 
                       return (
-                        <button
-                          key={dayNum}
-                          disabled={isPast}
-                          onClick={() => setSelectedDate(dateObj)}
-                          className={`py-3 rounded-xl font-bold text-xs transition-all ${
-                            isPast
-                              ? 'text-slate-700 cursor-not-allowed'
-                              : isSelected
-                              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/40 scale-105 font-black'
-                              : 'text-slate-300 hover:bg-white/10'
-                          }`}
-                        >
-                          {dayNum}
-                        </button>
+                         <button
+                           key={dayNum}
+                           disabled={isPast}
+                           onClick={() => setSelectedDate(dateObj)}
+                           className={`py-2 rounded-lg font-bold text-xs transition-all ${
+                             isPast
+                               ? 'text-slate-300 cursor-not-allowed'
+                               : isSelected
+                               ? 'bg-slate-900 text-white shadow-md'
+                               : 'text-slate-700 hover:bg-slate-100'
+                           }`}
+                         >
+                           {dayNum}
+                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Time Slots Grid */}
+                {/* Time Slots */}
                 {selectedDate && (
                   <div className="space-y-3">
-                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">
-                      Available Time Slots for {selectedDate.toDateString()}
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                      Slots for {selectedDate.toDateString()}
                     </span>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto pr-1">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-32 overflow-y-auto pr-1">
                       {availableTimes.map((time) => {
                         const isSelected = selectedTime === time;
                         return (
                           <button
                             key={time}
                             onClick={() => setSelectedTime(time)}
-                            className={`py-2.5 rounded-xl font-bold text-xs transition-all ${
+                            className={`py-2 rounded-lg font-bold text-xs transition-all border ${
                               isSelected
-                                ? 'bg-blue-600 text-white border border-blue-400 shadow-md'
-                                : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
+                                ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                           >
                             {time}
@@ -470,129 +460,129 @@ export const BookingPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="pt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="text-xs text-slate-400 hover:text-white">Back to Advisor</button>
+                <div className="pt-2 flex justify-end mt-auto">
                   <button
                     disabled={!selectedDate || !selectedTime}
                     onClick={() => setStep(3)}
-                    className={`px-8 py-4 font-black rounded-full text-xs uppercase tracking-widest transition-all ${
+                    className={`px-6 py-3 font-black rounded-full text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 ${
                       selectedDate && selectedTime
-                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30'
-                        : 'bg-white/10 text-slate-500 cursor-not-allowed'
+                        ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                     }`}
                   >
-                    Confirm Date &amp; Time <ArrowRight size={14} className="inline ml-1" />
+                    Next: Your Details <ArrowRight size={14} />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 3: CLIENT DETAILS */}
+            {/* STEP 3 */}
             {step === 3 && (
-              <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-1">Step 3: Client Details</h3>
-                    <p className="text-slate-400 text-xs font-medium">Provide your contact details so we can send the meeting invitation.</p>
-                  </div>
-                  <button type="button" onClick={() => setStep(2)} className="text-xs text-slate-400 hover:text-white underline">Back</button>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="John Doe"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-medium text-white placeholder:text-slate-500 outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-300 flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Email Address *</label>
+                      <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-1">Step 3: Details</h3>
+                      <p className="text-slate-500 text-xs font-medium">Provide contact info for your calendar invitation.</p>
+                    </div>
+                    <button type="button" onClick={() => setStep(2)} className="text-[11px] font-bold text-slate-400 hover:text-slate-900 uppercase tracking-wider">Back</button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Full Name *</label>
                       <input
-                        type="email"
+                        type="text"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="john@example.com"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-medium text-white placeholder:text-slate-500 outline-none focus:border-blue-500"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                       />
                     </div>
-                    <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="(717) 847-9638"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-medium text-white placeholder:text-slate-500 outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Additional Notes / Topics for Discussion</label>
-                    <textarea
-                      rows={3}
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Please let us know what specific financial, real estate, or freight insurance topic you'd like to discuss..."
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-medium text-white placeholder:text-slate-500 outline-none focus:border-blue-500 resize-none"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Email Address *</label>
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="john@example.com"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Phone Number</label>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="(717) 847-9638"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Additional Notes</label>
+                      <textarea
+                        rows={2}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Topics for discussion..."
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all resize-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-4 flex justify-between items-center">
-                  <button type="button" onClick={() => setStep(2)} className="text-xs text-slate-400 hover:text-white">Back to Date</button>
+                <div className="pt-4 flex justify-end">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-full text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30 flex items-center gap-2"
+                    className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-full text-[11px] uppercase tracking-widest transition-all shadow-md shadow-blue-600/20 flex items-center gap-2"
                   >
-                    {isSubmitting ? 'Scheduling Meeting...' : 'Confirm Appointment'} <CheckCircle2 size={16} />
+                    {isSubmitting ? 'Scheduling...' : 'Confirm Appointment'} <CheckCircle2 size={14} />
                   </button>
                 </div>
               </form>
             )}
 
-            {/* STEP 4: CONFIRMATION */}
+            {/* STEP 4 */}
             {step === 4 && (
-              <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500">
-                <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                  <CheckCircle2 size={40} />
+              <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500 my-auto">
+                <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-sm ring-1 ring-emerald-100">
+                  <CheckCircle2 size={32} />
                 </div>
 
                 <div>
-                  <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-2">Appointment Confirmed!</h3>
-                  <p className="text-slate-400 text-sm font-medium max-w-md mx-auto leading-relaxed">
-                    Your discovery session with <strong className="text-white">{selectedAdvisor?.name}</strong> has been scheduled and added to their CRM calendar.
+                  <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Confirmed!</h3>
+                  <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto leading-relaxed">
+                    Your session with <strong className="text-slate-900">{selectedAdvisor?.name}</strong> is scheduled.
                   </p>
                 </div>
 
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/10 max-w-md mx-auto text-left space-y-2 text-xs">
-                  <p><strong className="text-slate-400">Date:</strong> <span className="text-white font-bold">{selectedDate?.toDateString()}</span></p>
-                  <p><strong className="text-slate-400">Time:</strong> <span className="text-white font-bold">{selectedTime}</span></p>
-                  <p><strong className="text-slate-400">Advisor:</strong> <span className="text-white font-bold">{selectedAdvisor?.name}</span> ({selectedAdvisor?.email})</p>
-                  <p><strong className="text-slate-400">Session:</strong> <span className="text-white font-bold">{selectedMeetingType.name}</span></p>
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 max-w-sm mx-auto text-left space-y-2 text-xs">
+                  <p><strong className="text-slate-500">Date:</strong> <span className="text-slate-900 font-bold">{selectedDate?.toDateString()}</span></p>
+                  <p><strong className="text-slate-500">Time:</strong> <span className="text-slate-900 font-bold">{selectedTime}</span></p>
+                  <p><strong className="text-slate-500">Advisor:</strong> <span className="text-slate-900 font-bold">{selectedAdvisor?.name}</span></p>
+                  <p><strong className="text-slate-500">Session:</strong> <span className="text-slate-900 font-bold">{selectedMeetingType.name}</span></p>
                 </div>
 
-                <div className="pt-4 flex justify-center gap-4">
+                <div className="pt-4 flex justify-center gap-3">
                   <Link
                     to="/"
-                    className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-full text-xs uppercase tracking-widest transition-all"
+                    className="px-6 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-full text-[11px] uppercase tracking-widest transition-all"
                   >
-                    Return Home
+                    Home
                   </Link>
                   <Link
                     to="/products"
-                    className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30"
+                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-full text-[11px] uppercase tracking-widest transition-all shadow-md"
                   >
-                    Explore Solutions
+                    Solutions
                   </Link>
                 </div>
               </div>
@@ -601,6 +591,10 @@ export const BookingPage: React.FC = () => {
           </div>
         </div>
 
+        {/* BOTTOM BAND */}
+        <div className="bg-slate-50 border-t border-slate-200 p-4 text-center text-[10px] text-slate-400 font-bold tracking-widest uppercase">
+          CONFIDENTIALITY NOTICE: Secure &amp; Encrypted Booking Portal
+        </div>
       </div>
     </div>
   );
