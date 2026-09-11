@@ -162,7 +162,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                     <div className={`absolute left-[15px] top-[30px] bottom-[-40px] w-0.5 transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-slate-100 group-hover:bg-slate-200'}`}></div>
                 )}
                 
-                <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
+                <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all  border-2 ${
                   isCompleted ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' :
                   isActive ? 'bg-white border-blue-600 text-blue-600 ring-4 ring-blue-50' :
                   'bg-white border-slate-200 text-slate-300'

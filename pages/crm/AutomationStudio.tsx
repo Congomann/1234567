@@ -98,10 +98,10 @@ export const AutomationStudio: React.FC = () => {
 
     const MetricCard = ({ icon: Icon, value, label, iconBg }: any) => (
         <div className="bg-white/60 backdrop-blur-2xl p-10 rounded-[3rem] shadow-[0_8px_40px_rgb(0,0,0,0.03)] border border-white/60 flex items-center gap-10 flex-1 transition-all hover:shadow-[0_20px_60px_rgb(0,0,0,0.06)] group relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-150 transition-transform duration-700">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-150 transition-transform ">
                 <Icon size={120} />
             </div>
-            <div className={`relative z-10 h-24 w-24 rounded-[2.5rem] flex items-center justify-center text-white shadow-xl group-hover:scale-105 transition-transform duration-500 ${iconBg}`}>
+            <div className={`relative z-10 h-24 w-24 rounded-[2.5rem] flex items-center justify-center text-white shadow-xl group-hover:scale-105 transition-transform  ${iconBg}`}>
                 <Icon size={44} />
             </div>
             <div className="relative z-10">
@@ -112,7 +112,7 @@ export const AutomationStudio: React.FC = () => {
     );
 
     return (
-        <div className="space-y-12 pb-24 animate-in fade-in duration-700 font-sans min-h-full">
+        <div className="space-y-12 pb-24  font-sans min-h-full">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/50 backdrop-blur-3xl p-8 rounded-[3.5rem] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
                 <div>
@@ -132,7 +132,7 @@ export const AutomationStudio: React.FC = () => {
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="bg-slate-900 text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest shadow-[0_10px_30px_rgb(15,23,42,0.3)] hover:bg-slate-800 hover:scale-105 transition-all flex items-center gap-3 active:scale-95 duration-300"
+                        className="bg-slate-900 text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest shadow-[0_10px_30px_rgb(15,23,42,0.3)] hover:bg-slate-800 hover:scale-105 transition-all flex items-center gap-3 active:scale-95 "
                     >
                         <Plus size={18} strokeWidth={4} /> Define Workflow
                     </button>
@@ -192,7 +192,7 @@ export const AutomationStudio: React.FC = () => {
                     const isSocial = wf.trigger?.includes('SOCIAL');
 
                     return (
-                        <div key={wf.id} className={`bg-white/60 backdrop-blur-xl rounded-[4rem] border shadow-[0_8px_40px_rgb(0,0,0,0.03)] overflow-hidden p-10 lg:p-16 group relative transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.06)] ${isWfProcessing ? 'border-blue-400 ring-4 ring-blue-50' : 'border-white/60'}`}>
+                        <div key={wf.id} className={`bg-white/60 backdrop-blur-xl rounded-[4rem] border shadow-[0_8px_40px_rgb(0,0,0,0.03)] overflow-hidden p-10 lg:p-16 group relative transition-all  hover:shadow-[0_20px_60px_rgb(0,0,0,0.06)] ${isWfProcessing ? 'border-blue-400 ring-4 ring-blue-50' : 'border-white/60'}`}>
                             {isWfProcessing && (
                                 <div className="absolute top-0 right-0 p-12">
                                     <span className="flex h-5 w-5">
@@ -241,7 +241,7 @@ export const AutomationStudio: React.FC = () => {
                                                 const isStepActive = isWfProcessing && processingLeads.some(p => p.activeNode === act);
                                                 return (
                                                     <React.Fragment key={i}>
-                                                        <div className={`px-6 py-4 rounded-2xl shadow-xl flex items-center justify-center min-w-[140px] shrink-0 transform transition-all duration-500 ${isStepActive
+                                                        <div className={`px-6 py-4 rounded-2xl shadow-xl flex items-center justify-center min-w-[140px] shrink-0 transform transition-all  ${isStepActive
                                                                 ? 'bg-blue-600 scale-105 ring-4 ring-blue-500/30 text-white'
                                                                 : 'bg-slate-800 border border-slate-700 text-slate-300 opacity-80 hover:opacity-100'
                                                             }`}>
@@ -302,8 +302,8 @@ export const AutomationStudio: React.FC = () => {
 
             {/* Workflow Architect Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-2xl p-6 animate-in fade-in duration-300">
-                    <div className="bg-white/90 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl w-full max-w-5xl p-12 md:p-16 relative border border-white/60 animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-2xl p-6 ">
+                    <div className="bg-white/90 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl w-full max-w-5xl p-12 md:p-16 relative border border-white/60 animate-in zoom-in-95 ">
                         <button
                             onClick={() => setIsModalOpen(false)}
                             disabled={isDeploying}
@@ -313,7 +313,7 @@ export const AutomationStudio: React.FC = () => {
                         </button>
 
                         {deploymentSuccess ? (
-                            <div className="text-center py-20 animate-in zoom-in-95 duration-500">
+                            <div className="text-center py-20 animate-in zoom-in-95 ">
                                 <div className="w-28 h-28 bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner animate-bounce">
                                     <CheckCircle2 size={64} />
                                 </div>

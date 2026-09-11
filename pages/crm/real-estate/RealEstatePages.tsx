@@ -98,7 +98,7 @@ export const PropertyPipeline: React.FC = () => {
                             <img 
                                 src={prop.image || '/assets/products/realestate.png'} 
                                 alt={prop.address} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform " 
                             />
                             <div className="absolute top-4 right-4">
                                 <StatusBadge status={prop.status} />

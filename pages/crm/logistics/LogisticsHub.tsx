@@ -198,7 +198,7 @@ export const LogisticsHub: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-10 ">
       <Tab3DBanner
         cards={[
           { title: "Active Freight Loads", value: loads.length + " Freight Loads", subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board", linkPath: "#load_board" },
@@ -235,7 +235,7 @@ export const LogisticsHub: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {getStats().map((stat, i) => (
-          <div key={i} className="bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 group">
+          <div key={i} className="bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all  group">
             <div className="flex items-center justify-between mb-4">
               <div className={"p-3 rounded-2xl " + stat.bg + " " + stat.color + " group-hover:scale-110 transition-transform"}>
                 <stat.icon size={20} />

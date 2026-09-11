@@ -705,7 +705,7 @@ export const Leads: React.FC = () => {
                                         </div>
                                         <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4">Neural Lead Score: {viewingLead.score}</h3>
                                         <div className="w-full bg-white/10 rounded-full h-2 mb-6">
-                                            <div className="bg-gradient-to-r from-blue-400 to-emerald-400 h-2 rounded-full transition-all duration-1000" style={{ width: `${viewingLead.score}%` }}></div>
+                                            <div className="bg-gradient-to-r from-blue-400 to-emerald-400 h-2 rounded-full transition-all " style={{ width: `${viewingLead.score}%` }}></div>
                                         </div>
                                         <div className="space-y-4">
                                             <p className="text-xs text-blue-100 font-medium leading-relaxed italic">

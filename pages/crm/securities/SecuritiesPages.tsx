@@ -372,7 +372,7 @@ export const AdvisoryFees: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left: Fees Collected */}
                 <div className="bg-gradient-to-br from-[#10B981] to-[#059669] p-10 rounded-[2.5rem] text-white shadow-2xl shadow-emerald-500/20 flex flex-col justify-between h-56 relative overflow-hidden group">
-                    <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                    <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform ">
                         <DollarSign size={180} strokeWidth={3} />
                     </div>
                     <div className="flex justify-between items-start relative z-10">
@@ -453,7 +453,7 @@ export const AdvisoryFees: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-8 py-7 text-right">
-                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all ">
                                             {fee.status !== 'Paid' && (
                                                 <button 
                                                     onClick={() => updateFeeStatus(fee.id, 'Paid')}

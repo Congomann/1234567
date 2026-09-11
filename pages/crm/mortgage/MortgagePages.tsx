@@ -165,7 +165,7 @@ export const LoanApplications: React.FC = () => {
                                         <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-0.5">{loan.ltv}% LTV</div>
                                     </td>
                                     <td className="px-10 py-8 text-right">
-                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all ">
                                             <button 
                                                 onClick={() => setViewingLoan(loan)}
                                                 className="text-[#0A62A7] font-black text-sm hover:underline flex items-center gap-1.5 bg-blue-50 px-4 py-2 rounded-xl"
@@ -425,7 +425,7 @@ export const RateTools: React.FC = () => {
             </div>
 
             <div className="bg-[#0B2240] text-white p-12 rounded-[4rem] shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity duration-1000 rotate-12 scale-150"><Percent size={220} /></div>
+                <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity  rotate-12 scale-150"><Percent size={220} /></div>
                 <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="p-4 bg-white/10 rounded-3xl backdrop-blur-md">

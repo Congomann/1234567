@@ -117,7 +117,7 @@ const CampaignModal = ({ audiences, onClose, onCreated }: { audiences: Audience[
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 ">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-black text-slate-900">New Campaign</h3>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors"><X size={20} /></button>
@@ -194,7 +194,7 @@ const AudienceModal = ({ onClose, onCreated }: { onClose: () => void, onCreated:
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 ">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-black text-slate-900">Create Audience Segment</h3>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors"><X size={20} /></button>
@@ -346,7 +346,7 @@ export const CampaignManager: React.FC = () => {
     <div className="space-y-8 font-sans">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top-2 duration-300 flex items-center gap-2">
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top-2  flex items-center gap-2">
           <CheckCircle size={16} className="text-emerald-400" /> {toast}
         </div>
       )}
@@ -382,7 +382,7 @@ export const CampaignManager: React.FC = () => {
         <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-full overflow-x-auto">
           {(['dashboard','attribution','campaigns','audiences','email','social','payments'] as Tab[]).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 capitalize whitespace-nowrap ${
+              className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all  capitalize whitespace-nowrap ${
                 activeTab === tab ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
               }`}
             >{tab}</button>
@@ -411,7 +411,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── DASHBOARD ── */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8 ">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black text-slate-900">Campaign ROI Dashboard</h3>
               <button onClick={fetchAll} className="flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full text-xs font-bold uppercase tracking-widest transition-all">
@@ -469,7 +469,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── CAMPAIGNS ── */}
         {activeTab === 'campaigns' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 ">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black text-slate-900">Campaign Creator</h3>
               <button onClick={() => setShowCampaignModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
@@ -537,7 +537,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── AUDIENCES ── */}
         {activeTab === 'audiences' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 ">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black text-slate-900">Audience Builder</h3>
               <button onClick={() => setShowAudienceModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
@@ -588,7 +588,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── EMAIL BLAST ── */}
         {activeTab === 'email' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8 ">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Composer */}
               <div>
@@ -669,7 +669,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── SOCIAL ── */}
         {activeTab === 'social' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 ">
             <h3 className="text-2xl font-black text-slate-900">Social Listening & Mentions</h3>
             <SocialMentions />
           </div>
@@ -677,7 +677,7 @@ export const CampaignManager: React.FC = () => {
 
         {/* ── PAYMENTS ── */}
         {activeTab === 'payments' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 ">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black text-slate-900">Campaign Payments & Billing</h3>
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">

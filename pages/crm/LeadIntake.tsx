@@ -199,7 +199,7 @@ export const LeadIntake: React.FC = () => {
                     <button
                         key={pt}
                         onClick={() => handleProductChange(pt)}
-                        className={`flex items-center gap-2 px-6 py-4 rounded-[2rem] text-sm font-bold transition-all duration-300 ${
+                        className={`flex items-center gap-2 px-6 py-4 rounded-[2rem] text-sm font-bold transition-all  ${
                             isActive 
                             ? 'bg-[#0A62A7] text-white shadow-xl transform scale-105' 
                             : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-100 hover:border-slate-200'

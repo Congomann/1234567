@@ -74,7 +74,7 @@ export const LoadPostingTerminal: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-12 animate-in fade-in duration-700">
+    <div className="min-h-screen bg-slate-50 p-6 md:p-12 ">
       <div className="max-w-6xl mx-auto">
         
         {/* HEADER */}
@@ -323,8 +323,8 @@ export const LoadPostingTerminal: React.FC = () => {
 
       {/* SUCCESS OVERLAY */}
       {success && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-500">
-           <div className="bg-white rounded-[3.5rem] p-16 text-center max-w-sm shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-500">
+        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-md flex items-center justify-center ">
+           <div className="bg-white rounded-[3.5rem] p-16 text-center max-w-sm shadow-2xl shadow-black/20 animate-in zoom-in-95 ">
               <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-500/10">
                  <CheckCircle2 size={40} />
               </div>

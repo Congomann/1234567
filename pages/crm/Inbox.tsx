@@ -74,7 +74,7 @@ export const Inbox: React.FC = () => {
             <nav className="space-y-2">
                 <button 
                     onClick={() => setFilterType('new')} 
-                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${filterType === 'new' ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all  ${filterType === 'new' ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
                 >
                     <span className="flex items-center">
                         <InboxIcon className="h-5 w-5 mr-3" />
@@ -89,7 +89,7 @@ export const Inbox: React.FC = () => {
 
                 <button 
                     onClick={() => setFilterType('active')} 
-                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${filterType === 'active' ? 'bg-white text-orange-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all  ${filterType === 'active' ? 'bg-white text-orange-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
                 >
                     <span className="flex items-center">
                         <Clock className="h-5 w-5 mr-3" />
@@ -104,7 +104,7 @@ export const Inbox: React.FC = () => {
 
                 <button 
                     onClick={() => setFilterType('closed')} 
-                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${filterType === 'closed' ? 'bg-white text-green-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] text-sm font-bold transition-all  ${filterType === 'closed' ? 'bg-white text-green-600 shadow-md' : 'text-slate-500 hover:bg-white/40'}`}
                 >
                     <span className="flex items-center">
                         <Archive className="h-5 w-5 mr-3" />
@@ -121,7 +121,7 @@ export const Inbox: React.FC = () => {
                 <div 
                     key={lead.id} 
                     onClick={() => setSelectedLeadId(lead.id)}
-                    className={`cursor-pointer border-b border-white/20 p-6 transition-all duration-300 ${selectedLeadId === lead.id ? 'bg-white/60 backdrop-blur-xl' : 'hover:bg-white/30'}`}
+                    className={`cursor-pointer border-b border-white/20 p-6 transition-all  ${selectedLeadId === lead.id ? 'bg-white/60 backdrop-blur-xl' : 'hover:bg-white/30'}`}
                 >
                     <div className="flex justify-between items-baseline mb-2">
                         <span className={`truncate text-sm ${lead.status === LeadStatus.NEW ? 'text-[#0B2240] font-black' : 'text-slate-600 font-bold'}`}>{lead.name}</span>

@@ -200,7 +200,7 @@ export const AdvisorResources: React.FC = () => {
           <div
             key={resource.id}
             onClick={() => setSelectedResourceId(resource.id)}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-pointer overflow-hidden"
+            className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all  flex flex-col group cursor-pointer overflow-hidden"
           >
             <div className="relative h-40 bg-slate-100 overflow-hidden">
               {playingVideoId === resource.id ? (
@@ -224,9 +224,9 @@ export const AdvisorResources: React.FC = () => {
               ) : (
                 <>
                   {resource.thumbnail ? (
-                    <img src={resource.thumbnail} alt={resource.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={resource.thumbnail} alt={resource.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform " />
                   ) : resource.type === "YouTube" ? (
-                    <img src={`https://img.youtube.com/vi/${getYoutubeId(resource.url)}/hqdefault.jpg`} alt={resource.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={`https://img.youtube.com/vi/${getYoutubeId(resource.url)}/hqdefault.jpg`} alt={resource.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform " />
                   ) : resource.type === "Video" ? (
                     <video className="w-full h-full object-cover" src={resource.url} muted onMouseOver={(e) => (e.target as HTMLVideoElement).play()} onMouseOut={(e) => { (e.target as HTMLVideoElement).pause(); (e.target as HTMLVideoElement).currentTime = 0; }} />
                   ) : (

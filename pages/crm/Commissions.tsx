@@ -97,8 +97,8 @@ export const Commissions: React.FC = () => {
 
       {/* Top Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#10B981] p-8 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-          <div className="absolute -right-6 -top-6 p-8 opacity-10 transform group-hover:rotate-12 transition-transform duration-500">
+        <div className="bg-[#10B981] p-8 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform ">
+          <div className="absolute -right-6 -top-6 p-8 opacity-10 transform group-hover:rotate-12 transition-transform ">
             <Wallet className="h-32 w-32 text-white" />
           </div>
           <div className="relative z-10 flex flex-col h-full justify-between">
@@ -118,7 +118,7 @@ export const Commissions: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-lg transition-all  group relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity opacity-50 group-hover:opacity-100"></div>
           <div className="flex justify-between items-start mb-4 relative z-10">
             <div>
@@ -132,7 +132,7 @@ export const Commissions: React.FC = () => {
           <p className="text-sm text-slate-500 font-medium relative z-10">Commission average</p>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-lg transition-all  group relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity opacity-50 group-hover:opacity-100"></div>
           <div className="flex justify-between items-start mb-4 relative z-10">
             <div>
@@ -148,7 +148,7 @@ export const Commissions: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="bg-white p-12 rounded-[4rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.03)] border border-slate-100 h-[32rem] flex flex-col transition-all duration-500 group relative">
+        <div className="bg-white p-12 rounded-[4rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.03)] border border-slate-100 h-[32rem] flex flex-col transition-all  group relative">
           <div className="mb-10">
             <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Earnings by Product</h3>
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] mt-1">Transaction Yield Matrix</p>
@@ -186,7 +186,7 @@ export const Commissions: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-12 rounded-[4rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.03)] border border-slate-100 h-[32rem] flex flex-col transition-all duration-500 group relative">
+        <div className="bg-white p-12 rounded-[4rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.03)] border border-slate-100 h-[32rem] flex flex-col transition-all  group relative">
           <div className="mb-2">
             <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Portfolio Mix</h3>
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] mt-1">Concentration of Services</p>
