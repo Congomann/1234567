@@ -29,7 +29,7 @@ router.get('/google/oauth/callback', async (req, res) => {
       .update({ status: 'connected' })
       .eq('platform', 'google');
     // Redirect back to frontend
-    res.redirect('http://localhost:5173/crm/admin/marketing?integration=google_success');
+    res.redirect('https://newhollandfinancial.com/crm/admin/marketing?integration=google_success');
   } catch (err) {
     res.status(500).send('OAuth Failed');
   }
@@ -52,7 +52,7 @@ router.get('/linkedin/oauth/callback', async (req, res) => {
       .update({ status })
       .eq('platform', 'linkedin');
     
-    res.redirect(`http://localhost:5173/crm/admin/marketing?integration=linkedin_${status}`);
+    res.redirect(`https://newhollandfinancial.com/crm/admin/marketing?integration=linkedin_${status}`);
   } catch (err) {
     res.status(500).send('OAuth Failed');
   }
@@ -69,7 +69,7 @@ router.get('/tiktok/oauth/callback', async (req, res) => {
     await supabase.from('integration_health')
       .update({ status: 'connected' })
       .eq('platform', 'tiktok');
-    res.redirect('http://localhost:5173/crm/admin/marketing?integration=tiktok_success');
+    res.redirect('https://newhollandfinancial.com/crm/admin/marketing?integration=tiktok_success');
   } catch (err) {
     res.status(500).send('OAuth Failed');
   }
@@ -109,7 +109,7 @@ router.get('/meta/oauth/callback', async (req, res) => {
 
     await supabase.from('integration_health').upsert([{ platform: 'meta', status: 'connected' }]);
 
-    res.redirect('http://localhost:5173/crm/admin/marketing?integration=meta_success');
+    res.redirect('https://newhollandfinancial.com/crm/admin/marketing?integration=meta_success');
   } catch (err) {
     res.status(500).send('OAuth Failed');
   }
