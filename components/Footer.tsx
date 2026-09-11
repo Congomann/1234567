@@ -58,12 +58,12 @@ export const Footer: React.FC = () => {
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder="Enter your email address"
-                    className="w-full pl-12 pr-6 py-3.5 bg-slate-900/60 border border-slate-800 rounded-full text-xs font-semibold text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-inner"
+                    className="w-full pl-12 pr-6 py-3.5 bg-[#0c0d12]/60 border border-slate-800 rounded-full text-xs font-semibold text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all shadow-inner"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-xs uppercase tracking-wider transition-all shadow-md shrink-0 flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-slate-600 hover:bg-slate-500 text-white font-bold rounded-full text-xs uppercase tracking-wider transition-all shadow-md shrink-0 flex items-center justify-center gap-2"
                 >
                   Subscribe <ArrowRight size={13} />
                 </button>
@@ -91,7 +91,7 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex flex-col">
                 <span className="font-black text-lg text-white tracking-tighter leading-none uppercase">NEW HOLLAND</span>
-                <span className="text-[9px] font-black text-blue-400 tracking-widest uppercase">FINANCIAL GROUP</span>
+                <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">FINANCIAL GROUP</span>
               </div>
             </Link>
 
@@ -102,19 +102,19 @@ export const Footer: React.FC = () => {
             <div className="space-y-3">
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">FOLLOW US</h4>
               <div className="flex items-center gap-3">
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
                   <Facebook size={14} />
                 </a>
-                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
                   <Twitter size={14} />
                 </a>
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
                   <Linkedin size={14} />
                 </a>
-                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
                   <Instagram size={14} />
                 </a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all">
                   <Youtube size={14} />
                 </a>
               </div>
@@ -263,8 +263,8 @@ export const Footer: React.FC = () => {
             <div className="space-y-1">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">DIRECT EMAIL</span>
               <div className="text-white text-sm flex flex-col gap-1 transition-colors">
-                <a href="mailto:info@newhollandfinancial.com" className="hover:text-blue-400 font-bold truncate">info@nhfg.com</a>
-                <a href="mailto:sales@newhollandfinancial.com" className="hover:text-blue-400 font-bold text-slate-400 truncate">sales@nhfg.com</a>
+                <a href="mailto:info@newhollandfinancial.com" className="hover:text-slate-400 font-bold truncate">info@nhfg.com</a>
+                <a href="mailto:sales@newhollandfinancial.com" className="hover:text-slate-400 font-bold text-slate-400 truncate">sales@nhfg.com</a>
               </div>
             </div>
 

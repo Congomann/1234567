@@ -216,7 +216,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-4">
               <button 
                 onClick={handleAuthAction}
-                className="hidden lg:flex bg-slate-900 text-white hover:bg-black px-6 py-2.5 rounded-full text-[11px] font-black items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10 uppercase tracking-widest"
+                className="hidden lg:flex bg-[#0c0d12] text-white hover:bg-black px-6 py-2.5 rounded-full text-[11px] font-black items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10 uppercase tracking-widest"
               >
                 <User size={13} className="opacity-70" /> 
                 {user ? (user.role === UserRole.CLIENT ? 'Portal' : 'Console') : 'Sign In'}
@@ -255,7 +255,7 @@ export const Navbar: React.FC = () => {
                                 onClick={() => setIsServicesOpen(false)}
                                 className="group flex items-center gap-3 py-2 text-slate-600 hover:text-black transition-colors"
                               >
-                                {item.icon && <item.icon size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />}
+                                {item.icon && <item.icon size={16} className="text-slate-300 group-hover:text-slate-500 transition-colors" />}
                                 <span className="text-[13px] font-bold tracking-tight">{item.label}</span>
                               </Link>
                             </li>
@@ -279,7 +279,7 @@ export const Navbar: React.FC = () => {
                     <Link 
                       to="/logistics"
                       onClick={() => setIsServicesOpen(false)}
-                      className="inline-flex items-center gap-2 text-[11px] font-black text-blue-600 uppercase tracking-widest hover:gap-4 transition-all group pt-8"
+                      className="inline-flex items-center gap-2 text-[11px] font-black text-slate-600 uppercase tracking-widest hover:gap-4 transition-all group pt-8"
                     >
                       Get Started 
                       <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -313,7 +313,7 @@ export const Navbar: React.FC = () => {
                     key={link.label}
                     to={link.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className="block text-4xl font-black text-slate-900 tracking-tighter hover:text-blue-600 transition-colors"
+                    className="block text-4xl font-black text-slate-900 tracking-tighter hover:text-slate-600 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -346,7 +346,7 @@ export const Navbar: React.FC = () => {
 
             <button 
               onClick={handleAuthAction}
-              className="w-full bg-slate-900 text-white py-6 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl"
+              className="w-full bg-[#0c0d12] text-white py-6 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl"
             >
               Initialize Console
             </button>

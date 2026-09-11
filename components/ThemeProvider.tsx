@@ -9,7 +9,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
   const primary = companySettings.themePrimaryColor || '#2563EB'; // default blue-600 equivalent
-  const secondary = companySettings.themeSecondaryColor || '#0B2240'; // default navy
+  const secondary = companySettings.themeSecondaryColor || '#0c0d12'; // default navy
   const structure = companySettings.themeStructure || 'default';
 
   const customCSS = `
@@ -30,9 +30,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     .bg-blue-50 { background-color: color-mix(in srgb, var(--color-primary) 10%, transparent) !important; }
 
     /* Global Secondary Overrides (replacing dark navy blocks like Footer, NavBar, Hero gradient) */
-    .bg-\\[\\#0B2240\\] { background-color: var(--color-secondary) !important; }
-    .text-\\[\\#0B2240\\] { color: var(--color-secondary) !important; }
-    .border-\\[\\#0B2240\\] { border-color: var(--color-secondary) !important; }
+    .bg-\\[\\#0c0d12\\] { background-color: var(--color-secondary) !important; }
+    .text-\\[\\#0c0d12\\] { color: var(--color-secondary) !important; }
+    .border-\\[\\#0c0d12\\] { border-color: var(--color-secondary) !important; }
 
     /* Structural Theme Variations */
     ${structure === 'modern' ? `

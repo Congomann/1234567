@@ -202,7 +202,7 @@ export const AdminAnalytics: React.FC = () => {
                                 <Target size={22} />
                             </div>
                             <div>
-                                <h3 className="text-base font-black text-[#0B2240] tracking-tight">
+                                <h3 className="text-base font-black text-[#0c0d12] tracking-tight">
                                     User / IP Intelligence & Behavioral Profile Inspector
                                 </h3>
                                 <p className="text-xs text-slate-400 font-medium">
@@ -264,7 +264,7 @@ export const AdminAnalytics: React.FC = () => {
                         </div>
                         <button
                             onClick={() => handleInspect(inspectorInput)}
-                            className="px-8 py-4 bg-[#0B2240] hover:bg-blue-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 flex items-center justify-center gap-2"
+                            className="px-8 py-4 bg-[#0c0d12] hover:bg-blue-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 flex items-center justify-center gap-2"
                         >
                             <Target size={16} />
                             <span>Inspect Profile</span>
@@ -444,7 +444,7 @@ export const AdminAnalytics: React.FC = () => {
                 </div>
 
                 {/* Tracking Snippet Section */}
-                <div className="bg-[#0B2240] rounded-[3rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-blue-900/40">
+                <div className="bg-[#0c0d12] rounded-[3rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-blue-900/40">
                     <div className="absolute top-0 right-0 p-12 opacity-5"><Activity size={200} strokeWidth={1} /></div>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
                         <div>

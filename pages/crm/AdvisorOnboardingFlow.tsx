@@ -132,7 +132,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="font-black text-xl text-[#0B2240] tracking-tight leading-none">NEW HOLLAND</span>
+            <span className="font-black text-xl text-[#0c0d12] tracking-tight leading-none">NEW HOLLAND</span>
             <span className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-[0.2em] mt-0.5">FINANCIAL GROUP</span>
           </div>
         </div>
@@ -171,7 +171,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col">
-                  <span className={`text-sm font-black transition-colors ${isActive ? 'text-[#0B2240]' : isCompleted ? 'text-slate-700' : 'text-slate-400'}`}>
+                  <span className={`text-sm font-black transition-colors ${isActive ? 'text-[#0c0d12]' : isCompleted ? 'text-slate-700' : 'text-slate-400'}`}>
                     {step.label}
                   </span>
                   <span className="text-[11px] font-bold text-slate-400 leading-tight mt-1">
@@ -206,7 +206,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                         <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner animate-bounce-subtle">
                             <User className="h-10 w-10" />
                         </div>
-                        <h1 className="text-4xl font-black text-[#0B2240] tracking-tight mb-4">Welcome to the Team!</h1>
+                        <h1 className="text-4xl font-black text-[#0c0d12] tracking-tight mb-4">Welcome to the Team!</h1>
                         <p className="text-lg text-slate-500 max-w-md mx-auto leading-relaxed font-medium">
                             We are thrilled to have you onboard New Holland Financial Group. Before you access your advisor terminal, we need to finalize a few legal formalities.
                         </p>
@@ -219,7 +219,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-sm"><FileText className="h-6 w-6"/></div>
                         <div>
-                            <h1 className="text-xl font-black text-[#0B2240] uppercase tracking-widest">NHFG Terms of Use</h1>
+                            <h1 className="text-xl font-black text-[#0c0d12] uppercase tracking-widest">NHFG Terms of Use</h1>
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Legal Requirement</p>
                         </div>
                     </div>
@@ -235,7 +235,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                         <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                             <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 shadow-sm"><ShieldAlert className="h-6 w-6"/></div>
                             <div>
-                                <h1 className="text-xl font-black text-[#0B2240] uppercase tracking-widest">Independent Contractor Agreement</h1>
+                                <h1 className="text-xl font-black text-[#0c0d12] uppercase tracking-widest">Independent Contractor Agreement</h1>
                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Solicitor Provisions</p>
                             </div>
                         </div>
@@ -251,7 +251,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
                             <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm"><PenTool className="h-6 w-6"/></div>
                             <div>
-                                <h1 className="text-xl font-black text-[#0B2240] uppercase tracking-widest">Digital Signature</h1>
+                                <h1 className="text-xl font-black text-[#0c0d12] uppercase tracking-widest">Digital Signature</h1>
                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Execute Agreements</p>
                             </div>
                         </div>
@@ -299,7 +299,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                             <div className="absolute inset-0 bg-green-500 blur-3xl opacity-20 animate-pulse"></div>
                             <CheckCircle2 className="h-24 w-24 text-green-500 relative" />
                         </div>
-                        <h2 className="text-4xl font-black text-[#0B2240] tracking-tight">Onboarding Complete</h2>
+                        <h2 className="text-4xl font-black text-[#0c0d12] tracking-tight">Onboarding Complete</h2>
                         <p className="text-lg text-slate-500 mt-4 max-w-sm mx-auto font-medium">
                             Your agreements have been signed and filed. We have pre-populated your <span className="text-blue-600 font-bold">Strategic Priorities</span> on your dashboard to help you launch your advisor presence today.
                         </p>
@@ -373,7 +373,7 @@ export const AdvisorOnboardingFlow: React.FC = () => {
                   className={`flex items-center gap-2 px-12 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] transition-all ${
                     isNextDisabled() 
                     ? 'bg-slate-100 text-slate-300 cursor-not-allowed border border-slate-200' 
-                    : 'bg-[#0B2240] text-white shadow-2xl shadow-blue-900/20 hover:bg-blue-900 hover:scale-105 active:scale-95 transform'
+                    : 'bg-[#0c0d12] text-white shadow-2xl shadow-blue-900/20 hover:bg-blue-900 hover:scale-105 active:scale-95 transform'
                   }`}
                 >
                   {currentStepIndex === STEPS.length - 1 ? 'Enter Portal' : 'Next Step'} <ChevronRight className="h-4 w-4" />

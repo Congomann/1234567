@@ -66,7 +66,7 @@ export const GroupBenefits: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Premium Hero Section */}
-      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0B2240]">
+      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0c0d12]">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-transparent"></div>
         <div className="absolute h-[500px] w-[500px] bg-emerald-500/10 blur-[120px] rounded-full -top-48 -right-24 animate-pulse"></div>
         
@@ -77,16 +77,16 @@ export const GroupBenefits: React.FC = () => {
             </span>
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8 leading-[1.1]">
               Elevating the <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">Corporate Standard.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-slate-400">Corporate Standard.</span>
             </h1>
-            <p className="text-xl text-blue-100/70 leading-relaxed max-w-2xl mx-auto font-medium mb-12">
+            <p className="text-xl text-slate-100/70 leading-relaxed max-w-2xl mx-auto font-medium mb-12">
               Bespoke benefit ecosystems engineered to attract elite talent 
               and protect your organization's most valuable assets.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button 
                 onClick={() => document.getElementById('benefits-grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 bg-white text-[#0B2240] rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-white/90 transition-all active:scale-95"
+                className="px-10 py-5 bg-white text-[#0c0d12] rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-white/90 transition-all active:scale-95"
               >
                 View Solutions
               </button>
@@ -124,7 +124,7 @@ export const GroupBenefits: React.FC = () => {
 
         {/* Two Pillar Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-32">
-          <div className="bg-[#0B2240] p-16 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
+          <div className="bg-[#0c0d12] p-16 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-1000"></div>
             <h2 className="text-4xl font-black mb-10 tracking-tighter">For Employers</h2>
             <ul className="space-y-8">
@@ -133,19 +133,19 @@ export const GroupBenefits: React.FC = () => {
                   <div className="mt-1 p-2 bg-emerald-500/20 rounded-xl">
                     <CheckCircle className="w-6 h-6 text-emerald-400" />
                   </div>
-                  <span className="text-blue-100/80 font-bold leading-relaxed">{item}</span>
+                  <span className="text-slate-100/80 font-bold leading-relaxed">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
           <div className="bg-white p-16 rounded-[4rem] border border-slate-200 shadow-sm relative overflow-hidden group">
              <div className="absolute top-0 right-0 w-48 h-48 bg-slate-100 rounded-full -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-1000"></div>
-            <h2 className="text-4xl font-black text-[#0B2240] mb-10 tracking-tighter">For Employees</h2>
+            <h2 className="text-4xl font-black text-[#0c0d12] mb-10 tracking-tighter">For Employees</h2>
             <ul className="space-y-8">
               {employeeBenefits.map((item, i) => (
                 <li key={i} className="flex items-start gap-5">
                   <div className="mt-1 p-2 bg-slate-100 rounded-xl">
-                    <CheckCircle className="w-6 h-6 text-[#0B2240]" />
+                    <CheckCircle className="w-6 h-6 text-[#0c0d12]" />
                   </div>
                   <span className="text-slate-600 font-bold leading-relaxed">{item}</span>
                 </li>

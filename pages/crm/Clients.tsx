@@ -128,7 +128,7 @@ export const Clients: React.FC = () => {
         <div className="space-y-8 pb-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-[#0B2240] tracking-tight">Client Management</h1>
+                    <h1 className="text-4xl font-black text-[#0c0d12] tracking-tight">Client Management</h1>
                     <p className="text-slate-500 font-bold mt-1 uppercase tracking-wider text-xs">Monitor policies and renewal cycles.</p>
                 </div>
                 <button
@@ -275,7 +275,7 @@ export const Clients: React.FC = () => {
 
             {/* Edit / Details Modal */}
             {editingClient && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-xl p-4 md:p-6 animate-fade-in overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/70 backdrop-blur-xl p-4 md:p-6 animate-fade-in overflow-y-auto">
                     <div className={`bg-white rounded-[3.5rem] shadow-2xl w-full p-8 md:p-12 relative max-h-[92vh] overflow-y-auto border border-white/20 my-auto transition-all ${
                         modalTab === 'carrier_policy' ? 'max-w-4xl' : 'max-w-2xl'
                     }`}>
@@ -285,7 +285,7 @@ export const Clients: React.FC = () => {
                                     <Edit2 className="h-8 w-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">
+                                    <h2 className="text-3xl font-black text-[#0c0d12] tracking-tight">
                                         {modalTab === 'carrier_policy'
                                             ? 'Carrier API Policy Integration'
                                             : modalTab === 'chat'
@@ -382,7 +382,7 @@ export const Clients: React.FC = () => {
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-black text-slate-500 uppercase mb-3 ml-2">Master Policy Number</label>
                                             <input
-                                                className="w-full bg-blue-50/30 text-[#0B2240] border-2 border-blue-100 rounded-2xl px-6 py-6 text-2xl font-black font-mono focus:ring-4 focus:ring-blue-200 outline-none transition-all"
+                                                className="w-full bg-blue-50/30 text-[#0c0d12] border-2 border-blue-100 rounded-2xl px-6 py-6 text-2xl font-black font-mono focus:ring-4 focus:ring-blue-200 outline-none transition-all"
                                                 value={editForm.policyNumber || ''}
                                                 onChange={e => setEditForm({ ...editForm, policyNumber: e.target.value })}
                                             />
@@ -428,7 +428,7 @@ export const Clients: React.FC = () => {
 
                                 <div className="pt-10 flex gap-6">
                                     <button type="button" onClick={() => setEditingClient(null)} className="flex-1 py-6 rounded-full font-black text-slate-400 bg-slate-100 hover:bg-slate-200 transition-all uppercase tracking-widest text-xs">Discard</button>
-                                    <button type="submit" className="flex-1 py-6 rounded-full font-black bg-[#0B2240] text-white hover:bg-blue-800 transition-all shadow-2xl shadow-blue-900/30 transform active:scale-95 uppercase tracking-widest text-xs">Commit Updates</button>
+                                    <button type="submit" className="flex-1 py-6 rounded-full font-black bg-[#0c0d12] text-white hover:bg-blue-800 transition-all shadow-2xl shadow-blue-900/30 transform active:scale-95 uppercase tracking-widest text-xs">Commit Updates</button>
                                 </div>
                             </form>
                         )}

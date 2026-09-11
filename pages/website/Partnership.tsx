@@ -180,7 +180,7 @@ export const Partnership: React.FC = () => {
   const estimatedPolicyCount = (advisorCount * monthlyVolume * 12).toLocaleString();
 
   return (
-    <div className="bg-slate-50 font-sans min-h-screen selection:bg-blue-500 selection:text-white">
+    <div className="bg-slate-50 font-sans min-h-screen selection:bg-slate-500 selection:text-white">
       <SEO 
         title="Partnerships & Carriers | New Holland Financial Group" 
         description="Partner with New Holland Financial Group. Connect your insurance carrier, freight logistics network, mortgage lending desk, or fintech API to our 48-state advisor distribution network." 
@@ -188,17 +188,17 @@ export const Partnership: React.FC = () => {
       
       {/* 1. HERO SECTION */}
       <div className="relative bg-[#050A14] py-32 overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-[#050A14] to-[#050A14] pointer-events-none"></div>
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900/30 via-[#050A14] to-[#050A14] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-slate-500/10 rounded-full blur-[140px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black tracking-widest uppercase mb-8 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-500/10 border border-slate-500/20 text-slate-400 text-xs font-black tracking-widest uppercase mb-8 backdrop-blur-md">
             <Handshake size={14} /> Institutional B2B Distribution Platform
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tighter leading-tight">
             Partner with <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 via-cyan-300 to-emerald-400">
               New Holland Financial
             </span>
           </h1>
@@ -211,7 +211,7 @@ export const Partnership: React.FC = () => {
                 setShowDemoModal(true);
                 handleExecuteApiSandbox();
               }}
-              className="px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-600/30 hover:scale-105 active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+              className="px-8 py-4 rounded-full bg-slate-600 hover:bg-slate-500 text-white font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-slate-600/30 hover:scale-105 active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
             >
               <PlayCircle size={18} />
               Test Drive API Sandbox
@@ -236,7 +236,7 @@ export const Partnership: React.FC = () => {
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active State Jurisdictions</span>
             </div>
             <div>
-              <span className="block text-3xl md:text-4xl font-black text-blue-600 tracking-tight">14+</span>
+              <span className="block text-3xl md:text-4xl font-black text-slate-600 tracking-tight">14+</span>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tier-1 Institutional Partners</span>
             </div>
             <div>
@@ -276,7 +276,7 @@ export const Partnership: React.FC = () => {
                   onClick={() => setActiveCategory(tab.id as any)}
                   className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all ${
                     activeCategory === tab.id
-                      ? 'bg-[#0B2240] text-white shadow-md'
+                      ? 'bg-[#0c0d12] text-white shadow-md'
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
@@ -315,9 +315,9 @@ export const Partnership: React.FC = () => {
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
                     <span className="flex items-center gap-1.5 text-slate-600">
-                      <Globe size={14} className="text-blue-600" /> 50 States Active
+                      <Globe size={14} className="text-slate-600" /> 50 States Active
                     </span>
-                    <span className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1" onClick={() => setShowDemoModal(true)}>
+                    <span className="text-slate-600 hover:underline cursor-pointer flex items-center gap-1" onClick={() => setShowDemoModal(true)}>
                       API Quoting <ChevronRight size={12} />
                     </span>
                   </div>
@@ -326,7 +326,7 @@ export const Partnership: React.FC = () => {
             </div>
           ) : (
             <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center max-w-2xl mx-auto">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+              <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
                 <Handshake size={28} />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Admin-Managed Carrier Directory</h3>
@@ -335,7 +335,7 @@ export const Partnership: React.FC = () => {
               </p>
               <Link
                 to="/crm/admin/website"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0B2240] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0c0d12] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md"
               >
                 <Settings size={14} /> Open Admin Partner CMS
               </Link>
@@ -350,7 +350,7 @@ export const Partnership: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-full uppercase tracking-widest mb-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-full uppercase tracking-widest mb-4">
                 <Sliders size={14} /> Partner Calculator
               </div>
               <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
@@ -364,7 +364,7 @@ export const Partnership: React.FC = () => {
               <div className="space-y-3 mb-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                 <div className="flex justify-between items-center text-sm font-bold text-slate-900">
                   <span>Appointed Independent Advisors:</span>
-                  <span className="text-blue-600 font-black text-lg">{advisorCount} Advisors</span>
+                  <span className="text-slate-600 font-black text-lg">{advisorCount} Advisors</span>
                 </div>
                 <input 
                   type="range" 
@@ -373,7 +373,7 @@ export const Partnership: React.FC = () => {
                   step={5}
                   value={advisorCount} 
                   onChange={(e) => setAdvisorCount(parseInt(e.target.value))}
-                  className="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
+                  className="w-full accent-slate-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
                 />
                 <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
                   <span>10 Advisors</span>
@@ -405,11 +405,11 @@ export const Partnership: React.FC = () => {
 
             {/* Calculated Results Card */}
             <div className="bg-[#050B14] rounded-3xl p-8 md:p-10 text-white border border-white/10 shadow-2xl space-y-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Projected Annual Premium Volume</span>
-                <span className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight">
+                <span className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-emerald-400 tracking-tight">
                   {estimatedAnnualPremium}
                 </span>
               </div>
@@ -429,7 +429,7 @@ export const Partnership: React.FC = () => {
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck size={16} className="text-emerald-400" /> Automated API Quoting &amp; Underwriting
                 </span>
-                <a href="#apply-partner" className="text-blue-400 hover:text-white font-bold transition-colors">
+                <a href="#apply-partner" className="text-slate-400 hover:text-white font-bold transition-colors">
                   Apply Now →
                 </a>
               </div>
@@ -445,7 +445,7 @@ export const Partnership: React.FC = () => {
           <div className="bg-white rounded-3xl p-8 md:p-12 border border-slate-200 shadow-xl">
             
             <div className="text-center max-w-2xl mx-auto mb-10">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-full uppercase tracking-widest mb-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-full uppercase tracking-widest mb-4">
                 <Building2 size={14} /> Partner Appointment
               </div>
               <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3 tracking-tight">
@@ -468,7 +468,7 @@ export const Partnership: React.FC = () => {
                 <div className="pt-4">
                   <button 
                     onClick={() => { setAppSubmitted(false); }}
-                    className="px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-colors"
+                    className="px-6 py-2.5 bg-[#0c0d12] text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-colors"
                   >
                     Submit Another Filing
                   </button>
@@ -485,7 +485,7 @@ export const Partnership: React.FC = () => {
                       value={appForm.companyName}
                       onChange={(e) => setAppForm({ ...appForm, companyName: e.target.value })}
                       placeholder="e.g. Acme Life Insurance Corp" 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -494,7 +494,7 @@ export const Partnership: React.FC = () => {
                     <select
                       value={appForm.partnerCategory}
                       onChange={(e) => setAppForm({ ...appForm, partnerCategory: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     >
                       <option value="Life & Annuity Carrier">Life &amp; Annuity Carrier</option>
                       <option value="Real Estate & Title Partner">Real Estate &amp; Title Partner</option>
@@ -514,7 +514,7 @@ export const Partnership: React.FC = () => {
                       value={appForm.contactName}
                       onChange={(e) => setAppForm({ ...appForm, contactName: e.target.value })}
                       placeholder="Jane Smith" 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -526,7 +526,7 @@ export const Partnership: React.FC = () => {
                       value={appForm.contactTitle}
                       onChange={(e) => setAppForm({ ...appForm, contactTitle: e.target.value })}
                       placeholder="VP of Carrier Distribution" 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     />
                   </div>
                 </div>
@@ -540,7 +540,7 @@ export const Partnership: React.FC = () => {
                       value={appForm.email}
                       onChange={(e) => setAppForm({ ...appForm, email: e.target.value })}
                       placeholder="jane@carrier.com" 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -552,7 +552,7 @@ export const Partnership: React.FC = () => {
                       value={appForm.phone}
                       onChange={(e) => setAppForm({ ...appForm, phone: e.target.value })}
                       placeholder="(800) 555-0199" 
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     />
                   </div>
                 </div>
@@ -563,7 +563,7 @@ export const Partnership: React.FC = () => {
                     <select
                       value={appForm.statesOperating}
                       onChange={(e) => setAppForm({ ...appForm, statesOperating: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     >
                       <option value="48 States (Nationwide)">48 States (Nationwide)</option>
                       <option value="Midwest Region (IA, IL, MN, MO, NE)">Midwest Region (IA, IL, MN, MO, NE)</option>
@@ -577,7 +577,7 @@ export const Partnership: React.FC = () => {
                     <select
                       value={appForm.projectedVolume}
                       onChange={(e) => setAppForm({ ...appForm, projectedVolume: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                     >
                       <option value="$1M - $5M / Year">$1M - $5M / Year</option>
                       <option value="$5M - $20M / Year">$5M - $20M / Year</option>
@@ -593,14 +593,14 @@ export const Partnership: React.FC = () => {
                     value={appForm.message}
                     onChange={(e) => setAppForm({ ...appForm, message: e.target.value })}
                     placeholder="Provide details about products, underwriting speed, or API integration capabilities..."
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:bg-white transition-all"
                   />
                 </div>
 
                 <button 
                   type="submit" 
                   disabled={appLoading}
-                  className="w-full py-4 bg-[#0B2240] hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#0c0d12] hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
                 >
                   {appLoading ? 'Transmitting Filing...' : 'Submit Carrier Appointment Application'} <ArrowRight size={16} />
                 </button>
@@ -622,11 +622,11 @@ export const Partnership: React.FC = () => {
 
       {/* INTERACTIVE LIVE API SANDBOX MODAL */}
       {showDemoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in">
-          <div className="bg-slate-900 text-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden border border-white/10">
-            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0c0d12]/80 backdrop-blur-md animate-in fade-in">
+          <div className="bg-[#0c0d12] text-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden border border-white/10">
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0c0d12]">
               <div className="flex items-center gap-3">
-                <Code2 size={20} className="text-blue-400" />
+                <Code2 size={20} className="text-slate-400" />
                 <h3 className="text-base font-black tracking-tight text-white">
                   NHFG Partner Quoting &amp; API Sandbox
                 </h3>
@@ -650,7 +650,7 @@ export const Partnership: React.FC = () => {
                   onClick={() => { setSandboxEndpoint('life-quote'); setApiResponse(null); }}
                   className={`p-3 rounded-xl border text-left text-xs font-bold transition-all ${
                     sandboxEndpoint === 'life-quote'
-                      ? 'bg-blue-600/20 border-blue-500 text-blue-300'
+                      ? 'bg-slate-600/20 border-slate-500 text-slate-300'
                       : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
                   }`}
                 >
@@ -691,7 +691,7 @@ export const Partnership: React.FC = () => {
                 <button
                   onClick={handleExecuteApiSandbox}
                   disabled={apiExecuting}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 bg-slate-600 hover:bg-slate-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all flex items-center gap-2"
                 >
                   {apiExecuting ? 'Executing Payload...' : 'Execute Live API Call'} <PlayCircle size={14} />
                 </button>
@@ -701,7 +701,7 @@ export const Partnership: React.FC = () => {
               <div className="bg-black/90 rounded-2xl p-4 font-mono text-xs border border-white/10 text-emerald-400 overflow-x-auto min-h-[180px] max-h-[300px]">
                 {apiExecuting ? (
                   <div className="flex items-center justify-center h-40 text-slate-500 gap-2">
-                    <span className="animate-spin text-blue-400">⚡</span> Processing REST request against carrier gateway...
+                    <span className="animate-spin text-slate-400">⚡</span> Processing REST request against carrier gateway...
                   </div>
                 ) : apiResponse ? (
                   <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
@@ -711,8 +711,8 @@ export const Partnership: React.FC = () => {
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-slate-950 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
-              <span>Full documentation available at <Link to="/developers" className="text-blue-400 hover:underline">/developers</Link></span>
+            <div className="px-6 py-4 bg-[#0c0d12] border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
+              <span>Full documentation available at <Link to="/developers" className="text-slate-400 hover:underline">/developers</Link></span>
               <button 
                 onClick={() => setShowDemoModal(false)}
                 className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold"

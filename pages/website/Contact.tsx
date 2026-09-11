@@ -63,7 +63,7 @@ export const Contact: React.FC = () => {
           </p>
           <button
             onClick={() => setSubmitted(false)}
-            className="w-full py-4 bg-[#0A62A7] text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-900/20"
+            className="w-full py-4 bg-[#0c0d12] text-white font-bold rounded-2xl hover:bg-slate-700 transition-all shadow-xl shadow-slate-900/20"
           >
             Send Another Inquiry
           </button>
@@ -73,10 +73,10 @@ export const Contact: React.FC = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen pt-40 pb-20 font-sans selection:bg-blue-100">
+    <div className="bg-white min-h-screen pt-40 pb-20 font-sans selection:bg-slate-100">
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-5xl font-black text-[#0B2240] tracking-tight mb-4">
+          <h1 className="text-5xl font-black text-[#0c0d12] tracking-tight mb-4">
             Contact Us
           </h1>
           <p className="text-xl text-slate-500 font-medium">
@@ -95,7 +95,7 @@ export const Contact: React.FC = () => {
                 Full Name
               </label>
               <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-500 transition-colors">
                   <User size={20} />
                 </div>
                 <input
@@ -104,7 +104,7 @@ export const Contact: React.FC = () => {
                   id="name"
                   required
                   placeholder="Jane Doe"
-                  className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
+                  className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-slate-50 focus:border-slate-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -123,7 +123,7 @@ export const Contact: React.FC = () => {
                   Email Address
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-500 transition-colors">
                     <Mail size={20} />
                   </div>
                   <input
@@ -132,7 +132,7 @@ export const Contact: React.FC = () => {
                     type="email"
                     required
                     placeholder="jane@example.com"
-                    className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
+                    className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-slate-50 focus:border-slate-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
                     value={formData.email}
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
@@ -148,7 +148,7 @@ export const Contact: React.FC = () => {
                   Phone Number
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-500 transition-colors">
                     <Phone size={20} />
                   </div>
                   <input
@@ -156,7 +156,7 @@ export const Contact: React.FC = () => {
                     name="phone"
                     id="phone"
                     placeholder="(555) 000-0000"
-                    className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
+                    className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-medium focus:ring-4 focus:ring-slate-50 focus:border-slate-500 outline-none transition-all placeholder:text-slate-300 shadow-inner"
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
@@ -175,13 +175,13 @@ export const Contact: React.FC = () => {
                 Interested In
               </label>
               <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-500 transition-colors pointer-events-none">
                   <Briefcase size={20} />
                 </div>
                 <select
                   id="interest"
                   name="interest"
-                  className="w-full pl-16 pr-12 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-bold text-slate-700 focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer shadow-inner"
+                  className="w-full pl-16 pr-12 py-5 bg-slate-50/50 border border-slate-200 rounded-[2rem] text-base font-bold text-slate-700 focus:ring-4 focus:ring-slate-50 focus:border-slate-500 outline-none transition-all appearance-none cursor-pointer shadow-inner"
                   value={formData.interest}
                   onChange={(e) =>
                     setFormData({
@@ -211,7 +211,7 @@ export const Contact: React.FC = () => {
                 Message / Details
               </label>
               <div className="relative group">
-                <div className="absolute left-6 top-6 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                <div className="absolute left-6 top-6 text-slate-300 group-focus-within:text-slate-500 transition-colors">
                   <MessageSquare size={20} />
                 </div>
                 <textarea
@@ -220,7 +220,7 @@ export const Contact: React.FC = () => {
                   rows={5}
                   required
                   placeholder="How can our advisors assist you today?"
-                  className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2.5rem] text-base font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 resize-none shadow-inner"
+                  className="w-full pl-16 pr-8 py-5 bg-slate-50/50 border border-slate-200 rounded-[2.5rem] text-base font-medium focus:ring-4 focus:ring-slate-50 focus:border-slate-500 outline-none transition-all placeholder:text-slate-300 resize-none shadow-inner"
                   value={formData.message}
                   onChange={(e) =>
                     setFormData({ ...formData, message: e.target.value })
@@ -233,7 +233,7 @@ export const Contact: React.FC = () => {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full py-6 bg-blue-600 text-white font-black text-lg rounded-[2rem] shadow-2xl shadow-blue-600/30 hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all transform uppercase tracking-widest"
+                className="w-full py-6 bg-slate-600 text-white font-black text-lg rounded-[2rem] shadow-2xl shadow-slate-600/30 hover:bg-slate-700 hover:scale-[1.02] active:scale-[0.98] transition-all transform uppercase tracking-widest"
               >
                 Submit Inquiry
               </button>

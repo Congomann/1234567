@@ -31,7 +31,7 @@ export const AccountingDashboard: React.FC = () => {
     <div className="space-y-8">
         <div className="flex justify-between items-end">
             <div>
-                <h1 className="text-3xl font-black text-[#0B2240]">Financial Overview</h1>
+                <h1 className="text-3xl font-black text-[#0c0d12]">Financial Overview</h1>
                 <p className="text-slate-500 font-medium mt-1">Real-time accounting snapshot.</p>
             </div>
             <div className="flex gap-3">
@@ -72,7 +72,7 @@ export const AccountingDashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Quick Links / Actions */}
-            <div className="bg-[#0B2240] text-white p-8 rounded-[2.5rem] flex flex-col justify-between shadow-xl">
+            <div className="bg-[#0c0d12] text-white p-8 rounded-[2.5rem] flex flex-col justify-between shadow-xl">
                 <div>
                     <h3 className="text-2xl font-bold mb-4">Bookkeeping Tools</h3>
                     <p className="text-blue-200 mb-8 text-sm leading-relaxed">Access core accounting functions, generate reports, and manage payroll.</p>

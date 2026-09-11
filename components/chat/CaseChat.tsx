@@ -81,7 +81,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseId, clientName }) => {
                             <MessageSquare size={18} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-black text-[#0B2240] uppercase tracking-tighter">Underwriting Chat</h4>
+                            <h4 className="text-sm font-black text-[#0c0d12] uppercase tracking-tighter">Underwriting Chat</h4>
                             <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Direct line to Sub-Admin</p>
                         </div>
                     </div>
@@ -122,7 +122,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseId, clientName }) => {
 
             {/* Structured Notes Section */}
             <div className="w-full lg:w-80 flex flex-col gap-6">
-                <div className="bg-[#0B2240] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+                <div className="bg-[#0c0d12] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
                     <Activity className="absolute -right-6 -top-6 text-white/10" size={120} />
                     <div className="relative z-10">
                         <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-4 text-blue-400">Medical Intelligence</h4>

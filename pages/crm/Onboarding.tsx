@@ -75,20 +75,20 @@ export const Onboarding: React.FC = () => {
         <div className="space-y-8 pb-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-[#0B2240] tracking-tight">Advisor Onboarding</h1>
+                    <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight">Advisor Onboarding</h1>
                     <p className="text-slate-500 mt-1 font-medium">Review applications and onboard new talent.</p>
                 </div>
 
                 <div className="flex bg-white p-1 rounded-full border border-slate-200 shadow-sm">
                     <button
                         onClick={() => setFilter('Pending')}
-                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${filter === 'Pending' ? 'bg-[#0B2240] text-white shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${filter === 'Pending' ? 'bg-[#0c0d12] text-white shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
                     >
                         Pending
                     </button>
                     <button
                         onClick={() => setFilter('All')}
-                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${filter === 'All' ? 'bg-[#0B2240] text-white shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${filter === 'All' ? 'bg-[#0c0d12] text-white shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
                     >
                         All Applications
                     </button>
@@ -130,7 +130,7 @@ export const Onboarding: React.FC = () => {
                                                 {app.fullName.charAt(0)}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-[#0B2240]">{app.fullName}</p>
+                                                <p className="font-bold text-[#0c0d12]">{app.fullName}</p>
                                                 <p className="text-xs text-slate-400">{app.email}</p>
                                             </div>
                                         </div>
@@ -169,12 +169,12 @@ export const Onboarding: React.FC = () => {
 
             {/* Details Modal */}
             {selectedApp && !isApprovalModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden relative border border-white/20 flex flex-col max-h-[90vh]">
                         {/* Header */}
                         <div className="p-8 pb-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
                             <div>
-                                <h2 className="text-2xl font-black text-[#0B2240]">{selectedApp.fullName}</h2>
+                                <h2 className="text-2xl font-black text-[#0c0d12]">{selectedApp.fullName}</h2>
                                 <p className="text-slate-500 font-medium mt-1">Application ID: {selectedApp.id}</p>
                             </div>
                             <button
@@ -274,13 +274,13 @@ export const Onboarding: React.FC = () => {
 
             {/* Approval Configuration Modal */}
             {isApprovalModalOpen && selectedApp && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0c0d12]/70 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg p-10 relative">
                         <button onClick={() => setIsApprovalModalOpen(false)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full hover:bg-slate-200 text-slate-500">
                             <X className="h-5 w-5" />
                         </button>
 
-                        <h2 className="text-2xl font-black text-[#0B2240] mb-2">Configure Contract</h2>
+                        <h2 className="text-2xl font-black text-[#0c0d12] mb-2">Configure Contract</h2>
                         <p className="text-slate-500 mb-8">Set commission levels and product authorization for {selectedApp.fullName}.</p>
 
                         <div className="space-y-8">

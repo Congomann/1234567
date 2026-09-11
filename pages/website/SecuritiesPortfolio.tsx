@@ -117,7 +117,7 @@ export const SecuritiesPortfolio: React.FC = () => {
             The Strategic Wealth Engine is reserved for internal NHFG Securities & Investment Advisors only.
           </p>
           <div className="pt-4">
-             <Link to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
+             <Link to="/products" className="bg-[#0c0d12] text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
                 Back to Solutions
              </Link>
           </div>
@@ -179,12 +179,12 @@ export const SecuritiesPortfolio: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-full text-xs font-black uppercase tracking-widest mb-6">
             <Zap className="w-4 h-4" />
             Strategic Wealth Engine
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight mb-6">
-            Portfolio <span className="text-blue-600">Visualizer</span>
+            Portfolio <span className="text-slate-600">Visualizer</span>
           </h1>
           <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
             Project your wealth growth across diverse market conditions with our proprietary risk-adjusted modeling engine.
@@ -194,9 +194,9 @@ export const SecuritiesPortfolio: React.FC = () => {
         {/* Interactive Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
           {/* Investment Input */}
-          <div className="lg:col-span-1 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-900/5">
+          <div className="lg:col-span-1 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-900/5">
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-6 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-blue-600" />
+              <DollarSign className="w-4 h-4 text-slate-600" />
               Initial Investment
             </h3>
             <div className="relative mb-8">
@@ -205,7 +205,7 @@ export const SecuritiesPortfolio: React.FC = () => {
                 type="number"
                 value={investmentAmount}
                 onChange={(e) => setInvestmentAmount(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-6 pl-12 pr-6 text-3xl font-black text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all"
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-6 pl-12 pr-6 text-3xl font-black text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500/50 transition-all"
               />
             </div>
             
@@ -214,7 +214,7 @@ export const SecuritiesPortfolio: React.FC = () => {
                 <button
                   key={amt}
                   onClick={() => setInvestmentAmount(amt)}
-                  className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${investmentAmount === amt ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                  className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${investmentAmount === amt ? 'bg-slate-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
                 >
                   ${amt.toLocaleString()}
                 </button>
@@ -223,9 +223,9 @@ export const SecuritiesPortfolio: React.FC = () => {
           </div>
 
           {/* Profile Selector */}
-          <div className="lg:col-span-3 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-900/5">
+          <div className="lg:col-span-3 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-900/5">
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-2">
-              <Target className="w-4 h-4 text-blue-600" />
+              <Target className="w-4 h-4 text-slate-600" />
               Risk Profile Strategy
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -237,10 +237,10 @@ export const SecuritiesPortfolio: React.FC = () => {
                     onClick={() => setActiveProfile(key)}
                     className={`
                       relative p-6 rounded-[2rem] border-2 transition-all group text-left
-                      ${isActive ? 'border-blue-600 bg-blue-50/30' : 'border-slate-50 hover:border-blue-200 hover:bg-slate-50'}
+                      ${isActive ? 'border-slate-600 bg-slate-50/30' : 'border-slate-50 hover:border-slate-200 hover:bg-slate-50'}
                     `}
                   >
-                    <div className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-all ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:text-blue-500'}`}>
+                    <div className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-all ${isActive ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:text-slate-500'}`}>
                       {key === 'conservative' && <Shield className="w-5 h-5" />}
                       {key === 'balanced' && <Briefcase className="w-5 h-5" />}
                       {key === 'aggressive' && <TrendingUp className="w-5 h-5" />}
@@ -254,7 +254,7 @@ export const SecuritiesPortfolio: React.FC = () => {
             </div>
 
             <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4">
-              <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
               <p className="text-sm text-slate-600 leading-relaxed font-medium italic">
                 "{profile.description}"
               </p>
@@ -265,7 +265,7 @@ export const SecuritiesPortfolio: React.FC = () => {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Main Performance Chart */}
-          <div className="lg:col-span-2 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-900/5">
+          <div className="lg:col-span-2 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-900/5">
             <div className="flex items-center justify-between mb-10">
               <div>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Growth Projection</h3>
@@ -319,7 +319,7 @@ export const SecuritiesPortfolio: React.FC = () => {
           </div>
 
           {/* Asset Allocation */}
-          <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-900/5">
+          <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-900/5">
              <div className="mb-10">
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Asset Allocation</h3>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Strategic Diversification</p>
@@ -368,25 +368,25 @@ export const SecuritiesPortfolio: React.FC = () => {
         {/* Strategy Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
           {/* Key Metrics */}
-          <div className="bg-[#0B2240] p-12 rounded-[3.5rem] text-white relative overflow-hidden">
+          <div className="bg-[#0c0d12] p-12 rounded-[3.5rem] text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 p-12 opacity-10"><TrendingUp size={200} strokeWidth={1} /></div>
             <h3 className="text-2xl font-black tracking-tight mb-8 relative z-10">Strategy Statistics</h3>
             
             <div className="grid grid-cols-2 gap-8 relative z-10">
               <div>
-                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Annualized Return</div>
+                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Annualized Return</div>
                 <div className="text-4xl font-black">{profile.expectedReturn}%</div>
               </div>
               <div>
-                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Sharpe Ratio</div>
+                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Sharpe Ratio</div>
                 <div className="text-4xl font-black">{(profile.expectedReturn / profile.volatility).toFixed(2)}</div>
               </div>
               <div>
-                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Annual Volatility</div>
+                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Annual Volatility</div>
                 <div className="text-4xl font-black">{profile.volatility}%</div>
               </div>
               <div>
-                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Risk Rating</div>
+                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Risk Rating</div>
                 <div className="text-4xl font-black flex items-center gap-2">
                   {profile.volatility < 8 ? 'Low' : profile.volatility < 12 ? 'Med' : 'High'}
                   <div className={`h-3 w-3 rounded-full ${profile.volatility < 8 ? 'bg-emerald-400' : profile.volatility < 12 ? 'bg-amber-400' : 'bg-red-400'}`}></div>
@@ -396,22 +396,22 @@ export const SecuritiesPortfolio: React.FC = () => {
 
             <div className="mt-12 pt-8 border-t border-white/10 flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                <ArrowUpRight className="text-blue-400" />
+                <ArrowUpRight className="text-slate-400" />
               </div>
-              <p className="text-xs text-blue-100/60 font-medium leading-relaxed">
+              <p className="text-xs text-slate-100/60 font-medium leading-relaxed">
                 Our quantitative modeling indicates a 95% confidence interval for these projections based on historical asset class correlations.
               </p>
             </div>
           </div>
 
           {/* Model Holdings */}
-          <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-900/5">
+          <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-xl shadow-slate-900/5">
             <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Model Holdings</h3>
             <div className="space-y-4">
               {profile.holdings.map((holding, idx) => (
-                <div key={idx} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl group hover:bg-blue-50 transition-all cursor-default">
+                <div key={idx} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl group hover:bg-slate-50 transition-all cursor-default">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 font-black shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-600 font-black shadow-sm group-hover:bg-slate-600 group-hover:text-white transition-all">
                       {idx + 1}
                     </div>
                     <div>
@@ -419,7 +419,7 @@ export const SecuritiesPortfolio: React.FC = () => {
                       <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Asset Component</div>
                     </div>
                   </div>
-                  <div className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-300 group-hover:text-blue-500 group-hover:border-blue-200 transition-all">
+                  <div className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-300 group-hover:text-slate-500 group-hover:border-slate-200 transition-all">
                     <ArrowUpRight size={14} />
                   </div>
                 </div>
@@ -429,7 +429,7 @@ export const SecuritiesPortfolio: React.FC = () => {
             <button 
               onClick={handleDownloadStrategy}
               disabled={isGenerating}
-              className="w-full mt-8 py-5 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full mt-8 py-5 rounded-2xl bg-[#0c0d12] text-white font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
               Download Strategy PDF
@@ -446,7 +446,7 @@ export const SecuritiesPortfolio: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-6">
                 <button 
                     onClick={() => document.getElementById('speak-to-advisor')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-12 py-6 bg-[#0B2240] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
+                    className="px-12 py-6 bg-[#0c0d12] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
                 >
                     Establish Connection
                 </button>

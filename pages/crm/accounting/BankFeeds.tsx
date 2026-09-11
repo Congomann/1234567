@@ -114,7 +114,7 @@ export const BankFeeds: React.FC = () => {
     <div className="space-y-8 pb-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
-                <h1 className="text-2xl font-bold text-[#0B2240]">Banking & Expenses</h1>
+                <h1 className="text-2xl font-bold text-[#0c0d12]">Banking & Expenses</h1>
                 <p className="text-slate-500">Securely connect accounts, track real-time spending, and automate tax savings.</p>
             </div>
             <div className="flex gap-3">
@@ -126,7 +126,7 @@ export const BankFeeds: React.FC = () => {
                 </button>
                 <button 
                     onClick={() => setActiveTab('feeds')}
-                    className={`px-5 py-3 rounded-full font-bold text-sm transition-colors ${activeTab === 'feeds' ? 'bg-[#0B2240] text-white shadow-lg' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                    className={`px-5 py-3 rounded-full font-bold text-sm transition-colors ${activeTab === 'feeds' ? 'bg-[#0c0d12] text-white shadow-lg' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
                 >
                     Transactions
                 </button>
@@ -141,7 +141,7 @@ export const BankFeeds: React.FC = () => {
                         <div 
                             key={acc.id}
                             onClick={() => setSelectedAccount(acc.id)}
-                            className={`min-w-[300px] p-6 rounded-[2rem] border transition-all cursor-pointer flex flex-col justify-between h-52 shadow-sm ${selectedAccount === acc.id || (!selectedAccount && acc === myAccounts[0]) ? 'bg-[#0B2240] text-white border-[#0B2240] shadow-xl transform scale-[1.02]' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
+                            className={`min-w-[300px] p-6 rounded-[2rem] border transition-all cursor-pointer flex flex-col justify-between h-52 shadow-sm ${selectedAccount === acc.id || (!selectedAccount && acc === myAccounts[0]) ? 'bg-[#0c0d12] text-white border-[#0c0d12] shadow-xl transform scale-[1.02]' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
                         >
                             <div className="flex justify-between items-start">
                                 <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md">
@@ -177,7 +177,7 @@ export const BankFeeds: React.FC = () => {
                     <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>
-                                <h2 className="text-lg font-bold text-[#0B2240]">{activeAccount.accountName} Activity</h2>
+                                <h2 className="text-lg font-bold text-[#0c0d12]">{activeAccount.accountName} Activity</h2>
                                 <p className="text-xs text-slate-500 flex items-center gap-1">
                                     <ShieldCheck className="h-3 w-3 text-green-600" />
                                     Secure connection • Last synced: {new Date(activeAccount.lastSynced).toLocaleTimeString()}
@@ -263,7 +263,7 @@ export const BankFeeds: React.FC = () => {
         {activeTab === 'rules' && (
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="mb-8">
-                    <h2 className="text-xl font-bold text-[#0B2240] flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-[#0c0d12] flex items-center gap-2">
                         <Wand2 className="h-6 w-6 text-blue-600" /> Automation Rules
                     </h2>
                     <p className="text-slate-500">Create rules to automatically categorize transactions from your bank feed.</p>
@@ -303,7 +303,7 @@ export const BankFeeds: React.FC = () => {
                         </div>
                         <button 
                             onClick={handleAddRule}
-                            className="bg-[#0B2240] text-white p-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"
+                            className="bg-[#0c0d12] text-white p-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"
                         >
                             Create Rule
                         </button>
@@ -401,9 +401,9 @@ export const BankFeeds: React.FC = () => {
 
         {/* Categorize Modal */}
         {selectedTxId && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/40 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/40 backdrop-blur-sm p-4 animate-fade-in">
                 <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8">
-                    <h3 className="text-lg font-bold text-[#0B2240] mb-4">Categorize Transaction</h3>
+                    <h3 className="text-lg font-bold text-[#0c0d12] mb-4">Categorize Transaction</h3>
                     
                     <div className="mb-6">
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Select Category</label>

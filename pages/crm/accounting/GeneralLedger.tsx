@@ -74,7 +74,7 @@ export const GeneralLedger: React.FC = () => {
     <div className="space-y-8 pb-10">
         <div className="flex justify-between items-center">
             <div>
-                <h1 className="text-2xl font-bold text-[#0B2240]">General Ledger</h1>
+                <h1 className="text-2xl font-bold text-[#0c0d12]">General Ledger</h1>
                 <p className="text-slate-500">View transaction history and post manual journal entries.</p>
             </div>
             <button 
@@ -154,10 +154,10 @@ export const GeneralLedger: React.FC = () => {
 
         {/* New Entry Modal */}
         {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/50 backdrop-blur-sm p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/50 backdrop-blur-sm p-4">
                 <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-[#0B2240]">Post Journal Entry</h2>
+                        <h2 className="text-2xl font-bold text-[#0c0d12]">Post Journal Entry</h2>
                         <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full"><X className="h-6 w-6 text-slate-400" /></button>
                     </div>
 

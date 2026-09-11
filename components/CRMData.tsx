@@ -333,7 +333,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                 <>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-slate-900/10 z-[60]" onClick={() => setIsTourActive(false)} />
                     <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="fixed bottom-10 right-10 w-[420px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.4)] z-[100] border border-slate-200 overflow-hidden">
-                        <div className="bg-[#0B2240] p-8 text-white relative">
+                        <div className="bg-[#0c0d12] p-8 text-white relative">
                             <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles size={100} /></div>
                             <div className="flex justify-between items-start relative z-10">
                                 <h4 className="font-black text-2xl tracking-tighter leading-none mb-2">{currentStep.title}</h4>
@@ -345,7 +345,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                         <div className="p-10">
                             <p className="text-slate-600 font-medium leading-relaxed mb-10 text-lg">{currentStep.text}</p>
                             <div className="flex items-center justify-between pt-8 border-t border-slate-100">
-                                <span className="text-xl font-black text-[#0B2240]">{currentStepIndex + 1} <span className="text-slate-300">/ {currentTourSteps.length}</span></span>
+                                <span className="text-xl font-black text-[#0c0d12]">{currentStepIndex + 1} <span className="text-slate-300">/ {currentTourSteps.length}</span></span>
                                 <div className="flex gap-3">
                                     {currentStepIndex > 0 && (
                                         <button onClick={handlePrev} className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all"><ChevronLeft size={20} /></button>

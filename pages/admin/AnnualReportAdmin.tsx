@@ -346,7 +346,7 @@ export const AnnualReportAdmin: React.FC = () => {
       </div>
 
       {/* Partner Contributions Section */}
-      <div className="bg-[#0B2240] rounded-[3.5rem] p-12 text-white shadow-3xl shadow-blue-900/40 relative overflow-hidden">
+      <div className="bg-[#0c0d12] rounded-[3.5rem] p-12 text-white shadow-3xl shadow-blue-900/40 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[400px] h-full bg-blue-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-10"></div>
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-12">

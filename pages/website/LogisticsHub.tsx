@@ -44,7 +44,7 @@ export const LogisticsHub: React.FC = () => {
       id: "brokerage",
       title: "Freight Brokerage",
       icon: Globe,
-      colorClasses: { bg: "bg-blue-50", text: "text-blue-600", shadow: "hover:shadow-blue-900/5", iconText: "text-blue-500" },
+      colorClasses: { bg: "bg-slate-50", text: "text-slate-600", shadow: "hover:shadow-slate-900/5", iconText: "text-slate-500" },
       description: "Leverage our elite network of verified carriers. We match your freight with the perfect equipment at market-leading rates.",
       suitableFor: "Businesses looking for immediate capacity, specialized equipment, or those navigating complex lane shifts.",
       benefits: ["Rigorous carrier compliance and safety screening", "Dynamic market-rate negotiation", "Dedicated account management", "24/7 incident response and resolution"],
@@ -88,12 +88,12 @@ export const LogisticsHub: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
       {/* Premium Hero Section (Unified across all views) */}
-      <div className="relative bg-slate-900 pt-56 pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
-        <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-blue-500/5 rounded-full mix-blend-overlay filter blur-[120px] animate-pulse"></div>
+      <div className="relative bg-[#0c0d12] pt-56 pb-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent"></div>
+        <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-slate-500/5 rounded-full mix-blend-overlay filter blur-[120px] animate-pulse"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <span className="px-5 py-2 rounded-full bg-blue-500/10 text-blue-400 font-black text-[10px] uppercase tracking-[0.4em] border border-blue-500/20 mb-10 inline-block">
+          <span className="px-5 py-2 rounded-full bg-slate-500/10 text-slate-400 font-black text-[10px] uppercase tracking-[0.4em] border border-slate-500/20 mb-10 inline-block">
             {viewMode === "overview" ? "Freight & Logistics Division" : 
              viewMode === "listing" ? "Real-time Supply Chain Feed" :
              viewMode === "search" ? "Advanced Query Engine" : 
@@ -124,7 +124,7 @@ export const LogisticsHub: React.FC = () => {
                   to={`/logistics?view=${view.id}`}
                   className={`px-8 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                     viewMode === view.id 
-                    ? "bg-blue-600 text-white shadow-xl shadow-blue-500/20" 
+                    ? "bg-slate-600 text-white shadow-xl shadow-slate-500/20" 
                     : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
                   }`}
                 >
@@ -142,7 +142,7 @@ export const LogisticsHub: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div className="space-y-10">
                 <h2 className="text-5xl font-black text-slate-900 tracking-tighter leading-tight">
-                  Logistics <br /> <span className="text-blue-600">Mastered.</span>
+                  Logistics <br /> <span className="text-slate-600">Mastered.</span>
                 </h2>
                 <p className="text-slate-500 text-lg leading-relaxed font-medium">
                   We don't just move freight; we engineer your supply chain for maximum efficiency. 
@@ -152,7 +152,7 @@ export const LogisticsHub: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
                     to="/logistics?view=listing"
-                    className="px-10 py-5 bg-slate-900 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-2"
+                    className="px-10 py-5 bg-[#0c0d12] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-2"
                   >
                     View Active Loads <ArrowRight size={16} />
                   </Link>
@@ -181,7 +181,7 @@ export const LogisticsHub: React.FC = () => {
                           {need.label}
                         </span>
                         <div className={`w-6 h-6 rounded-xl border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                          selectedNeed === need.id ? "border-slate-900 bg-slate-900 text-white rotate-12" : "border-slate-200"
+                          selectedNeed === need.id ? "border-slate-900 bg-[#0c0d12] text-white rotate-12" : "border-slate-200"
                         }`}>
                           {selectedNeed === need.id && <CheckCircle size={14} strokeWidth={3} />}
                         </div>
@@ -191,7 +191,7 @@ export const LogisticsHub: React.FC = () => {
                 </div>
 
                 {selectedNeed && (
-                  <div className="mt-8 p-8 bg-slate-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
+                  <div className="mt-8 p-8 bg-[#0c0d12] rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3">Recommendation</p>
                     <div className="flex items-center justify-between gap-8">
                       <h3 className="text-2xl font-black text-white tracking-tight">
@@ -221,7 +221,7 @@ export const LogisticsHub: React.FC = () => {
                     <div className="space-y-4 pt-8 border-t border-slate-50">
                       {service.benefits.map((benefit, i) => (
                         <div key={i} className="flex items-start gap-3">
-                          <div className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 bg-slate-900"></div>
+                          <div className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 bg-[#0c0d12]"></div>
                           <span className="text-xs font-bold text-slate-700 leading-tight">{benefit}</span>
                         </div>
                       ))}
@@ -245,18 +245,18 @@ export const LogisticsHub: React.FC = () => {
               <form onSubmit={handleSearchClick} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
                   <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input type="text" placeholder="Origin City or Zip" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold placeholder:text-slate-400 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all text-sm" />
+                  <input type="text" placeholder="Origin City or Zip" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold placeholder:text-slate-400 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all text-sm" />
                 </div>
                 <div className="relative">
                   <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input type="text" placeholder="Destination City or Zip" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold placeholder:text-slate-400 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all text-sm" />
+                  <input type="text" placeholder="Destination City or Zip" className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold placeholder:text-slate-400 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all text-sm" />
                 </div>
               </form>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
                   <Truck className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <select className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold focus:outline-none focus:ring-4 ring-blue-500/10 transition-all text-sm appearance-none">
+                  <select className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 text-slate-900 font-bold focus:outline-none focus:ring-4 ring-slate-500/10 transition-all text-sm appearance-none">
                     <option>All Equipment</option>
                     <option>Dry Van</option>
                     <option>Reefer</option>
@@ -264,7 +264,7 @@ export const LogisticsHub: React.FC = () => {
                   </select>
                 </div>
                 <div className="md:col-span-2 flex gap-4">
-                  <button onClick={handleSearchClick} className="flex-1 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-[2rem] py-5 hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-3">
+                  <button onClick={handleSearchClick} className="flex-1 bg-slate-600 text-white font-black text-xs uppercase tracking-widest rounded-[2rem] py-5 hover:bg-slate-500 transition-all shadow-xl shadow-slate-500/20 active:scale-95 flex items-center justify-center gap-3">
                     <Search size={16} /> Search Loads
                   </button>
                   <button className="p-5 bg-slate-50 border border-slate-100 text-slate-400 rounded-[2rem] hover:bg-slate-100 transition-all">
@@ -281,13 +281,13 @@ export const LogisticsHub: React.FC = () => {
                     <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                       <History size={20} className="text-slate-400" /> Recent Searches
                     </h3>
-                    <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clear All</button>
+                    <button className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Clear All</button>
                   </div>
                   <div className="space-y-4">
                     {['Chicago, IL → Dallas, TX (Dry Van)', 'Atlanta, GA → Any (Reefer)', 'Houston, TX → 500mi (Flatbed)'].map((s, i) => (
-                      <button key={i} className="w-full flex items-center justify-between p-6 rounded-2xl border border-slate-50 hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+                      <button key={i} className="w-full flex items-center justify-between p-6 rounded-2xl border border-slate-50 hover:border-slate-200 hover:bg-slate-50/30 transition-all group">
                         <span className="text-sm font-bold text-slate-700">{s}</span>
-                        <ArrowRight size={14} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                        <ArrowRight size={14} className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-1 transition-all" />
                       </button>
                     ))}
                   </div>
@@ -304,7 +304,7 @@ export const LogisticsHub: React.FC = () => {
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{lane.from} to {lane.to}</p>
                           <p className="text-xs font-bold text-slate-900">{lane.loads} loads available</p>
                         </div>
-                        <button onClick={handleSearchClick} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
+                        <button onClick={handleSearchClick} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
                           <Search size={14} />
                         </button>
                       </div>
@@ -347,13 +347,13 @@ export const LogisticsHub: React.FC = () => {
           <div className="space-y-6 animate-fade-in -mt-16">
             <div className="flex justify-end mb-8">
                <button className="px-8 py-4 bg-white text-slate-900 font-black text-[10px] uppercase tracking-widest rounded-full border border-slate-200 shadow-sm hover:bg-slate-50 transition-all flex items-center gap-3">
-                 Refresh Feed <Globe size={14} className="animate-spin-slow text-blue-500" />
+                 Refresh Feed <Globe size={14} className="animate-spin-slow text-slate-500" />
                </button>
             </div>
             {loads.map((load) => (
               <div key={load.id} className="bg-white rounded-[3rem] border border-slate-100 p-8 md:p-12 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col lg:flex-row items-center gap-12">
                 <div className="flex-1 flex items-center gap-10">
-                  <div className="w-20 h-20 bg-slate-900 text-white rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
+                  <div className="w-20 h-20 bg-[#0c0d12] text-white rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
                     <Truck size={32} />
                   </div>
                   <div>
@@ -372,7 +372,7 @@ export const LogisticsHub: React.FC = () => {
                         <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
                           <Navigation size={14} className="text-slate-300" /> {load.distance} Miles
                         </div>
-                        <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
+                        <div className="flex items-center gap-2 text-slate-600 font-black text-[10px] uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">
                           {load.trailerType}
                         </div>
                      </div>
@@ -391,7 +391,7 @@ export const LogisticsHub: React.FC = () => {
                       <p className="text-3xl font-black text-slate-900 tracking-tighter">${load.totalRate?.toLocaleString()}</p>
                    </div>
                    <div className="flex gap-3">
-                     <Link to="/logistics?view=booking" className="px-10 py-5 bg-slate-900 text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95">
+                     <Link to="/logistics?view=booking" className="px-10 py-5 bg-[#0c0d12] text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95">
                        Book Load
                      </Link>
                    </div>
@@ -411,21 +411,21 @@ export const LogisticsHub: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><User size={12} /> Contact Name</label>
-                      <input type="text" placeholder="John Doe" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all" />
+                      <input type="text" placeholder="John Doe" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all" />
                     </div>
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Truck size={12} /> Company / MC#</label>
-                      <input type="text" placeholder="Logistic Co / MC123456" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all" />
+                      <input type="text" placeholder="Logistic Co / MC123456" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Mail size={12} /> Email Address</label>
-                      <input type="email" placeholder="john@logistics.com" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all" />
+                      <input type="email" placeholder="john@logistics.com" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all" />
                     </div>
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Phone size={12} /> Phone Number</label>
-                      <input type="tel" placeholder="(555) 000-0000" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all" />
+                      <input type="tel" placeholder="(555) 000-0000" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all" />
                     </div>
                   </div>
                   <div className="pt-8 border-t border-slate-100">
@@ -433,11 +433,11 @@ export const LogisticsHub: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><MapPin size={12} /> Preferred Lane</label>
-                        <input type="text" placeholder="Origin to Destination" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all" />
+                        <input type="text" placeholder="Origin to Destination" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all" />
                       </div>
                       <div className="space-y-3">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Package size={12} /> Equipment Type</label>
-                        <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-blue-500/10 transition-all appearance-none">
+                        <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 ring-slate-500/10 transition-all appearance-none">
                           <option>Dry Van</option>
                           <option>Reefer</option>
                           <option>Flatbed</option>
@@ -447,14 +447,14 @@ export const LogisticsHub: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <button className="w-full bg-slate-900 text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-3">
+                  <button className="w-full bg-[#0c0d12] text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-3">
                     Submit Booking Request <ArrowRight size={16} />
                   </button>
                 </form>
               </div>
             </div>
             <div className="space-y-8">
-              <div className="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl">
+              <div className="bg-[#0c0d12] rounded-[3rem] p-10 text-white shadow-2xl">
                 <h3 className="text-xl font-black mb-8 tracking-tight">Booking Requirements</h3>
                 <ul className="space-y-6">
                   {[
@@ -464,7 +464,7 @@ export const LogisticsHub: React.FC = () => {
                   ].map((item, i) => (
                     <li key={i} className="flex gap-4">
                       <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
-                        <item.icon size={18} className="text-blue-400" />
+                        <item.icon size={18} className="text-slate-400" />
                       </div>
                       <div>
                         <p className="text-xs font-black uppercase tracking-widest mb-1">{item.title}</p>
@@ -474,13 +474,13 @@ export const LogisticsHub: React.FC = () => {
                   ))}
                 </ul>
               </div>
-              <div className="bg-blue-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+              <div className="bg-slate-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
                 <h3 className="text-xl font-black mb-4 tracking-tight relative z-10">Need Assistance?</h3>
-                <p className="text-blue-100 text-sm font-medium mb-8 relative z-10 leading-relaxed">
+                <p className="text-slate-100 text-sm font-medium mb-8 relative z-10 leading-relaxed">
                   Our logistics brokers and agents are available 24/7 to help you secure the best loads.
                 </p>
-                <a href="tel:800-555-0199" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white text-blue-600 px-6 py-3 rounded-full hover:bg-slate-50 transition-colors relative z-10">
+                <a href="tel:800-555-0199" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white text-slate-600 px-6 py-3 rounded-full hover:bg-slate-50 transition-colors relative z-10">
                   Call the Broker Team
                 </a>
               </div>

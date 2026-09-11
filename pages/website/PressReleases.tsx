@@ -136,53 +136,53 @@ export const PressReleases: React.FC = () => {
         {/* Header Section */}
         <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-6">
+            <div className="flex items-center gap-3 text-slate-600 font-black text-[10px] uppercase tracking-[0.4em] mb-6">
               <Megaphone size={14} /> Official Newsroom
             </div>
             <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-none">
-              Press <span className="text-blue-600">Releases.</span>
+              Press <span className="text-slate-600">Releases.</span>
             </h1>
           </div>
           <div className="relative group min-w-[300px]">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors" size={18} />
             <input 
               type="text" 
               placeholder="Search press library..." 
-              className="w-full pl-16 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-full font-bold text-sm focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all shadow-sm"
+              className="w-full pl-16 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-full font-bold text-sm focus:outline-none focus:ring-4 focus:ring-slate-100 focus:bg-white transition-all shadow-sm"
             />
           </div>
         </div>
 
         {/* Featured Story */}
-        <div className="mb-24 relative group cursor-pointer overflow-hidden rounded-[4rem] bg-[#0B2240] text-white shadow-2xl shadow-blue-900/20">
-          <div className="absolute top-0 right-0 w-[800px] h-full bg-gradient-to-l from-blue-600/20 to-transparent"></div>
+        <div className="mb-24 relative group cursor-pointer overflow-hidden rounded-[4rem] bg-[#0c0d12] text-white shadow-2xl shadow-slate-900/20">
+          <div className="absolute top-0 right-0 w-[800px] h-full bg-gradient-to-l from-slate-600/20 to-transparent"></div>
           <div className="relative z-10 flex flex-col lg:flex-row items-stretch min-h-[500px]">
             <div className="lg:w-1/2 p-12 md:p-20 flex flex-col justify-center">
               <div className="flex items-center gap-4 mb-8">
-                <span className="px-4 py-1.5 bg-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Release</span>
-                <span className="text-blue-200/60 font-bold text-sm tracking-tight">May 15, 2026</span>
+                <span className="px-4 py-1.5 bg-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Release</span>
+                <span className="text-slate-200/60 font-bold text-sm tracking-tight">May 15, 2026</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-8 leading-tight group-hover:text-blue-400 transition-colors">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-8 leading-tight group-hover:text-slate-400 transition-colors">
                 NHFG Announces $250M Expansion into Sustainable Infrastructure Financing.
               </h2>
-              <p className="text-xl text-blue-100/70 font-medium leading-relaxed mb-12">
+              <p className="text-xl text-slate-100/70 font-medium leading-relaxed mb-12">
                 The strategic shift marks a pivotal moment in the group's investment history, focusing on renewable energy logistics and green property development.
               </p>
               <button 
                 onClick={() => handleReadFullRelease({ id: 'featured', title: 'Expansion into Sustainable Infrastructure', date: 'May 15, 2026', excerpt: 'The strategic shift marks a pivotal moment in the group\'s investment history...' })}
                 className="inline-flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] group-hover:gap-6 transition-all"
               >
-                Read Full Release <ArrowRight size={16} className="text-blue-400" />
+                Read Full Release <ArrowRight size={16} className="text-slate-400" />
               </button>
             </div>
             <div className="lg:w-1/2 relative bg-slate-800 overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-[#0B2240] to-slate-950 flex items-center justify-center p-8">
+               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-[#0c0d12] to-slate-950 flex items-center justify-center p-8">
                  <div className="text-center text-white/80">
                    <h4 className="text-lg font-bold text-white mb-2">New Holland Financial Press Desk</h4>
                    <p className="text-xs text-slate-300">Official Corporate Announcements & Regulatory Updates</p>
                  </div>
                </div>
-               <div className="absolute inset-0 bg-gradient-to-r from-[#0B2240] via-[#0B2240]/40 to-transparent"></div>
+               <div className="absolute inset-0 bg-gradient-to-r from-[#0c0d12] via-[#0c0d12]/40 to-transparent"></div>
             </div>
           </div>
         </div>
@@ -195,13 +195,13 @@ export const PressReleases: React.FC = () => {
               className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col group hover:shadow-2xl hover:shadow-slate-300/40 transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest px-3 py-1 bg-blue-50 rounded-lg">{release.category}</span>
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-3 py-1 bg-slate-50 rounded-lg">{release.category}</span>
                 <div className="flex items-center gap-2 text-slate-400 font-bold text-xs">
                   <Calendar size={14} /> {release.date}
                 </div>
               </div>
               
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-6 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-6 group-hover:text-slate-600 transition-colors">
                 {release.title}
               </h3>
               
@@ -216,7 +216,7 @@ export const PressReleases: React.FC = () => {
                 >
                   Full Report Available
                 </button>
-                <ArrowRight size={20} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-2 transition-all" />
+                <ArrowRight size={20} className="text-slate-200 group-hover:text-slate-600 group-hover:translate-x-2 transition-all" />
               </div>
             </div>
           ))}
@@ -240,7 +240,7 @@ export const PressReleases: React.FC = () => {
             <button 
               onClick={handleDownloadMediaKit}
               disabled={isGenerating}
-              className="bg-slate-900 text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest hover:bg-black hover:scale-105 transition-all text-center shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-50"
+              className="bg-[#0c0d12] text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest hover:bg-black hover:scale-105 transition-all text-center shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
               {isGenerating ? 'Generating...' : 'Download Media Kit'}

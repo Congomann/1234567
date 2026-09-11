@@ -91,7 +91,7 @@ export const AdminUsers: React.FC = () => {
                     <div className="flex justify-between items-end mb-2">
                         <div>
                             <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Sub-Admin Capacity</span>
-                            <span className="text-xl font-black text-[#0B2240]">{allUsers.filter(u => u.role === UserRole.SUB_ADMIN && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 50</span></span>
+                            <span className="text-xl font-black text-[#0c0d12]">{allUsers.filter(u => u.role === UserRole.SUB_ADMIN && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 50</span></span>
                         </div>
                         <Shield className="h-8 w-8 text-blue-100" />
                     </div>
@@ -106,7 +106,7 @@ export const AdminUsers: React.FC = () => {
                     <div className="flex justify-between items-end mb-2">
                         <div>
                             <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Advisors Provisioned</span>
-                            <span className="text-xl font-black text-[#0B2240]">{allUsers.filter(u => u.role === UserRole.ADVISOR && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 150</span></span>
+                            <span className="text-xl font-black text-[#0c0d12]">{allUsers.filter(u => u.role === UserRole.ADVISOR && !u.deletedAt).length} <span className="text-slate-300 font-bold">/ 150</span></span>
                         </div>
                         <Briefcase className="h-8 w-8 text-purple-100" />
                     </div>
@@ -281,10 +281,10 @@ export const AdminUsers: React.FC = () => {
 
             {/* Edit User Modal - Mastering Microsite Visibility */}
             {editingUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg p-10 relative border border-white/20">
                         <button onClick={() => setEditingUser(null)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={24} /></button>
-                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">Modify User Configuration</h2>
+                        <h2 className="text-2xl font-black text-[#0c0d12] mb-8 tracking-tight">Modify User Configuration</h2>
 
                         <form onSubmit={handleUpdateUser} className="space-y-6">
                             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
@@ -362,7 +362,7 @@ export const AdminUsers: React.FC = () => {
 
                             <div className="pt-6 flex gap-4">
                                 <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">Save Changes</button>
+                                <button type="submit" className="flex-1 py-4 bg-[#0c0d12] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">Save Changes</button>
                             </div>
                         </form>
                     </div>
@@ -371,10 +371,10 @@ export const AdminUsers: React.FC = () => {
 
             {/* Add User Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg p-10 relative border border-white/20">
                         <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={24} /></button>
-                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">Provision New User</h2>
+                        <h2 className="text-2xl font-black text-[#0c0d12] mb-8 tracking-tight">Provision New User</h2>
                         <form onSubmit={handleAddUser} className="space-y-6">
                             <div className="space-y-4">
                                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" required placeholder="Full Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
@@ -386,7 +386,7 @@ export const AdminUsers: React.FC = () => {
                             </div>
                             <div className="pt-6 flex gap-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20">Add User</button>
+                                <button type="submit" className="flex-1 py-4 bg-[#0c0d12] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20">Add User</button>
                             </div>
                         </form>
                     </div>

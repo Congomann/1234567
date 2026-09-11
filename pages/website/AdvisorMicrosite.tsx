@@ -255,7 +255,7 @@ END:VCARD`;
   };
 
   return (
-    <div className="bg-[#0B2240] min-h-screen font-sans text-white pb-20 selection:bg-blue-900 selection:text-blue-100">
+    <div className="bg-[#0c0d12] min-h-screen font-sans text-white pb-20 selection:bg-[#0c0d12] selection:text-slate-100">
       <SEO 
         title={`${advisor.name} | NHFG Licensed Advisor`} 
         description={advisor.bio || `Connect with ${advisor.name}, a licensed financial professional at New Holland Financial Group.`}
@@ -274,12 +274,12 @@ END:VCARD`;
           <img
             src={
               advisor.avatar ||
-              `https://ui-avatars.com/api/?name=${advisor.name}&background=0B2240&color=fff`
+              `https://ui-avatars.com/api/?name=${advisor.name}&background=0c0d12&color=fff`
             }
             alt={advisor.name}
             className="w-40 h-40 rounded-full object-cover shadow-sm mx-auto border-[6px] border-white/10"
           />
-          <div className="absolute bottom-1 right-1 bg-[#112A4F] p-1 rounded-full shadow-sm border border-white/10">
+          <div className="absolute bottom-1 right-1 bg-[#0f172a] p-1 rounded-full shadow-sm border border-white/10">
             <VerifiedBadge className="h-8 w-8 text-[#F5A524] fill-[#F5A524]/20" />
           </div>
         </div>
@@ -287,14 +287,14 @@ END:VCARD`;
         <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-white mb-3">
           {advisor.name}
         </h1>
-        <p className="text-xl text-blue-200 font-medium mb-10 tracking-tight">
+        <p className="text-xl text-slate-200 font-medium mb-10 tracking-tight">
           {advisor.title || `${advisor.category} Specialist`}
         </p>
         
         <div className="flex flex-wrap justify-center gap-3 md:gap-4">
           <Link
             to={`/book/${advisor.id}`}
-            className="px-8 py-3.5 bg-[#F5A524] text-[#0B2240] rounded-full font-medium hover:bg-[#E0941F] transition-colors flex items-center gap-2 shadow-sm"
+            className="px-8 py-3.5 bg-[#F5A524] text-[#0c0d12] rounded-full font-medium hover:bg-[#E0941F] transition-colors flex items-center gap-2 shadow-sm"
           >
             <Calendar className="h-5 w-5" /> Book Meeting
           </Link>
@@ -492,7 +492,7 @@ END:VCARD`;
                 ></textarea>
                 <button
                   type="submit"
-                  className="w-full py-4 bg-[#F5A524] text-[#0B2240] rounded-2xl font-medium hover:bg-[#E0941F] transition-colors shadow-sm"
+                  className="w-full py-4 bg-[#F5A524] text-[#0c0d12] rounded-2xl font-medium hover:bg-[#E0941F] transition-colors shadow-sm"
                 >
                   Submit Experience
                 </button>
@@ -568,7 +568,7 @@ END:VCARD`;
                   Product Focus
                 </label>
                 <select
-                  className="w-full p-4 bg-[#0B2240] border border-white/10 rounded-2xl text-white focus:ring-2 focus:ring-[#F5A524] outline-none cursor-pointer transition-all appearance-none"
+                  className="w-full p-4 bg-[#0c0d12] border border-white/10 rounded-2xl text-white focus:ring-2 focus:ring-[#F5A524] outline-none cursor-pointer transition-all appearance-none"
                   value={quoteForm.interest}
                   onChange={(e) =>
                     setQuoteForm({
@@ -600,7 +600,7 @@ END:VCARD`;
               </div>
               <button
                 type="submit"
-                className="w-full py-4 bg-[#F5A524] text-[#0B2240] rounded-2xl font-medium text-lg hover:bg-[#E0941F] transition-colors flex items-center justify-center gap-2 group"
+                className="w-full py-4 bg-[#F5A524] text-[#0c0d12] rounded-2xl font-medium text-lg hover:bg-[#E0941F] transition-colors flex items-center justify-center gap-2 group"
               >
                 Submit Inquiry{" "}
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -612,7 +612,7 @@ END:VCARD`;
 
       {isShareModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-[#112A4F] rounded-[32px] p-8 md:p-10 w-full max-w-sm shadow-2xl relative border border-white/10">
+          <div className="bg-[#0f172a] rounded-[32px] p-8 md:p-10 w-full max-w-sm shadow-2xl relative border border-white/10">
             <button
               onClick={() => setIsShareModalOpen(false)}
               className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
@@ -682,7 +682,7 @@ END:VCARD`;
               />
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-2.5 bg-[#F5A524] text-[#0B2240] text-sm font-medium rounded-xl hover:bg-[#E0941F] transition-colors flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 bg-[#F5A524] text-[#0c0d12] text-sm font-medium rounded-xl hover:bg-[#E0941F] transition-colors flex items-center gap-2 shrink-0"
               >
                 {copyText === 'Copied!' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copyText}

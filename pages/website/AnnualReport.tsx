@@ -122,11 +122,11 @@ export const AnnualReport: React.FC = () => {
         
         {/* Header Section */}
         <div className="mb-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 rounded-full text-blue-600 text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-blue-200">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600/10 rounded-full text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-slate-200">
             <ShieldCheck size={14} /> Corporate Transparency Initiative
           </div>
           <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
-            Annual Report <span className="text-blue-600">2025.</span>
+            Annual Report <span className="text-slate-600">2025.</span>
           </h1>
           <p className="text-xl text-slate-500 max-w-3xl mx-auto font-medium leading-relaxed">
             Transparency is the foundation of New Holland Financial Group. We believe in absolute accountability to our clients, advisors, and the states we serve.
@@ -135,7 +135,7 @@ export const AnnualReport: React.FC = () => {
 
         {!isPublished ? (
           <div className="bg-white p-16 md:p-24 rounded-[4rem] border border-slate-100 shadow-xl shadow-slate-200/50 text-center flex flex-col items-center justify-center">
-            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-10 border border-blue-100">
+            <div className="w-24 h-24 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center mb-10 border border-slate-100">
                <ShieldCheck size={40} />
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter mb-6">Pending Release</h2>
@@ -151,7 +151,7 @@ export const AnnualReport: React.FC = () => {
             {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-8">
+            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600 mb-8">
               <TrendingUp size={28} />
             </div>
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">Gross Sales (YTD)</h3>
@@ -193,13 +193,13 @@ export const AnnualReport: React.FC = () => {
             {partnerRevenue.filter((p: any) => p.visible !== false).map((partner: any, idx: number) => {
               const displayRevenue = partner.revenue >= 1000000 ? `$${(partner.revenue / 1000000).toFixed(1)}M` : `$${(partner.revenue / 1000).toFixed(0)}K`;
               return (
-                <div key={idx} className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 hover:bg-blue-50 transition-all group">
+                <div key={idx} className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 hover:bg-slate-50 transition-all group">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-8 group-hover:scale-110 transition-transform">
-                    <Users className="text-blue-600" size={24} />
+                    <Users className="text-slate-600" size={24} />
                   </div>
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{partner.vertical}</h3>
                   <h4 className="font-black text-slate-900 mb-2 tracking-tight leading-none">{partner.name}</h4>
-                  <p className="text-3xl font-black text-blue-600 group-hover:scale-110 transition-transform origin-left">{displayRevenue}</p>
+                  <p className="text-3xl font-black text-slate-600 group-hover:scale-110 transition-transform origin-left">{displayRevenue}</p>
                   <div className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                     Strategic Contribution
                   </div>
@@ -213,18 +213,18 @@ export const AnnualReport: React.FC = () => {
         <div className="mb-24">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-              <Layers className="text-blue-600" size={28} /> Quarterly Disclosures
+              <Layers className="text-slate-600" size={28} /> Quarterly Disclosures
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {quarterlyReports.map((report: any) => (
-              <div key={report.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-lg shadow-slate-200/40 group hover:bg-slate-900 transition-all cursor-pointer">
+              <div key={report.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-lg shadow-slate-200/40 group hover:bg-[#0c0d12] transition-all cursor-pointer">
                 <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 mb-8 group-hover:bg-white/10 group-hover:text-white transition-all">
                   <FileText size={28} />
                 </div>
                 <h3 className="text-lg font-black text-slate-900 mb-2 group-hover:text-white transition-colors">{report.title}</h3>
                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8 group-hover:text-white/40 transition-colors">Released: {report.date}</p>
-                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-blue-600 group-hover:text-blue-400 transition-colors">
+                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:text-slate-400 transition-colors">
                   View Full Statement <ArrowRight size={14} />
                 </div>
               </div>
@@ -236,7 +236,7 @@ export const AnnualReport: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-24">
           <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl shadow-slate-200/40">
             <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight flex items-center gap-4">
-              Revenue Growth <span className="text-blue-600 text-sm font-bold uppercase tracking-widest">(In Millions USD)</span>
+              Revenue Growth <span className="text-slate-600 text-sm font-bold uppercase tracking-widest">(In Millions USD)</span>
             </h2>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -300,15 +300,15 @@ export const AnnualReport: React.FC = () => {
         </div>
 
         {/* Transparency Ledger: Violations, Fines, Lawsuits */}
-        <div className="bg-[#0B2240] rounded-[4rem] p-12 md:p-20 text-white shadow-3xl shadow-blue-900/40 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[150px] opacity-10"></div>
+        <div className="bg-[#0c0d12] rounded-[4rem] p-12 md:p-20 text-white shadow-3xl shadow-slate-900/40 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500 rounded-full mix-blend-overlay filter blur-[150px] opacity-10"></div>
           
           <div className="relative z-10">
             <div className="max-w-2xl mb-16">
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-tight">
-                The Transparency <span className="text-blue-400 font-serif italic">Ledger.</span>
+                The Transparency <span className="text-slate-400 font-serif italic">Ledger.</span>
               </h2>
-              <p className="text-xl text-blue-100/70 font-medium leading-relaxed">
+              <p className="text-xl text-slate-100/70 font-medium leading-relaxed">
                 We maintain an open-book policy regarding our regulatory standing. Below is a full disclosure of all corporate legal and compliance events.
               </p>
             </div>
@@ -317,17 +317,17 @@ export const AnnualReport: React.FC = () => {
               {/* Column 1: Fines & Violations */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 mb-10">
-                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-blue-300 border border-white/10">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-slate-300 border border-white/10">
                     <AlertCircle size={24} />
                   </div>
                   <h3 className="text-xl font-black tracking-tight">Regulatory Fines</h3>
                 </div>
                 
                 <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center text-center min-h-[200px]">
-                  <p className="text-4xl font-black text-blue-400 mb-2">$0.00</p>
-                  <p className="text-xs font-black text-blue-200/40 uppercase tracking-widest">Total Fines in 2025</p>
+                  <p className="text-4xl font-black text-slate-400 mb-2">$0.00</p>
+                  <p className="text-xs font-black text-slate-200/40 uppercase tracking-widest">Total Fines in 2025</p>
                 </div>
-                <p className="text-sm text-blue-200/60 font-medium leading-relaxed px-4">
+                <p className="text-sm text-slate-200/60 font-medium leading-relaxed px-4">
                   New Holland Financial Group has maintained a perfect regulatory record for the current fiscal year across all 48 active states.
                 </p>
               </div>
@@ -335,17 +335,17 @@ export const AnnualReport: React.FC = () => {
               {/* Column 2: Legal Proceedings */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 mb-10">
-                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-blue-300 border border-white/10">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-slate-300 border border-white/10">
                     <Gavel size={24} />
                   </div>
                   <h3 className="text-xl font-black tracking-tight">Active Lawsuits</h3>
                 </div>
                 
                 <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center text-center min-h-[200px]">
-                  <p className="text-4xl font-black text-blue-400 mb-2">0</p>
-                  <p className="text-xs font-black text-blue-200/40 uppercase tracking-widest">Open Legal Actions</p>
+                  <p className="text-4xl font-black text-slate-400 mb-2">0</p>
+                  <p className="text-xs font-black text-slate-200/40 uppercase tracking-widest">Open Legal Actions</p>
                 </div>
-                <p className="text-sm text-blue-200/60 font-medium leading-relaxed px-4">
+                <p className="text-sm text-slate-200/60 font-medium leading-relaxed px-4">
                   There are currently no active lawsuits, class actions, or pending litigation against the group or its subsidiaries.
                 </p>
               </div>
@@ -353,17 +353,17 @@ export const AnnualReport: React.FC = () => {
               {/* Column 3: State Audits */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 mb-10">
-                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-blue-300 border border-white/10">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-slate-300 border border-white/10">
                     <ShieldAlert size={24} />
                   </div>
                   <h3 className="text-xl font-black tracking-tight">State Audits</h3>
                 </div>
                 
                 <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center text-center min-h-[200px]">
-                  <p className="text-4xl font-black text-blue-400 mb-2">4</p>
-                  <p className="text-xs font-black text-blue-200/40 uppercase tracking-widest">Successful Audits (2025)</p>
+                  <p className="text-4xl font-black text-slate-400 mb-2">4</p>
+                  <p className="text-xs font-black text-slate-200/40 uppercase tracking-widest">Successful Audits (2025)</p>
                 </div>
-                <p className="text-sm text-blue-200/60 font-medium leading-relaxed px-4">
+                <p className="text-sm text-slate-200/60 font-medium leading-relaxed px-4">
                   The states of NY, FL, TX, and CA have completed comprehensive operational audits this year with zero findings.
                 </p>
               </div>
@@ -386,7 +386,7 @@ export const AnnualReport: React.FC = () => {
           <button 
             onClick={handleDownloadReport}
             disabled={isGenerating}
-            className="flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-slate-900/20 whitespace-nowrap disabled:opacity-50"
+            className="flex items-center gap-3 bg-[#0c0d12] text-white px-10 py-5 rounded-full font-black text-xs uppercase tracking-widest hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-slate-900/20 whitespace-nowrap disabled:opacity-50"
           >
             {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <ArrowDownToLine size={18} />} 
             {isGenerating ? 'Generating...' : 'Download Full Report (PDF)'}

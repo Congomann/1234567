@@ -64,10 +64,10 @@ export const BusinessInsurance: React.FC = () => {
       title: "General Liability",
       icon: Shield,
       colorClasses: {
-        bg: "bg-blue-50",
-        text: "text-blue-600",
-        shadow: "hover:shadow-blue-900/5",
-        iconText: "text-blue-500",
+        bg: "bg-slate-50",
+        text: "text-slate-600",
+        shadow: "hover:shadow-slate-900/5",
+        iconText: "text-slate-500",
       },
       description:
         "Protects your business from financial loss should you be liable for property damage or personal and advertising injury caused by your services, business operations or your employees.",
@@ -156,7 +156,7 @@ export const BusinessInsurance: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Premium Hero Section */}
-      <div className="relative pt-48 pb-32 overflow-hidden bg-slate-900">
+      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0c0d12]">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent"></div>
         <div className="absolute h-[500px] w-[500px] bg-amber-500/5 blur-[120px] rounded-full -top-48 -right-24 animate-pulse"></div>
         
@@ -232,7 +232,7 @@ export const BusinessInsurance: React.FC = () => {
           </div>
 
           {selectedNeed && (
-            <div className="mt-12 p-8 bg-slate-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
+            <div className="mt-12 p-8 bg-[#0c0d12] rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
               <p className="text-[10px] font-black text-amber-400 uppercase tracking-[0.3em] mb-3">
                 Institutional Recommendation
@@ -307,21 +307,21 @@ export const BusinessInsurance: React.FC = () => {
 
       {/* Enterprise CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-20">
-        <div className="bg-[#0B2240] rounded-[4rem] p-16 md:p-24 text-center relative overflow-hidden shadow-2xl group">
+        <div className="bg-[#0c0d12] rounded-[4rem] p-16 md:p-24 text-center relative overflow-hidden shadow-2xl group">
           <div className="absolute inset-0 bg-amber-600/5"></div>
           <div className="relative z-10">
             <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter max-w-3xl mx-auto">
               Safeguard your <br />
               <span className="text-amber-500">commercial legacy.</span>
             </h2>
-            <p className="text-blue-100/70 text-xl mb-12 max-w-xl mx-auto font-medium">
+            <p className="text-slate-100/70 text-xl mb-12 max-w-xl mx-auto font-medium">
               Join thousands of businesses who trust NHFG for comprehensive 
               risk management and executive-level advisory.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
                <Link
                 to="/contact"
-                className="inline-flex items-center justify-center px-12 py-6 text-xs font-black uppercase tracking-widest rounded-full text-[#0B2240] bg-white hover:bg-amber-50 transition-all shadow-xl hover:scale-105 active:scale-95"
+                className="inline-flex items-center justify-center px-12 py-6 text-xs font-black uppercase tracking-widest rounded-full text-[#0c0d12] bg-white hover:bg-amber-50 transition-all shadow-xl hover:scale-105 active:scale-95"
               >
                 Contact Business Desk
               </Link>

@@ -42,9 +42,9 @@ export const LoadBoard: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Search Header */}
-      <div className="bg-slate-900 pt-48 pb-24 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <div className="bg-[#0c0d12] pt-48 pb-24 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto text-center">
-          <span className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+          <span className="inline-block px-4 py-1.5 bg-slate-500/10 border border-slate-500/20 rounded-full text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
             Live Freight Exchange
           </span>
           <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-8">
@@ -57,7 +57,7 @@ export const LoadBoard: React.FC = () => {
               <input 
                 type="text" 
                 placeholder="Search origin or destination city..."
-                className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-blue-500/20 transition-all text-sm"
+                className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-slate-500/20 transition-all text-sm"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -69,7 +69,7 @@ export const LoadBoard: React.FC = () => {
                   onClick={() => setActiveFilter(type as any)}
                   className={`px-6 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                     activeFilter === type 
-                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' 
+                      ? 'bg-slate-600 text-white shadow-xl shadow-slate-500/20' 
                       : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
                   }`}
                  >
@@ -105,7 +105,7 @@ export const LoadBoard: React.FC = () => {
             >
               {/* Route */}
               <div className="flex-1 flex items-center gap-8">
-                <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center shrink-0">
+                <div className="w-16 h-16 bg-[#0c0d12] text-white rounded-[1.5rem] flex items-center justify-center shrink-0">
                   <Truck size={24} />
                 </div>
                 <div>
@@ -121,7 +121,7 @@ export const LoadBoard: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2 text-slate-400">
                         <Filter size={12} />
-                        <span className="text-[11px] font-bold text-blue-600">{load.trailerType}</span>
+                        <span className="text-[11px] font-bold text-slate-600">{load.trailerType}</span>
                       </div>
                    </div>
                 </div>
@@ -151,7 +151,7 @@ export const LoadBoard: React.FC = () => {
 
                 <Link
                   to="/contact"
-                  className="px-10 py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95 whitespace-nowrap"
+                  className="px-10 py-5 bg-[#0c0d12] text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95 whitespace-nowrap"
                 >
                   Book Now
                 </Link>

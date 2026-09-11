@@ -61,10 +61,10 @@ export const Securities: React.FC = () => {
       title: "Series 6, 7, 63 Support",
       icon: Briefcase,
       colorClasses: {
-        bg: "bg-blue-50",
-        text: "text-blue-600",
-        shadow: "hover:shadow-blue-900/5",
-        iconText: "text-blue-500",
+        bg: "bg-slate-50",
+        text: "text-slate-600",
+        shadow: "hover:shadow-slate-900/5",
+        iconText: "text-slate-500",
       },
       description:
         "Comprehensive support and guidance for professionals seeking or maintaining their Series 6, 7, and 63 securities licenses.",
@@ -168,9 +168,9 @@ export const Securities: React.FC = () => {
 
       {/* Interactive Recommender */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-blue-900/5 border border-slate-100">
+        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-slate-900/5 border border-slate-100">
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center flex-shrink-0">
               <HelpCircle className="w-6 h-6" />
             </div>
             <div>
@@ -190,20 +190,20 @@ export const Securities: React.FC = () => {
                 onClick={() => setSelectedNeed(need.id)}
                 className={`text-left p-5 rounded-2xl border-2 transition-all duration-300 ${
                   selectedNeed === need.id
-                    ? "border-blue-500 bg-blue-50/50 shadow-md shadow-blue-500/10"
-                    : "border-slate-100 hover:border-blue-200 hover:bg-slate-50"
+                    ? "border-slate-500 bg-slate-50/50 shadow-md shadow-slate-500/10"
+                    : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`font-medium ${selectedNeed === need.id ? "text-blue-900" : "text-slate-700"}`}
+                    className={`font-medium ${selectedNeed === need.id ? "text-slate-900" : "text-slate-700"}`}
                   >
                     {need.label}
                   </span>
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex-shrink-0 ml-4 flex items-center justify-center ${
                       selectedNeed === need.id
-                        ? "border-blue-500 bg-blue-500"
+                        ? "border-slate-500 bg-slate-500"
                         : "border-slate-300"
                     }`}
                   >
@@ -265,7 +265,7 @@ export const Securities: React.FC = () => {
                 <div className="absolute top-0 right-0 p-10 text-slate-100 font-black text-8xl opacity-10 group-hover:text-amber-500/10 transition-colors pointer-events-none">
                   {index + 1}
                 </div>
-                <div className="h-20 w-20 bg-slate-50 text-[#0B2240] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0B2240] group-hover:text-white transition-all">
+                <div className="h-20 w-20 bg-slate-50 text-[#0c0d12] rounded-[2rem] flex items-center justify-center mb-10 shadow-inner group-hover:bg-[#0c0d12] group-hover:text-white transition-all">
                   <Icon className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tighter uppercase">
@@ -282,7 +282,7 @@ export const Securities: React.FC = () => {
 
       {/* Institutional Partner & Regulatory Disclosure Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-8">
-        <div className="bg-slate-900 text-slate-300 rounded-3xl p-8 border border-slate-800 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+        <div className="bg-[#0c0d12] text-slate-300 rounded-3xl p-8 border border-slate-800 flex flex-col md:flex-row items-center gap-6 shadow-xl">
           <div className="p-4 bg-amber-500/10 text-amber-400 rounded-2xl shrink-0 border border-amber-500/20">
             <Shield size={28} />
           </div>

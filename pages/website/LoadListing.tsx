@@ -16,11 +16,11 @@ export const LoadListing: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Feed Header */}
-      <div className="bg-slate-900 pt-48 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
+      <div className="bg-[#0c0d12] pt-48 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent"></div>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
           <div className="text-center md:text-left">
-            <span className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
+            <span className="inline-block px-4 py-1.5 bg-slate-500/10 border border-slate-500/20 rounded-full text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
               Real-time Supply Chain Feed
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1]">
@@ -33,7 +33,7 @@ export const LoadListing: React.FC = () => {
                 <span className="text-3xl font-black text-white tracking-tighter">{loads.length} Loads</span>
              </div>
              <div className="h-10 w-px bg-white/10 mx-4 hidden md:block"></div>
-             <button className="px-8 py-4 bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center gap-3">
+             <button className="px-8 py-4 bg-slate-600 text-white font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-slate-500 transition-all shadow-xl shadow-slate-500/20 active:scale-95 flex items-center gap-3">
                Refresh Feed <Globe size={14} className="animate-spin-slow" />
              </button>
           </div>
@@ -49,7 +49,7 @@ export const LoadListing: React.FC = () => {
             >
               {/* Route Info */}
               <div className="flex-1 flex items-center gap-10">
-                <div className="w-20 h-20 bg-slate-900 text-white rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
+                <div className="w-20 h-20 bg-[#0c0d12] text-white rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
                   <Truck size={32} />
                 </div>
                 <div>
@@ -69,7 +69,7 @@ export const LoadListing: React.FC = () => {
                         <Navigation size={14} className="text-slate-300" />
                         {load.distance} Miles
                       </div>
-                      <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
+                      <div className="flex items-center gap-2 text-slate-600 font-black text-[10px] uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">
                         {load.trailerType}
                       </div>
                    </div>
@@ -95,7 +95,7 @@ export const LoadListing: React.FC = () => {
                  <div className="flex gap-3">
                    <Link
                      to="/logistics/booking"
-                     className="px-10 py-5 bg-slate-900 text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95"
+                     className="px-10 py-5 bg-[#0c0d12] text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95"
                    >
                      Book Load
                    </Link>
@@ -111,7 +111,7 @@ export const LoadListing: React.FC = () => {
         {/* Boarding Info */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-12">
            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex gap-8 items-start">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center shrink-0">
                 <DollarSign size={28} />
               </div>
               <div>

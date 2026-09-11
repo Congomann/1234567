@@ -46,7 +46,7 @@ export const Inbox: React.FC = () => {
 
       {/* Header */}
       <div className="h-24 px-8 flex items-center justify-between z-20 border-b border-white/20">
-        <h2 className="text-2xl font-black text-[#0B2240] tracking-tight flex items-center gap-3">
+        <h2 className="text-2xl font-black text-[#0c0d12] tracking-tight flex items-center gap-3">
             <InboxIcon className="h-6 w-6 text-blue-600" /> Requests & Inquiries
         </h2>
         
@@ -124,7 +124,7 @@ export const Inbox: React.FC = () => {
                     className={`cursor-pointer border-b border-white/20 p-6 transition-all duration-300 ${selectedLeadId === lead.id ? 'bg-white/60 backdrop-blur-xl' : 'hover:bg-white/30'}`}
                 >
                     <div className="flex justify-between items-baseline mb-2">
-                        <span className={`truncate text-sm ${lead.status === LeadStatus.NEW ? 'text-[#0B2240] font-black' : 'text-slate-600 font-bold'}`}>{lead.name}</span>
+                        <span className={`truncate text-sm ${lead.status === LeadStatus.NEW ? 'text-[#0c0d12] font-black' : 'text-slate-600 font-bold'}`}>{lead.name}</span>
                         <span className="text-[10px] text-slate-400 font-bold bg-white/50 px-2 py-1 rounded-lg">{new Date(lead.date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
@@ -204,7 +204,7 @@ export const Inbox: React.FC = () => {
                     </div>
                     
                     <div className="p-8 border-t border-slate-100 flex gap-4 bg-white/50 backdrop-blur-md sticky bottom-0">
-                        <a href={`tel:${selectedLead.phone}`} className="flex-1 px-4 py-3.5 bg-[#0B2240] text-white rounded-2xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:scale-105 transition-all flex items-center justify-center gap-2">
+                        <a href={`tel:${selectedLead.phone}`} className="flex-1 px-4 py-3.5 bg-[#0c0d12] text-white rounded-2xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:scale-105 transition-all flex items-center justify-center gap-2">
                             <Phone className="h-4 w-4" /> Call Client
                         </a>
                         <a href={`mailto:${selectedLead.email}`} className="flex-1 px-4 py-3.5 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">

@@ -9,7 +9,7 @@ const services = [
     title: "Roofing",
     desc: "Professional roof inspections, repairs, and full replacements using premium materials designed to withstand the elements.",
     icon: Home,
-    color: "bg-blue-500",
+    color: "bg-slate-500",
   },
   {
     id: "drywalls",
@@ -124,7 +124,7 @@ export const HomeRepair: React.FC = () => {
     <div className="bg-slate-50 min-h-screen pt-32 pb-24 font-sans relative overflow-hidden">
       {/* Background Ornaments */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-slate-200 to-transparent pointer-events-none"></div>
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-slate-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute top-40 -left-40 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -144,7 +144,7 @@ export const HomeRepair: React.FC = () => {
           <div className="mt-10">
             <button 
               onClick={() => setIsFormOpen(true)}
-              className="px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/20 inline-flex items-center gap-2"
+              className="px-8 py-4 bg-[#0c0d12] text-white rounded-full font-bold text-lg hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/20 inline-flex items-center gap-2"
             >
               Request a Service <ArrowRight size={20} />
             </button>
@@ -186,7 +186,7 @@ export const HomeRepair: React.FC = () => {
 
       {/* Contact Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl w-full relative overflow-hidden">
             {/* Design Ornament */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>

@@ -119,15 +119,15 @@ export const JoinTeam: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
       {/* Hero Section */}
-      <div className="relative bg-[#0B2240] py-20 sm:py-32 overflow-hidden">
+      <div className="relative bg-[#0c0d12] py-20 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-slate-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 animate-pulse"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Join Our Team
           </h1>
-          <p className="text-xl text-blue-200 max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-xl text-slate-200 max-w-3xl mx-auto font-medium leading-relaxed">
             Build a rewarding career helping individuals, families, and
             businesses achieve financial security.
           </p>
@@ -151,7 +151,7 @@ export const JoinTeam: React.FC = () => {
           </div>
 
           <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-transform duration-300">
-            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
+            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 mb-6">
               <Shield className="h-7 w-7" />
             </div>
             <h3 className="text-xl font-bold text-slate-900 mb-3">
@@ -181,7 +181,7 @@ export const JoinTeam: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-12 items-start">
           {/* Left Content */}
           <div className="lg:w-1/3">
-            <h2 className="text-3xl font-black text-[#0B2240] mb-6">
+            <h2 className="text-3xl font-black text-[#0c0d12] mb-6">
               Why New Holland Financial Group?
             </h2>
             <div className="prose prose-slate text-slate-600 mb-8">
@@ -193,9 +193,9 @@ export const JoinTeam: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-              <h4 className="font-bold text-blue-900 mb-2">Ready to apply?</h4>
-              <p className="text-sm text-blue-700 mb-4">
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <h4 className="font-bold text-slate-900 mb-2">Ready to apply?</h4>
+              <p className="text-sm text-slate-700 mb-4">
                 Complete the form to start your journey with us. A hiring
                 manager will review your application and contact you shortly.
               </p>
@@ -241,7 +241,7 @@ export const JoinTeam: React.FC = () => {
                           required
                           value={formData.fullName}
                           onChange={handleInputChange}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all"
                           placeholder="John Doe"
                         />
                       </div>
@@ -255,7 +255,7 @@ export const JoinTeam: React.FC = () => {
                           required
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -272,7 +272,7 @@ export const JoinTeam: React.FC = () => {
                           required
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all"
                           placeholder="(555) 123-4567"
                         />
                       </div>
@@ -285,7 +285,7 @@ export const JoinTeam: React.FC = () => {
                           name="licenseNumber"
                           value={formData.licenseNumber}
                           onChange={handleInputChange}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all"
                           placeholder="NPN or State License #"
                         />
                       </div>
@@ -301,7 +301,7 @@ export const JoinTeam: React.FC = () => {
                         required
                         value={formData.address}
                         onChange={handleInputChange}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all"
                         placeholder="123 Main St, City, State, Zip"
                       />
                     </div>
@@ -317,7 +317,7 @@ export const JoinTeam: React.FC = () => {
                         rows={4}
                         value={formData.experience}
                         onChange={handleInputChange}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent outline-none transition-all resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0c0d12] focus:border-transparent outline-none transition-all resize-none"
                         placeholder="Briefly describe your background in sales, finance, or insurance..."
                       ></textarea>
                     </div>
@@ -328,7 +328,7 @@ export const JoinTeam: React.FC = () => {
                       </label>
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-blue-400 rounded-xl p-6 cursor-pointer transition-all flex flex-col items-center justify-center text-center group"
+                        className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 rounded-xl p-6 cursor-pointer transition-all flex flex-col items-center justify-center text-center group"
                       >
                         <input
                           type="file"
@@ -338,7 +338,7 @@ export const JoinTeam: React.FC = () => {
                           onChange={handleFileChange}
                         />
                         {resume ? (
-                          <div className="flex items-center gap-3 text-blue-600 font-bold">
+                          <div className="flex items-center gap-3 text-slate-600 font-bold">
                             <FileText className="h-6 w-6" />
                             {resume.name}
                             <button
@@ -347,14 +347,14 @@ export const JoinTeam: React.FC = () => {
                                 e.stopPropagation();
                                 setResume(null);
                               }}
-                              className="p-1 hover:bg-blue-100 rounded-full text-slate-400 hover:text-red-500"
+                              className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           </div>
                         ) : (
                           <>
-                            <Upload className="h-8 w-8 text-slate-400 mb-2 group-hover:text-blue-500 transition-colors" />
+                            <Upload className="h-8 w-8 text-slate-400 mb-2 group-hover:text-slate-500 transition-colors" />
                             <p className="text-sm font-medium text-slate-600">
                               Click to upload or drag and drop
                             </p>
@@ -375,7 +375,7 @@ export const JoinTeam: React.FC = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-4 bg-[#0A62A7] text-white font-bold rounded-full shadow-xl shadow-blue-900/20 hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-[#0c0d12] text-white font-bold rounded-full shadow-xl shadow-slate-900/20 hover:bg-slate-700 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         {isSubmitting ? (
                           "Submitting..."

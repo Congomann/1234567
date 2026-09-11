@@ -19,11 +19,11 @@ export const LoadSearching: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Search Hero */}
-      <div className="bg-slate-900 pt-48 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
+      <div className="bg-[#0c0d12] pt-48 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent"></div>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+            <span className="inline-block px-4 py-1.5 bg-slate-500/10 border border-slate-500/20 rounded-full text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
               Advanced Query Engine
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-8">
@@ -38,7 +38,7 @@ export const LoadSearching: React.FC = () => {
                 <input 
                   type="text" 
                   placeholder="Origin City or Zip"
-                  className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-blue-500/20 transition-all text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-slate-500/20 transition-all text-sm"
                 />
               </div>
               <div className="relative">
@@ -46,7 +46,7 @@ export const LoadSearching: React.FC = () => {
                 <input 
                   type="text" 
                   placeholder="Destination City or Zip"
-                  className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-blue-500/20 transition-all text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-4 ring-slate-500/20 transition-all text-sm"
                 />
               </div>
             </div>
@@ -54,15 +54,15 @@ export const LoadSearching: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
                 <Truck className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <select className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold focus:outline-none focus:ring-4 ring-blue-500/20 transition-all text-sm appearance-none">
-                  <option className="bg-slate-900">All Equipment</option>
-                  <option className="bg-slate-900">Dry Van</option>
-                  <option className="bg-slate-900">Reefer</option>
-                  <option className="bg-slate-900">Flatbed</option>
+                <select className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-6 py-5 text-white font-bold focus:outline-none focus:ring-4 ring-slate-500/20 transition-all text-sm appearance-none">
+                  <option className="bg-[#0c0d12]">All Equipment</option>
+                  <option className="bg-[#0c0d12]">Dry Van</option>
+                  <option className="bg-[#0c0d12]">Reefer</option>
+                  <option className="bg-[#0c0d12]">Flatbed</option>
                 </select>
               </div>
               <div className="md:col-span-2 flex gap-4">
-                <button className="flex-1 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-[2rem] py-5 hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-3">
+                <button className="flex-1 bg-slate-600 text-white font-black text-xs uppercase tracking-widest rounded-[2rem] py-5 hover:bg-slate-500 transition-all shadow-xl shadow-slate-500/20 active:scale-95 flex items-center justify-center gap-3">
                   <Search size={16} /> Search Loads
                 </button>
                 <button className="p-5 bg-white/5 border border-white/10 text-white rounded-[2rem] hover:bg-white/10 transition-all">
@@ -84,7 +84,7 @@ export const LoadSearching: React.FC = () => {
                 <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                   <History size={20} className="text-slate-400" /> Recent Searches
                 </h3>
-                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clear All</button>
+                <button className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Clear All</button>
               </div>
               
               <div className="space-y-4">
@@ -93,9 +93,9 @@ export const LoadSearching: React.FC = () => {
                   'Atlanta, GA → Any (Reefer)',
                   'Houston, TX → 500mi (Flatbed)'
                 ].map((s, i) => (
-                  <button key={i} className="w-full flex items-center justify-between p-6 rounded-2xl border border-slate-50 hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+                  <button key={i} className="w-full flex items-center justify-between p-6 rounded-2xl border border-slate-50 hover:border-slate-200 hover:bg-slate-50/30 transition-all group">
                     <span className="text-sm font-bold text-slate-700">{s}</span>
-                    <ArrowRight size={14} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight size={14} className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>
@@ -112,7 +112,7 @@ export const LoadSearching: React.FC = () => {
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{lane.from} to {lane.to}</p>
                       <p className="text-xs font-bold text-slate-900">{lane.loads} loads available</p>
                     </div>
-                    <button className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
+                    <button className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
                       <Search size={14} />
                     </button>
                   </div>
@@ -147,7 +147,7 @@ export const LoadSearching: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-slate-900 to-blue-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
                <div className="relative z-10">
                   <h3 className="text-xl font-black mb-4 tracking-tight">Need a Custom Lane?</h3>
                   <p className="text-slate-400 text-sm font-medium mb-8 leading-relaxed">

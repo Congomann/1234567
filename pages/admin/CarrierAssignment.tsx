@@ -74,7 +74,7 @@ export const CarrierAssignment: React.FC = () => {
         ]}
       />
         <div>
-            <h1 className="text-2xl font-bold text-[#0B2240]">Bulk Carrier Assignment</h1>
+            <h1 className="text-2xl font-bold text-[#0c0d12]">Bulk Carrier Assignment</h1>
             <p className="text-slate-500">Manage advisor appointments with insurance carriers.</p>
         </div>
 
@@ -82,7 +82,7 @@ export const CarrierAssignment: React.FC = () => {
             {/* Left Col: Advisors */}
             <div className="lg:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-[800px]">
                 <div className="p-6 border-b border-slate-100">
-                    <h3 className="text-lg font-bold text-[#0B2240] mb-4">1. Select Advisors</h3>
+                    <h3 className="text-lg font-bold text-[#0c0d12] mb-4">1. Select Advisors</h3>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <input 
@@ -124,7 +124,7 @@ export const CarrierAssignment: React.FC = () => {
             {/* Right Col: Carriers */}
             <div id="insurance_carriers" className="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-[800px]">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-[#0B2240]">2. Select Carriers</h3>
+                    <h3 className="text-lg font-bold text-[#0c0d12]">2. Select Carriers</h3>
                     <div className="text-sm text-slate-500">
                         {selectedCarrierNames.size} Carriers Selected
                     </div>
@@ -133,7 +133,7 @@ export const CarrierAssignment: React.FC = () => {
                     {Object.entries(groupedCarriers).map(([category, carriers]: [string, Carrier[]]) => (
                         <div key={category}>
                             <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 py-2 border-b border-slate-50">
-                                <h4 className="text-sm font-bold text-[#0B2240] uppercase tracking-wider">{category}</h4>
+                                <h4 className="text-sm font-bold text-[#0c0d12] uppercase tracking-wider">{category}</h4>
                                 <button 
                                     onClick={() => toggleSelectAllCarriers(category)}
                                     className="text-xs text-blue-600 font-bold hover:underline"

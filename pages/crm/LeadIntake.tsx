@@ -10,7 +10,7 @@ const SectionHeader = ({ icon: Icon, title, description }: any) => (
     <div className="mb-10 border-b border-slate-100 pb-6">
         <div className="flex items-center gap-5 mb-2">
           <div className="p-4 bg-blue-50 text-blue-600 rounded-[1.5rem]"><Icon className="h-7 w-7" /></div>
-          <h3 className="text-2xl font-bold text-[#0B2240]">{title}</h3>
+          <h3 className="text-2xl font-bold text-[#0c0d12]">{title}</h3>
         </div>
         {description && <p className="text-slate-500 text-sm ml-[4.25rem] font-medium">{description}</p>}
     </div>
@@ -175,7 +175,7 @@ export const LeadIntake: React.FC = () => {
               <ArrowLeft className="h-4 w-4" /> Back to Leads
           </button>
           <div className="text-center md:text-left">
-            <h1 className="text-4xl font-black text-[#0B2240] tracking-tight mb-2">New Lead Intake</h1>
+            <h1 className="text-4xl font-black text-[#0c0d12] tracking-tight mb-2">New Lead Intake</h1>
             <p className="text-slate-500 text-lg font-medium">Create a new client record. Select the product vertical to customize the form.</p>
           </div>
       </div>
@@ -269,7 +269,7 @@ export const LeadIntake: React.FC = () => {
                         </div>
                         
                         <div className="border-t border-slate-100 pt-8">
-                            <h4 className="text-sm font-bold text-[#0B2240] mb-6 uppercase tracking-wider pl-2">Banking & Health</h4>
+                            <h4 className="text-sm font-bold text-[#0c0d12] mb-6 uppercase tracking-wider pl-2">Banking & Health</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <InputGroup label="Bank Name" value={details.bankName} onChange={(v: string) => handleDetailsChange('bankName', v)} placeholder="Chase" />
                                 <InputGroup label="Routing Number" value={details.routingNumber} onChange={(v: string) => handleDetailsChange('routingNumber', v)} placeholder="123456789" />

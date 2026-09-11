@@ -12,13 +12,13 @@ export const PrivacyPolicy: React.FC = () => {
       <div className="max-w-4xl mx-auto px-6">
         <Link
           to="/"
-          className="inline-flex items-center text-blue-600 font-bold text-sm mb-8 hover:underline"
+          className="inline-flex items-center text-slate-600 font-bold text-sm mb-8 hover:underline"
         >
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Home
         </Link>
 
         <div className="mb-12">
-          <h1 className="text-4xl font-black text-[#0B2240] tracking-tight mb-4">
+          <h1 className="text-4xl font-black text-[#0c0d12] tracking-tight mb-4">
             Privacy Policy
           </h1>
           <p className="text-slate-500 font-medium">
@@ -29,7 +29,7 @@ export const PrivacyPolicy: React.FC = () => {
         <div className="prose prose-slate max-w-none space-y-12">
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
                 <Shield className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -48,7 +48,7 @@ export const PrivacyPolicy: React.FC = () => {
 
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
                 <Eye className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -62,7 +62,7 @@ export const PrivacyPolicy: React.FC = () => {
             </p>
             <ul className="space-y-4 text-slate-600">
               <li className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-600 mt-2 shrink-0"></div>
+                <div className="h-2 w-2 rounded-full bg-slate-600 mt-2 shrink-0"></div>
                 <span>
                   <strong>Personal Identification:</strong> Name, Social
                   Security Number (SSN), Date of Birth, Driver's License, and
@@ -70,7 +70,7 @@ export const PrivacyPolicy: React.FC = () => {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-600 mt-2 shrink-0"></div>
+                <div className="h-2 w-2 rounded-full bg-slate-600 mt-2 shrink-0"></div>
                 <span>
                   <strong>Health Data (Life Insurance):</strong> Medical
                   history, smoking status, height, weight, and lifestyle details
@@ -78,14 +78,14 @@ export const PrivacyPolicy: React.FC = () => {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-600 mt-2 shrink-0"></div>
+                <div className="h-2 w-2 rounded-full bg-slate-600 mt-2 shrink-0"></div>
                 <span>
                   <strong>Financial Information:</strong> Bank account details,
                   annual income, net worth, and assets under management.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-600 mt-2 shrink-0"></div>
+                <div className="h-2 w-2 rounded-full bg-slate-600 mt-2 shrink-0"></div>
                 <span>
                   <strong>Property & Business Data:</strong> Real estate
                   property values, business revenues, employee counts, and fleet
@@ -97,7 +97,7 @@ export const PrivacyPolicy: React.FC = () => {
 
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
                 <Lock className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -115,7 +115,7 @@ export const PrivacyPolicy: React.FC = () => {
 
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
                 <FileCheck className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">

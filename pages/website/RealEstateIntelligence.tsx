@@ -86,7 +86,7 @@ export const RealEstateIntelligence: React.FC = () => {
             The Market Intelligence Terminal is reserved for authorized NHFG Real Estate Realtors only.
           </p>
           <div className="pt-4">
-             <Link to="/products" className="bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
+             <Link to="/products" className="bg-[#0c0d12] text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-black transition-all">
                 Back to Solutions
              </Link>
           </div>
@@ -155,7 +155,7 @@ export const RealEstateIntelligence: React.FC = () => {
           <button 
             onClick={handleDownloadReport}
             disabled={isGenerating}
-            className="flex items-center gap-3 px-8 py-4 bg-[#0B2240] text-white rounded-full font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
+            className="flex items-center gap-3 px-8 py-4 bg-[#0c0d12] text-white rounded-full font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
           >
             {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
             Download Market Report
@@ -167,7 +167,7 @@ export const RealEstateIntelligence: React.FC = () => {
             {[
                 { label: 'Market Temp', value: 'Hot', sub: 'Seller Advantage', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50' },
                 { label: 'Avg. appreciation', value: '12.4%', sub: 'Last 12 Months', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-                { label: 'Days on Market', value: '18', sub: 'Area Average', icon: Shield, color: 'text-blue-500', bg: 'bg-blue-50' },
+                { label: 'Days on Market', value: '18', sub: 'Area Average', icon: Shield, color: 'text-slate-500', bg: 'bg-slate-50' },
                 { label: 'Investor Yield', value: '6.2%', sub: 'Mean Cap Rate', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
             ].map((stat, i) => (
                 <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-900/5 relative overflow-hidden group">
@@ -239,23 +239,23 @@ export const RealEstateIntelligence: React.FC = () => {
 
           {/* Metrics Visualization */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-[#0B2240] p-12 rounded-[3.5rem] text-white relative overflow-hidden flex flex-col justify-between">
+              <div className="bg-[#0c0d12] p-12 rounded-[3.5rem] text-white relative overflow-hidden flex flex-col justify-between">
                 <div className="absolute top-0 right-0 p-12 opacity-10"><TrendingUp size={200} strokeWidth={1} /></div>
                 <div>
                     <h3 className="text-2xl font-black tracking-tight mb-8">Performance Summary</h3>
                     <div className="space-y-10">
                         <div>
-                            <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Net Operating Income (NOI)</div>
+                            <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Net Operating Income (NOI)</div>
                             <div className="text-5xl font-black text-amber-500">${roiMetrics.noi.toLocaleString()}</div>
-                            <div className="text-[10px] text-blue-200/40 uppercase tracking-widest mt-1 font-bold">Projected Annual Profit</div>
+                            <div className="text-[10px] text-slate-200/40 uppercase tracking-widest mt-1 font-bold">Projected Annual Profit</div>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
                             <div>
-                                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Cap Rate</div>
+                                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Cap Rate</div>
                                 <div className="text-4xl font-black">{roiMetrics.capRate}%</div>
                             </div>
                             <div>
-                                <div className="text-blue-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Cash on Cash</div>
+                                <div className="text-slate-300/50 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Cash on Cash</div>
                                 <div className="text-4xl font-black">{roiMetrics.cashOnCash}%</div>
                             </div>
                         </div>
@@ -265,7 +265,7 @@ export const RealEstateIntelligence: React.FC = () => {
                     <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
                         <ArrowUpRight className="text-amber-500" />
                     </div>
-                    <p className="text-xs text-blue-100/60 font-medium leading-relaxed italic">
+                    <p className="text-xs text-slate-100/60 font-medium leading-relaxed italic">
                         "Your estimated ROI exceeds the market average for this asset class."
                     </p>
                 </div>
@@ -280,7 +280,7 @@ export const RealEstateIntelligence: React.FC = () => {
                             <PolarAngleAxis dataKey="subject" tick={{fontSize: 10, fontWeight: 800, fill: '#94a3b8'}} />
                             <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                             <Radar name="Subject Area" dataKey="A" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.4} />
-                            <Radar name="City Average" dataKey="B" stroke="#0B2240" fill="#0B2240" fillOpacity={0.1} />
+                            <Radar name="City Average" dataKey="B" stroke="#0c0d12" fill="#0c0d12" fillOpacity={0.1} />
                         </RadarChart>
                     </ResponsiveContainer>
                 </div>
@@ -372,23 +372,23 @@ export const RealEstateIntelligence: React.FC = () => {
         <div className="bg-amber-500 rounded-[4rem] p-16 lg:p-24 text-center relative overflow-hidden group mb-20 shadow-3xl shadow-amber-500/20">
             <div className="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             <div className="relative z-10">
-                <h3 className="text-4xl lg:text-6xl font-black text-[#0B2240] tracking-tighter uppercase leading-tight mb-8">
+                <h3 className="text-4xl lg:text-6xl font-black text-[#0c0d12] tracking-tighter uppercase leading-tight mb-8">
                     Unlock Private <br /><span className="text-white">Market Access.</span>
                 </h3>
-                <p className="text-[#0B2240]/60 text-lg font-medium max-w-2xl mx-auto mb-12">
+                <p className="text-[#0c0d12]/60 text-lg font-medium max-w-2xl mx-auto mb-12">
                     Our intelligence terminal is just the beginning. Connect with a senior advisor for off-market listings and institutional-grade portfolio analysis.
                 </p>
                 <div className="flex flex-wrap justify-center gap-6">
                     <button 
                         onClick={() => document.getElementById('speak-to-advisor')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="px-12 py-6 bg-[#0B2240] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
+                        className="px-12 py-6 bg-[#0c0d12] text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
                     >
                         Establish Connection
                     </button>
                     <button 
                         onClick={handleDownloadReport}
                         disabled={isGenerating}
-                        className="px-12 py-6 bg-white/20 text-[#0B2240] backdrop-blur-md rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/30 transition-all border border-[#0B2240]/10 flex items-center gap-2"
+                        className="px-12 py-6 bg-white/20 text-[#0c0d12] backdrop-blur-md rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/30 transition-all border border-[#0c0d12]/10 flex items-center gap-2"
                     >
                         {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
                         Download Market Report
