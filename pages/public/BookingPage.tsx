@@ -233,8 +233,8 @@ export const BookingPage: React.FC = () => {
             <div>
               {/* Logo Box */}
               <div className="mb-8">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#F59E0B] to-amber-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20">
-                  <Shield size={20} className="text-white" />
+                <div className="w-16 h-16 bg-black rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden mb-4 shadow-xl">
+                  <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iNSIgeT0iMTUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI2MCIgcng9IjEyIiBmaWxsPSIjRjU5RTBCIiAvPjxyZWN0IHg9IjEwIiB5PSIzNSIgd2lkdGg9IjgwIiBoZWlnaHQ9IjU1IiByeD0iMTIiIGZpbGw9IiNGQ0QzNEQiIC8+PHJlY3QgeD0iNDIiIHk9IjUyIiB3aWR0aD0iMTYiIGhlaWdodD0iMjIiIHJ4PSI0IiBmaWxsPSIjQjQ1MzA5IiBmaWxsLW9wYWNpdHk9IjAuMjUiIC8+PC9zdmc+" width="38" height="38" className="block object-contain" alt="Logo" />
                 </div>
                 <h2 className="text-[10px] font-black text-slate-400 tracking-[1.5px] uppercase leading-relaxed">
                   New Holland<br />Financial Group
