@@ -108,7 +108,7 @@ export const BookingPage: React.FC = () => {
         className="w-full max-w-4xl bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col md:flex-row min-h-[600px]"
       >
         {/* Left Side: Info */}
-        <div className="md:w-1/3 bg-[#0c0d12] p-10 text-white flex flex-col">
+        <div className="md:w-1/3 bg-slate-900 p-10 text-white flex flex-col">
           <div className="mb-auto">
             <h1 className="text-3xl font-black mb-2 tracking-tight">NHFG</h1>
             <p className="text-slate-400 font-medium">New Holland Financial Group</p>
@@ -117,11 +117,11 @@ export const BookingPage: React.FC = () => {
           <div className="space-y-6 my-12">
             <h2 className="text-2xl font-bold">Schedule an Advisory Session</h2>
             <div className="flex items-center gap-3 text-slate-300">
-              <Clock className="w-5 h-5 text-slate-400" />
+              <Clock className="w-5 h-5 text-blue-400" />
               <span>30 Minute Session</span>
             </div>
             <div className="flex items-center gap-3 text-slate-300">
-              <CalendarIcon className="w-5 h-5 text-slate-400" />
+              <CalendarIcon className="w-5 h-5 text-blue-400" />
               <span>
                 {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
                 {selectedTime && ` at ${formatTime(selectedTime)}`}
@@ -169,7 +169,7 @@ export const BookingPage: React.FC = () => {
                         onClick={() => handleDateSelect(d)}
                         className={`flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all \${
                           isSelected 
-                            ? 'border-slate-600 bg-slate-50 text-slate-700 shadow-sm' 
+                            ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' 
                             : 'border-slate-100 bg-white hover:border-slate-300 text-slate-600'
                         }`}
                       >
@@ -185,7 +185,7 @@ export const BookingPage: React.FC = () => {
                   {selectedDate ? (
                     isLoading ? (
                       <div className="h-full flex items-center justify-center">
-                        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin"></div>
+                        <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
                       </div>
                     ) : (
                       <div className="grid grid-cols-3 gap-3">
@@ -201,8 +201,8 @@ export const BookingPage: React.FC = () => {
                                 isBooked
                                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
                                   : isSelected
-                                    ? 'bg-slate-600 text-white shadow-md shadow-slate-600/30'
-                                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-slate-600 hover:text-slate-600'
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-blue-600 hover:text-blue-600'
                               }`}
                             >
                               {formatTime(time)}
@@ -222,7 +222,7 @@ export const BookingPage: React.FC = () => {
                   <button
                     disabled={!selectedDate || !selectedTime}
                     onClick={handleNext}
-                    className="px-8 py-4 bg-[#0c0d12] hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-black rounded-xl transition-colors shadow-lg"
+                    className="px-8 py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-black rounded-xl transition-colors shadow-lg"
                   >
                     Continue →
                   </button>
@@ -257,7 +257,7 @@ export const BookingPage: React.FC = () => {
                         type="text"
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-600 focus:bg-white rounded-xl py-4 pl-12 pr-4 font-semibold text-slate-900 transition-colors outline-none"
+                        className="w-full bg-slate-50 border-2 border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl py-4 pl-12 pr-4 font-semibold text-slate-900 transition-colors outline-none"
                         placeholder="John Doe"
                       />
                     </div>
@@ -271,7 +271,7 @@ export const BookingPage: React.FC = () => {
                         type="email"
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-600 focus:bg-white rounded-xl py-4 pl-12 pr-4 font-semibold text-slate-900 transition-colors outline-none"
+                        className="w-full bg-slate-50 border-2 border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl py-4 pl-12 pr-4 font-semibold text-slate-900 transition-colors outline-none"
                         placeholder="john@example.com"
                       />
                     </div>
@@ -280,7 +280,7 @@ export const BookingPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-4 mt-8 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-400 text-white font-black rounded-xl shadow-lg shadow-slate-500/30 transition-all flex justify-center items-center"
+                    className="w-full py-4 mt-8 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 text-white font-black rounded-xl shadow-lg shadow-blue-500/30 transition-all flex justify-center items-center"
                   >
                     {isLoading ? (
                       <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -308,9 +308,9 @@ export const BookingPage: React.FC = () => {
                   Your meeting has been confirmed. A calendar invitation has been sent to your email address.
                 </p>
                 {meetingLink && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8 w-full max-w-md text-left">
-                    <p className="text-sm font-bold text-slate-900 mb-1">Video Meeting Link (Jitsi):</p>
-                    <a href={meetingLink} target="_blank" rel="noreferrer" className="text-slate-600 font-medium break-all hover:underline">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 w-full max-w-md text-left">
+                    <p className="text-sm font-bold text-blue-900 mb-1">Video Meeting Link (Jitsi):</p>
+                    <a href={meetingLink} target="_blank" rel="noreferrer" className="text-blue-600 font-medium break-all hover:underline">
                       {meetingLink}
                     </a>
                   </div>

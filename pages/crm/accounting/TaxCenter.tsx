@@ -19,12 +19,12 @@ export const TaxCenter: React.FC = () => {
   return (
     <div className="space-y-8 pb-10">
         <div>
-            <h1 className="text-2xl font-bold text-[#0c0d12]">Tax Savings Center</h1>
+            <h1 className="text-2xl font-bold text-[#0B2240]">Tax Savings Center</h1>
             <p className="text-slate-500">Automated 1099 tax estimation and allocation.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#0c0d12] text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
+            <div className="bg-[#0B2240] text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
                     <p className="text-blue-200 font-bold text-xs uppercase tracking-widest mb-1">Estimated Tax YTD</p>
                     <p className="text-4xl font-black tracking-tight">${estimatedTax.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>

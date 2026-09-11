@@ -169,17 +169,17 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/75 backdrop-blur-xl p-4 md:p-8 animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/75 backdrop-blur-xl p-4 md:p-8 animate-fade-in overflow-y-auto">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl border border-white/40 overflow-hidden my-auto flex flex-col max-h-[92vh]">
                 {/* Header Bar */}
                 <div className="p-8 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 via-white to-blue-50/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="p-4 bg-[#0c0d12] text-white rounded-2xl shadow-xl shadow-blue-900/15">
+                        <div className="p-4 bg-[#0B2240] text-white rounded-2xl shadow-xl shadow-blue-900/15">
                             <Activity size={24} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="text-2xl font-black text-[#0c0d12] tracking-tight">Behavioral Intelligence Dossier</h2>
+                                <h2 className="text-2xl font-black text-[#0B2240] tracking-tight">Behavioral Intelligence Dossier</h2>
                                 {getQualificationBadge()}
                             </div>
                             <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 flex-wrap">
@@ -666,7 +666,7 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
                     </div>
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 bg-[#0c0d12] hover:bg-blue-800 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95"
+                        className="px-6 py-2.5 bg-[#0B2240] hover:bg-blue-800 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95"
                     >
                         Close Inspector
                     </button>

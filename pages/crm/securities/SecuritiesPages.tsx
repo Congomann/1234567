@@ -62,7 +62,7 @@ export const PortfolioMgmt: React.FC = () => {
         <div className="space-y-8 pb-10">
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#0c0d12] tracking-tight">Portfolio Management</h1>
+                    <h1 className="text-3xl font-bold text-[#0B2240] tracking-tight">Portfolio Management</h1>
                     <p className="text-slate-500 mt-2">Track client asset allocation, performance, and holdings.</p>
                 </div>
                 <button 
@@ -85,7 +85,7 @@ export const PortfolioMgmt: React.FC = () => {
                             <div 
                                 key={port.id}
                                 onClick={() => setSelectedPortfolioId(port.id)}
-                                className={`p-8 rounded-[2.5rem] border cursor-pointer transition-all hover:shadow-lg group relative ${selectedPortfolio?.id === port.id ? 'bg-[#0c0d12] text-white border-[#0c0d12] shadow-xl scale-[1.02]' : 'bg-white text-slate-700 border-slate-100 hover:border-slate-200'}`}
+                                className={`p-8 rounded-[2.5rem] border cursor-pointer transition-all hover:shadow-lg group relative ${selectedPortfolio?.id === port.id ? 'bg-[#0B2240] text-white border-[#0B2240] shadow-xl scale-[1.02]' : 'bg-white text-slate-700 border-slate-100 hover:border-slate-200'}`}
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <h3 className="font-bold text-lg leading-tight truncate pr-10">{port.clientName}</h3>
@@ -116,7 +116,7 @@ export const PortfolioMgmt: React.FC = () => {
                             <div className="space-y-10">
                                 <div className="flex justify-between items-center border-b border-slate-50 pb-8">
                                     <div>
-                                        <h2 className="text-2xl font-black text-[#0c0d12] tracking-tight">{selectedPortfolio.clientName}</h2>
+                                        <h2 className="text-2xl font-black text-[#0B2240] tracking-tight">{selectedPortfolio.clientName}</h2>
                                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Last Rebalanced: {new Date(selectedPortfolio.lastRebalanced).toLocaleDateString()}</p>
                                     </div>
                                     <div className="flex gap-3">
@@ -163,7 +163,7 @@ export const PortfolioMgmt: React.FC = () => {
                                             {selectedPortfolio.holdings && selectedPortfolio.holdings.length > 0 ? selectedPortfolio.holdings.map(h => (
                                                 <div key={h.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all group">
                                                     <div>
-                                                        <div className="font-black text-[#0c0d12] text-sm">{h.ticker}</div>
+                                                        <div className="font-black text-[#0B2240] text-sm">{h.ticker}</div>
                                                         <div className="text-[10px] text-slate-400 font-bold uppercase">{h.name}</div>
                                                     </div>
                                                     <div className="text-right">
@@ -185,10 +185,10 @@ export const PortfolioMgmt: React.FC = () => {
 
             {/* Portfolio Modal */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-sm p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md p-10 relative border border-white/20">
                         <button onClick={() => setIsAddModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={24}/></button>
-                        <h2 className="text-2xl font-black text-[#0c0d12] mb-8 tracking-tight">{editingPortfolio ? 'Modify Portfolio' : 'Authorize New Portfolio'}</h2>
+                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">{editingPortfolio ? 'Modify Portfolio' : 'Authorize New Portfolio'}</h2>
                         <form onSubmit={handleSave} className="space-y-6">
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Client Name</label>
@@ -209,7 +209,7 @@ export const PortfolioMgmt: React.FC = () => {
                             </div>
                             <div className="pt-6 flex gap-4">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 bg-[#0c0d12] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">Submit Entry</button>
+                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">Submit Entry</button>
                             </div>
                         </form>
                     </div>
@@ -239,12 +239,12 @@ export const ComplianceDocs: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#0c0d12]">Compliance Vault</h1>
+                    <h1 className="text-2xl font-bold text-[#0B2240]">Compliance Vault</h1>
                     <p className="text-slate-500">Secure storage for KYC, ADV, and regulatory documents.</p>
                 </div>
                 <button 
                     onClick={() => setIsUploadOpen(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#0c0d12] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors"
                 >
                     <Upload className="h-4 w-4" /> Upload Document
                 </button>
@@ -286,7 +286,7 @@ export const ComplianceDocs: React.FC = () => {
             </div>
 
             {isUploadOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md p-8">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold">Upload Compliance Doc</h2>
@@ -364,7 +364,7 @@ export const AdvisoryFees: React.FC = () => {
     return (
         <div className="space-y-8 pb-10">
             <div>
-                <h1 className="text-3xl font-bold text-[#0c0d12] tracking-tight">Advisory Billing</h1>
+                <h1 className="text-3xl font-bold text-[#0B2240] tracking-tight">Advisory Billing</h1>
                 <p className="text-slate-500 mt-2">Billing overview, collected fees, and invoice status.</p>
             </div>
 
@@ -405,10 +405,10 @@ export const AdvisoryFees: React.FC = () => {
             {/* Table Section */}
             <div className="bg-white rounded-[3rem] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-slate-100 overflow-hidden">
                 <div className="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
-                    <h3 className="text-xl font-black text-[#0c0d12] tracking-tight">Fee Schedule & Invoices</h3>
+                    <h3 className="text-xl font-black text-[#0B2240] tracking-tight">Fee Schedule & Invoices</h3>
                     <button 
                         onClick={() => { setEditingFee(null); setFormData({ clientName: '', aum: 0, amount: 0, billingPeriod: 'Q1', status: 'Invoiced', dueDate: new Date().toISOString().split('T')[0] }); setIsModalOpen(true); }}
-                        className="px-8 py-4 bg-slate-50 text-[#0c0d12] border border-slate-200 rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm active:scale-95"
+                        className="px-8 py-4 bg-slate-50 text-[#0B2240] border border-slate-200 rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm active:scale-95"
                     >
                         Generate Invoice
                     </button>
@@ -486,10 +486,10 @@ export const AdvisoryFees: React.FC = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-sm p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg p-12 relative border border-white/10">
                         <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={24}/></button>
-                        <h2 className="text-2xl font-black text-[#0c0d12] mb-10 tracking-tight">{editingFee ? 'Edit Advisory Invoice' : 'Issue New Advisory Invoice'}</h2>
+                        <h2 className="text-2xl font-black text-[#0B2240] mb-10 tracking-tight">{editingFee ? 'Edit Advisory Invoice' : 'Issue New Advisory Invoice'}</h2>
                         <form onSubmit={handleSave} className="space-y-6">
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Account Entity</label>
@@ -522,7 +522,7 @@ export const AdvisoryFees: React.FC = () => {
                             </div>
                             <div className="pt-8 flex gap-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 rounded-2xl font-black text-[11px] bg-slate-50 text-slate-400 uppercase tracking-widest hover:bg-slate-100 transition-all">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 rounded-2xl font-black text-[11px] bg-[#0c0d12] text-white uppercase tracking-widest hover:bg-slate-800 shadow-2xl shadow-blue-900/20 active:scale-95 transition-all">Commit Invoice</button>
+                                <button type="submit" className="flex-1 py-4 rounded-2xl font-black text-[11px] bg-[#0B2240] text-white uppercase tracking-widest hover:bg-slate-800 shadow-2xl shadow-blue-900/20 active:scale-95 transition-all">Commit Invoice</button>
                             </div>
                         </form>
                     </div>

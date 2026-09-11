@@ -12,13 +12,13 @@ export const TermsOfUse: React.FC = () => {
       <div className="max-w-4xl mx-auto px-6">
         <Link
           to="/"
-          className="inline-flex items-center text-slate-600 font-bold text-sm mb-8 hover:underline"
+          className="inline-flex items-center text-blue-600 font-bold text-sm mb-8 hover:underline"
         >
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Home
         </Link>
 
         <div className="mb-12">
-          <h1 className="text-4xl font-black text-[#0c0d12] tracking-tight mb-4">
+          <h1 className="text-4xl font-black text-[#0B2240] tracking-tight mb-4">
             Terms of Use
           </h1>
           <p className="text-slate-500 font-medium">
@@ -29,7 +29,7 @@ export const TermsOfUse: React.FC = () => {
         <div className="prose prose-slate max-w-none space-y-12">
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                 <Scale className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -46,7 +46,7 @@ export const TermsOfUse: React.FC = () => {
 
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                 <AlertCircle className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -64,7 +64,7 @@ export const TermsOfUse: React.FC = () => {
 
           <section>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                 <FileText className="h-6 w-6" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 m-0">
@@ -92,7 +92,7 @@ export const TermsOfUse: React.FC = () => {
 
           <section>
             <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-200">
-              <h3 className="text-lg font-bold text-[#0c0d12] mb-4">
+              <h3 className="text-lg font-bold text-[#0B2240] mb-4">
                 Agent Compliance
               </h3>
               <p className="text-sm text-slate-500 leading-relaxed">

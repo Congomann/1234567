@@ -152,12 +152,12 @@ export const NormalizedPolicySection: React.FC<NormalizedPolicySectionProps> = (
             {/* Header & Carrier Synchronizer Bar */}
             <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 p-6 rounded-[2.5rem] border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="p-4 bg-[#0c0d12] text-white rounded-2xl shadow-lg shadow-blue-900/15">
+                    <div className="p-4 bg-[#0B2240] text-white rounded-2xl shadow-lg shadow-blue-900/15">
                         <Building2 size={24} />
                     </div>
                     <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-xl font-black text-[#0c0d12] tracking-tight">
+                            <h3 className="text-xl font-black text-[#0B2240] tracking-tight">
                                 {policyData?.carrierName || 'Carrier API Integration'}
                             </h3>
                             <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[10px] font-black uppercase tracking-wider font-mono">
@@ -175,7 +175,7 @@ export const NormalizedPolicySection: React.FC<NormalizedPolicySectionProps> = (
                     <button
                         onClick={() => executeSync(selectedCarrier, scenario)}
                         disabled={isSyncing}
-                        className="flex items-center gap-2 px-6 py-3.5 bg-[#0c0d12] hover:bg-blue-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-3.5 bg-[#0B2240] hover:bg-blue-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
                     >
                         <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
                         <span>{isSyncing ? 'Synchronizing...' : 'Sync Carrier Data'}</span>

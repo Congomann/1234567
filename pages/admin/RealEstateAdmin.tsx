@@ -93,7 +93,7 @@ export const RealEstateAdmin: React.FC = () => {
       <div id="listing_management" className="pb-10 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight uppercase">Listing Management</h1>
+          <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Listing Management</h1>
           <p className="text-slate-500 font-medium mt-1">Review and authorize property listings before they go live on the public site.</p>
         </div>
       </div>
@@ -115,7 +115,7 @@ export const RealEstateAdmin: React.FC = () => {
             <button 
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-6 py-4 rounded-[2rem] text-xs font-black uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-[#0c0d12] text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100'}`}
+              className={`px-6 py-4 rounded-[2rem] text-xs font-black uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-[#0B2240] text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100'}`}
             >
               {s}
             </button>
@@ -203,7 +203,7 @@ export const RealEstateAdmin: React.FC = () => {
 
       {/* Review Modal */}
       {selectedProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/80 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/80 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
           <div className="bg-white rounded-[4rem] w-full max-w-5xl shadow-2xl relative overflow-hidden flex flex-col max-h-[95vh]">
             <button 
               onClick={() => setSelectedProperty(null)}
@@ -333,20 +333,20 @@ export const RealEstateAdmin: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Assigned Advisor</p>
-                          <p className="text-sm font-black text-[#0c0d12]">{getAdvisorName(selectedProperty.advisorId)}</p>
+                          <p className="text-sm font-black text-[#0B2240]">{getAdvisorName(selectedProperty.advisorId)}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Seller Entity</p>
-                          <p className="text-sm font-black text-[#0c0d12]">{selectedProperty.sellerName}</p>
+                          <p className="text-sm font-black text-[#0B2240]">{selectedProperty.sellerName}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Listed Since</p>
-                          <p className="text-sm font-black text-[#0c0d12]">{new Date(selectedProperty.listedDate).toLocaleDateString()}</p>
+                          <p className="text-sm font-black text-[#0B2240]">{new Date(selectedProperty.listedDate).toLocaleDateString()}</p>
                         </div>
                         {selectedProperty.source && (
                           <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Listing Source</p>
-                            <p className="text-sm font-black text-[#0c0d12]">{selectedProperty.source}</p>
+                            <p className="text-sm font-black text-[#0B2240]">{selectedProperty.source}</p>
                           </div>
                         )}
                       </div>

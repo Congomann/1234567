@@ -80,12 +80,12 @@ export const PropertyPipeline: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#0c0d12]">Property Pipeline</h1>
+                    <h1 className="text-2xl font-bold text-[#0B2240]">Property Pipeline</h1>
                     <p className="text-slate-500">Manage active listings and potential inventory.</p>
                 </div>
                 <button 
                     onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#0c0d12] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg"
                 >
                     <Home className="h-4 w-4" /> Add Listing
                 </button>
@@ -155,7 +155,7 @@ export const PropertyPipeline: React.FC = () => {
 
             {/* Add Listing Modal */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-sm p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl p-10 relative border border-white/20 max-h-[90vh] overflow-y-auto no-scrollbar flex flex-col">
                         <button 
                             onClick={() => setIsAddModalOpen(false)} 
@@ -163,7 +163,7 @@ export const PropertyPipeline: React.FC = () => {
                         >
                             <X size={24}/>
                         </button>
-                        <h2 className="text-2xl font-black text-[#0c0d12] mb-2 tracking-tight">Create New Listing</h2>
+                        <h2 className="text-2xl font-black text-[#0B2240] mb-2 tracking-tight">Create New Listing</h2>
                         <p className="text-slate-500 mb-8 font-medium">Add a new property to the public marketplace.</p>
                         
                         {/* Tabs */}
@@ -478,7 +478,7 @@ export const PropertyPipeline: React.FC = () => {
 
                             <div className="pt-6 flex gap-4 border-t border-slate-100">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 bg-[#0c0d12] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">
+                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">
                                     Publish Listing
                                 </button>
                             </div>
@@ -501,7 +501,7 @@ export const TransactionsEscrow: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#0c0d12]">Transactions & Escrow</h1>
+                    <h1 className="text-2xl font-bold text-[#0B2240]">Transactions & Escrow</h1>
                     <p className="text-slate-500">Track deals from offer to closing.</p>
                 </div>
             </div>

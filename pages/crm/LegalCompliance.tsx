@@ -47,7 +47,7 @@ export const LegalCompliance: React.FC = () => {
       />
 
       <div>
-        <h1 className="text-2xl font-bold text-[#0c0d12]">Legal & Compliance</h1>
+        <h1 className="text-2xl font-bold text-[#0B2240]">Legal & Compliance</h1>
         <p className="text-slate-500">Corporate policies, advisor agreements, and data privacy standards.</p>
       </div>
 
@@ -66,7 +66,7 @@ export const LegalCompliance: React.FC = () => {
         />
       </div>
 
-      <div className="bg-[#0c0d12] rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-[#0B2240] rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 p-10 opacity-10"><Lock className="h-40 w-40" /></div>
           <div className="relative z-10">
               <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
@@ -178,7 +178,7 @@ This Agreement represents the understanding between the Company and Contractor r
 
   return (
     <div className="apple-glass rounded-[2.5rem] p-10 border border-white/80 shadow-xl mt-8">
-      <h2 className="text-2xl font-bold text-[#0c0d12] mb-2 flex items-center gap-3">
+      <h2 className="text-2xl font-bold text-[#0B2240] mb-2 flex items-center gap-3">
         <FileText className="h-6 w-6 text-blue-600" />
         Foreign Independent Contractor Agreement
       </h2>
@@ -216,7 +216,7 @@ This Agreement represents the understanding between the Company and Contractor r
       
       <button 
         onClick={() => setShowContract(true)}
-        className="px-6 py-3 bg-[#0c0d12] text-white font-bold rounded-xl hover:bg-[#0A62A7] transition-all shadow-md flex items-center gap-2 mb-8"
+        className="px-6 py-3 bg-[#0B2240] text-white font-bold rounded-xl hover:bg-[#0A62A7] transition-all shadow-md flex items-center gap-2 mb-8"
       >
         <FileText className="h-5 w-5" /> Generate Contract Document
       </button>

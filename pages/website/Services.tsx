@@ -201,7 +201,7 @@ export const Services: React.FC = () => {
             <div className="mb-8 animate-on-scroll">
               <Link
                 to="/products"
-                className="inline-flex items-center text-slate-600 hover:text-slate-800 font-medium mb-4 transition-colors"
+                className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> View All Products
               </Link>
@@ -211,7 +211,7 @@ export const Services: React.FC = () => {
             </div>
           ) : (
             <div className="mb-16 animate-on-scroll">
-              <h2 className="text-base text-slate-600 font-semibold tracking-wide uppercase">
+              <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">
                 Our Products
               </h2>
               <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -249,11 +249,11 @@ export const Services: React.FC = () => {
                       alt={prop.address}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute top-4 left-4 bg-[#0c0d12]/80 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                    <div className="absolute top-4 left-4 bg-slate-900/80 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md">
                       {prop.type}
                     </div>
                     {prop.source && (
-                      <div className="absolute top-4 right-4 bg-slate-600/90 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-lg">
+                      <div className="absolute top-4 right-4 bg-blue-600/90 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-lg">
                         {prop.source}
                       </div>
                     )}
@@ -300,7 +300,7 @@ export const Services: React.FC = () => {
 
                     <button
                       onClick={() => setViewListing(prop.id)}
-                      className="w-full py-3 bg-[#0c0d12] text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
+                      className="w-full py-3 bg-[#0B2240] text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition-colors shadow-lg shadow-blue-900/20"
                     >
                       View Details
                     </button>
@@ -329,7 +329,7 @@ export const Services: React.FC = () => {
                     alt={product.title}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <h3 className="absolute bottom-4 left-6 text-xl font-bold text-white tracking-wide group-hover:text-slate-200 transition-colors">
+                  <h3 className="absolute bottom-4 left-6 text-xl font-bold text-white tracking-wide group-hover:text-blue-200 transition-colors">
                     {product.title}
                   </h3>
                 </div>
@@ -342,7 +342,7 @@ export const Services: React.FC = () => {
                       {product.features.map((feature) => (
                         <li key={feature} className="flex items-start">
                           <CheckCircle
-                            className="flex-shrink-0 h-5 w-5 text-slate-500"
+                            className="flex-shrink-0 h-5 w-5 text-blue-500"
                             aria-hidden="true"
                           />
                           <span className="ml-3 text-sm text-slate-700 font-medium text-left">
@@ -393,7 +393,7 @@ export const Services: React.FC = () => {
                         e.stopPropagation();
                         setIsFormOpen(true);
                       }}
-                      className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-bold rounded-xl text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
+                      className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-bold rounded-xl text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
                     >
                       Request Consultation
                     </button>
@@ -443,7 +443,7 @@ export const Services: React.FC = () => {
 
       {/* Contact Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button
               onClick={() => setIsFormOpen(false)}
@@ -479,7 +479,7 @@ export const Services: React.FC = () => {
                     </label>
                     <input
                       required
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
@@ -493,7 +493,7 @@ export const Services: React.FC = () => {
                     <input
                       required
                       type="email"
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -507,7 +507,7 @@ export const Services: React.FC = () => {
                     <input
                       required
                       type="tel"
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                       value={formData.phone}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
@@ -520,7 +520,7 @@ export const Services: React.FC = () => {
                     </label>
                     <select
                       required
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                       value={formData.productType}
                       onChange={(e) =>
                         setFormData({
@@ -542,7 +542,7 @@ export const Services: React.FC = () => {
                       Best Time to Call
                     </label>
                     <select
-                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                       value={formData.timeRequested}
                       onChange={(e) =>
                         setFormData({
@@ -559,7 +559,7 @@ export const Services: React.FC = () => {
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-slate-600 text-white font-bold py-3 rounded-lg hover:bg-slate-700 transition-colors"
+                    className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Submit Request
                   </button>

@@ -88,7 +88,7 @@ export const Home: React.FC = () => {
             {playlist.length > 1 && (
               <div className="absolute bottom-8 right-8 z-30 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center gap-3 shadow-2xl">
                 <span className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5">
-                  <PlayCircle size={12} className="text-slate-400 animate-pulse" /> Video { (currentVideoIndex % playlist.length) + 1 } / { playlist.length }
+                  <PlayCircle size={12} className="text-blue-400 animate-pulse" /> Video { (currentVideoIndex % playlist.length) + 1 } / { playlist.length }
                 </span>
                 <div className="flex items-center gap-1.5 border-l border-white/20 pl-3">
                   {playlist.map((_, idx) => (
@@ -97,7 +97,7 @@ export const Home: React.FC = () => {
                       onClick={() => setCurrentVideoIndex(idx)}
                       className={`h-2 rounded-full transition-all duration-300 ${
                         (currentVideoIndex % playlist.length) === idx
-                          ? 'w-6 bg-slate-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]'
+                          ? 'w-6 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]'
                           : 'w-2 bg-white/40 hover:bg-white/70'
                       }`}
                       title={`Switch to Video ${idx + 1}`}
@@ -121,7 +121,7 @@ export const Home: React.FC = () => {
             <div className="absolute inset-0 bg-black/50 pointer-events-none"></div>
           </>
         ) : (
-          <div className="absolute inset-0 bg-[#0c0d12]">
+          <div className="absolute inset-0 bg-slate-950">
             {companySettings.heroBackgroundUrl && (
               <img
                 src={companySettings.heroBackgroundUrl}
@@ -139,7 +139,7 @@ export const Home: React.FC = () => {
               {companySettings.heroTitle ||
                 "Securing Your Future, Protecting Your Legacy."}
             </h1>
-            <p className="text-xl md:text-3xl text-slate-100/95 mb-12 leading-relaxed max-w-3xl font-medium tracking-wide drop-shadow-lg">
+            <p className="text-xl md:text-3xl text-blue-100/95 mb-12 leading-relaxed max-w-3xl font-medium tracking-wide drop-shadow-lg">
               {companySettings.heroSubtitle ||
                 "New Holland Financial Group provides comprehensive insurance and financial solutions."}
             </p>
@@ -170,7 +170,7 @@ export const Home: React.FC = () => {
           {/* Animated Marquee Partners Section Promoted to Top */}
           <div className="mb-32">
             <div className="text-center mb-16">
-              <span className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-widest border border-slate-200">
+              <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest border border-blue-200">
                 OUR PARTNERS
               </span>
               <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">

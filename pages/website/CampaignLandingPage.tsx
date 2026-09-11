@@ -82,7 +82,7 @@ export const CampaignLandingPage: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="animate-spin text-slate-500"><CloudIcon size={48} /></div>
+                <div className="animate-spin text-blue-500"><CloudIcon size={48} /></div>
             </div>
         );
     }
@@ -92,7 +92,7 @@ export const CampaignLandingPage: React.FC = () => {
             <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
                 <h1 className="text-3xl font-black text-slate-800 mb-2">404</h1>
                 <p className="text-slate-500 mb-8">{error || 'Page not found'}</p>
-                <button onClick={() => navigate('/')} className="px-6 py-3 bg-[#0c0d12] text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#0c0d12] transition-all">
+                <button onClick={() => navigate('/')} className="px-6 py-3 bg-[#0B2240] text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#0A62A7] transition-all">
                     Return Home
                 </button>
             </div>
@@ -100,7 +100,7 @@ export const CampaignLandingPage: React.FC = () => {
     }
 
     const { content, style_config } = pageConfig;
-    const primaryColor = style_config?.primary_color || '#0c0d12';
+    const primaryColor = style_config?.primary_color || '#0A62A7';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">

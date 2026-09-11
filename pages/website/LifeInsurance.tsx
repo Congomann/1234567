@@ -71,10 +71,10 @@ export const LifeInsurance: React.FC = () => {
       title: "Term Life",
       icon: Shield,
       colorClasses: {
-        bg: "bg-slate-50",
-        text: "text-slate-600",
-        shadow: "hover:shadow-slate-900/5",
-        iconText: "text-slate-500",
+        bg: "bg-blue-50",
+        text: "text-blue-600",
+        shadow: "hover:shadow-blue-900/5",
+        iconText: "text-blue-500",
       },
       description:
         "Affordable, straightforward protection for a specific period (e.g., 10, 20, or 30 years). Ideal for covering temporary needs like a mortgage or children's education.",
@@ -186,21 +186,21 @@ export const LifeInsurance: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Premium Hero Section */}
-      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0c0d12]">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-600/20 to-transparent"></div>
-        <div className="absolute h-[500px] w-[500px] bg-slate-500/10 blur-[120px] rounded-full -top-48 -left-24 animate-pulse"></div>
+      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0B2240]">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent"></div>
+        <div className="absolute h-[500px] w-[500px] bg-blue-500/10 blur-[120px] rounded-full -top-48 -left-24 animate-pulse"></div>
         <div className="absolute h-[400px] w-[400px] bg-purple-500/10 blur-[100px] rounded-full bottom-0 right-0"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <span className="inline-block px-4 py-1.5 bg-slate-500/10 border border-slate-400/20 rounded-full text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+            <span className="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-400/20 rounded-full text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
               Legacy Protection & Wealth
             </span>
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8 leading-[1.1]">
               Securing Your Family's <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-emerald-400">Future Generations.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Future Generations.</span>
             </h1>
-            <p className="text-xl text-slate-100/70 leading-relaxed max-w-2xl mx-auto font-medium mb-12">
+            <p className="text-xl text-blue-100/70 leading-relaxed max-w-2xl mx-auto font-medium mb-12">
               Beyond a policy, we provide a foundation. Experience premium life insurance 
               tailored to high-net-worth protection and strategic family planning.
             </p>
@@ -208,7 +208,7 @@ export const LifeInsurance: React.FC = () => {
 
               <button 
                 onClick={() => document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 bg-slate-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
+                className="px-10 py-5 bg-blue-600/20 text-white border border-white/20 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
               >
                 Speak to Advisor
               </button>
@@ -219,9 +219,9 @@ export const LifeInsurance: React.FC = () => {
 
       {/* Interactive Recommender */}
       <div id="match-tool" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
-        <div className="bg-white/70 backdrop-blur-2xl rounded-[3.5rem] p-10 md:p-16 shadow-2xl shadow-slate-900/10 border border-white">
+        <div className="bg-white/70 backdrop-blur-2xl rounded-[3.5rem] p-10 md:p-16 shadow-2xl shadow-blue-900/10 border border-white">
           <div className="flex flex-col items-center text-center mb-12">
-            <div className="w-16 h-16 bg-slate-50 text-slate-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner">
               <HelpCircle className="w-8 h-8" />
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
@@ -239,16 +239,16 @@ export const LifeInsurance: React.FC = () => {
                 onClick={() => setSelectedNeed(need.id)}
                 className={`text-left p-6 rounded-[2.5rem] border-2 transition-all duration-500 group relative overflow-hidden ${
                   selectedNeed === need.id
-                    ? "border-slate-500 bg-slate-50/30 shadow-xl shadow-slate-500/5 scale-[1.02]"
-                    : "border-slate-100 hover:border-slate-200 hover:bg-white hover:shadow-lg"
+                    ? "border-blue-500 bg-blue-50/30 shadow-xl shadow-blue-500/5 scale-[1.02]"
+                    : "border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-lg"
                 }`}
               >
                 <div className="flex items-center justify-between relative z-10">
-                  <span className={`font-black text-sm pr-4 ${selectedNeed === need.id ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"}`}>
+                  <span className={`font-black text-sm pr-4 ${selectedNeed === need.id ? "text-blue-900" : "text-slate-600 group-hover:text-slate-900"}`}>
                     {need.label}
                   </span>
                   <div className={`w-6 h-6 rounded-xl border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                    selectedNeed === need.id ? "border-slate-500 bg-slate-500 text-white rotate-12" : "border-slate-200"
+                    selectedNeed === need.id ? "border-blue-500 bg-blue-500 text-white rotate-12" : "border-slate-200"
                   }`}>
                     {selectedNeed === need.id && <CheckCircle size={14} strokeWidth={3} />}
                   </div>
@@ -258,9 +258,9 @@ export const LifeInsurance: React.FC = () => {
           </div>
 
           {selectedNeed && (
-            <div className="mt-12 p-8 bg-gradient-to-r from-[#0c0d12] to-slate-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
+            <div className="mt-12 p-8 bg-gradient-to-r from-[#0B2240] to-blue-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3">
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-3">
                 Architect's Recommendation
               </p>
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -268,7 +268,7 @@ export const LifeInsurance: React.FC = () => {
                   <h3 className="text-2xl font-black text-white tracking-tight">
                     {customerNeeds.find((n) => n.id === selectedNeed)?.suggestionName}
                   </h3>
-                  <p className="text-slate-200/70 text-sm font-medium mt-1">
+                  <p className="text-blue-200/70 text-sm font-medium mt-1">
                     Optimized for your specific capital protection profile.
                   </p>
                 </div>
@@ -290,7 +290,7 @@ export const LifeInsurance: React.FC = () => {
       {/* Insurance Types Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="flex flex-col items-center mb-20 text-center">
-            <h2 className="text-xs font-black text-slate-600 uppercase tracking-[0.4em] mb-4">Core Instruments</h2>
+            <h2 className="text-xs font-black text-blue-600 uppercase tracking-[0.4em] mb-4">Core Instruments</h2>
             <p className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Diversified Portfolio of Protection.</p>
         </div>
 

@@ -98,7 +98,7 @@ export const RealEstateCms: React.FC = () => {
       />
       <div id="portal_cms" className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight uppercase">Real Estate CMS</h1>
+          <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Real Estate CMS</h1>
           <p className="text-slate-500 font-medium mt-1">Manage specialized content for the high-end real estate portal.</p>
         </div>
         <div className="flex items-center gap-4">
@@ -190,7 +190,7 @@ export const RealEstateCms: React.FC = () => {
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Destination URL</label>
                               <input className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold" value={newResource.url} onChange={e => setNewResource({...newResource, url: e.target.value})} placeholder="https://..." />
                           </div>
-                          <button onClick={addResource} className="px-6 py-2 bg-[#0c0d12] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2 h-10">
+                          <button onClick={addResource} className="px-6 py-2 bg-[#0B2240] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2 h-10">
                               <Plus className="h-4 w-4" /> Add Node
                           </button>
                       </div>

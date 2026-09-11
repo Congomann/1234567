@@ -31,7 +31,7 @@ export const PoliciesApps: React.FC = () => {
     return (
         <div className="space-y-8 animate-fade-in pb-10">
             <div>
-                <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight uppercase">Policies & Applications</h1>
+                <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase">Policies & Applications</h1>
                 <p className="text-slate-500 font-medium mt-1">Track application lifecycle with enhanced visual categorization.</p>
             </div>
             
@@ -150,7 +150,7 @@ export const CommercialQuotes: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Commercial Quotes</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Commercial Quotes</h1>
                 <p className="text-slate-500">Manage B2B leads and commercial insurance requests.</p>
             </div>
             
@@ -195,7 +195,7 @@ export const PoliciesRenewals: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Policies & Renewals</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Policies & Renewals</h1>
                 <p className="text-slate-500">Monitor upcoming policy expirations and renewal status.</p>
             </div>
 
@@ -241,7 +241,7 @@ export const AutoQuotes: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Auto Quotes</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Auto Quotes</h1>
                 <p className="text-slate-500">Personal and commercial auto insurance inquiries.</p>
             </div>
 
@@ -262,7 +262,7 @@ export const AutoQuotes: React.FC = () => {
                         </div>
                         <div className="flex gap-2">
                             <button onClick={() => alert('Feature in development')} className="flex-1 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">View</button>
-                            <button onClick={() => alert('Feature in development')} className="flex-1 py-2 bg-[#0c0d12] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Quote</button>
+                            <button onClick={() => alert('Feature in development')} className="flex-1 py-2 bg-[#0B2240] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Quote</button>
                         </div>
                     </div>
                 ))}
@@ -287,10 +287,10 @@ export const FleetManager: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#0c0d12]">Fleet Manager</h1>
+                    <h1 className="text-2xl font-bold text-[#0B2240]">Fleet Manager</h1>
                     <p className="text-slate-500">Commercial fleet policies and vehicle schedules.</p>
                 </div>
-                <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-[#0c0d12] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors">
+                <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors">
                     <Plus className="h-4 w-4" /> Add Fleet
                 </button>
             </div>
@@ -339,7 +339,7 @@ export const Claims: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#0c0d12]">Claims Center center</h1>
+                    <h1 className="text-2xl font-bold text-[#0B2240]">Claims Center center</h1>
                     <p className="text-slate-500">Track and manage active insurance claims.</p>
                 </div>
                 <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-full font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-200">

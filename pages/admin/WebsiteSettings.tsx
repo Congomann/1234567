@@ -485,13 +485,13 @@ export const WebsiteSettings: React.FC = () => {
                 ]}
             />
             <div id="site_config">
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Website Settings</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Website Settings</h1>
                 <p className="text-slate-500">Manage global company information and public resources.</p>
             </div>
 
             {/* Legal Onboarding Content Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                <h2 className="text-lg font-bold text-[#0c0d12] mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <ShieldCheck className="h-5 w-5 text-blue-600" />
                     Advisor Onboarding Legal Documents
                 </h2>
@@ -527,7 +527,7 @@ export const WebsiteSettings: React.FC = () => {
 
             {/* Theme & Branding Configuration */}
             <div id="theme_settings" className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                <h2 className="text-lg font-bold text-[#0c0d12] mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <span className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xs">✨</span>
                     Theme & Global Branding Settings
                 </h2>
@@ -562,14 +562,14 @@ export const WebsiteSettings: React.FC = () => {
                             <input
                                 type="color"
                                 className="w-12 h-12 rounded cursor-pointer border-0 bg-transparent p-0"
-                                value={settingsForm.themeSecondaryColor || '#0c0d12'}
+                                value={settingsForm.themeSecondaryColor || '#0B2240'}
                                 onChange={e => setSettingsForm({ ...settingsForm, themeSecondaryColor: e.target.value })}
                             />
                             <div className="flex-1">
                                 <input
                                     type="text"
                                     className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono"
-                                    value={settingsForm.themeSecondaryColor || '#0c0d12'}
+                                    value={settingsForm.themeSecondaryColor || '#0B2240'}
                                     onChange={e => setSettingsForm({ ...settingsForm, themeSecondaryColor: e.target.value })}
                                 />
                             </div>
@@ -610,7 +610,7 @@ export const WebsiteSettings: React.FC = () => {
 
             {/* Integrations & API Connections Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                <h2 className="text-lg font-bold text-[#0c0d12] mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <LinkIcon className="h-5 w-5 text-indigo-600" />
                     Integrations & API Connections
                 </h2>
@@ -632,7 +632,7 @@ export const WebsiteSettings: React.FC = () => {
 
             {/* System Maintenance Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                <h2 className="text-lg font-bold text-[#0c0d12] mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <AlertCircle className="h-5 w-5 text-orange-600" />
                     System Maintenance & Global Alerts
                 </h2>
@@ -679,7 +679,7 @@ export const WebsiteSettings: React.FC = () => {
 
             {/* Company Information Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                <h2 className="text-lg font-bold text-[#0c0d12] mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#0B2240] mb-6 flex items-center gap-2">
                     <Globe className="h-5 w-5 text-blue-600" />
                     Company Contact Information
                 </h2>
@@ -687,7 +687,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* Logo Settings */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <ImageIcon className="h-4 w-4" /> Company Logo
                         </h3>
                         <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -751,7 +751,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* Footer Description & Social Links */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <Share2 className="h-4 w-4" /> Footer & Social Media
                         </h3>
 
@@ -811,7 +811,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* Hero Background Settings */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <ImageIcon className="h-4 w-4" /> Homepage Visuals
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -982,7 +982,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* About Us Page Image Setting */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <Camera className="h-4 w-4" /> About Us Page Image
                         </h3>
                         <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -1023,7 +1023,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* Product Page Images Setting */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <BookOpen className="h-4 w-4" /> Product Page Images
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1068,7 +1068,7 @@ export const WebsiteSettings: React.FC = () => {
 
                     {/* Hidden Products Setting */}
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
-                        <h3 className="text-sm font-bold text-[#0c0d12] mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0B2240] mb-4 uppercase tracking-wide flex items-center gap-2">
                             <EyeOff className="h-4 w-4" /> Hidden Products
                         </h3>
                         <p className="text-xs text-slate-500 mb-4">Select products to hide from the public website navigation and product listings.</p>
@@ -1234,7 +1234,7 @@ export const WebsiteSettings: React.FC = () => {
             {/* CRM Customization Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-bold text-[#0c0d12] flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[#0B2240] flex items-center gap-2">
                         <Layout className="h-5 w-5 text-blue-600" />
                         CRM Lead Customization
                     </h2>
@@ -1249,7 +1249,7 @@ export const WebsiteSettings: React.FC = () => {
                 <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-sm font-black text-[#0c0d12] uppercase tracking-wide">Lead Lifecycle Stages</h3>
+                            <h3 className="text-sm font-black text-[#0B2240] uppercase tracking-wide">Lead Lifecycle Stages</h3>
                             <p className="text-xs text-slate-500 mt-1">Define the workflow stages for your leads. These will appear in the Leads Database.</p>
                         </div>
                         <button 
@@ -1285,7 +1285,7 @@ export const WebsiteSettings: React.FC = () => {
                                     type="text" 
                                     value={status} 
                                     onChange={(e) => handleStatusChange(index, e.target.value)}
-                                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0c0d12] focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0B2240] focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
                                 />
 
                                 <button 
@@ -1307,7 +1307,7 @@ export const WebsiteSettings: React.FC = () => {
                     <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
                         <button 
                             onClick={handleSettingsSave}
-                            className="bg-[#0c0d12] text-white px-8 py-3 rounded-full font-bold text-sm shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2"
+                            className="bg-[#0B2240] text-white px-8 py-3 rounded-full font-bold text-sm shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2"
                         >
                             <Save className="h-4 w-4" /> Update CRM Stages
                         </button>
@@ -1318,7 +1318,7 @@ export const WebsiteSettings: React.FC = () => {
             {/* Partner Management Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-bold text-[#0c0d12] flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[#0B2240] flex items-center gap-2">
                         <Handshake className="h-5 w-5 text-blue-600" />
                         Partner Logos
                     </h2>
@@ -1369,14 +1369,14 @@ export const WebsiteSettings: React.FC = () => {
                     </div>
                     <button
                         onClick={addPartner}
-                        className="bg-[#0c0d12] text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"
+                        className="bg-[#0B2240] text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"
                     >
                         Add
                     </button>
                 </div>
 
                 <div className="mt-8 border-t border-slate-100 pt-8">
-                    <label className="block text-sm font-bold text-[#0c0d12] mb-2">Marquee Animation Speed (Seconds)</label>
+                    <label className="block text-sm font-bold text-[#0B2240] mb-2">Marquee Animation Speed (Seconds)</label>
                     <p className="text-xs text-slate-500 mb-4">Lower value = Faster scrolling. Higher value = Slower scrolling. Default is 30s.</p>
                     <div className="flex items-center gap-4 max-w-md">
                         <input
@@ -1400,7 +1400,7 @@ export const WebsiteSettings: React.FC = () => {
             {/* Resource Management Section */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-bold text-[#0c0d12] flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[#0B2240] flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-blue-600" />
                         Resource Library
                     </h2>
@@ -1449,9 +1449,9 @@ export const WebsiteSettings: React.FC = () => {
 
             {/* Add Resource Modal */}
             {isResourceModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/50 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-bold text-[#0c0d12] mb-6">Add New Resource</h2>
+                        <h2 className="text-xl font-bold text-[#0B2240] mb-6">Add New Resource</h2>
                         <form onSubmit={handleResourceSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Title</label>

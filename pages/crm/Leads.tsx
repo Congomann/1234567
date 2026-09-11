@@ -402,14 +402,14 @@ export const Leads: React.FC = () => {
             </div>
 
             {selectedLeadIds.size > 0 && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 bg-[#0c0d12] text-white px-8 py-5 rounded-[2.5rem] shadow-2xl border border-white/10 flex items-center gap-8 animate-slide-up">
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 bg-[#0B2240] text-white px-8 py-5 rounded-[2.5rem] shadow-2xl border border-white/10 flex items-center gap-8 animate-slide-up">
                     <div className="flex items-center gap-2">
                         <span className="bg-blue-600 h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black">{selectedLeadIds.size}</span>
                         <span className="text-xs font-black uppercase tracking-widest text-blue-100">Leads Selected</span>
                     </div>
                     <div className="h-8 w-px bg-white/10"></div>
                     <div className="flex gap-2">
-                        <button onClick={() => handleBulkStatusUpdate(LeadStatus.CONTACTED)} className="px-5 py-2 bg-yellow-500 text-[#0c0d12] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-400 transition-all">Mark Contacted</button>
+                        <button onClick={() => handleBulkStatusUpdate(LeadStatus.CONTACTED)} className="px-5 py-2 bg-yellow-500 text-[#0B2240] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-400 transition-all">Mark Contacted</button>
                         <button onClick={() => handleBulkStatusUpdate(LeadStatus.CLOSED)} className="px-5 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 transition-all">Mark Closed</button>
                         <button onClick={() => handleBulkStatusUpdate(LeadStatus.LOST)} className="px-5 py-2 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition-all">Mark Lost</button>
                         <button onClick={() => setSelectedLeadIds(new Set())} className="p-2 text-slate-400 hover:text-white transition-all"><X size={18} /></button>
@@ -452,7 +452,7 @@ export const Leads: React.FC = () => {
                                     </td>
                                     <td className="px-8 py-6 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-10 w-10 bg-[#0c0d12] rounded-full flex items-center justify-center text-white font-bold border border-slate-200">{lead.name.charAt(0)}</div>
+                                            <div className="h-10 w-10 bg-[#0B2240] rounded-full flex items-center justify-center text-white font-bold border border-slate-200">{lead.name.charAt(0)}</div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-bold text-slate-900">{lead.name}</div>
                                                 <div className="text-xs text-slate-400 font-medium">{lead.email}</div>
@@ -529,7 +529,7 @@ export const Leads: React.FC = () => {
             </div>
 
             {viewingLead && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/70 backdrop-blur-md p-6 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/70 backdrop-blur-md p-6 animate-fade-in">
                     <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-5xl p-10 relative max-h-[90vh] overflow-y-auto border border-white/20">
                         <div className="flex justify-between items-center mb-10">
                             <div className="flex items-center gap-5">
@@ -537,7 +537,7 @@ export const Leads: React.FC = () => {
                                     <Eye size={32} />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0c0d12]">Lead Detail Hub</h2>
+                                    <h2 className="text-3xl font-black text-[#0B2240]">Lead Detail Hub</h2>
                                     <p className="text-slate-500 text-sm font-medium">{viewingLead.name} • {viewingLead.interest}</p>
                                 </div>
                             </div>
@@ -653,7 +653,7 @@ export const Leads: React.FC = () => {
                                                 </div>
                                                 
                                                 {(viewingLead.customDetails.realEstateDetails.timeline === 'ASAP' && (viewingLead.customDetails.realEstateDetails.budget?.includes('M') || viewingLead.customDetails.realEstateDetails.budget?.includes('500k'))) && (
-                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0c0d12] text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20 shadow-xl">
+                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0B2240] text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20 shadow-xl">
                                                         <Sparkles size={12} /> Autonomous Priority Detected
                                                     </div>
                                                 )}
@@ -691,7 +691,7 @@ export const Leads: React.FC = () => {
                                                 </div>
                                                 
                                                 {(viewingLead.customDetails.securitiesDetails.investableAssets?.includes('M') || viewingLead.customDetails.securitiesDetails.investableAssets?.includes('5M')) && (
-                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0c0d12] text-blue-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500/20 shadow-xl">
+                                                    <div className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#0B2240] text-blue-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500/20 shadow-xl">
                                                         <Shield size={12} /> High-Net-Worth Individual
                                                     </div>
                                                 )}
@@ -699,7 +699,7 @@ export const Leads: React.FC = () => {
                                         </div>
                                     )}
 
-                                    <div className="bg-[#0c0d12] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                                    <div className="bg-[#0B2240] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                                             <Sparkles size={48} />
                                         </div>
@@ -763,7 +763,7 @@ export const Leads: React.FC = () => {
                                 ) : (
                                     <div className="space-y-6">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-lg font-black text-[#0c0d12] tracking-tight flex items-center gap-3">
+                                            <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
                                                 <MousePointer2 className="text-blue-500" /> Pre-Capture Browse Intent
                                             </h3>
                                             <span className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -884,7 +884,7 @@ export const Leads: React.FC = () => {
                         {activeTab === 'vault' && (
                             <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100 shadow-xl min-h-[400px] animate-fade-in">
                                 <div className="flex justify-between items-center mb-8">
-                                    <h3 className="text-lg font-black text-[#0c0d12] tracking-tight flex items-center gap-3">
+                                    <h3 className="text-lg font-black text-[#0B2240] tracking-tight flex items-center gap-3">
                                         <FileText className="text-blue-500" /> Digital Document Vault
                                     </h3>
                                     <button onClick={handleRequestSignedDoc} className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">

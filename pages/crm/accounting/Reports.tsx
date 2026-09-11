@@ -41,7 +41,7 @@ export const Reports: React.FC = () => {
     <div className="space-y-8 pb-10">
         <div className="flex justify-between items-center">
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Financial Reports</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Financial Reports</h1>
                 <p className="text-slate-500">Real-time Balance Sheet and Income Statement.</p>
             </div>
             <button className="bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-full font-bold text-sm hover:bg-slate-50 flex items-center gap-2">
@@ -69,14 +69,14 @@ export const Reports: React.FC = () => {
              <div className="p-10 max-w-3xl mx-auto">
                  {activeTab === 'bs' ? (
                      <div className="space-y-10 animate-fade-in">
-                         <h2 className="text-center text-2xl font-black text-[#0c0d12] mb-8">Balance Sheet <span className="text-lg font-normal text-slate-400 block mt-1">As of {new Date().toLocaleDateString()}</span></h2>
+                         <h2 className="text-center text-2xl font-black text-[#0B2240] mb-8">Balance Sheet <span className="text-lg font-normal text-slate-400 block mt-1">As of {new Date().toLocaleDateString()}</span></h2>
                          
                          {renderAccountGroup('Assets', AccountType.ASSET)}
                          {renderAccountGroup('Liabilities', AccountType.LIABILITY)}
                          {renderAccountGroup('Equity', AccountType.EQUITY)}
 
                          <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mt-8">
-                             <div className="flex justify-between text-lg font-bold text-[#0c0d12]">
+                             <div className="flex justify-between text-lg font-bold text-[#0B2240]">
                                  <span>Total Liabilities & Equity</span>
                                  <span>${(financials.totalLiabilities + financials.totalEquity).toLocaleString()}</span>
                              </div>
@@ -85,12 +85,12 @@ export const Reports: React.FC = () => {
                      </div>
                  ) : (
                      <div className="space-y-10 animate-fade-in">
-                         <h2 className="text-center text-2xl font-black text-[#0c0d12] mb-8">Income Statement <span className="text-lg font-normal text-slate-400 block mt-1">Year to Date</span></h2>
+                         <h2 className="text-center text-2xl font-black text-[#0B2240] mb-8">Income Statement <span className="text-lg font-normal text-slate-400 block mt-1">Year to Date</span></h2>
                          
                          {renderAccountGroup('Revenue', AccountType.REVENUE)}
                          {renderAccountGroup('Expenses', AccountType.EXPENSE)}
 
-                         <div className="bg-[#0c0d12] text-white p-6 rounded-xl shadow-lg mt-8">
+                         <div className="bg-[#0B2240] text-white p-6 rounded-xl shadow-lg mt-8">
                              <div className="flex justify-between text-xl font-bold">
                                  <span>Net Income</span>
                                  <span>${financials.netIncome.toLocaleString()}</span>

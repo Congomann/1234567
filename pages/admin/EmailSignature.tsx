@@ -108,7 +108,7 @@ const ImageCropper: React.FC<CropperProps> = ({ imageUrl, onSave, onCancel }) =>
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 animate-fade-in">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-[#0c0d12]">Crop & Fit Photo</h3>
+                    <h3 className="text-xl font-bold text-[#0B2240]">Crop & Fit Photo</h3>
                     <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X /></button>
                 </div>
 
@@ -145,7 +145,7 @@ const ImageCropper: React.FC<CropperProps> = ({ imageUrl, onSave, onCancel }) =>
 
                     <div className="flex gap-4 w-full pt-4">
                         <button onClick={onCancel} className="flex-1 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all">Cancel</button>
-                        <button onClick={handleSave} className="flex-1 py-4 bg-[#0c0d12] text-white font-bold rounded-2xl hover:bg-blue-900 transition-all shadow-lg">Apply Crop</button>
+                        <button onClick={handleSave} className="flex-1 py-4 bg-[#0B2240] text-white font-bold rounded-2xl hover:bg-blue-900 transition-all shadow-lg">Apply Crop</button>
                     </div>
                 </div>
             </div>
@@ -500,13 +500,13 @@ export const EmailSignature: React.FC = () => {
     const STYLES = {
         fontFamily: "'Inter', sans-serif",
         colors: {
-            navy: '#0c0d12',
+            navy: '#0B2240',
             grey: '#64748B',
             lightGrey: '#94A3B8',
             blue: '#3B82F6',
             white: '#ffffff',
             btnGray: '#B7BDC5',
-            logoBar: '#0c0d12'
+            logoBar: '#0B2240'
         }
     };
 
@@ -514,7 +514,7 @@ export const EmailSignature: React.FC = () => {
     const logoFullColorBase64 = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iNSIgeT0iMTUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI2MCIgcng9IjEyIiBmaWxsPSIjRjU5RTBCIiAvPjxyZWN0IHg9IjEwIiB5PSIzNSIgd2lkdGg9IjgwIiBoZWlnaHQ9IjU1IiByeD0iMTIiIGZpbGw9IiNGQ0QzNEQiIC8+PHJlY3QgeD0iNDIiIHk9IjUyIiB3aWR0aD0iMTYiIGhlaWdodD0iMjIiIHJ4PSI0IiBmaWxsPSIjQjQ1MzA5IiBmaWxsLW9wYWNpdHk9IjAuMjUiIC8+PC9zdmc+";
 
     const getSocialIconUrl = (platform: string) => {
-        const color = "0c0d12";
+        const color = "0B2240";
         switch (platform) {
             case 'LinkedIn': return `https://img.icons8.com/ios-filled/50/${color}/linkedin.png`;
             case 'Facebook': return `https://img.icons8.com/ios-filled/50/${color}/facebook-new.png`;
@@ -553,7 +553,7 @@ export const EmailSignature: React.FC = () => {
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight uppercase leading-none">Terminal Console</h1>
+                    <h1 className="text-3xl font-black text-[#0B2240] tracking-tight uppercase leading-none">Terminal Console</h1>
                 </div>
 
                 <div className="flex items-center gap-3 bg-white p-2 rounded-full border border-slate-200 shadow-sm">
@@ -725,7 +725,7 @@ export const EmailSignature: React.FC = () => {
 
                         <div className="p-6 bg-slate-50 border-t border-slate-200 flex gap-4">
                             <button onClick={handleReset} className="p-4 bg-white border border-slate-200 text-slate-400 rounded-2xl hover:bg-slate-100 shadow-sm" title="Revert Changes"><RotateCcw size={18} /></button>
-                            <button onClick={handleSaveChanges} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-[#0c0d12] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-900 transition-colors shadow-lg">
+                            <button onClick={handleSaveChanges} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-900 transition-colors shadow-lg">
                                 COMMIT UPDATES
                             </button>
                         </div>
@@ -888,7 +888,7 @@ export const EmailSignature: React.FC = () => {
                             </button>
                             <button
                                 onClick={handleCopyVisual}
-                                className="px-10 py-5 bg-[#0c0d12] text-white font-black rounded-full shadow-lg transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest hover:bg-blue-900 border border-transparent"
+                                className="px-10 py-5 bg-[#0B2240] text-white font-black rounded-full shadow-lg transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest hover:bg-blue-900 border border-transparent"
                             >
                                 {visualCopied ? <Check className="h-4 w-4 text-green-300" /> : <Ghost className="h-4 w-4 text-blue-300" />}
                                 {visualCopied ? 'COPIED TO LARK' : 'COPY VISUAL (FOR LARK)'}

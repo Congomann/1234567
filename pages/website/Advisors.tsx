@@ -123,7 +123,7 @@ export const Advisors: React.FC = () => {
             alt={advisor.name}
           />
         ) : (
-          <div className="w-full h-full bg-[#0c0d12] flex items-center justify-center text-white text-5xl font-bold">
+          <div className="w-full h-full bg-[#0B2240] flex items-center justify-center text-white text-5xl font-bold">
             {advisor.name.charAt(0)}
           </div>
         )}
@@ -131,7 +131,7 @@ export const Advisors: React.FC = () => {
       <div className="p-6 flex-1 flex flex-col">
         <div className="mb-4">
           <h3 className="text-xl font-bold text-slate-900">{advisor.name}</h3>
-          <p className="text-slate-600 font-medium text-sm">
+          <p className="text-blue-600 font-medium text-sm">
             {advisor.title || `${advisor.category} Advisor`}
           </p>
         </div>
@@ -143,12 +143,12 @@ export const Advisors: React.FC = () => {
 
         <div className="space-y-4 mt-auto">
           <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-            <div className="p-1.5 bg-slate-50 text-slate-500 rounded-full">
+            <div className="p-1.5 bg-blue-50 text-blue-500 rounded-full">
               <Mail size={14} />
             </div>
             <a
               href={`mailto:${advisor.email}`}
-              className="hover:text-slate-600 truncate"
+              className="hover:text-blue-600 truncate"
             >
               {advisor.email}
             </a>
@@ -162,7 +162,7 @@ export const Advisors: React.FC = () => {
                   key={i}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-slate-500 bg-white border border-slate-200 rounded-full hover:z-10 hover:border-slate-300 hover:text-slate-600 transition-all"
+                  className="w-8 h-8 flex items-center justify-center text-slate-500 bg-white border border-slate-200 rounded-full hover:z-10 hover:border-blue-300 hover:text-blue-600 transition-all"
                 >
                   {getSocialIcon(l.platform)}
                 </a>
@@ -171,7 +171,7 @@ export const Advisors: React.FC = () => {
 
             <Link
               to={`/advisor/${slug}`}
-              className="px-5 py-2 bg-[#0c0d12] text-white text-xs font-bold rounded-full hover:bg-slate-600 transition-colors flex items-center gap-2 shadow-md"
+              className="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-full hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-md"
             >
               View Profile <ArrowRight className="h-3 w-3" />
             </Link>
@@ -185,14 +185,14 @@ export const Advisors: React.FC = () => {
     <div className="bg-white font-sans">
       <SEO />
       {/* 1. Advisors Hero Section */}
-      <div className="relative bg-[#0c0d12] py-24 sm:py-32 overflow-hidden">
+      <div className="relative bg-[#0B2240] py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-slate-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Find Your Financial Partner
           </h1>
-          <p className="text-xl text-slate-200 max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-xl text-blue-200 max-w-3xl mx-auto font-medium leading-relaxed">
             Connect with our team of expert advisors dedicated to securing your
             legacy.
           </p>

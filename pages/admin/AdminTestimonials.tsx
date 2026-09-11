@@ -130,7 +130,7 @@ export const AdminTestimonials: React.FC = () => {
                 ]}
             />
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Manage Testimonials</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Manage Testimonials</h1>
                 <p className="text-slate-500">Approve or deny new client reviews and advisor edits submitted via microsites.</p>
             </div>
 

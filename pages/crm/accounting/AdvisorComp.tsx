@@ -41,14 +41,14 @@ export const AdvisorComp: React.FC = () => {
     <div className="space-y-8 pb-10">
          <div className="flex justify-between items-end">
             <div>
-                <h1 className="text-2xl font-bold text-[#0c0d12]">Advisor Compensation</h1>
+                <h1 className="text-2xl font-bold text-[#0B2240]">Advisor Compensation</h1>
                 <p className="text-slate-500">Real-time payable commissions calculated from General Ledger.</p>
             </div>
             <div className="bg-blue-50 px-6 py-3 rounded-2xl flex items-center gap-3">
                 <div className="p-2 bg-blue-200 rounded-full text-blue-800"><TrendingUp className="h-5 w-5" /></div>
                 <div>
                     <p className="text-xs font-bold text-blue-800 uppercase">Total Payable</p>
-                    <p className="text-lg font-black text-[#0c0d12]">
+                    <p className="text-lg font-black text-[#0B2240]">
                         ${advisorData.reduce((acc, curr) => acc + curr.balance, 0).toLocaleString()}
                     </p>
                 </div>

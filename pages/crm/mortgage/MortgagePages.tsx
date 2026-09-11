@@ -94,7 +94,7 @@ export const LoanApplications: React.FC = () => {
         <div className="space-y-8 pb-10 animate-fade-in">
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight">Lending Terminal</h1>
+                    <h1 className="text-3xl font-black text-[#0B2240] tracking-tight">Lending Terminal</h1>
                     <p className="text-slate-500 mt-2 font-medium">Strategic mortgage management and equity optimization.</p>
                 </div>
                 <button 
@@ -189,15 +189,15 @@ export const LoanApplications: React.FC = () => {
 
             {/* Strategy Hub Modal (Detail View) */}
             {viewingLoan && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-slate-50 rounded-[4rem] shadow-2xl w-full max-w-6xl overflow-hidden relative border border-white/10 max-h-[95vh] flex flex-col">
                         <div className="bg-white p-10 flex justify-between items-center border-b border-slate-100">
                             <div className="flex items-center gap-6">
-                                <div className="p-5 bg-[#0c0d12] text-white rounded-[2rem] shadow-lg">
+                                <div className="p-5 bg-[#0B2240] text-white rounded-[2rem] shadow-lg">
                                     <Landmark size={32} />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-[#0c0d12] tracking-tight">{viewingLoan.clientName}</h2>
+                                    <h2 className="text-3xl font-black text-[#0B2240] tracking-tight">{viewingLoan.clientName}</h2>
                                     <p className="text-slate-400 font-black uppercase text-xs tracking-widest mt-1">Strategic Path: <span className="text-blue-600">{viewingLoan.strategicGoal || 'Custom Lending'}</span></p>
                                 </div>
                             </div>
@@ -235,7 +235,7 @@ export const LoanApplications: React.FC = () => {
                                     {/* Smart Analysis Block */}
                                     <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12 transition-transform group-hover:scale-110"><PieChart size={200}/></div>
-                                        <h3 className="text-xl font-black text-[#0c0d12] mb-8 flex items-center gap-3">
+                                        <h3 className="text-xl font-black text-[#0B2240] mb-8 flex items-center gap-3">
                                             <Zap className="h-6 w-6 text-yellow-500 fill-current" /> Financial Optimization Logic
                                         </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -301,7 +301,7 @@ export const LoanApplications: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-6">
                                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-500"/> Compliant & Secure</span>
-                                <button onClick={() => alert('Feature in development')} className="px-10 py-4 bg-[#0c0d12] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 shadow-xl transition-all flex items-center gap-3">
+                                <button onClick={() => alert('Feature in development')} className="px-10 py-4 bg-[#0B2240] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 shadow-xl transition-all flex items-center gap-3">
                                     <FileText size={16} /> Generate Strategy Report
                                 </button>
                             </div>
@@ -312,10 +312,10 @@ export const LoanApplications: React.FC = () => {
 
             {/* Smart Intake Modal */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/60 backdrop-blur-md p-4 animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl p-12 relative border border-white/10 max-h-[95vh] overflow-y-auto no-scrollbar">
                         <button onClick={() => setIsAddModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={32}/></button>
-                        <h2 className="text-3xl font-black text-[#0c0d12] mb-2 tracking-tight">Initiate Smart Loan App</h2>
+                        <h2 className="text-3xl font-black text-[#0B2240] mb-2 tracking-tight">Initiate Smart Loan App</h2>
                         <p className="text-slate-400 font-medium mb-10">Capture real-world financials to analyze path-to-wealth.</p>
                         
                         <form onSubmit={handleSave} className="space-y-10">
@@ -384,7 +384,7 @@ export const LoanApplications: React.FC = () => {
 
                             <div className="pt-6 flex gap-6">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-5 rounded-[1.5rem] font-black text-[10px] bg-slate-100 text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-200 transition-all">Cancel Draft</button>
-                                <button type="submit" className="flex-1 py-5 rounded-[1.5rem] font-black text-[10px] bg-[#0c0d12] text-white uppercase tracking-[0.2em] hover:bg-slate-800 shadow-2xl shadow-blue-900/20 active:scale-95 transition-all">Commit Strategy</button>
+                                <button type="submit" className="flex-1 py-5 rounded-[1.5rem] font-black text-[10px] bg-[#0B2240] text-white uppercase tracking-[0.2em] hover:bg-slate-800 shadow-2xl shadow-blue-900/20 active:scale-95 transition-all">Commit Strategy</button>
                             </div>
                         </form>
                     </div>
@@ -406,7 +406,7 @@ export const RateTools: React.FC = () => {
     return (
         <div className="space-y-8 pb-10">
             <div>
-                <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight">Wholesale Rate Terminal</h1>
+                <h1 className="text-3xl font-black text-[#0B2240] tracking-tight">Wholesale Rate Terminal</h1>
                 <p className="text-slate-500 mt-2 font-medium">Real-time pricing for A-rated mortgage lenders.</p>
             </div>
 
@@ -424,7 +424,7 @@ export const RateTools: React.FC = () => {
                 ))}
             </div>
 
-            <div className="bg-[#0c0d12] text-white p-12 rounded-[4rem] shadow-2xl relative overflow-hidden group">
+            <div className="bg-[#0B2240] text-white p-12 rounded-[4rem] shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity duration-1000 rotate-12 scale-150"><Percent size={220} /></div>
                 <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-6">
@@ -479,19 +479,19 @@ export const RefinanceCalc: React.FC = () => {
     return (
         <div className="space-y-8 pb-10">
             <div>
-                <h1 className="text-3xl font-black text-[#0c0d12] tracking-tight">Smart Refi Analysis</h1>
+                <h1 className="text-3xl font-black text-[#0B2240] tracking-tight">Smart Refi Analysis</h1>
                 <p className="text-slate-500 mt-2 font-medium">Wealth building through rate and term optimization.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="bg-white p-12 rounded-[3.5rem] shadow-sm border border-slate-100">
-                    <h2 className="text-2xl font-black text-[#0c0d12] mb-10 flex items-center gap-3"><Calculator className="h-8 w-8 text-[#0A62A7]" /> Wealth Inputs</h2>
+                    <h2 className="text-2xl font-black text-[#0B2240] mb-10 flex items-center gap-3"><Calculator className="h-8 w-8 text-[#0A62A7]" /> Wealth Inputs</h2>
                     <div className="space-y-8">
                         <div>
                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3 ml-2">Mortgage Balance ($)</label>
                             <input 
                                 type="number" 
-                                className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0c0d12] outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-[#0A62A7] transition-all shadow-inner"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0B2240] outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-[#0A62A7] transition-all shadow-inner"
                                 value={calc.currentBalance}
                                 onChange={e => setCalc({...calc, currentBalance: Number(e.target.value)})}
                             />
@@ -501,7 +501,7 @@ export const RefinanceCalc: React.FC = () => {
                                 <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3 ml-2">Current Rate (%)</label>
                                 <input 
                                     type="number" step="0.1"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0c0d12] outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-[#0A62A7] transition-all shadow-inner"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0B2240] outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-[#0A62A7] transition-all shadow-inner"
                                     value={calc.currentRate}
                                     onChange={e => setCalc({...calc, currentRate: Number(e.target.value)})}
                                 />
@@ -520,7 +520,7 @@ export const RefinanceCalc: React.FC = () => {
                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3 ml-2">New Term (Years)</label>
                             <div className="relative">
                                 <select 
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0c0d12] outline-none appearance-none cursor-pointer focus:ring-4 focus:ring-blue-50/50"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-5 text-2xl font-black text-[#0B2240] outline-none appearance-none cursor-pointer focus:ring-4 focus:ring-blue-50/50"
                                     value={calc.term}
                                     onChange={e => setCalc({...calc, term: Number(e.target.value)})}
                                 >
@@ -535,7 +535,7 @@ export const RefinanceCalc: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-[#0c0d12] text-white p-12 rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(11,34,64,0.3)] flex flex-col justify-between relative overflow-hidden group">
+                <div className="bg-[#0B2240] text-white p-12 rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(11,34,64,0.3)] flex flex-col justify-between relative overflow-hidden group">
                     <div className="absolute -top-20 -right-20 w-80 h-80 bg-blue-500 rounded-full blur-[120px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
                     <div className="relative z-10">
                         <h2 className="text-2xl font-black mb-12 flex items-center gap-3 text-blue-400 uppercase tracking-widest"><TrendingUp className="h-7 w-7" /> Financial Outcomes</h2>

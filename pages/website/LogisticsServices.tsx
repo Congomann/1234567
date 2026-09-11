@@ -86,10 +86,10 @@ export const LogisticsServices: React.FC = () => {
       title: "Freight Brokerage",
       icon: Globe,
       colorClasses: {
-        bg: "bg-slate-50",
-        text: "text-slate-600",
-        shadow: "hover:shadow-slate-900/5",
-        iconText: "text-slate-500",
+        bg: "bg-blue-50",
+        text: "text-blue-600",
+        shadow: "hover:shadow-blue-900/5",
+        iconText: "text-blue-500",
       },
       description:
         "Leverage our elite network of verified carriers. We match your freight with the perfect equipment at market-leading rates.",
@@ -139,10 +139,10 @@ export const LogisticsServices: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Premium Hero Section */}
-      <div className="relative pt-48 pb-32 overflow-hidden bg-[#0c0d12]">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent"></div>
+      <div className="relative pt-48 pb-32 overflow-hidden bg-slate-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
         <div className="absolute h-[500px] w-[500px] bg-slate-500/10 blur-[120px] rounded-full -top-48 -left-24 animate-pulse"></div>
-        <div className="absolute h-[400px] w-[400px] bg-slate-500/10 blur-[100px] rounded-full bottom-0 right-0"></div>
+        <div className="absolute h-[400px] w-[400px] bg-blue-500/10 blur-[100px] rounded-full bottom-0 right-0"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <span className="inline-block px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-slate-300 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
@@ -150,7 +150,7 @@ export const LogisticsServices: React.FC = () => {
           </span>
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8 leading-[1.1]">
             Restoring Reliability to <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-200">Modern Logistics.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-slate-200">Modern Logistics.</span>
           </h1>
           <p className="text-xl text-slate-300/70 leading-relaxed max-w-2xl mx-auto font-medium mb-12">
             Beyond transport, we provide precision. Experience elite brokerage and trucking 
@@ -177,7 +177,7 @@ export const LogisticsServices: React.FC = () => {
       <div id="match-tool" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
         <div className="bg-white/70 backdrop-blur-2xl rounded-[3.5rem] p-10 md:p-16 shadow-2xl shadow-slate-900/10 border border-white">
           <div className="flex flex-col items-center text-center mb-12">
-            <div className="w-16 h-16 bg-[#0c0d12] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-inner">
+            <div className="w-16 h-16 bg-slate-900 text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-inner">
               <Truck className="w-8 h-8" />
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
@@ -204,7 +204,7 @@ export const LogisticsServices: React.FC = () => {
                     {need.label}
                   </span>
                   <div className={`w-6 h-6 rounded-xl border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                    selectedNeed === need.id ? "border-slate-900 bg-[#0c0d12] text-white rotate-12" : "border-slate-200"
+                    selectedNeed === need.id ? "border-slate-900 bg-slate-900 text-white rotate-12" : "border-slate-200"
                   }`}>
                     {selectedNeed === need.id && <CheckCircle size={14} strokeWidth={3} />}
                   </div>
@@ -214,7 +214,7 @@ export const LogisticsServices: React.FC = () => {
           </div>
 
           {selectedNeed && (
-            <div className="mt-12 p-8 bg-gradient-to-r from-slate-900 to-slate-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
+            <div className="mt-12 p-8 bg-gradient-to-r from-slate-900 to-blue-900 rounded-[2.5rem] animate-in fade-in slide-in-from-top-4 duration-700 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3">
                 Logistics Optimization Recommendation
@@ -268,7 +268,7 @@ export const LogisticsServices: React.FC = () => {
                 <div className="space-y-4 pt-8 border-t border-slate-50">
                   {service.benefits.map((benefit, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <div className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 bg-[#0c0d12]"></div>
+                      <div className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 bg-slate-900"></div>
                       <span className="text-xs font-bold text-slate-700 leading-tight">{benefit}</span>
                     </div>
                   ))}
@@ -285,10 +285,10 @@ export const LogisticsServices: React.FC = () => {
       </div>
 
       {/* Specialized Trucking Capability Grid */}
-      <div className="bg-[#0c0d12] py-32">
+      <div className="bg-slate-900 py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Specialized Trucking</h2>
+            <h2 className="text-xs font-black text-blue-400 uppercase tracking-[0.4em] mb-4">Specialized Trucking</h2>
             <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">Beyond Standard Hauling.</p>
           </div>
           
@@ -319,7 +319,7 @@ export const LogisticsServices: React.FC = () => {
           <div className="relative z-10">
             <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-8 tracking-tighter max-w-3xl mx-auto">
               Ready to engineer your <br />
-              <span className="text-slate-900 underline decoration-slate-500 decoration-8 underline-offset-8">supply chain?</span>
+              <span className="text-slate-900 underline decoration-blue-500 decoration-8 underline-offset-8">supply chain?</span>
             </h2>
             <p className="text-slate-600 text-xl mb-12 max-w-xl mx-auto font-medium">
               Join the growing network of manufacturers and distributors who trust 
@@ -327,7 +327,7 @@ export const LogisticsServices: React.FC = () => {
             </p>
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center px-12 py-6 text-xs font-black uppercase tracking-widest rounded-full text-white bg-[#0c0d12] hover:bg-slate-800 transition-all shadow-xl hover:scale-105 active:scale-95"
+              className="inline-flex items-center justify-center px-12 py-6 text-xs font-black uppercase tracking-widest rounded-full text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-xl hover:scale-105 active:scale-95"
             >
               Get a Freight Quote <ArrowRight className="ml-3 w-5 h-5" />
             </Link>

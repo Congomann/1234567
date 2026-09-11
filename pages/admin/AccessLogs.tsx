@@ -70,7 +70,7 @@ export const AccessLogs: React.FC = () => {
                     <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-2xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
                         <Download size={16} /> Export Audit
                     </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-[#0c0d12] text-white rounded-2xl text-sm font-bold hover:bg-blue-900 transition-all shadow-xl">
+                    <button className="flex items-center gap-2 px-6 py-3 bg-[#0B2240] text-white rounded-2xl text-sm font-bold hover:bg-blue-900 transition-all shadow-xl">
                         <RefreshCw size={16} /> Refresh logs
                     </button>
                 </div>

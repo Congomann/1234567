@@ -239,7 +239,7 @@ export const CommissionRecon: React.FC = () => {
                                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-2xl bg-[#0c0d12] flex items-center justify-center text-white text-xs font-black ring-4 ring-slate-50">
+                                            <div className="h-10 w-10 rounded-2xl bg-[#0B2240] flex items-center justify-center text-white text-xs font-black ring-4 ring-slate-50">
                                                 {item.carrier?.charAt(0)}
                                             </div>
                                             <div>

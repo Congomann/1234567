@@ -156,7 +156,7 @@ export const ProfileSettings: React.FC = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 className="text-2xl font-bold text-[#0c0d12]">Profile Settings</h1>
+            <h1 className="text-2xl font-bold text-[#0B2240]">Profile Settings</h1>
             <p className="text-slate-500">Manage your public advisor profile and contact details.</p>
         </div>
       </div>
@@ -181,7 +181,7 @@ export const ProfileSettings: React.FC = () => {
                 {formData.avatar ? (
                   <img src={formData.avatar} alt="Profile Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-[#0c0d12] flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-full h-full bg-[#0B2240] flex items-center justify-center text-white text-3xl font-bold">
                     {formData.name?.charAt(0)}
                   </div>
                 )}
@@ -251,7 +251,7 @@ export const ProfileSettings: React.FC = () => {
         
         {/* Public Profile Visibility - Admin Only Toggle */}
         <div id="microsite" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-[#0c0d12] mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-[#0B2240] mb-4 flex items-center gap-2">
                 <Globe className="h-5 w-5 text-blue-600" /> Public Profile Settings
             </h3>
             
@@ -304,7 +304,7 @@ export const ProfileSettings: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Briefcase className="h-6 w-6" /></div>
-                <h3 className="text-lg font-bold text-[#0c0d12]">My Products</h3>
+                <h3 className="text-lg font-bold text-[#0B2240]">My Products</h3>
             </div>
             {!isAdmin && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
@@ -351,7 +351,7 @@ export const ProfileSettings: React.FC = () => {
         <div id="licensing" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
           <div className="flex items-center gap-3 mb-6">
              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><MapPin className="h-6 w-6" /></div>
-             <h3 className="text-lg font-bold text-[#0c0d12]">Licensing</h3>
+             <h3 className="text-lg font-bold text-[#0B2240]">Licensing</h3>
           </div>
           <div className="mb-2">
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Licensed In</label>
@@ -372,7 +372,7 @@ export const ProfileSettings: React.FC = () => {
         <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
           <div className="flex items-center gap-3 mb-6">
              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Languages className="h-6 w-6" /></div>
-             <h3 className="text-lg font-bold text-[#0c0d12]">Languages Spoken</h3>
+             <h3 className="text-lg font-bold text-[#0B2240]">Languages Spoken</h3>
           </div>
           <div className="flex items-center gap-3 mb-4">
               <input 
@@ -402,7 +402,7 @@ export const ProfileSettings: React.FC = () => {
                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                         <Shield className="h-6 w-6" />
                      </div>
-                     <h3 className="text-lg font-bold text-[#0c0d12]">My Approved Carriers</h3>
+                     <h3 className="text-lg font-bold text-[#0B2240]">My Approved Carriers</h3>
                 </div>
                 
                 {Object.keys(myCarriers).length > 0 ? (
@@ -433,7 +433,7 @@ export const ProfileSettings: React.FC = () => {
         <div id="client_reviews" className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Award className="h-6 w-6" /></div>
-                <h3 className="text-lg font-bold text-[#0c0d12]">My Public Testimonials</h3>
+                <h3 className="text-lg font-bold text-[#0B2240]">My Public Testimonials</h3>
             </div>
             <div className="space-y-4">
                 {myTestimonials.map(t => (
@@ -459,7 +459,7 @@ export const ProfileSettings: React.FC = () => {
 
         {/* Bio */}
         <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-          <h3 className="text-lg font-bold text-[#0c0d12]">About Me / Bio</h3>
+          <h3 className="text-lg font-bold text-[#0B2240]">About Me / Bio</h3>
           <textarea
             rows={5}
             className="w-full mt-4 bg-white text-slate-900 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A62A7] focus:border-transparent resize-none"
@@ -472,7 +472,7 @@ export const ProfileSettings: React.FC = () => {
         {/* Social Links */}
         <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-[#0c0d12]">Social Media Links</h3>
+            <h3 className="text-lg font-bold text-[#0B2240]">Social Media Links</h3>
             <button 
               type="button" 
               onClick={handleAddSocial}
@@ -530,7 +530,7 @@ export const ProfileSettings: React.FC = () => {
              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                 <Globe className="h-6 w-6" />
              </div>
-             <h3 className="text-lg font-bold text-[#0c0d12]">Video Conferencing Hub (Jitsi)</h3>
+             <h3 className="text-lg font-bold text-[#0B2240]">Video Conferencing Hub (Jitsi)</h3>
           </div>
           <p className="text-sm text-slate-500 mb-6">
              Use your dedicated personal rooms for video meetings. These links are static and unique to you.

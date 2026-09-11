@@ -15,7 +15,7 @@ export const About: React.FC = () => {
 
   const ValueCard = ({ title, desc, icon: Icon }: any) => (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600 mb-6">
+      <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6">
         <Icon className="h-6 w-6" />
       </div>
       <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
@@ -27,14 +27,14 @@ export const About: React.FC = () => {
     <div className="bg-white font-sans">
       <SEO />
       {/* 1. About Hero Section */}
-      <div className="relative bg-[#0c0d12] py-24 sm:py-32 overflow-hidden">
+      <div className="relative bg-[#0B2240] py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-slate-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
             About New Holland Financial Group
           </h1>
-          <p className="text-xl text-slate-200 max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-xl text-blue-200 max-w-3xl mx-auto font-medium leading-relaxed">
             Your trusted partner in securing a sound financial future through
             personalized insurance solutions.
           </p>
@@ -74,7 +74,7 @@ export const About: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-[#0c0d12] border border-slate-800 flex items-center justify-center p-8 text-center text-white">
+                <div className="w-full h-full bg-slate-900 border border-slate-800 flex items-center justify-center p-8 text-center text-white">
                   <div>
                     <h3 className="text-xl font-bold mb-2">New Holland Financial Group</h3>
                     <p className="text-xs text-slate-400">Institutional Fiduciary & Brokerage Distribution Platform</p>
@@ -138,7 +138,7 @@ export const About: React.FC = () => {
           </p>
           <Link
             to="/advisors"
-            className="inline-flex items-center px-8 py-4 bg-slate-600 text-white rounded-full font-bold text-lg hover:bg-slate-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+            className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
           >
             Find an Advisor <ArrowRight className="ml-2 h-5 w-5" />
           </Link>

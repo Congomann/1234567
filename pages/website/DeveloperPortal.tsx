@@ -104,12 +104,12 @@ export const DeveloperPortal: React.FC = () => {
       <header className="border-b border-white/10 bg-[#0B1120]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-500/20">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
               <Code2 size={24} />
             </div>
             <div>
               <h1 className="text-xl font-black text-white tracking-tight leading-none">NHFG Developers</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">API Documentation</p>
+              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1">API Documentation</p>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -123,11 +123,11 @@ export const DeveloperPortal: React.FC = () => {
 
       {/* 2. Hero */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-slate-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
         
         <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tighter">
           Build the future of <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-emerald-400">insurance distribution.</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">insurance distribution.</span>
         </h2>
         <p className="text-xl text-slate-400 max-w-2xl font-medium leading-relaxed mb-10">
           Integrate directly with our proprietary tech stack. Access real-time quoting engines, instant underwriting APIs, and seamless CRM lead ingestion to power your InsurTech applications.
@@ -137,7 +137,7 @@ export const DeveloperPortal: React.FC = () => {
           <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-emerald-400">
             <Activity size={16} /> APIs Operational (99.99% Uptime)
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-slate-400">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-blue-400">
             <Shield size={16} /> 256-bit TLS Encryption
           </div>
         </div>
@@ -152,7 +152,7 @@ export const DeveloperPortal: React.FC = () => {
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-3">Endpoints (v1)</h3>
             <button 
               onClick={() => setActiveTab('quotes')}
-              className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3 ${activeTab === 'quotes' ? 'bg-slate-600/10 text-slate-400 border border-slate-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+              className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-3 ${activeTab === 'quotes' ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
             >
               <Zap size={16} /> Quoting Engine
             </button>
@@ -196,7 +196,7 @@ export const DeveloperPortal: React.FC = () => {
                   
                   <div className="mt-8">
                     <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Authentication</h4>
-                    <p className="text-sm text-slate-400 mb-2">Requires <code className="text-slate-400">x-api-key</code> in request headers.</p>
+                    <p className="text-sm text-slate-400 mb-2">Requires <code className="text-blue-400">x-api-key</code> in request headers.</p>
                   </div>
                 </div>
 
@@ -210,7 +210,7 @@ export const DeveloperPortal: React.FC = () => {
                     >
                       {copied ? <CheckCircle2 size={16} className="text-emerald-400" /> : <Copy size={16} />}
                     </button>
-                    <pre className="bg-[#1A2234] p-5 rounded-xl text-sm text-slate-300 font-mono overflow-x-auto border border-white/5">
+                    <pre className="bg-[#1A2234] p-5 rounded-xl text-sm text-blue-300 font-mono overflow-x-auto border border-white/5">
                       <code>{activeDoc.response}</code>
                     </pre>
                   </div>

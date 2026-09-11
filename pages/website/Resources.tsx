@@ -83,9 +83,9 @@ export const Resources: React.FC = () => {
       case "YouTube":
         return <Youtube className="h-5 w-5 text-red-600" />;
       case "Article":
-        return <ExternalLink className="h-5 w-5 text-slate-500" />;
+        return <ExternalLink className="h-5 w-5 text-blue-500" />;
       case "Link":
-        return <ExternalLink className="h-5 w-5 text-slate-500" />;
+        return <ExternalLink className="h-5 w-5 text-blue-500" />;
       case "Blog":
         return <BookOpen className="h-5 w-5 text-green-500" />;
       case "Image":
@@ -183,7 +183,7 @@ export const Resources: React.FC = () => {
             <input
               type="text"
               placeholder="Search for guides, videos, articles..."
-              className="w-full pl-14 pr-6 py-4 rounded-full border border-slate-200 shadow-xl shadow-slate-200/50 focus:ring-4 focus:ring-slate-100 focus:border-slate-500 text-lg outline-none transition-all text-slate-900 bg-white"
+              className="w-full pl-14 pr-6 py-4 rounded-full border border-slate-200 shadow-xl shadow-slate-200/50 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-lg outline-none transition-all text-slate-900 bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -195,7 +195,7 @@ export const Resources: React.FC = () => {
                 key={f}
                 onClick={() => setActiveFilter(f)}
                 className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 ${activeFilter === f
-                    ? "bg-[#0c0d12] text-white shadow-lg"
+                    ? "bg-[#0B2240] text-white shadow-lg"
                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
                   }`}
               >
@@ -310,7 +310,7 @@ export const Resources: React.FC = () => {
               </div>
 
               <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-slate-600 transition-colors line-clamp-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
                   {resource.title}
                 </h3>
                 <p className="text-slate-500 mb-6 text-sm leading-relaxed line-clamp-3 flex-1">
@@ -334,7 +334,7 @@ export const Resources: React.FC = () => {
                       />{" "}
                       {resource.likes}
                     </span>
-                    <span className="flex items-center gap-1 hover:text-slate-500 transition-colors">
+                    <span className="flex items-center gap-1 hover:text-blue-500 transition-colors">
                       <MessageSquare className="h-4 w-4" />{" "}
                       {resource.comments.length}
                     </span>
@@ -355,7 +355,7 @@ export const Resources: React.FC = () => {
                 setSearchTerm("");
                 setActiveFilter("All");
               }}
-              className="mt-4 text-slate-600 font-bold hover:underline"
+              className="mt-4 text-blue-600 font-bold hover:underline"
             >
               Clear Filters
             </button>
@@ -365,7 +365,7 @@ export const Resources: React.FC = () => {
 
       {/* Detail Modal */}
       {selectedResource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0d12]/80 backdrop-blur-md p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fade-in">
           {/* Backdrop Click Handler to Close */}
           <div
             className="absolute inset-0 z-0"
@@ -453,7 +453,7 @@ export const Resources: React.FC = () => {
                             {selectedResource.type === "PDF" ? (
                               <FileText className="h-6 w-6 text-red-500" />
                             ) : (
-                              <ExternalLink className="h-6 w-6 text-slate-500" />
+                              <ExternalLink className="h-6 w-6 text-blue-500" />
                             )}
                           </div>
                           <div>
@@ -469,7 +469,7 @@ export const Resources: React.FC = () => {
                           {(selectedResource.content || selectedResource.type === 'Blog' || selectedResource.type === 'Article') && (
                             <button
                               onClick={() => generateBrandedPDF(selectedResource)}
-                              className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-md"
+                              className="px-6 py-3 bg-white border border-blue-200 text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-md"
                             >
                               Download Branded PDF
                             </button>
@@ -483,7 +483,7 @@ export const Resources: React.FC = () => {
                                 ? selectedResource.title
                                 : undefined
                             }
-                            className="px-6 py-3 bg-slate-600 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors shadow-lg shadow-slate-600/20"
+                            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
                           >
                             {selectedResource.type === "PDF"
                               ? "Download Original PDF"
@@ -532,8 +532,8 @@ export const Resources: React.FC = () => {
                         onClick={(e) => handleShare(selectedResource.id, e)}
                         className="flex flex-col items-center gap-1 group"
                       >
-                        <div className="p-3 bg-white rounded-full hover:bg-slate-50 transition-colors">
-                          <Share2 className="h-5 w-5 text-slate-400 group-hover:text-slate-500" />
+                        <div className="p-3 bg-white rounded-full hover:bg-blue-50 transition-colors">
+                          <Share2 className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
                         </div>
                         <span className="text-xs font-bold text-slate-500">
                           Share
@@ -576,14 +576,14 @@ export const Resources: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Add a comment..."
-                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-slate-500 outline-none"
+                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                       value={commentInput}
                       onChange={(e) => setCommentInput(e.target.value)}
                     />
                     <button
                       type="submit"
                       disabled={!commentInput.trim()}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Send className="h-3 w-3" />
                     </button>

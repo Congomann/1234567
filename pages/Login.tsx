@@ -54,7 +54,7 @@ export const Login: React.FC = () => {
             <rect x="42" y="52" width="16" height="22" rx="4" fill="#B45309" fillOpacity="0.25" />
           </svg>
         </div>
-        <h2 className="text-3xl font-bold text-[#0c0d12] tracking-tight">
+        <h2 className="text-3xl font-bold text-[#0B2240] tracking-tight">
           Advisor & Admin Login
         </h2>
       </div>
@@ -68,7 +68,7 @@ export const Login: React.FC = () => {
           )}
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-[#0c0d12] ml-1 mb-1">
+              <label htmlFor="email" className="block text-sm font-semibold text-[#0B2240] ml-1 mb-1">
                 Email Address
               </label>
               <div className="relative rounded-2xl shadow-sm">
@@ -90,7 +90,7 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-[#0c0d12] ml-1 mb-1">
+              <label htmlFor="password" className="block text-sm font-semibold text-[#0B2240] ml-1 mb-1">
                 Password
               </label>
               <div className="relative rounded-2xl shadow-sm">

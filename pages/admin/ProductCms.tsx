@@ -83,7 +83,7 @@ export const ProductCms: React.FC = () => {
       />
       <div id="products_section" className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[#0c0d12]">Product Listings CMS</h1>
+          <h1 className="text-2xl font-bold text-[#0B2240]">Product Listings CMS</h1>
           <p className="text-slate-500">Manage the products displayed on the Home and Services pages.</p>
         </div>
         <div className="flex gap-3">

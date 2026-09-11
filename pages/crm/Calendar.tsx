@@ -130,7 +130,7 @@ export const Calendar: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleCopyBookingLink}
-            className="px-4 py-2 bg-[#0c0d12] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-[#0B2240] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-2"
           >
             <span>🔗 Copy Booking Link</span>
           </button>
