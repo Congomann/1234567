@@ -18,7 +18,7 @@ router.get('/health', async (req, res) => {
 router.get('/google/oauth', (req, res) => {
   // Real implementation would redirect to Google OAuth URL
   const clientId = process.env.GOOGLE_CLIENT_ID || 'MISSING_CLIENT_ID';
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent('https://newhollandfinancial.com/api/integrations/google/oauth/callback')}&response_type=code&scope=https://www.googleapis.com/auth/adwords`;
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent('https://newhollandfinancial.com/api/integrations/google/oauth/callback')}&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fadwords%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fanalytics.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly`;
   res.redirect(authUrl);
 });
 
