@@ -451,7 +451,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const backendUser = await Backend.getCurrentUser();
         if (backendUser) {
           setUser(backendUser);
-          await refreshActiveData(backendUser);
+          refreshActiveData(backendUser);
         }
       } catch (err) {
         console.error("Bootstrap error:", err);
@@ -508,7 +508,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendUser = await Backend.login(cleanEmail, password);
       if (backendUser) {
         setUser(backendUser);
-        await refreshActiveData(backendUser);
+        refreshActiveData(backendUser);
         pushNotification('Neural Terminal Active', `Authenticated internal node: ${backendUser.name}`, 'success');
         return true;
       }
