@@ -56,7 +56,8 @@ export const MarketingIntegrations: React.FC = () => {
     const platforms = [
         { id: 'google', name: 'Google Ads', icon: Globe, color: 'text-red-400', desc: 'Search intent lead form webhooks.' },
         { id: 'linkedin', name: 'LinkedIn Ads', icon: Linkedin, color: 'text-sky-400', desc: 'B2B and Executive Recruitment.' },
-        { id: 'tiktok', name: 'TikTok', icon: Music, color: 'text-white', desc: 'High-velocity form capture.' }
+        { id: 'tiktok', name: 'TikTok', icon: Music, color: 'text-white', desc: 'High-velocity form capture.' },
+        { id: 'meta', name: 'Meta Ads', icon: Facebook, color: 'text-blue-500', desc: 'Facebook & Instagram lead ads.' }
     ];
 
     return (
