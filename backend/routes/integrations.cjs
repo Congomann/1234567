@@ -17,7 +17,8 @@ router.get('/health', async (req, res) => {
 // GOOGLE OAUTH
 router.get('/google/oauth', (req, res) => {
   // Real implementation would redirect to Google OAuth URL
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=REAL_CLIENT_ID&redirect_uri=${encodeURIComponent('https://api.nhfg.com/api/integrations/google/oauth/callback')}&response_type=code&scope=https://www.googleapis.com/auth/adwords`;
+  const clientId = process.env.GOOGLE_CLIENT_ID || 'MISSING_CLIENT_ID';
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent('https://newhollandfinancial.com/api/integrations/google/oauth/callback')}&response_type=code&scope=https://www.googleapis.com/auth/adwords`;
   res.redirect(authUrl);
 });
 
@@ -36,7 +37,8 @@ router.get('/google/oauth/callback', async (req, res) => {
 
 // LINKEDIN OAUTH
 router.get('/linkedin/oauth', (req, res) => {
-  const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=REAL_CLIENT_ID&redirect_uri=${encodeURIComponent('https://api.nhfg.com/api/integrations/linkedin/oauth/callback')}&scope=r_liteprofile%20r_emailaddress%20rw_ads`;
+  const clientId = process.env.LINKEDIN_CLIENT_ID || 'MISSING_CLIENT_ID';
+  const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent('https://newhollandfinancial.com/api/integrations/linkedin/oauth/callback')}&scope=r_liteprofile%20r_emailaddress%20rw_ads`;
   res.redirect(authUrl);
 });
 
@@ -77,7 +79,8 @@ router.get('/tiktok/oauth/callback', async (req, res) => {
 const encryptionService = require('../encryptionService.cjs');
 
 router.get('/meta/oauth', (req, res) => {
-  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=REAL_CLIENT_ID&redirect_uri=${encodeURIComponent('https://api.nhfg.com/api/integrations/meta/oauth/callback')}&scope=ads_management,leads_retrieval`;
+  const clientId = process.env.META_CLIENT_ID || 'MISSING_CLIENT_ID';
+  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent('https://newhollandfinancial.com/api/integrations/meta/oauth/callback')}&scope=ads_management,leads_retrieval`;
   res.redirect(authUrl);
 });
 
