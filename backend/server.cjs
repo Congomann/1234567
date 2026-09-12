@@ -5761,4 +5761,13 @@ try {
   console.warn('Failed to load telematics routes:', e.message);
 }
 
+
+// Mount Root Insurance API
+try {
+  const rootInsuranceRoutes = require('./routes/rootInsuranceRoutes.cjs');
+  app.use('/api/root-insurance', rootInsuranceRoutes);
+} catch (e) {
+  console.warn('Failed to load Root Insurance routes:', e.message);
+}
+
 module.exports = app;
