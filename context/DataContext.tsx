@@ -53,6 +53,9 @@ interface DataContextType {
   login: (email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
   logout: () => void;
+  impersonateUser: (userId: string) => void;
+  stopImpersonating: () => void;
+  originalAdminUser: User | null;
   addLead: (lead: Partial<Lead>, assignTo?: string) => void;
   updateLeadStatus: (id: string, status: LeadStatus | string, analysis?: string) => void;
   updateLead: (id: string, data: Partial<Lead>) => void;
@@ -154,6 +157,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>(INITIAL_USERS);
+  const [originalAdminUser, setOriginalAdminUser] = useState<User | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);

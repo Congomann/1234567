@@ -13,7 +13,21 @@ import { LayoutDashboard, Calendar as CalendarIcon, Link as LinkIcon } from 'luc
 export type CalendarViewType = 'month' | 'week' | 'day';
 export type MainViewMode = 'dashboard' | 'calendar';
 
+
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
+  render() { 
+    if (this.state.hasError) return <div style={{padding: '2rem', color: 'red'}}><h1>Error in Calendar</h1><pre>{String(this.state.error?.stack || this.state.error)}</pre></div>; 
+    return this.props.children; 
+  }
+}
+
 export const Calendar: React.FC = () => {
+  return <ErrorBoundary><CalendarInner /></ErrorBoundary>;
+};
+
+const CalendarInner: React.FC = () => {
   const { events, updateEvent, user } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarViewType>('month');

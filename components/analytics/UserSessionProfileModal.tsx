@@ -58,8 +58,8 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
                     linkedLead: null,
                     behavioralProfile: {
                         totalSessions: 1,
-                        totalPageViews: session.pagesVisited.length,
-                        totalDurationSeconds: session.pagesVisited.reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
+                        totalPageViews: (session.pagesVisited || []).length,
+                        totalDurationSeconds: (session.pagesVisited || []).reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
                         firstSeen: session.startTime,
                         lastSeen: session.endTime || session.startTime,
                         intentScore: session.behaviorScore === 'High Intent' ? 80 : session.behaviorScore === 'Medium Intent' ? 50 : 20,
@@ -75,7 +75,7 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
                             recommendedLandingPage: '/'
                         }],
                         marketingTags: [],
-                        recentPaths: session.pagesVisited.map((v: any) => v.path)
+                        recentPaths: (session.pagesVisited || []).map((v: any) => v.path)
                     }
                 } as any);
                 
@@ -87,9 +87,9 @@ export const UserSessionProfileModal: React.FC<UserSessionProfileModalProps> = (
                     started_at: session.startTime,
                     last_activity_at: session.endTime || session.startTime,
                     ended_at: session.endTime || null,
-                    duration_seconds: session.pagesVisited.reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
-                    page_count: session.pagesVisited.length,
-                    pages_visited: session.pagesVisited.map((v: any) => ({
+                    duration_seconds: (session.pagesVisited || []).reduce((acc: number, v: any) => acc + (v.timeSpent || 0), 0),
+                    page_count: (session.pagesVisited || []).length,
+                    pages_visited: (session.pagesVisited || []).map((v: any) => ({
                         path: v.path,
                         url: v.path,
                         title: v.path,

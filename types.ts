@@ -142,6 +142,7 @@ export interface User {
   productsSold?: ProductType[];
   languages?: string[];
   micrositeEnabled?: boolean;
+  socialPublisherAccess?: boolean;
   avatar?: string;
   phone?: string;
   bio?: string;

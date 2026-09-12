@@ -26,7 +26,7 @@ import { Partnership } from './pages/website/Partnership';
 import { CampaignLandingPage } from './pages/website/CampaignLandingPage';
 import { Resources } from './pages/website/Resources';
 import { Contact } from './pages/website/Contact';
-import { BookingPage } from './pages/website/BookingPage';
+
 import { SecuritiesPortfolio } from './pages/website/SecuritiesPortfolio';
 import { RealEstateIntelligence } from './pages/website/RealEstateIntelligence';
 import { ExploreSolutions } from './pages/website/ExploreSolutions';
@@ -42,7 +42,7 @@ import { Leads } from './pages/crm/Leads';
 import { LeadIntake } from './pages/crm/LeadIntake';
 import { Clients } from './pages/crm/Clients';
 import { Commissions } from './pages/crm/Commissions';
-const Calendar = React.lazy(() => import('./pages/crm/Calendar').then(m => ({ default: m.Calendar })));
+import { Calendar } from './pages/crm/Calendar';
 import { Inbox } from './pages/crm/Inbox';
 import { ProfileSettings } from './pages/crm/ProfileSettings';
 import { AdminUsers } from './pages/admin/AdminUsers';
@@ -109,6 +109,8 @@ import { SEO } from './components/SEO';
 import { AccessLogs } from './pages/admin/AccessLogs';
 import { LoadPostingTerminal } from './pages/crm/logistics/LoadPostingTerminal';
 import { CampaignManager } from './pages/crm/MarketingCampaigns';
+import { SocialPublisherPage } from './pages/crm/SocialPublisherPage';
+
 import { InsuranceQuoteFunnel } from './pages/public/InsuranceQuoteFunnel';
 import { LifeInsuranceFunnel } from './pages/public/LifeInsuranceFunnel';
 import { SystemStatus } from './components/SystemStatus';
@@ -222,7 +224,9 @@ const App: React.FC = () => {
             <Route path="/transparency" element={<PublicLayout><AnnualReport /></PublicLayout>} />
             <Route path="/press" element={<PublicLayout><PressReleases /></PublicLayout>} />
             <Route path="/join" element={<PublicLayout><JoinTeam /></PublicLayout>} />
+            <Route path="/book" element={<PublicBookingPage />} />
             <Route path="/book/:id" element={<PublicBookingPage />} />
+            <Route path="/schedule" element={<PublicBookingPage />} />
             <Route path="/track/:token" element={<LoadTracking />} />
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
@@ -238,7 +242,6 @@ const App: React.FC = () => {
             <Route path="/verify/:token" element={<ClientVerify />} />
 
             {/* PUBLIC BOOKING / SCHEDULING PAGE */}
-            <Route path="/schedule" element={<PublicLayout><BookingPage /></PublicLayout>} />
 
             {/* ADVISOR TERMINAL (CRM) */}
             <Route path="/crm" element={<ProtectedCRMRoute />}>
@@ -252,6 +255,8 @@ const App: React.FC = () => {
               <Route path="commissions" element={<Commissions />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="campaigns" element={<CampaignManager />} />
+            <Route path="social-publisher" element={<SocialPublisherPage />} />
+
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="legal" element={<LegalCompliance />} />
               <Route path="resources" element={<AdvisorResources />} />

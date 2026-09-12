@@ -117,8 +117,9 @@ export const LogisticsHub: React.FC = () => {
   const deals = getDeals();
 
   const getStats = () => {
-    const totalDeals = deals.length;
-    const totalValue = deals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+    const activeDeals = Object.values(deals[activeNiche] || {}).flat();
+    const totalDeals = activeDeals.length;
+    const totalValue = activeDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
     const formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalValue);
 
     switch(activeNiche) {

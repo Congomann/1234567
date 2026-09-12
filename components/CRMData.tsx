@@ -46,7 +46,7 @@ import {
     Newspaper,
     Map as MapIcon,
     Briefcase,
-    Phone, Video, 
+    Phone, Video, Send, 
     Search,
     BookOpen
 } from 'lucide-react';
@@ -120,7 +120,7 @@ interface CRMLayoutProps {
 export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, logout, login } = useData();
+    const { user, logout, login, originalAdminUser, stopImpersonating, updateUser, pushNotification } = useData();
     const sidebarRef = useRef<HTMLDivElement>(null);
 
     // --- TOUR & CONCEPT MODAL STATES ---
@@ -182,8 +182,12 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         if (!user) return { main: [], vertical: [], shared: [], admin: [] };
 
         const main = [
-            { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, Video, tourId: 'nav-dashboard' },
+            { path: '/crm/dashboard', label: 'Dashboard', icon: LayoutGrid, tourId: 'nav-dashboard' },
             { path: '/crm/campaigns', label: 'Campaigns', icon: Zap, tourId: 'nav-campaigns' },
+            ...(user.role === 'Administrator' || (user as any).socialPublisherAccess ? [
+                { path: '/crm/social-publisher', label: 'Social Publisher', icon: Send, tourId: 'nav-social-publisher' },
+            ] : []),
+
             ...(enabledModules.sales ? [
                 { path: '/crm/leads', label: 'Leads DB', icon: Users, tourId: 'nav-leads' },
                 { path: '/crm/clients', label: 'Client Management', icon: CircleUser, tourId: 'nav-clients' },
@@ -281,7 +285,76 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
     const currentStep = currentTourSteps[currentStepIndex];
 
 
-    // --- AUTO-SCROLL LOGIC ---
+
+    
+    // --- KEYBOARD SHORTCUTS FOR ROLE SWITCHING ---
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
+                if (!user) return;
+                let newCategory = user.category;
+                let newProducts = user.productsSold || [];
+                let roleName = "";
+                let matched = true;
+
+                switch(e.key) {
+                    case '1':
+                    case '!':
+                        newCategory = AdvisorCategory.INSURANCE;
+                        newProducts = [ProductType.LIFE, ProductType.IUL, ProductType.FINAL_EXPENSE];
+                        roleName = "Life Insurance";
+                        break;
+                    case '2':
+                    case '@':
+                        newCategory = AdvisorCategory.REAL_ESTATE;
+                        newProducts = [ProductType.REAL_ESTATE, ProductType.MORTGAGE];
+                        roleName = "Real Estate";
+                        break;
+                    case '9':
+                    case '(':
+                        newCategory = AdvisorCategory.INSURANCE;
+                        newProducts = [ProductType.AUTO, ProductType.COMMERCIAL, ProductType.BUSINESS];
+                        roleName = "Auto/Commercial Insurance";
+                        break;
+                    case '4':
+                    case '$':
+                        newCategory = AdvisorCategory.SECURITIES;
+                        newProducts = [ProductType.SECURITIES, ProductType.INVESTMENT, ProductType.ANNUITY];
+                        roleName = "Securities / Wealth Management";
+                        break;
+                    case '6':
+                    case '^':
+                        newCategory = AdvisorCategory.REAL_ESTATE;
+                        newProducts = [ProductType.HOME_REPAIR, ProductType.PROPERTY];
+                        roleName = "DSM Property Solutions";
+                        break;
+                    case '7':
+                    case '&':
+                        newCategory = AdvisorCategory.LOGISTICS;
+                        newProducts = [ProductType.LOGISTICS];
+                        roleName = "Freight Trucking";
+                        break;
+                    default:
+                        matched = false;
+                        break;
+                }
+
+                if (matched) {
+                    e.preventDefault();
+                    updateUser(user.id, {
+                        category: newCategory,
+                        productsSold: newProducts
+                    });
+                    pushNotification("Role Switched", "Identity shifted to: " + roleName, "success");
+                    setTimeout(() => window.location.reload(), 500);
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [user, updateUser, pushNotification]);
+
+// --- AUTO-SCROLL LOGIC ---
     useEffect(() => {
         if (isTourActive && currentStep?.targetId) {
             const timer = setTimeout(() => {
@@ -332,7 +405,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             {isTourActive && currentStep && (
                 <>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-slate-900/10 z-[60]" onClick={() => setIsTourActive(false)} />
-                    <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="fixed bottom-10 right-10 w-[420px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.4)] z-[100] border border-slate-200 overflow-hidden">
+                    <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }}  exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="fixed bottom-10 right-10 w-[420px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.4)] z-[100] border border-slate-200 overflow-hidden">
                         <div className="bg-[#0B2240] p-8 text-white relative">
                             <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles size={100} /></div>
                             <div className="flex justify-between items-start relative z-10">
@@ -361,7 +434,16 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             )}
             </AnimatePresence>
 
-            <div className="w-full h-full max-w-[1920px] bg-white sm:rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex relative overflow-hidden ring-1 ring-slate-200/60 m-0 sm:m-4">
+            
+            {originalAdminUser && (
+                <div className="absolute top-0 left-0 right-0 bg-red-600 text-white py-1.5 px-4 text-xs font-black z-[200] flex justify-between items-center shadow-lg">
+                    <span>⚠️ IMPERSONATION MODE ACTIVE: You are acting as {user?.name} ({user?.email})</span>
+                    <button onClick={stopImpersonating} className="bg-white text-red-600 px-3 py-1 rounded-md hover:bg-slate-100 transition-colors">
+                        Stop Impersonating
+                    </button>
+                </div>
+            )}
+<div className="w-full h-full max-w-[1920px] bg-white sm:rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex relative overflow-hidden ring-1 ring-slate-200/60 m-0 sm:m-4">
                 <aside ref={sidebarRef} className={`hidden lg:flex flex-col w-[260px] bg-[#f5f5f7]/80 backdrop-blur-2xl text-slate-900 h-full overflow-y-auto py-5 flex-shrink-0 no-scrollbar border-r border-slate-200/50 relative ${isTourActive ? 'z-[65]' : 'z-10'}`}>
                     <div className="px-5 mb-6 flex flex-col gap-5">
                         {/* macOS Window Controls */}
@@ -509,19 +591,18 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
                             </div>
                         </div>
                     </header>
-                    <AnimatePresence mode="wait">
+                    
                         <motion.main
-                            key={location.pathname}
-                            initial={{ opacity: 0, y: 14, scale: 0.99 }}
+                            
+                            
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -14, scale: 0.99 }}
-                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            
+                            
                             className="flex-1 overflow-y-auto p-8 lg:p-10 no-scrollbar relative bg-[#f5f5f7]"
                         >
                             {children}
                         </motion.main>
-                    </AnimatePresence>
-                </div>
+                    </div>
             </div>
         </div>
     );

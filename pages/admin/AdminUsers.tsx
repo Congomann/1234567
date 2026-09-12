@@ -8,7 +8,7 @@ import ConfirmModal from '../../components/shared/ConfirmModal';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const AdminUsers: React.FC = () => {
-    const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser, accessLogs } = useData();
+    const { allUsers, addAdvisor, deleteAdvisor, updateUser, restoreUser, permanentlyDeleteUser, accessLogs, impersonateUser, user } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);

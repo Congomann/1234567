@@ -666,6 +666,42 @@ const WebhookNormalizer = {
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } }); // 500MB limit for videos
 
+
+app.post('/api/video/token', async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    // Default to guest (client) if no auth
+    let userName = req.body.userName || 'Guest Client';
+    let userEmail = 'guest@example.com';
+    let isModerator = false;
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        // If they are an advisor/admin, make them a moderator
+        if (decoded.role === 'Administrator' || decoded.role === 'Manager' || decoded.role === 'Advisor') {
+           isModerator = true;
+           userName = decoded.name || userName;
+           userEmail = decoded.email || userEmail;
+        }
+      } catch (e) {
+        // Ignore, just treat as guest
+      }
+    }
+
+    const roomName = req.body.roomName;
+    if (!roomName) return res.status(400).json({ error: 'Room name required' });
+
+    const jitsiToken = generateJitsiToken(roomName, userName, userEmail, isModerator);
+    res.json({ token: jitsiToken });
+  } catch (error) {
+    console.error('Jitsi token error:', error);
+    res.status(500).json({ error: 'Failed to generate token' });
+  }
+});
+
 app.post('/api/upload', async (req, res) => {
   try {
     // Require valid JWT for uploads
@@ -5714,6 +5750,15 @@ if (require.main === module) {
       }
     }
   });
+}
+
+
+// Mount Telematics
+try {
+  const telematicsRoutes = require('./routes/telematics.cjs');
+  app.use('/api/telematics', telematicsRoutes);
+} catch (e) {
+  console.warn('Failed to load telematics routes:', e.message);
 }
 
 module.exports = app;

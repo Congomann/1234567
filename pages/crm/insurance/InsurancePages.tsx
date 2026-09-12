@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useData } from '../../../context/DataContext';
 import { ApplicationStatus, LeadStatus, ProductType } from '../../../types';
 import { FileText, CheckCircle, Hourglass, XCircle, Briefcase, Car, Truck, AlertTriangle, RefreshCw, Plus, Search, Filter, Send } from 'lucide-react';
+import { EmbeddedRootInsuranceModal } from '../../../components/crm/EmbeddedRootInsuranceModal';
 
 const StatusBadge = ({ status }: { status: string }) => {
     let color = 'bg-slate-100 text-slate-700';
@@ -147,6 +148,8 @@ export const CommercialQuotes: React.FC = () => {
         (l.assignedTo === user?.id || !l.assignedTo)
     );
 
+    const [rootModalLead, setRootModalLead] = React.useState<any>(null);
+
     return (
         <div className="space-y-6">
             <div>
@@ -172,14 +175,15 @@ export const CommercialQuotes: React.FC = () => {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                             <span className="text-xs font-bold text-slate-400">Score: {lead.score} ({lead.qualification})</span>
-                            <button onClick={() => alert('Feature in development')} className="px-5 py-2 bg-purple-600 text-white rounded-full text-xs font-bold hover:bg-purple-700 transition-colors">
-                                View Quote
+                            <button onClick={() => setRootModalLead(lead)} className="px-5 py-2 bg-purple-600 text-white rounded-full text-xs font-bold hover:bg-purple-700 transition-colors">
+                                View Root Quote
                             </button>
                         </div>
                     </div>
                 ))}
                 {commercialLeads.length === 0 && <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-300 text-slate-400">No active commercial quotes.</div>}
             </div>
+        {rootModalLead && <EmbeddedRootInsuranceModal lead={rootModalLead} onClose={() => setRootModalLead(null)} />}
         </div>
     );
 };
@@ -238,6 +242,8 @@ export const AutoQuotes: React.FC = () => {
     const { leads, user } = useData();
     const autoLeads = leads.filter(l => l.interest === ProductType.AUTO && (l.assignedTo === user?.id || !l.assignedTo));
 
+    const [rootModalLead, setRootModalLead] = React.useState<any>(null);
+
     return (
         <div className="space-y-6">
             <div>
@@ -262,7 +268,7 @@ export const AutoQuotes: React.FC = () => {
                         </div>
                         <div className="flex gap-2">
                             <button onClick={() => alert('Feature in development')} className="flex-1 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">View</button>
-                            <button onClick={() => alert('Feature in development')} className="flex-1 py-2 bg-[#0B2240] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Quote</button>
+                            <button onClick={() => setRootModalLead(lead)} className="flex-1 py-2 bg-[#0B2240] text-white rounded-xl text-xs font-bold hover:bg-slate-800">Root Quote</button>
                         </div>
                     </div>
                 ))}
@@ -272,16 +278,33 @@ export const AutoQuotes: React.FC = () => {
                     </div>
                 )}
             </div>
+        {rootModalLead && <EmbeddedRootInsuranceModal lead={rootModalLead} onClose={() => setRootModalLead(null)} />}
         </div>
     );
 };
 
 // --- 5. Fleet Manager ---
 export const FleetManager: React.FC = () => {
-    const fleets = [
+    const [fleets, setFleets] = React.useState([
         { id: 1, client: 'Green Earth Landscaping', vehicles: 8, premium: 28000, status: 'Active', renewal: '2024-01-15' },
         { id: 2, client: 'Metro Logistics', vehicles: 12, premium: 45000, status: 'Underwriting', renewal: 'Pending' },
-    ];
+    ]);
+    const [isAdding, setIsAdding] = React.useState(false);
+    const [newFleet, setNewFleet] = React.useState({ client: '', vehicles: '', premium: '' });
+
+    const handleAdd = (e: React.FormEvent) => {
+        e.preventDefault();
+        setFleets([{
+            id: Date.now(),
+            client: newFleet.client,
+            vehicles: parseInt(newFleet.vehicles) || 1,
+            premium: parseFloat(newFleet.premium) || 0,
+            status: 'Underwriting',
+            renewal: 'Pending'
+        }, ...fleets]);
+        setIsAdding(false);
+        setNewFleet({ client: '', vehicles: '', premium: '' });
+    };
 
     return (
         <div className="space-y-6">
@@ -290,10 +313,41 @@ export const FleetManager: React.FC = () => {
                     <h1 className="text-2xl font-bold text-[#0B2240]">Fleet Manager</h1>
                     <p className="text-slate-500">Commercial fleet policies and vehicle schedules.</p>
                 </div>
-                <button onClick={() => alert('Feature in development')} className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors">
+                <button onClick={() => setIsAdding(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[#0B2240] text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-blue-900/20 active:scale-95">
                     <Plus className="h-4 w-4" /> Add Fleet
                 </button>
             </div>
+
+            {isAdding && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
+                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md p-10 relative border border-white/20">
+                        <button onClick={() => setIsAdding(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors">✕</button>
+                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">Add New Fleet</h2>
+                        
+                        <form onSubmit={handleAdd} className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Client / Company Name</label>
+                                <input type="text" required value={newFleet.client} onChange={e => setNewFleet({...newFleet, client: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-500/10" placeholder="e.g. Apex Trucking LLC" />
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Vehicle Count</label>
+                                    <input type="number" required min="1" value={newFleet.vehicles} onChange={e => setNewFleet({...newFleet, vehicles: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-500/10" placeholder="0" />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Est. Premium ($)</label>
+                                    <input type="number" required min="0" value={newFleet.premium} onChange={e => setNewFleet({...newFleet, premium: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-500/10" placeholder="0.00" />
+                                </div>
+                            </div>
+                            <div className="pt-4 flex gap-4">
+                                <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-colors">Cancel</button>
+                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20 active:scale-95 transition-all">Create Fleet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {fleets.map(fleet => (

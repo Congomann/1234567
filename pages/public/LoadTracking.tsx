@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { 
   MapPin, 
   Truck, 
+  AlertTriangle, 
+  TrafficCone, 
   Navigation, 
   Clock, 
   Activity, 
@@ -10,6 +12,7 @@ import {
   Calendar,
   CheckCircle2
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export const LoadTracking: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -19,6 +22,8 @@ export const LoadTracking: React.FC = () => {
   const [gpsActive, setGpsActive] = useState(false);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [simulatedSpeed, setSimulatedSpeed] = useState(0);
+  const [showHazardMenu, setShowHazardMenu] = useState(false);
+  const [roadEvents, setRoadEvents] = useState<any[]>([]);
   const [watchId, setWatchId] = useState<number | null>(null);
 
   // Load Leaflet dynamically
@@ -65,6 +70,13 @@ export const LoadTracking: React.FC = () => {
 
   useEffect(() => {
     fetchLoadDetails();
+    // Fetch road events
+    fetch('/api/telematics/road-events')
+      .then(res => res.json())
+      .then(data => {
+        if(Array.isArray(data)) setRoadEvents(data);
+      })
+      .catch(console.error);
   }, [token]);
 
   // Handle real-time Leaflet Map rendering
@@ -89,8 +101,9 @@ export const LoadTracking: React.FC = () => {
     const map = L.map('tracking-map', { zoomControl: false }).setView([coordinates.lat, coordinates.lng], 10);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=YOUR_KEY', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd', maxZoom: 20
     }).addTo(map);
 
     // Truck Marker Icon

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Menu, X, User, ChevronDown, ArrowRight, Shield, TrendingUp, Truck, Landmark, Key, FileText, Briefcase, BarChart3, Globe, Navigation, Search, Home, Wrench, Map as MapIcon, Newspaper, Scale } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
@@ -13,7 +13,7 @@ import { UserRole, ProductType } from '../types';
 interface MegaMenuColumn {
   title: string;
   subtitle: string;
-  items: { label: string; path: string; icon?: any }[];
+  items: { label: string; path: string; icon?: any; productTypes?: ProductType[] }[];
 }
 
 export const Navbar: React.FC = () => {
@@ -52,50 +52,62 @@ export const Navbar: React.FC = () => {
   };
 
   // MEGA MENU DATA
-  const megaMenuColumns: MegaMenuColumn[] = [
-    {
-      title: 'Insurance',
-      subtitle: 'Protect what matters most.',
-      items: [
-        { label: 'Life Insurance', path: '/life-insurance', icon: Shield },
-        { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck },
-        { label: 'Property Solutions', path: '/dsm-property-solutions', icon: Home },
-        { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase },
-        { label: 'Group Benefits', path: '/group-benefits', icon: FileText }
-      ]
-    },
-    {
-      title: 'Financial & Property',
-      subtitle: 'Build, manage, and maintain your assets.',
-      items: [
-        { label: 'Mortgage', path: '/mortgage', icon: Landmark },
-        { label: 'Securities', path: '/securities', icon: BarChart3 },
-        { label: 'Real Estate', path: '/real-estate', icon: Key },
-        { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench }
-      ]
-    },
-    {
-      title: 'Freight & Logistics',
-      subtitle: 'Move your business forward.',
-      items: [
-        { label: 'Freight Shipping', path: '/logistics?view=overview', icon: Truck },
-        { label: 'Freight Brokerage', path: '/logistics?view=overview', icon: Globe },
-        { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation },
-        { label: 'Live Load', path: '/logistics?view=listing', icon: Truck }
-      ]
-    },
-    {
-      title: 'Corporate',
-      subtitle: 'Transparency & News.',
-      items: [
-        { label: 'Partnerships & Carriers', path: '/partnership', icon: Briefcase },
-        { label: 'Annual Report', path: '/transparency', icon: Scale },
-        { label: 'Press Releases', path: '/press', icon: Newspaper },
-        { label: 'About NHFG', path: '/about', icon: Shield },
-        { label: 'Contact Us', path: '/contact', icon: Globe }
-      ]
-    }
-  ];
+  const hiddenProducts = companySettings?.hiddenProducts || [];
+  const megaMenuColumns = useMemo<MegaMenuColumn[]>(() => {
+    const rawColumns: MegaMenuColumn[] = [
+      {
+        title: 'Insurance',
+        subtitle: 'Protect what matters most.',
+        items: [
+          { label: 'Life Insurance', path: '/life-insurance', icon: Shield, productTypes: [ProductType.LIFE] },
+          { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck, productTypes: [ProductType.AUTO, ProductType.COMMERCIAL] },
+          { label: 'Property Solutions', path: '/dsm-property-solutions', icon: Home, productTypes: [ProductType.HOME_REPAIR, ProductType.PROPERTY] },
+          { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase, productTypes: [ProductType.BUSINESS] },
+          { label: 'Group Benefits', path: '/group-benefits', icon: FileText }
+        ]
+      },
+      {
+        title: 'Financial & Property',
+        subtitle: 'Build, manage, and maintain your assets.',
+        items: [
+          { label: 'Mortgage', path: '/mortgage', icon: Landmark, productTypes: [ProductType.MORTGAGE] },
+          { label: 'Securities', path: '/securities', icon: BarChart3, productTypes: [ProductType.SECURITIES] },
+          { label: 'Real Estate', path: '/real-estate', icon: Key, productTypes: [ProductType.REAL_ESTATE] },
+          { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench, productTypes: [ProductType.HOME_REPAIR] }
+        ]
+      },
+      {
+        title: 'Freight & Logistics',
+        subtitle: 'Move your business forward.',
+        items: [
+          { label: 'Freight Shipping', path: '/logistics?view=overview', icon: Truck, productTypes: [ProductType.LOGISTICS] },
+          { label: 'Freight Brokerage', path: '/logistics?view=overview', icon: Globe, productTypes: [ProductType.LOGISTICS] },
+          { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation, productTypes: [ProductType.LOGISTICS] },
+          { label: 'Live Load', path: '/logistics?view=listing', icon: Truck, productTypes: [ProductType.LOGISTICS] }
+        ]
+      },
+      {
+        title: 'Corporate',
+        subtitle: 'Transparency & News.',
+        items: [
+          { label: 'Partnerships & Carriers', path: '/partnership', icon: Briefcase },
+          { label: 'Annual Report', path: '/transparency', icon: Scale },
+          { label: 'Press Releases', path: '/press', icon: Newspaper },
+          { label: 'About NHFG', path: '/about', icon: Shield },
+          { label: 'Contact Us', path: '/contact', icon: Globe }
+        ]
+      }
+    ];
+
+    return rawColumns.map(col => ({
+      ...col,
+      items: col.items.filter(item => {
+        if (!item.productTypes || item.productTypes.length === 0) return true;
+        const allHidden = item.productTypes.every(pt => hiddenProducts.includes(pt));
+        return !allHidden;
+      })
+    })).filter(col => col.items.length > 0);
+  }, [hiddenProducts]);
 
   const standardLinks = [
     { label: 'Home', path: '/' },

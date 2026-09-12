@@ -67,8 +67,8 @@ export const AdminAnalytics: React.FC = () => {
             const data = await res.json();
             
             // Reformat tracking sessions into stats
-            const activeSessions = data.filter((s: any) => !s.endTime).length;
-            const visitors = data.map((s: any) => ({
+            const activeSessions = Array.isArray(data) ? data.filter((s: any) => !s.endTime).length : 0;
+            const visitors = (Array.isArray(data) ? data : []).map((s: any) => ({
                 visitor_id: s.id,
                 ip_address: s.ip || 'Unknown',
                 user_agent: s.deviceId,
@@ -81,7 +81,7 @@ export const AdminAnalytics: React.FC = () => {
             })).sort((a: any, b: any) => new Date(b.first_seen).getTime() - new Date(a.first_seen).getTime());
             
             setStats({
-                totalVisitors: data.length,
+                totalVisitors: Array.isArray(data) ? data.length : 0,
                 activeSessions,
                 topPages: [], // Can compute this if needed
                 recentVisitors: visitors

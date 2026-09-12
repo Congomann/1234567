@@ -54,6 +54,7 @@ export const BookingPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
+  const [contactPreference, setContactPreference] = useState<'video' | 'phone'>('video');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Find Advisors List
@@ -175,21 +176,29 @@ export const BookingPage: React.FC = () => {
       }
     });
 
+    const roomName = `NHFG-${Math.random().toString(36).substring(2, 9)}`;
+    const meetingPin = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit PIN
+    
     // 2. Insert Calendar Event on Advisor's CRM Calendar
     const meetingEvent: Partial<CalendarEvent> = {
       title: `Meeting: ${name} w/ ${selectedAdvisor.name}`,
       type: 'meeting',
       date: dateStr,
       time: selectedTime,
-      description: `Client: ${name}\nEmail: ${email}\nPhone: ${phone}\nAdvisor: ${selectedAdvisor.name}\nMeeting Type: ${selectedMeetingType.name}\nNotes: ${notes}`,
+      description: `Client: ${name}\nEmail: ${email}\nPhone: ${phone}\nAdvisor: ${selectedAdvisor.name}\nMeeting Type: ${selectedMeetingType.name}\nPreference: ${contactPreference}${contactPreference === 'video' ? '\nPIN: ' + meetingPin : ''}\nNotes: ${notes}`,
       visibility: 'public',
       status: 'scheduled',
       creatorId: selectedAdvisor.id,
-      meetingLink: `https://meet.google.com/nhfg-${Math.random().toString(36).substring(7)}`
+      meetingLink: contactPreference === 'video' ? `/crm/video-meetings?room=${roomName}` : undefined
     };
     addEvent(meetingEvent as CalendarEvent);
 
     // 3. Trigger SMTP Confirmation Email via Backend API
+    const joinInstructions = contactPreference === 'video' 
+      ? `<p style="margin: 4px 0;"><strong>Meeting Link:</strong> <a href="https://meet.newhollandfinancial.com/${roomName}" style="color: #60a5fa;">Join Video Room</a></p>
+         <p style="margin: 4px 0;"><strong>Meeting PIN:</strong> ${meetingPin}</p>`
+      : `<p style="margin: 4px 0;"><strong>Phone Call:</strong> Your advisor will call you at ${phone} at the scheduled time.</p>`;
+
     try {
       await fetch('/api/send-email', {
         method: 'POST',
@@ -209,6 +218,7 @@ export const BookingPage: React.FC = () => {
                 <p style="margin: 4px 0; color: #60a5fa;"><strong>Time:</strong> ${selectedTime}</p>
                 <p style="margin: 4px 0;"><strong>Advisor:</strong> ${selectedAdvisor.name} (${selectedAdvisor.email})</p>
                 <p style="margin: 4px 0;"><strong>Session Type:</strong> ${selectedMeetingType.name}</p>
+                ${joinInstructions}
               </div>
               <p style="color: #94a3b8; font-size: 13px;">If you need to reschedule, please reply directly to this email or call (717) 847-9638.</p>
             </div>
@@ -312,7 +322,7 @@ export const BookingPage: React.FC = () => {
                       {advisorParam ? "Your Selected Advisor" : "Available Advisors"}
                     </label>
                     <div className={`grid ${advisorParam ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
-                      {(advisorParam && selectedAdvisor ? [selectedAdvisor] : activeAdvisors).map(adv => {
+                      {(advisorParam ? (selectedAdvisor ? [selectedAdvisor] : []) : activeAdvisors).map(adv => {
                         const isSelected = selectedAdvisor?.id === adv.id;
                         return (
                           <button

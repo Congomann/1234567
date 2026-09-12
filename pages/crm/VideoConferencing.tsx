@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SEO } from '../../components/SEO';
 import { useData } from '../../context/DataContext';
 import { Video, Settings, Users, Link as LinkIcon, ExternalLink, Shield } from 'lucide-react';
@@ -15,35 +16,70 @@ export const VideoConferencing: React.FC = () => {
   };
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
   const [jitsiApi, setJitsiApi] = useState<any>(null);
-  const [roomName, setRoomName] = useState('NHFG-Advisory-Room-' + Math.floor(Math.random() * 10000));
+  const [roomName, setRoomName] = useState(searchParams.get('room') || 'NHFG-Advisory-Room-' + Math.floor(Math.random() * 10000));
   const [inMeeting, setInMeeting] = useState(false);
   const [advisorName, setAdvisorName] = useState(user?.name || 'NHFG Advisor');
 
   const startMeeting = () => {
-    if (!containerRef.current) return;
-
-    // Load Jitsi External API script
-    if (!(window as any).JitsiMeetExternalAPI) {
-      const script = document.createElement('script');
-      script.src = 'https://meet.newhollandfinancial.com/external_api.js';
-      script.async = true;
-      script.onload = () => initJitsi();
-      document.body.appendChild(script);
-    } else {
-      initJitsi();
-    }
+    setInMeeting(true);
   };
 
-  const initJitsi = () => {
+  useEffect(() => {
+    if (!inMeeting) return;
+    
+    const setupMeeting = async () => {
+      // 1. Fetch JWT token from backend
+      let jwtToken = null;
+      try {
+        const token = localStorage.getItem('nhfg_access_token');
+        const res = await fetch('/api/video/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ roomName, userName: advisorName })
+        });
+        const data = await res.json();
+        if (data.token) {
+          jwtToken = data.token;
+        }
+      } catch (err) {
+        console.error('Failed to fetch Jitsi token', err);
+      }
+
+      // Slight delay to ensure DOM is ready
+      setTimeout(() => {
+        if (!containerRef.current) return;
+        
+        if (!(window as any).JitsiMeetExternalAPI) {
+          const script = document.createElement('script');
+          script.src = 'https://meet.newhollandfinancial.com/external_api.js';
+          script.async = true;
+          script.onload = () => initJitsi(jwtToken);
+          document.body.appendChild(script);
+        } else {
+          initJitsi(jwtToken);
+        }
+      }, 100);
+    };
+
+    setupMeeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inMeeting]);
+
+  const initJitsi = (jwtToken: string | null = null) => {
     if (jitsiApi) jitsiApi.dispose();
 
     const domain = 'meet.newhollandfinancial.com';
-    const options = {
+    const options: any = {
       roomName: roomName,
       width: '100%',
       height: '100%',
       parentNode: containerRef.current,
+      ...(jwtToken && { jwt: jwtToken }),
       userInfo: {
         displayName: advisorName
       },
@@ -87,7 +123,6 @@ export const VideoConferencing: React.FC = () => {
     });
 
     setJitsiApi(api);
-    setInMeeting(true);
   };
 
   const leaveMeeting = () => {

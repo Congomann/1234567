@@ -125,7 +125,7 @@ export const Dashboard: React.FC = () => {
       {/* ── 3D VIBRANT ANIMATED BANNER CARDS ── */}
       <Tab3DBanner
         cards={[
-          ...(user?.category === 'SECURITIES' || user?.role === 'ADMIN' ? [{ title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
+          ...(user?.category === 'SECURITIES' ? [{ title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
           ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: "18", subtitle: "Total Value: $18.4M", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
           ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "42", subtitle: "Total Loads: 128", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
           { title: "Applications In Line", value: "750", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
@@ -186,7 +186,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         
         {/* 1. Wealth & Securities */}
-        {(user?.category === 'SECURITIES' || user?.productsSold?.includes('securities') || user?.role === 'ADMIN') && (
+        {(user?.category === 'SECURITIES' || user?.productsSold?.includes('Securities / Series') ) && (
         <div 
           onClick={() => navigate('/crm/portfolio')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -214,7 +214,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 2. Real Estate & Escrow */}
-        {(user?.category === 'REAL_ESTATE' || user?.productsSold?.includes('real_estate') || user?.role === 'ADMIN') && (
+        {(user?.category === 'REAL_ESTATE' || user?.productsSold?.includes('Real Estate') ) && (
         <div 
           onClick={() => navigate('/crm/properties')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -242,7 +242,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 3. Life & Commercial Insurance */}
-        {(user?.category === 'INSURANCE' || user?.productsSold?.includes('life') || user?.role === 'ADMIN') && (
+        {(user?.category === 'INSURANCE' || user?.productsSold?.includes('Life Insurance') ) && (
         <div 
           onClick={() => navigate('/crm/applications')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -270,7 +270,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 4. Mortgage & Lending */}
-        {(user?.category === 'MORTGAGE' || user?.productsSold?.includes('mortgage') || user?.role === 'ADMIN') && (
+        {(user?.category === 'MORTGAGE' || user?.productsSold?.includes('Mortgage Lending & Refinance') ) && (
         <div 
           onClick={() => navigate('/crm/loans')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -298,7 +298,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 5. Logistics & Fleet */}
-        {(user?.category === 'LOGISTICS' || user?.productsSold?.includes('logistics') || user?.role === 'ADMIN') && (
+        {(user?.category === 'LOGISTICS' || user?.productsSold?.includes('Freight / Logistics') ) && (
         <div 
           onClick={() => navigate('/crm/logistics')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"

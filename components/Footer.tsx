@@ -132,36 +132,48 @@ export const Footer: React.FC = () => {
                   Solutions Overview
                 </Link>
               </li>
-              <li>
-                <Link to="/real-estate" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Real Estate
-                </Link>
-              </li>
-              <li>
-                <Link to="/logistics" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Freight &amp; Logistics
-                </Link>
-              </li>
-              <li>
-                <Link to="/life-insurance" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Life Insurance
-                </Link>
-              </li>
-              <li>
-                <Link to="/mortgage" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Mortgages &amp; Loans
-                </Link>
-              </li>
-              <li>
-                <Link to="/securities" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  Securities &amp; Wealth
-                </Link>
-              </li>
-              <li>
-                <Link to="/dsm-property-solutions" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
-                  DSM Property Solutions
-                </Link>
-              </li>
+              {!companySettings?.hiddenProducts?.includes('Real Estate') && (
+                <li>
+                  <Link to="/real-estate" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    Real Estate
+                  </Link>
+                </li>
+              )}
+              {!companySettings?.hiddenProducts?.includes('Logistics & Trucking') && (
+                <li>
+                  <Link to="/logistics" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    Freight &amp; Logistics
+                  </Link>
+                </li>
+              )}
+              {!companySettings?.hiddenProducts?.includes('Life Insurance') && (
+                <li>
+                  <Link to="/life-insurance" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    Life Insurance
+                  </Link>
+                </li>
+              )}
+              {!companySettings?.hiddenProducts?.includes('Mortgage Lending & Refinance') && (
+                <li>
+                  <Link to="/mortgage" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    Mortgages &amp; Loans
+                  </Link>
+                </li>
+              )}
+              {!companySettings?.hiddenProducts?.includes('Securities / Series') && (
+                <li>
+                  <Link to="/securities" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    Securities &amp; Wealth
+                  </Link>
+                </li>
+              )}
+              {!companySettings?.hiddenProducts?.includes('DSM Property Solutions') && (
+                <li>
+                  <Link to="/dsm-property-solutions" className="text-slate-400 hover:text-white font-bold text-sm block transition-all hover:translate-x-1">
+                    DSM Property Solutions
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 

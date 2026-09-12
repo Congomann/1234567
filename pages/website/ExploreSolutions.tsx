@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { useData } from '../../context/DataContext';
+import { ProductType } from '../../types';
 import { 
   Shield, 
   Truck, 
@@ -26,7 +28,7 @@ import { Link } from 'react-router-dom';
 interface SolutionCategory {
   title: string;
   subtitle: string;
-  items: { label: string; path: string; icon: any; description: string }[];
+  items: { label: string; path: string; icon: any; description: string; productTypes?: ProductType[] }[];
 }
 
 export const ExploreSolutions: React.FC = () => {
@@ -34,39 +36,53 @@ export const ExploreSolutions: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const categories: SolutionCategory[] = [
-    {
-      title: 'Insurance',
-      subtitle: 'Protect what matters most.',
-      items: [
-        { label: 'Life Insurance', path: '/life-insurance', icon: Shield, description: 'Term, whole, and universal life coverage.' },
-        { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck, description: 'Personal auto and fleet management.' },
-        { label: 'Property Insurance', path: '/property-insurance', icon: Home, description: 'Homeowners, renters, and landlord policies.' },
-        { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase, description: 'General liability, workers comp, and E&O.' },
-        { label: 'Group Benefits', path: '/group-benefits', icon: FileText, description: 'Employee health and retirement plans.' }
-      ]
-    },
-    {
-      title: 'Financial & Property',
-      subtitle: 'Build, manage, and maintain assets.',
-      items: [
-        { label: 'Mortgage', path: '/mortgage', icon: Landmark, description: 'Purchase, refinance, and equity lines.' },
-        { label: 'Securities', path: '/securities', icon: BarChart3, description: 'Stocks, bonds, and mutual funds.' },
-        { label: 'Real Estate', path: '/real-estate', icon: Key, description: 'Residential and commercial listings.' },
-        { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench, description: 'Maintenance and renovation services.' }
-      ]
-    },
-    {
-      title: 'Freight & Logistics',
-      subtitle: 'Move your business forward.',
-      items: [
-        { label: 'Freight Shipping', path: '/logistics?view=overview', icon: Truck, description: 'National freight transportation.' },
-        { label: 'Freight Brokerage', path: '/logistics?view=overview', icon: Globe, description: 'Load matching and carrier network.' },
-        { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation, description: 'Route optimization and driver support.' },
-        { label: 'Live Load Board', path: '/logistics?view=listing', icon: Truck, description: 'Real-time available load tracking.' }
-      ]
-    }
-  ];
+  const { companySettings } = useData();
+  const hiddenProducts = companySettings?.hiddenProducts || [];
+  
+  const categories = useMemo<SolutionCategory[]>(() => {
+    const rawCategories: SolutionCategory[] = [
+      {
+        title: 'Insurance',
+        subtitle: 'Protect what matters most.',
+        items: [
+          { label: 'Life Insurance', path: '/life-insurance', icon: Shield, description: 'Term, whole, and universal life coverage.', productTypes: [ProductType.LIFE] },
+          { label: 'Auto & Commercial', path: '/auto-insurance', icon: Truck, description: 'Personal auto and fleet management.', productTypes: [ProductType.AUTO, ProductType.COMMERCIAL] },
+          { label: 'Property Insurance', path: '/property-insurance', icon: Home, description: 'Homeowners, renters, and landlord policies.', productTypes: [ProductType.PROPERTY] },
+          { label: 'Business Insurance', path: '/business-insurance', icon: Briefcase, description: 'General liability, workers comp, and E&O.', productTypes: [ProductType.BUSINESS] },
+          { label: 'Group Benefits', path: '/group-benefits', icon: FileText, description: 'Employee health and retirement plans.' }
+        ]
+      },
+      {
+        title: 'Financial & Property',
+        subtitle: 'Build, manage, and maintain assets.',
+        items: [
+          { label: 'Mortgage', path: '/mortgage', icon: Landmark, description: 'Purchase, refinance, and equity lines.', productTypes: [ProductType.MORTGAGE] },
+          { label: 'Securities', path: '/securities', icon: BarChart3, description: 'Stocks, bonds, and mutual funds.', productTypes: [ProductType.SECURITIES] },
+          { label: 'Real Estate', path: '/real-estate', icon: Key, description: 'Residential and commercial listings.', productTypes: [ProductType.REAL_ESTATE] },
+          { label: 'DSM Property Solutions', path: '/dsm-property-solutions', icon: Wrench, description: 'Maintenance and renovation services.', productTypes: [ProductType.HOME_REPAIR] }
+        ]
+      },
+      {
+        title: 'Freight & Logistics',
+        subtitle: 'Move your business forward.',
+        items: [
+          { label: 'Freight Shipping', path: '/logistics?view=overview', icon: Truck, description: 'National freight transportation.', productTypes: [ProductType.LOGISTICS] },
+          { label: 'Freight Brokerage', path: '/logistics?view=overview', icon: Globe, description: 'Load matching and carrier network.', productTypes: [ProductType.LOGISTICS] },
+          { label: 'Dispatch Services', path: '/logistics?view=overview', icon: Navigation, description: 'Route optimization and driver support.', productTypes: [ProductType.LOGISTICS] },
+          { label: 'Live Load Board', path: '/logistics?view=listing', icon: Truck, description: 'Real-time available load tracking.', productTypes: [ProductType.LOGISTICS] }
+        ]
+      }
+    ];
+
+    return rawCategories.map(cat => ({
+      ...cat,
+      items: cat.items.filter(item => {
+        if (!item.productTypes || item.productTypes.length === 0) return true;
+        const allHidden = item.productTypes.every(pt => hiddenProducts.includes(pt));
+        return !allHidden;
+      })
+    })).filter(cat => cat.items.length > 0);
+  }, [hiddenProducts]);
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 font-sans">

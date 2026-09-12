@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 import { PaymentApprovalModal } from '../../components/marketing/PaymentApprovalModal';
+import { OmnichannelPublisher } from '../../components/marketing/OmnichannelPublisher';
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Campaign {
@@ -670,7 +672,8 @@ export const CampaignManager: React.FC = () => {
         {/* ── SOCIAL ── */}
         {activeTab === 'social' && (
           <div className="space-y-6 ">
-            <h3 className="text-2xl font-black text-slate-900">Social Listening & Mentions</h3>
+            <OmnichannelPublisher />
+            <h3 className="text-2xl font-black text-slate-900 mt-8">Social Listening & Mentions</h3>
             <SocialMentions />
           </div>
         )}
