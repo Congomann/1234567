@@ -1,3 +1,4 @@
+import { RootInsuranceDashboard } from './pages/crm/insurance/RootInsuranceDashboard';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
@@ -267,6 +268,8 @@ const App: React.FC = () => {
               <Route path="securities" element={<SecuritiesWealth />} />
 
               {/* VERTICAL HUBS */}
+              <Route path="root-insurance" element={<RootInsuranceDashboard />} />
+
               <Route path="applications" element={<PoliciesApps />} />
               <Route path="auto-quotes" element={<AutoQuotes />} />
               <Route path="commercial-quotes" element={<CommercialQuotes />} />

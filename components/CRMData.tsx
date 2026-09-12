@@ -204,6 +204,11 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             vertical.push({ path: '/crm/commissions', label: 'Commissions', icon: LineChart, tourId: 'nav-commissions' });
         }
 
+        
+        if (user.category === AdvisorCategory.ADMIN || user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.AUTO) || products.includes(ProductType.COMMERCIAL)) {
+            vertical.push({ path: '/crm/root-insurance', label: 'Root Insurance', icon: Car, tourId: 'nav-root-insurance' });
+        }
+
         if (user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.AUTO) || products.includes(ProductType.COMMERCIAL)) {
             vertical.push({ path: '/crm/auto-quotes', label: 'Auto Quotes', icon: Car, tourId: 'nav-auto' });
             vertical.push({ path: '/crm/commercial-quotes', label: 'Commercial Hub', icon: Truck, tourId: 'nav-commercial' });
