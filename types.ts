@@ -59,6 +59,8 @@ export enum AdvisorCategory {
   SECURITIES = 'Securities',
   MORTGAGE = 'Mortgage & Lending',
   LOGISTICS = 'Logistics',
+  GROUP_BENEFITS = 'Group Benefits',
+  PROPERTY_CASUALTY = 'Property & Casualty',
   ADMIN = 'Admin'
 }
 

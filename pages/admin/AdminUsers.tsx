@@ -398,10 +398,14 @@ export const AdminUsers: React.FC = () => {
                                             if (newCat === 'Real Estate') defaultLevel = 50;
                                             if (newCat === 'Mortgage & Lending') defaultLevel = 100;
                                             if (newCat === 'Securities') defaultLevel = 35;
+                                            if (newCat === 'Group Benefits') defaultLevel = 30;
+                                            if (newCat === 'Property & Casualty') defaultLevel = 40;
                                             
                                             setFormData({ ...formData, category: newCat as any, contractLevel: defaultLevel });
                                         }}>
                                             <option value="Insurance & General">Insurance & General</option>
+                                            <option value="Group Benefits">Group Benefits</option>
+                                            <option value="Property & Casualty">Property & Casualty</option>
                                             <option value="Real Estate">Real Estate</option>
                                             <option value="Mortgage & Lending">Mortgage & Lending</option>
                                             <option value="Securities">Securities</option>
@@ -433,6 +437,18 @@ export const AdminUsers: React.FC = () => {
                                                         <option value={50}>50% (Experienced Payout)</option>
                                                         <option value={70}>70% (Senior Payout)</option>
                                                     </>
+                                                ) : formData.category === 'Property & Casualty' ? (
+                                                    <>
+                                                        <option value={40}>40% (New Business Split)</option>
+                                                        <option value={50}>50% (Experienced Split)</option>
+                                                        <option value={60}>60% (Senior Split)</option>
+                                                    </>
+                                                ) : formData.category === 'Group Benefits' ? (
+                                                    <>
+                                                        <option value={30}>30% (Standard Payout)</option>
+                                                        <option value={40}>40% (Experienced Payout)</option>
+                                                        <option value={50}>50% (Top Producer)</option>
+                                                    </>
                                                 ) : (
                                                     <>
                                                         <option value={65}>65% (Standard)</option>
@@ -451,6 +467,10 @@ export const AdminUsers: React.FC = () => {
                                                     "Mortgage loan officers are compensated based on basis points (bps) of the total loan amount originated." :
                                                  formData.category === 'Securities' ?
                                                     "Securities and Wealth Management advisors receive payouts based on Assets Under Management (AUM) and advisory fees." :
+                                                 formData.category === 'Property & Casualty' ?
+                                                    "P&C producers typically receive a 40-60% split of the agency's commission on new business premiums, with varying rates for renewals." :
+                                                 formData.category === 'Group Benefits' ?
+                                                    "Group Benefits advisors receive a percentage of the agency revenue (often 30-50%), typically derived from a percentage of the total group health/benefits premium." :
                                                     "Performance Bonus: If this advisor brings 40 business deals for Whole Life products, their commission percentage will automatically bump by 15%."
                                                 }
                                                 </p>
