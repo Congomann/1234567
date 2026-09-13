@@ -270,6 +270,15 @@ class NHFGBackend {
         return this.apiRequest<User[]>(`${this.baseUrl}/users`, { headers: this.getAuthHeaders() }, 'users');
     }
 
+    
+    async inviteUser(user: any): Promise<any> {
+        return this.post('/admin/invite-user', user);
+    }
+
+    async setupAccount(data: any): Promise<any> {
+        return this.post('/onboarding/setup-account', data);
+    }
+
     async saveUser(user: User): Promise<void> {
         if (USE_REAL_BACKEND) {
             try {
