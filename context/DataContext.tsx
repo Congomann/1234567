@@ -175,6 +175,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [userPreferences, setUserPreferences] = useState<UserPreference | null>(null);
+  const [availableCarriers, setAvailableCarriers] = useState<Carrier[]>([]);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const logout = useCallback(async () => {
@@ -208,8 +209,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user, resetInactivityTimer]);
 
   const [automationMetrics, setAutomationMetrics] = useState<AutomationMetrics>({
-    executions: 2087,
-    bandwidthSaved: 521 * 60
+    executions: 0,
+    bandwidthSaved: 0
   });
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>(() => {
@@ -423,7 +424,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       wrapped(() => Backend.getResources(), setResources),
       wrapped(() => Backend.getTestimonials(), setTestimonials),
       wrapped(() => Backend.getLandingPages(), setLandingPages),
-      wrapped(() => Backend.getProperties(), setProperties)
+      wrapped(() => Backend.getProperties(), setProperties),
+      wrapped(() => Backend.getTasks(), setTasks),
+      wrapped(() => Backend.getPortfolios(), setPortfolios),
+      wrapped(() => Backend.getApplications(), setApplications)
     ]);
     
     // Load user-specific platform modules
@@ -1000,23 +1004,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <DataContext.Provider value={{
-      user, isLoading, allUsers, leads, clients, tasks, metrics: { totalRevenue: 1250000, activeClients: 450, pendingLeads: 12, monthlyPerformance: [], totalCommission: 85000 },
+      user, isLoading, allUsers, leads, clients, tasks, metrics: { totalRevenue: clients.length * 5000, activeClients: clients.length, pendingLeads: leads.length, monthlyPerformance: [], totalCommission: clients.length * 500 },
       automationMetrics, workflows, processingLeads,
       notifications, companySettings, resources, commissions: [], events, testimonials,
-      availableCarriers: [
-  { name: 'National Life Group', category: 'Life Insurance' },
-  { name: 'Transamerica', category: 'Life Insurance' },
-  { name: 'Mutual of Omaha', category: 'Life Insurance' },
-  { name: 'Corebridge Financial', category: 'Life Insurance' },
-  { name: 'UnitedHealthcare', category: 'Health' },
-  { name: 'BlueCross BlueShield', category: 'Health' },
-  { name: 'Aetna', category: 'Health' },
-  { name: 'Root Insurance', category: 'Auto & Commercial' },
-  { name: 'Progressive', category: 'Auto & Commercial' },
-  { name: 'Travelers', category: 'Auto & Commercial' },
-  { name: 'Allianz', category: 'Annuities' },
-  { name: 'Athene', category: 'Annuities' }
-], colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
+      availableCarriers, colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
       accessLogs, documents, interactions, userPreferences,
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
