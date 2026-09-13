@@ -141,25 +141,14 @@ export const useData = () => {
   return context;
 };
 
-const INITIAL_USERS: User[] = [
-  { id: '00000000-0000-0000-0000-000000000001', name: 'Internal Admin', email: 'info@newhollandfinancial.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
-  { id: '00000000-0000-0000-0000-000000000002', name: 'James Manager', email: 'manager@nhfg.com', role: UserRole.MANAGER, category: AdvisorCategory.ADMIN, avatar: '', onboardingCompleted: true },
-  { id: '00000000-0000-0000-0000-000000000004', name: 'David Insurance', email: 'insurance@nhfg.com', phone: '(555) 123-4567', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, productsSold: [ProductType.LIFE, ProductType.IUL, ProductType.ANNUITY], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000005', name: 'Sarah RealEstate', email: 'realestate@nhfg.com', phone: '(555) 987-6543', role: UserRole.ADVISOR, category: AdvisorCategory.REAL_ESTATE, productsSold: [ProductType.REAL_ESTATE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000006', name: 'Marcus Mortgage', email: 'mortgage@nhfg.com', phone: '(555) 444-3333', role: UserRole.ADVISOR, category: AdvisorCategory.MORTGAGE, productsSold: [ProductType.MORTGAGE], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000007', name: 'Sophia Securities', email: 'securities@nhfg.com', phone: '(555) 777-8888', role: UserRole.ADVISOR, category: AdvisorCategory.SECURITIES, productsSold: [ProductType.SECURITIES, ProductType.INVESTMENT], onboardingCompleted: true, micrositeEnabled: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000008', name: 'Jordan SubAdmin', email: 'subadmin@nhfg.com', role: UserRole.SUB_ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000009', name: 'New Recruits', email: 'newbie@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000010', name: 'Bima Yamaisha', email: 'bimayamaisha@gmail.com', role: UserRole.ADMIN, category: AdvisorCategory.ADMIN, onboardingCompleted: true, avatar: '' },
-  { id: '00000000-0000-0000-0000-000000000011', name: 'Alex Transport', email: 'logistics@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.LOGISTICS, productsSold: [ProductType.LOGISTICS], onboardingCompleted: true, avatar: '' }
-];
+
 
 
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState<User[]>(INITIAL_USERS);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [originalAdminUser, setOriginalAdminUser] = useState<User | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -308,7 +297,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ...leadData,
     };
     
-    if (user && !INITIAL_USERS.find(u => u.id === user.id)) {
+    if (user) {
         try {
             await Backend.saveLead(newLead);
             setLeads(prev => [newLead, ...prev]);
@@ -399,7 +388,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     await Promise.all([
       wrapped(() => Backend.getLeads(), setLeads),
-      wrapped(() => Backend.getUsers(), (users) => setAllUsers(users.length > 0 ? [...INITIAL_USERS, ...users.filter(u => !INITIAL_USERS.find(iu => iu.id === u.id))] : INITIAL_USERS)),
+      wrapped(() => Backend.getUsers(), (users) => setAllUsers(users || [])),
       wrapped(() => Backend.getClients(), setClients),
       wrapped(() => Backend.getEvents(), setEvents),
       wrapped(() => Backend.getSettings(), async (s) => {
