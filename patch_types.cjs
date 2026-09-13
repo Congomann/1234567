@@ -1,11 +1,26 @@
 const fs = require('fs');
+const path = './types.ts';
+let content = fs.readFileSync(path, 'utf8');
 
-let types = fs.readFileSync('types.ts', 'utf-8');
+const oldEnum = `export enum AdvisorCategory {
+  INSURANCE = 'Insurance & General',
+  REAL_ESTATE = 'Real Estate',
+  SECURITIES = 'Securities',
+  MORTGAGE = 'Mortgage & Lending',
+  LOGISTICS = 'Logistics',
+  ADMIN = 'Admin'
+}`;
 
-types = types.replace(
-  "commissionAmount?: number;\n  carrier?: string;",
-  "commissionAmount?: number;\n  carrier?: string;\n  missedPayments?: number;\n  birthday?: string;\n  status?: string;\n  coverageAmount?: number;\n  policyDuration?: number;"
-);
+const newEnum = `export enum AdvisorCategory {
+  INSURANCE = 'Insurance & General',
+  REAL_ESTATE = 'Real Estate',
+  SECURITIES = 'Securities',
+  MORTGAGE = 'Mortgage & Lending',
+  LOGISTICS = 'Logistics',
+  GROUP_BENEFITS = 'Group Benefits',
+  PROPERTY_CASUALTY = 'Property & Casualty',
+  ADMIN = 'Admin'
+}`;
 
-fs.writeFileSync('types.ts', types, 'utf-8');
-console.log('Patched types.ts');
+content = content.replace(oldEnum, newEnum);
+fs.writeFileSync(path, content);

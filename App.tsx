@@ -288,6 +288,7 @@ const App: React.FC = () => {
               <Route path="securities-portfolio" element={<SecuritiesPortfolio />} />
               <Route path="real-estate-intelligence" element={<RealEstateIntelligence />} />
               <Route path="logistics" element={<CRMLogisticsHub />} />
+              <Route path="contracting" element={<ContractingHub />} />
               <Route path="logistics/post-load" element={<LoadPostingTerminal />} />
 
               {/* ADMIN CONTROL PANEL */}
@@ -314,6 +315,8 @@ const App: React.FC = () => {
                 <Route path="admin/commissions" element={<CommissionRecon />} />
                 <Route path="admin/landing-pages" element={<LandingPageBuilder />} />
                 <Route path="admin/routing" element={<AdvisorRoutingPage />} />
+                <Route path="admin/contracting" element={<ContractingAdmin />} />
+                <Route path="admin/contracting/queue" element={<ContractingReviewQueue />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

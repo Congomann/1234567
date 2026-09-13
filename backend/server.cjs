@@ -468,6 +468,101 @@ const initDB = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS company_profile (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        tax_id VARCHAR(100),
+        address TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS carriers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(100),
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS carrier_departments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        carrier_id UUID REFERENCES carriers(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        contact_email VARCHAR(255),
+        contact_phone VARCHAR(50),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS carrier_forms (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        carrier_id UUID REFERENCES carriers(id) ON DELETE CASCADE,
+        form_name VARCHAR(255) NOT NULL,
+        file_url TEXT,
+        is_digitized BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS application_types (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS submissions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        advisor_id UUID REFERENCES users(id),
+        carrier_id UUID REFERENCES carriers(id),
+        status VARCHAR(50) DEFAULT 'pending',
+        extracted_fields JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS submission_documents (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        submission_id UUID REFERENCES submissions(id) ON DELETE CASCADE,
+        document_url TEXT NOT NULL,
+        document_type VARCHAR(100),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS signatures (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        submission_id UUID REFERENCES submissions(id) ON DELETE CASCADE,
+        signer_name VARCHAR(255),
+        signature_data TEXT,
+        signed_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS carrier_assignments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        advisor_id UUID REFERENCES users(id),
+        carrier_id UUID REFERENCES carriers(id),
+        assigned_agent_number VARCHAR(100),
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS mailbox_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        carrier_id UUID REFERENCES carriers(id),
+        sender_email VARCHAR(255),
+        subject TEXT,
+        body TEXT,
+        extracted_data JSONB,
+        status VARCHAR(50) DEFAULT 'unread',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS admin_review_queue (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        submission_id UUID REFERENCES submissions(id),
+        review_status VARCHAR(50) DEFAULT 'pending',
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
     `);
 
     // Seed default extensions if table is empty
@@ -5747,6 +5842,59 @@ app.post('/api/carriers', async (req, res) => {
   }
 });
 
+// --- CONTRACTING & SUBMISSIONS API ---
+app.get('/api/contracting/submissions', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM submissions ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('[API] Error fetching submissions:', err);
+    res.status(500).json({ error: 'Failed to fetch submissions' });
+  }
+});
+
+app.post('/api/contracting/submissions', async (req, res) => {
+  try {
+    const { advisor_id, carrier_id, status, extracted_fields } = req.body;
+    const result = await pool.query(
+      'INSERT INTO submissions (advisor_id, carrier_id, status, extracted_fields) VALUES ($1, $2, $3, $4) RETURNING *',
+      [advisor_id, carrier_id, status || 'pending', extracted_fields || {}]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('[API] Error creating submission:', err);
+    res.status(500).json({ error: 'Failed to create submission' });
+  }
+});
+
+// --- AI PLACEHOLDER ROUTES ---
+app.post('/api/ai/classify-email', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      classification: 'Carrier Requirement',
+      confidence: 0.95,
+      extractedData: { subject_intent: 'Action Required', carrier: 'Sample Carrier' }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to classify email' });
+  }
+});
+
+app.post('/api/ai/digitize-form', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      formType: 'Application',
+      extractedFields: {
+        applicant_name: 'John Doe',
+        date_of_birth: '1990-01-01'
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to digitize form' });
+  }
+});
 
 // --- ADVISOR INVITE & ONBOARDING ---
 app.post('/api/admin/invite-user', authenticateToken, async (req, res) => {
