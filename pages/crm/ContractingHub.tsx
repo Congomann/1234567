@@ -72,10 +72,38 @@ export default function ContractingHub() {
             <div className="pt-6 border-t border-gray-200 flex justify-end">
               <button 
                 disabled={!signatureData}
-                onClick={() => {
-                  alert('Application submitted successfully!');
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    // In a real app we'd have the actual submission ID. We use a mock ID for the UI logic.
+                    const subId = activeApplication.id || 'mock-sub-123';
+                    const res = await fetch('/api/contracting/submissions/' + subId + '/sign-and-submit', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token')
+                      },
+                      body: JSON.stringify({
+                        signatureData: signatureData,
+                        mappedFields: {
+                          "Name": user?.firstName + ' ' + user?.lastName,
+                          "NPN": user?.npn || "12345678"
+                        }
+                      })
+                    });
+                    
+                    const data = await res.json();
+                    if(data.success) {
+                      alert('Success! ' + data.message + '\nPDF File Size: ' + data.pdfSize + ' bytes');
+                    } else {
+                      alert('Failed to submit application: ' + data.error);
+                    }
+                  } catch (e) {
+                    alert('Network error submitting application.');
+                  }
                   setActiveApplication(null);
                   setSignatureData(null);
+                  setLoading(false);
                 }}
                 className={`px-6 py-3 rounded-lg text-white font-medium ${signatureData ? 'bg-primary-600 hover:bg-primary-700' : 'bg-gray-300 cursor-not-allowed'}`}
               >
