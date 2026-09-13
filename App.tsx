@@ -1,3 +1,4 @@
+import { SetupAccount } from './pages/onboarding/SetupAccount';
 import { RootInsuranceDashboard } from './pages/crm/insurance/RootInsuranceDashboard';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
@@ -235,6 +236,7 @@ const App: React.FC = () => {
 
             {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />
+          <Route path="/onboarding/setup" element={<SetupAccount />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/client-portal" element={<PublicLayout><ClientPortal /></PublicLayout>} />

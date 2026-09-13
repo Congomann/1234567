@@ -36,12 +36,17 @@ export const AdminUsers: React.FC = () => {
         return matchesSearch && (showArchived ? isArchived : !isArchived);
     });
 
-    const handleAddUser = (e: React.FormEvent) => {
+    const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.name && formData.email) {
-            addAdvisor(formData as User);
-            setIsModalOpen(false);
-            setFormData(initialFormData);
+            try {
+                await inviteAdvisor(formData as User);
+                setIsModalOpen(false);
+                setFormData(initialFormData);
+                alert('Invite sent successfully!');
+            } catch (err: any) {
+                alert(err.message || 'Failed to send invite');
+            }
         }
     };
 
@@ -374,7 +379,7 @@ export const AdminUsers: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B2240]/60 backdrop-blur-md p-4 animate-fade-in">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg p-10 relative border border-white/20">
                         <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors"><X size={24} /></button>
-                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">Provision New User</h2>
+                        <h2 className="text-2xl font-black text-[#0B2240] mb-8 tracking-tight">Invite New Advisor</h2>
                         <form onSubmit={handleAddUser} className="space-y-6">
                             <div className="space-y-4">
                                 <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" required placeholder="Full Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
@@ -382,11 +387,11 @@ export const AdminUsers: React.FC = () => {
                                 <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}>
                                     {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
                                 </select>
-                                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" type="password" placeholder="Initial Password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                                
                             </div>
                             <div className="pt-6 flex gap-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-200">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20">Add User</button>
+                                <button type="submit" className="flex-1 py-4 bg-[#0B2240] text-white font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-blue-900/20">Send Invite Email</button>
                             </div>
                         </form>
                     </div>

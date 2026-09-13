@@ -92,6 +92,7 @@ interface DataContextType {
   updateEvent: (event: Partial<CalendarEvent>) => void;
   deleteEvent: (id: string) => void;
   addAdvisor: (data: Partial<User>) => void;
+  inviteAdvisor: (data: Partial<User>) => Promise<void>;
   deleteAdvisor: (id: string) => void;
   restoreUser: (id: string) => void;
   permanentlyDeleteUser: (id: string) => void;
@@ -779,6 +780,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   const handleAdvisorLeadAction = (id: string, a: string) => { };
+  const inviteAdvisor = async (data: Partial<User>) => {
+    await Backend.inviteUser(data);
+    // Optimistic update
+    const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: data.role || UserRole.ADVISOR, category: data.category || AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
+    setAllUsers(prev => [...prev, newUser]);
+  };
   const addAdvisor = (data: Partial<User>) => {
     const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
     setAllUsers(prev => [...prev, newUser]);
@@ -1026,7 +1033,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
       addCarrier, deleteCarrier, addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
       landingPages, saveLandingPage, deleteLandingPage: async () => false,
-      addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,
+      addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, inviteAdvisor, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,
       assignCarriers, submitJobApplication, updateJobApplicationStatus,
       updateApplicationStatus, updateTransactionStatus, addPortfolio, updatePortfolio, deletePortfolio, addComplianceDoc,
       updateFeeStatus, addAdvisoryFee, updateAdvisoryFee, deleteAdvisoryFee, addLoanApplication, updateLoanApplication, deleteLoanApplication,
