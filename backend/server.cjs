@@ -5708,6 +5708,29 @@ app.post('/api/v1/partners/leads', authenticateApiKey, async (req, res) => {
 });
 
 
+
+// --- CARRIERS API ---
+app.get('/api/carriers', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM carriers ORDER BY category, name');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch carriers' });
+  }
+});
+
+app.post('/api/carriers', async (req, res) => {
+  const { name, category } = req.body;
+  if (!name || !category) return res.status(400).json({ error: 'name and category required' });
+  try {
+    const { rows } = await pool.query('INSERT INTO carriers (name, category) VALUES ($1, $2) RETURNING *', [name, category]);
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    if (err.code === '23505') return res.status(400).json({ error: 'Carrier already exists' });
+    res.status(500).json({ error: 'Failed to add carrier' });
+  }
+});
+
 // --- SERVE STATIC FRONTEND (For Render / Unified deployment) ---
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {

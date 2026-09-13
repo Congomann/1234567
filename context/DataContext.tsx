@@ -77,6 +77,7 @@ interface DataContextType {
   addResourceComment: (id: string, text: string, userName: string) => void;
   addResource: (resource: Partial<Resource>) => void;
   deleteResource: (id: string) => void;
+  addCarrier: (name: string, category: string) => Promise<void>;
   addTestimonial: (testimonial: Omit<Testimonial, 'id' | 'status' | 'date'>) => void;
   approveTestimonial: (id: string) => void;
   deleteTestimonial: (id: string) => void;
@@ -698,6 +699,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     Backend.deleteResource(id);
   };
 
+  const addCarrier = async (name: string, category: string) => {
+    try {
+      const newCarrier = await apiBackend.addCarrier(name, category);
+      setAvailableCarriers(prev => [...prev, newCarrier]);
+    } catch (err) {
+      console.error('Failed to add carrier', err);
+      throw err;
+    }
+  };
+  
   const addTestimonial = (testimonial: Omit<Testimonial, 'id' | 'status' | 'date'>) => {
     const newT = { ...testimonial, id: crypto.randomUUID(), status: 'pending', date: new Date().toISOString() } as Testimonial;
     setTestimonials(prev => [...prev, newT]);
@@ -1002,7 +1013,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
-      addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
+      addCarrier, addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
       landingPages, saveLandingPage, deleteLandingPage: async () => false,
       addCallback, handleAdvisorLeadAction, addEvent, updateEvent, deleteEvent, addAdvisor, deleteAdvisor, restoreUser, permanentlyDeleteUser,
       assignCarriers, submitJobApplication, updateJobApplicationStatus,
