@@ -3934,6 +3934,7 @@ const migrateClientLinkTables = async () => {
     await safeAddUserCol('personal_email', 'VARCHAR(255)');
     await safeAddUserCol('status', "VARCHAR(50) DEFAULT 'active'");
     await safeAddUserCol('contract_level', 'NUMERIC(5,2)');
+    await safeAddUserCol('onboarding_completed', 'BOOLEAN DEFAULT FALSE');
     await safeAddUserCol('authorized_products', 'TEXT[]');
 
     await pool.query(`
@@ -5786,7 +5787,8 @@ app.post('/api/admin/invite-user', authenticateToken, async (req, res) => {
     res.json({ success: true, message: 'Invite sent' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to invite user' });
+    console.error('Invite Error:', err);
+    res.status(500).json({ error: err.message || 'Failed to invite user' });
   }
 });
 

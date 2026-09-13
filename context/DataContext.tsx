@@ -92,7 +92,7 @@ interface DataContextType {
   updateEvent: (event: Partial<CalendarEvent>) => void;
   deleteEvent: (id: string) => void;
   addAdvisor: (data: Partial<User>) => void;
-  inviteAdvisor: (data: Partial<User>) => Promise<void>;
+  inviteAdvisor: (data: Partial<User>) => Promise<any>;
   deleteAdvisor: (id: string) => void;
   restoreUser: (id: string) => void;
   permanentlyDeleteUser: (id: string) => void;
@@ -781,10 +781,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const handleAdvisorLeadAction = (id: string, a: string) => { };
   const inviteAdvisor = async (data: Partial<User>) => {
-    await Backend.inviteUser(data);
+    const res = await Backend.inviteUser(data);
     // Optimistic update
     const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: data.role || UserRole.ADVISOR, category: data.category || AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
     setAllUsers(prev => [...prev, newUser]);
+    return res;
   };
   const addAdvisor = (data: Partial<User>) => {
     const newUser: User = { id: crypto.randomUUID(), name: data.name || 'New Advisor', email: data.email || 'advisor@nhfg.com', role: UserRole.ADVISOR, category: AdvisorCategory.INSURANCE, onboardingCompleted: false, ...data } as User;
