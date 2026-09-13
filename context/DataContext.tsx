@@ -703,7 +703,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const deleteCarrier = async (name: string) => {
     try {
-      await apiBackend.deleteCarrier(name);
+      await Backend.deleteCarrier(name);
       setAvailableCarriers(prev => prev.filter(c => c.name !== name));
     } catch (err) {
       console.error('Failed to delete carrier', err);
@@ -713,7 +713,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   const addCarrier = async (name: string, category: string) => {
     try {
-      const newCarrier = await apiBackend.addCarrier(name, category);
+      const newCarrier = await Backend.addCarrier(name, category);
       setAvailableCarriers(prev => [...prev, newCarrier]);
     } catch (err) {
       console.error('Failed to add carrier', err);

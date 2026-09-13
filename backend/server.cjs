@@ -5750,20 +5750,20 @@ app.post('/api/carriers', async (req, res) => {
 // --- ADVISOR INVITE & ONBOARDING ---
 app.post('/api/admin/invite-user', authenticateToken, async (req, res) => {
   if (req.user.role !== 'Administrator') return res.status(403).json({ error: 'Admin only' });
-  const { name, email, role, category } = req.body;
+  const { name, email, role, category, contractLevel } = req.body;
   
   if (!email || !name) return res.status(400).json({ error: 'Name and email required' });
   
   try {
     const inviteToken = require('crypto').randomBytes(32).toString('hex');
     const query = `
-      INSERT INTO users (name, email, role, category, status, invite_token, onboarding_completed)
-      VALUES ($1, $2, $3, $4, 'pending_activation', $5, false)
+      INSERT INTO users (name, email, role, category, status, invite_token, onboarding_completed, contract_level)
+      VALUES ($1, $2, $3, $4, 'pending_activation', $5, false, $6)
       ON CONFLICT (email) DO UPDATE 
-      SET invite_token = EXCLUDED.invite_token, status = 'pending_activation'
+      SET invite_token = EXCLUDED.invite_token, status = 'pending_activation', contract_level = EXCLUDED.contract_level
       RETURNING *
     `;
-    const { rows } = await pool.query(query, [name, email, role || 'Advisor', category || 'Insurance & General', inviteToken]);
+    const { rows } = await pool.query(query, [name, email, role || 'Advisor', category || 'Insurance & General', inviteToken, contractLevel || 70]);
     
     // Send Invite Email
     const origin = req.headers.origin || 'http://localhost:5173';

@@ -247,8 +247,11 @@ export const AdminUsers: React.FC = () => {
                                         <button onClick={() => handleEditClick(user)} className="p-2.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">
                                             <Edit2 className="h-4 w-4" />
                                         </button>
-                                        <button onClick={() => setConfirmDelete({ id: user.id, name: user.name, permanent: false })} className="p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all">
+                                        <button onClick={() => setConfirmDelete({ id: user.id, name: user.name, permanent: false })} className="p-2.5 text-slate-400 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition-all" title="Archive User">
                                             <Trash2 className="h-4 w-4" />
+                                        </button>
+                                        <button onClick={() => setConfirmDelete({ id: user.id, name: user.name, permanent: true })} className="p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all" title="Permanently Wipe Profile (Terms Violation)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                                         </button>
                                     </>
                                 )}
@@ -387,6 +390,26 @@ export const AdminUsers: React.FC = () => {
                                 <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}>
                                     {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
                                 </select>
+                                
+                                {formData.role === UserRole.ADVISOR && (
+                                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Initial Commission Level</label>
+                                        <select 
+                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold mb-3" 
+                                            value={formData.contractLevel} 
+                                            onChange={e => setFormData({ ...formData, contractLevel: Number(e.target.value) })}
+                                        >
+                                            <option value={70}>70% (Standard)</option>
+                                            <option value={85}>85% (Experienced)</option>
+                                            <option value={100}>100% (Senior)</option>
+                                        </select>
+                                        
+                                        <div className="flex items-start gap-2 text-[10px] text-blue-600 bg-blue-100/50 p-3 rounded-lg leading-relaxed font-semibold">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                            <p>Performance Bonus: If this advisor brings 40 business deals for Whole Life products, their commission percentage will automatically bump by 15%.</p>
+                                        </div>
+                                    </div>
+                                )}
                                 
                             </div>
                             <div className="pt-6 flex gap-4">
