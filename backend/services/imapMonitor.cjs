@@ -98,23 +98,31 @@ async function routeToAdminQueue(msgId, classification) {
     await pool.query(\`UPDATE mailbox_messages SET processed_status = 'QUEUED_FOR_REVIEW' WHERE id = $1\`, [msgId]);
 }
 
-// Simulates LLM structured extraction based on PRD requirements
+// Regex-based structured extraction based on PRD requirements
 function simulateAiClassification(subject, body, from) {
-    const text = (subject + " " + body).toLowerCase();
+    const text = (subject + " " + body);
+    const lowerText = text.toLowerCase();
     
     // Default Unknown
     let result = {
         confidence: 50,
         type: 'Unknown',
-        carrierId: 1, // Mock
+        carrierId: 1, // Fallback ID
         advisorName: null,
+        advisorEmail: from,
         status: 'Unknown',
         contractNumber: null,
         isCompanyContract: false
     };
 
+    // Attempt to extract real contract number (e.g., ACT-12345 or similar alphanumeric near "contract")
+    const contractMatch = text.match(/(?:contract|appointment)\s*(?:number|#|no)[:\s]+([A-Z0-9-]+)/i);
+    if (contractMatch && contractMatch[1]) {
+        result.contractNumber = contractMatch[1];
+    }
+
     // Check for company-level contracts
-    if (text.includes("agency agreement") || text.includes("principal") || text.includes("ceo contract")) {
+    if (lowerText.includes("agency agreement") || lowerText.includes("principal") || lowerText.includes("ceo contract")) {
         result.isCompanyContract = true;
         result.type = 'Agency Contract';
         result.confidence = 96;
@@ -122,22 +130,21 @@ function simulateAiClassification(subject, body, from) {
     }
 
     // Check for standard approvals
-    if (text.includes("approved") || text.includes("ready to sell") || text.includes("appointed")) {
+    if (lowerText.includes("approved") || lowerText.includes("ready to sell") || lowerText.includes("appointed")) {
         result.status = 'Approved';
         result.confidence = 96;
         result.type = 'Carrier Appointment Approval';
-        result.contractNumber = 'ACT-' + Math.floor(Math.random() * 100000);
-        
-        // Mock extraction of advisor name
-        if (text.includes("john smith")) result.advisorName = "John Smith";
-        else if (text.includes("newholland")) result.advisorName = "System User";
-    }
-    
-    // Check for additional info
-    if (text.includes("additional information") || text.includes("missing") || text.includes("needs e&o")) {
+    } else if (lowerText.includes("additional information") || lowerText.includes("missing") || lowerText.includes("needs e&o")) {
+        // Check for additional info
         result.status = 'Additional Information Required';
         result.confidence = 90;
         result.type = 'Carrier Pending';
+    }
+
+    // Use regex to find potential names if not found by email
+    const nameMatch = text.match(/(?:advisor|agent|producer)[:\s]+([A-Za-z]+\s[A-Za-z]+)/i);
+    if (nameMatch && nameMatch[1]) {
+        result.advisorName = nameMatch[1].trim();
     }
 
     return result;

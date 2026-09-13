@@ -334,17 +334,12 @@ class NHFGBackend {
     }
 
     async submitApplication(submissionData: any): Promise<any> {
-        if (USE_REAL_BACKEND) {
-            try {
-                const res = await fetch(this.baseUrl + '/contracting/submissions', {
-                    method: 'POST',
-                    headers: this.getAuthHeaders(),
-                    body: JSON.stringify(submissionData)
-                });
-                return await this.handleResponse(res);
-            } catch(e) {}
-        }
-        return { success: true, tracking_id: 'BL-MOCK-123' };
+        const res = await fetch(this.baseUrl + '/contracting/submissions', {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify(submissionData)
+        });
+        return await this.handleResponse(res);
     }
 
     async getMySubmissions(): Promise<any[]> {

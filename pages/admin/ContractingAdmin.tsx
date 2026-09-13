@@ -3,8 +3,14 @@ import { BuildingLibraryIcon, PlusIcon, DocumentArrowUpIcon, CheckCircleIcon } f
 import { useNavigate } from 'react-router-dom';
 import Backend from '../../services/apiBackend';
 
+import { useEffect } from 'react';
+
 export default function ContractingAdmin() {
   const [carriers, setCarriers] = useState<any[]>([]);
+
+  useEffect(() => {
+    Backend.getActiveCarriers().then(res => setCarriers(res || [])).catch(console.error);
+  }, []);
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [newCarrier, setNewCarrier] = useState({ name: '', code: '', description: '' });
@@ -19,7 +25,8 @@ export default function ContractingAdmin() {
       await Backend.addCarrier(newCarrier.name, 'Contracting');
       setShowWizard(false);
       setWizardStep(1);
-      // Ideally we would re-fetch carriers here
+      const updated = await Backend.getActiveCarriers();
+      setCarriers(updated || []);
     } catch (err) {
       console.error(err);
     }

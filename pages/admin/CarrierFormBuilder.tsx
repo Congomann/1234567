@@ -1,14 +1,45 @@
 import React, { useState } from 'react';
 import { DocumentTextIcon, AdjustmentsHorizontalIcon, CheckIcon } from '@heroicons/react/24/outline';
 
+import { useEffect } from 'react';
+
 export default function CarrierFormBuilder() {
-  const [fields, setFields] = useState([
-    { id: 1, name: 'First Name', type: 'text', mappedTo: 'Advisor.firstName', required: true },
-    { id: 2, name: 'Last Name', type: 'text', mappedTo: 'Advisor.lastName', required: true },
-    { id: 3, name: 'NPN Number', type: 'text', mappedTo: 'Advisor.npn', required: true },
-    { id: 4, name: 'Agency Name', type: 'text', mappedTo: 'Company.legalName', required: false },
-    { id: 5, name: 'Signature', type: 'signature', mappedTo: 'Advisor.signature', required: true }
-  ]);
+  const [fields, setFields] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Hardcode ID 1 for now since we don't have routing params configured yet
+  const formId = 1; 
+
+  useEffect(() => {
+    fetch('/api/carriers/forms/' + formId, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
+    })
+    .then(res => res.json())
+    .then(data => {
+      setFields(data.extracted_schema && Array.isArray(data.extracted_schema) ? data.extracted_schema : []);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await fetch('/api/carriers/forms/' + formId, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') 
+        },
+        body: JSON.stringify({ extracted_schema: fields })
+      });
+      alert('Configuration published to database.');
+    } catch (e) {
+      alert('Failed to save.');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -20,7 +51,7 @@ export default function CarrierFormBuilder() {
           </h1>
           <p className="mt-2 text-sm text-gray-600">Map AI-extracted fields from the Carrier PDF to system properties.</p>
         </div>
-        <button className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center font-medium">
+        <button onClick={handleSave} className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center font-medium">
           <CheckIcon className="w-5 h-5 mr-2" /> Publish Configuration
         </button>
       </div>
@@ -42,7 +73,7 @@ export default function CarrierFormBuilder() {
             AI Extracted Fields
           </div>
           <div className="p-4 flex-1 overflow-y-auto space-y-4">
-            {fields.map(field => (
+            {loading ? <p className="text-gray-500 text-sm">Loading...</p> : fields.length === 0 ? <p className="text-gray-500 text-sm">No fields extracted yet.</p> : fields.map(field => (
               <div key={field.id} className="p-4 border border-gray-200 rounded-md shadow-sm hover:border-primary-300 transition">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-900">{field.name}</span>
@@ -52,7 +83,13 @@ export default function CarrierFormBuilder() {
                   <label className="block text-xs font-medium text-gray-500 mb-1">Map To Data Source</label>
                   <select 
                     className="w-full border-gray-300 rounded-md text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                    defaultValue={field.mappedTo}
+                    value={field.mappedTo || ''}
+                    onChange={(e) => {
+                      const newFields = [...fields];
+                      const idx = newFields.findIndex(f => f.id === field.id);
+                      if (idx > -1) newFields[idx].mappedTo = e.target.value;
+                      setFields(newFields);
+                    }}
                   >
                     <option value="">-- Manual Entry Required by Advisor --</option>
                     <optgroup label="Advisor Data">
