@@ -72,7 +72,9 @@ export const AdminAnalytics: React.FC = () => {
                 visitor_id: s.id,
                 ip_address: s.ip || 'Unknown',
                 user_agent: s.deviceId,
-                device_type: 'Unknown',
+                device_type: (s.deviceType || 'desktop').toLowerCase(),
+                browser: s.browser || 'Unknown Browser',
+                os: s.os || 'Unknown OS',
                 screen_resolution: 'Unknown',
                 language: 'en',
                 first_seen: s.startTime,
@@ -398,7 +400,7 @@ export const AdminAnalytics: React.FC = () => {
                                                     </div>
                                                     <div className="min-w-0">
                                                         <p className="text-[11px] font-black text-slate-700 truncate w-32 group-hover:text-blue-600 transition-colors">{visitor.visitor_id}</p>
-                                                        <p className="text-[9px] text-slate-400 font-bold">{visitor.screen_resolution}</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold">{visitor.metadata?.browser || 'Browser'} • {visitor.metadata?.os || 'OS'}</p>
                                                     </div>
                                                 </div>
                                             </td>
