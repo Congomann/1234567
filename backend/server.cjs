@@ -5893,6 +5893,21 @@ app.post('/api/contracting/submissions/:id/sign-and-submit', async (req, res) =>
   }
 });
 
+app.get('/api/contracting/queue', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT q.*, m.subject, m.from_email 
+      FROM admin_review_queue q 
+      JOIN mailbox_messages m ON q.mailbox_message_id = m.id 
+      WHERE q.status = 'PENDING'
+      ORDER BY q.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/contracting/submissions', async (req, res) => {
   try {
     const { advisor_id, carrier_id, status, extracted_fields } = req.body;

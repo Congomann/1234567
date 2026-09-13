@@ -317,6 +317,7 @@ const App: React.FC = () => {
                 <Route path="admin/routing" element={<AdvisorRoutingPage />} />
                 <Route path="admin/contracting" element={<ContractingAdmin />} />
                 <Route path="admin/contracting/queue" element={<ContractingReviewQueue />} />
+                <Route path="admin/contracting/builder" element={<CarrierFormBuilder />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

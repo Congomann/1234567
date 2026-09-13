@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BuildingLibraryIcon, PlusIcon, DocumentArrowUpIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import Backend from '../../services/apiBackend';
 
 export default function ContractingAdmin() {
@@ -7,6 +8,7 @@ export default function ContractingAdmin() {
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [newCarrier, setNewCarrier] = useState({ name: '', code: '', description: '' });
+  const navigate = useNavigate();
 
   const handleNext = () => setWizardStep(prev => prev + 1);
   const handleBack = () => setWizardStep(prev => prev - 1);
