@@ -88,9 +88,12 @@ export const TrackingProvider: React.FC<{ children: ReactNode }> = ({ children }
       // Calculate time spent on previous path
       const timeSpent = Math.floor((now - lastPathTimeRef.current) / 1000);
       
-      const lastVisit = sessionRef.current.pagesVisited.find(v => v.path === lastPathRef.current);
-      if (lastVisit) {
-        lastVisit.timeSpent = (lastVisit.timeSpent || 0) + timeSpent;
+      const visitsLength = sessionRef.current.pagesVisited.length;
+      if (visitsLength > 0) {
+        const lastVisit = sessionRef.current.pagesVisited[visitsLength - 1];
+        if (lastVisit.path === lastPathRef.current) {
+          lastVisit.timeSpent = (lastVisit.timeSpent || 0) + timeSpent;
+        }
       }
     }
 
@@ -115,9 +118,12 @@ export const TrackingProvider: React.FC<{ children: ReactNode }> = ({ children }
     // Finalize time on current path
     if (lastPathRef.current) {
       const timeSpent = Math.floor((now - lastPathTimeRef.current) / 1000);
-      const lastVisit = sessionRef.current.pagesVisited.find(v => v.path === lastPathRef.current);
-      if (lastVisit) {
-        lastVisit.timeSpent = (lastVisit.timeSpent || 0) + timeSpent;
+      const visitsLength = sessionRef.current.pagesVisited.length;
+      if (visitsLength > 0) {
+        const lastVisit = sessionRef.current.pagesVisited[visitsLength - 1];
+        if (lastVisit.path === lastPathRef.current) {
+          lastVisit.timeSpent = (lastVisit.timeSpent || 0) + timeSpent;
+        }
       }
       lastPathTimeRef.current = now; // reset
     }
