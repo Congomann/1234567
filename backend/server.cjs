@@ -5719,6 +5719,18 @@ app.get('/api/carriers', async (req, res) => {
   }
 });
 
+
+app.delete('/api/carriers/:name', async (req, res) => {
+  const { name } = req.params;
+  try {
+    const { rowCount } = await pool.query('DELETE FROM carriers WHERE name = $1', [name]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Carrier not found' });
+    res.status(200).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete carrier' });
+  }
+});
+
 app.post('/api/carriers', async (req, res) => {
   const { name, category } = req.body;
   if (!name || !category) return res.status(400).json({ error: 'name and category required' });

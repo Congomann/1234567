@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { UserRole, Carrier } from '../../types';
-import { Shield, CheckSquare, Square, Search, UserCheck, Plus, X } from 'lucide-react';
+import { Shield, CheckSquare, Square, Search, UserCheck, Plus, X, Trash2 } from 'lucide-react';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export const CarrierAssignment: React.FC = () => {
-  const { allUsers, availableCarriers, assignCarriers, addCarrier } = useData();
+  const { allUsers, availableCarriers, assignCarriers, addCarrier, deleteCarrier } = useData();
   const [selectedAdvisorIds, setSelectedAdvisorIds] = useState<Set<string>>(new Set());
   const [selectedCarrierNames, setSelectedCarrierNames] = useState<Set<string>>(new Set());
   const [advisorSearch, setAdvisorSearch] = useState('');
@@ -55,6 +55,18 @@ export const CarrierAssignment: React.FC = () => {
     if (newSet.has(name)) newSet.delete(name);
     else newSet.add(name);
     setSelectedCarrierNames(newSet);
+  };
+
+  
+  const handleDeleteCarrier = async (e: React.MouseEvent, name: string) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete ${name} from partnerships?`)) {
+      try {
+        await deleteCarrier(name);
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete carrier');
+      }
+    }
   };
 
   const handleBulkAssign = () => {
@@ -170,14 +182,17 @@ export const CarrierAssignment: React.FC = () => {
                                     <div 
                                         key={carrier.name}
                                         onClick={() => toggleCarrier(carrier.name)}
-                                        className={`flex items-start p-3 rounded-xl cursor-pointer border transition-all ${selectedCarrierNames.has(carrier.name) ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-blue-200'}`}
+                                        className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer border transition-all ${selectedCarrierNames.has(carrier.name) ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-blue-200'}`}
                                     >
                                         <div className={`mt-0.5 mr-3 ${selectedCarrierNames.has(carrier.name) ? 'text-blue-600' : 'text-slate-300'}`}>
                                             {selectedCarrierNames.has(carrier.name) ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
                                         </div>
-                                        <span className={`text-sm font-medium ${selectedCarrierNames.has(carrier.name) ? 'text-blue-900' : 'text-slate-600'}`}>
+                                        <span className={`text-sm font-medium flex-1 ${selectedCarrierNames.has(carrier.name) ? 'text-blue-900' : 'text-slate-600'}`}>
                                             {carrier.name}
                                         </span>
+                                        <button onClick={(e) => handleDeleteCarrier(e, carrier.name)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity">
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
