@@ -164,7 +164,7 @@ export const SetupAccount: React.FC = () => {
                             <h3 className="text-2xl font-black text-[#0B2240] mb-2">Terms & Conditions</h3>
                             <p className="text-slate-500 text-sm mb-8">Please review and accept our advisor agreement.</p>
                             
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 h-48 overflow-y-auto mb-6 text-xs text-slate-600 space-y-4">
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 text-xs text-slate-600 space-y-4">
                                 <p><strong>1. Welcome to NHFG CRM</strong><br/>By accessing this CRM, you agree to handle all client data with strict confidentiality in accordance with SEC, FINRA, and NHFG compliance guidelines.</p>
                                 <p><strong>2. Data Privacy</strong><br/>You may not export, share, or duplicate client records outside of authorized CRM functions. All interactions are logged and monitored for compliance.</p>
                                 <p><strong>3. Property Rights</strong><br/>All leads, quotes, and policies generated within this CRM remain the intellectual property of New Holland Financial Group.</p>
