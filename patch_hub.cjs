@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+const fs = require('fs');
+
+const newContent = `import React, { useState, useEffect } from 'react';
 import { Building, FileCheck, Inbox, ArrowRight, FileText, CheckCircle2 } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
 import { DB } from '../../services/database';
@@ -147,7 +149,7 @@ export default function ContractingHub() {
                         </label>
                         <input
                           type="text"
-                          className={`block w-full rounded-md shadow-sm sm:text-sm p-3 border ${isAutoFilled ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
+                          className={\`block w-full rounded-md shadow-sm sm:text-sm p-3 border \${isAutoFilled ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500'}\`}
                           value={formValues[field.id] || ''}
                           onChange={e => setFormValues({...formValues, [field.id]: e.target.value})}
                           readOnly={isAutoFilled}
@@ -209,7 +211,7 @@ export default function ContractingHub() {
                     setActiveApplication(null);
                     setLoading(false);
                   }}
-                  className={`px-8 py-3 rounded-lg text-white font-bold transition-all shadow-sm ${isFormValid() ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md' : 'bg-gray-300 cursor-not-allowed'}`}
+                  className={\`px-8 py-3 rounded-lg text-white font-bold transition-all shadow-sm \${isFormValid() ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md' : 'bg-gray-300 cursor-not-allowed'}\`}
                 >
                   Sign & Submit Application
                 </button>
@@ -280,11 +282,11 @@ export default function ContractingHub() {
                     <h3 className="text-base font-bold text-gray-900">{sub.carrier_name} - {sub.application_type || 'New Contract'}</h3>
                     <p className="text-sm text-gray-500">Submitted: {new Date(sub.submitted_at).toLocaleDateString()}</p>
                   </div>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                  <span className={\`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider \${
                     sub.status === 'Approved' ? 'bg-green-100 text-green-800 border border-green-200' :
                     sub.status === 'Pending Carrier' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
                     'bg-gray-100 text-gray-800 border border-gray-200'
-                  }`}>
+                  }\`}>
                     {sub.status}
                   </span>
                 </div>
@@ -297,3 +299,6 @@ export default function ContractingHub() {
     </div>
   );
 }
+`;
+fs.writeFileSync('pages/crm/ContractingHub.tsx', newContent);
+console.log('Patched ContractingHub.tsx');
