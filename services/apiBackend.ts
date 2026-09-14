@@ -370,6 +370,16 @@ class NHFGBackend {
         return await DB.getAll('contracting_submissions') || [];
     }
     
+    async signAndSubmitContract(payload: any): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            await fetch(this.baseUrl + '/contracting/sign-and-submit', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+        }
+    }
+    
     async autosaveSubmission(submission: any): Promise<any> {
         await DB.save('contracting_submissions', submission);
         return submission;

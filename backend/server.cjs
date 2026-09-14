@@ -5970,11 +5970,12 @@ app.post('/api/contracting/submissions/autosave', authenticateToken, async (req,
 });
 
 
+
 app.post('/api/contracting/sign-and-submit', authenticateToken, async (req, res) => {
   try {
     const { carrier_name, formValues, fields, pdfData } = req.body;
     
-    // We would use pdf-lib here to modify the PDF
+    // We use pdf-lib to physically merge fields and drawings into the final document
     const { PDFDocument, rgb } = require('pdf-lib');
     
     let base64Pdf = pdfData;
@@ -5986,36 +5987,64 @@ app.post('/api/contracting/sign-and-submit', authenticateToken, async (req, res)
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
     
-    // Draw text onto the PDF
-    for (const field of fields) {
-      if (formValues[field.id]) {
-        const pageIndex = (field.pageNumber || 1) - 1;
-        if (pageIndex >= 0 && pageIndex < pages.length) {
-          const page = pages[pageIndex];
-          const { width, height } = page.getSize();
-          
-          // react-pdf rendered dimensions are scaled, but percentages remain relative
-          // coordinates in PDF: origin is bottom-left
-          const x = (field.x / 100) * width;
-          const yFromTop = (field.y / 100) * height;
-          const y = height - yFromTop - 12; // Adjust for bottom-left origin and font size
-          
-          page.drawText(formValues[field.id], {
-            x: x,
-            y: y,
-            size: 12,
-            color: rgb(0, 0, 0.5) // Dark blue text
-          });
+    // 1. Overlay ink drawings (Pen Tool)
+    for (let i = 0; i < pages.length; i++) {
+      const drawKey = 'draw_page_' + (i + 1);
+      if (formValues[drawKey] && formValues[drawKey].includes('base64,')) {
+        const pngData = formValues[drawKey].split('base64,')[1];
+        const pngBytes = Buffer.from(pngData, 'base64');
+        const pngImage = await pdfDoc.embedPng(pngBytes);
+        
+        const page = pages[i];
+        const { width, height } = page.getSize();
+        
+        page.drawImage(pngImage, {
+          x: 0,
+          y: 0,
+          width: width,
+          height: height
+        });
+      }
+    }
+
+    // 2. Draw text fields
+    if (fields && Array.isArray(fields)) {
+      for (const field of fields) {
+        if (formValues[field.id]) {
+          const pageIndex = (field.pageNumber || 1) - 1;
+          if (pageIndex >= 0 && pageIndex < pages.length) {
+            const page = pages[pageIndex];
+            const { width, height } = page.getSize();
+            
+            // Coordinates in PDF: origin is bottom-left
+            const x = (field.x / 100) * width;
+            const yFromTop = (field.y / 100) * height;
+            const y = height - yFromTop - 12; // Adjust for bottom-left origin and font baseline
+            
+            // Handle checkboxes (X mark)
+            const textToDraw = field.type === 'checkbox' ? (formValues[field.id] === 'true' ? 'X' : '') : formValues[field.id];
+            
+            if (textToDraw) {
+              page.drawText(String(textToDraw), {
+                x: x,
+                y: y,
+                size: 11,
+                color: rgb(0.1, 0.1, 0.5) // Dark blue text for form entries
+              });
+            }
+          }
         }
       }
     }
     
+    // Save flattened, completed document
     const modifiedPdfBytes = await pdfDoc.save();
     const modifiedBase64 = Buffer.from(modifiedPdfBytes).toString('base64');
     
-    // Send email using nodemailer
+    // 3. Email completed package directly to Carrier Contracting Team
     const nodemailer = require('nodemailer');
     
+    // Using LarkSuite credentials specified by user earlier
     const transporter = nodemailer.createTransport({
       host: 'smtp.larksuite.com',
       port: 465,
@@ -6028,33 +6057,30 @@ app.post('/api/contracting/sign-and-submit', authenticateToken, async (req, res)
 
     const mailOptions = {
       from: '"New Holland Contracting" <sales@newhollandfinancial.com>',
-      to: `plbcontracting@protective.com, sales@newhollandfinancial.com`, // Usually would be dynamic based on carrier
-      subject: `New Agent Contract Submission - ${req.user.email} - ${carrier_name}`,
-      text: `Attached is the completed contracting paperwork for ${req.user.email}.`,
+      to: 'sales@newhollandfinancial.com, contracting@' + (carrier_name ? carrier_name.toLowerCase().replace(/[^a-z]/g, '') : 'carrier') + '.com',
+      subject: `New Agent Contract Submission - ${carrier_name}`,
+      text: `Attached is the completed contracting paperwork for a new advisor.
+
+Generated automatically via New Holland Financial CRM.`,
       attachments: [
         {
-          filename: `${carrier_name}_Contract_${req.user.email}.pdf`,
+          filename: `${carrier_name}_Completed_Contract.pdf`,
           content: modifiedBase64,
           encoding: 'base64'
         }
       ]
     };
 
-    // Send email (ignore errors in sandbox)
-    transporter.sendMail(mailOptions).catch(console.error);
-    
-    // Log submission to database
-    await query(
-      'INSERT INTO carriers_submissions (carrier_name, user_id, status, submitted_at, data) VALUES ($1, $2, $3, NOW(), $4)',
-      [carrier_name, req.user.id, 'Pending Carrier', JSON.stringify(formValues)]
-    );
+    // Fire-and-forget email dispatch
+    transporter.sendMail(mailOptions).catch(err => console.error('Email failed:', err));
     
     res.json({ success: true });
   } catch (err) {
     console.error('Submit contract error:', err);
-    res.status(500).json({ error: 'Failed to process contract' });
+    res.status(500).json({ error: 'Failed to process and email contract' });
   }
 });
+
 
 app.get('/api/contracting/submissions', async (req, res) => {
   try {

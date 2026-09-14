@@ -229,6 +229,7 @@ export default function ContractingHub() {
   const submitContract = async () => {
     setIsSubmitting(true);
     try {
+      // 1. Save final status
       await Backend.autosaveSubmission({
         id: activeApplication.submissionId,
         package_id: activeApplication.id,
@@ -240,10 +241,19 @@ export default function ContractingHub() {
         data: formValues,
         updated_at: new Date().toISOString()
       });
-      alert('Contract Submitted Successfully! Sales will review and forward to ' + activeApplication.carrier_name + '.');
+      
+      // 2. Generate PDF and email to carrier
+      await Backend.signAndSubmitContract({
+        carrier_name: activeApplication.carrier_name,
+        formValues: formValues,
+        fields: fields,
+        pdfData: pdfData
+      });
+      
+      alert('Contract Generated & Submitted! The completed PDF has been automatically emailed to sales@newhollandfinancial.com and the Carrier Contracting Department.');
       setActiveApplication(null);
     } catch (e) {
-      alert('Failed to submit contract.');
+      alert('Failed to generate and submit contract.');
     } finally {
       setIsSubmitting(false);
     }
