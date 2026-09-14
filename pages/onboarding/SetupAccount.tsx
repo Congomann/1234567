@@ -64,7 +64,7 @@ export const SetupAccount: React.FC = () => {
                 <div className="bg-[#0B2240] p-10 flex flex-col justify-between md:w-1/3 text-white hidden md:flex relative overflow-hidden">
                     <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,rgba(10,98,167,0.3)_0%,rgba(11,34,64,1)_70%)] opacity-50 pointer-events-none"></div>
                     <div className="relative z-10">
-                        <img src="https://files.readme.io/ef0f845-NHFG_Logo.png" alt="NHFG" className="h-8 mb-8 brightness-0 invert" />
+                        <img src="/nhfg-logo.png" alt="NHFG" className="h-8 mb-8 object-contain" />
                         <h2 className="text-3xl font-black mb-4">Welcome to NHFG</h2>
                         <p className="text-blue-200 text-sm">Let's get your advisor profile set up.</p>
                     </div>
