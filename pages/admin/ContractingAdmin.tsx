@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import React, { useState, useRef } from 'react';
-import { Building, Plus, FileUp, CheckCircle } from 'lucide-react';
+import { Building, Plus, FileUp, CheckCircle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Backend } from '../../services/apiBackend';
 import { DB } from '../../services/database';
@@ -32,6 +32,19 @@ export default function ContractingAdmin() {
     setWizardStep(prev => prev + 1);
   };
   const handleBack = () => setWizardStep(prev => prev - 1);
+
+  
+  const handleDeleteCarrier = async (name: string) => {
+    if (!confirm('Are you sure you want to delete ' + name + '? This cannot be undone.')) return;
+    try {
+      await Backend.deleteCarrier(name);
+      const updated = await Backend.getActiveCarriers();
+      setCarriers(updated || []);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to delete carrier.');
+    }
+  };
 
   const handleSaveCarrier = async () => {
     try {
@@ -105,9 +118,14 @@ export default function ContractingAdmin() {
                     </div>
                   </div>
                   <div className="ml-4 flex-shrink-0">
-                    <Link to="/crm/admin/contracting/builder" className="font-medium text-blue-600 hover:text-blue-500 text-sm">
-                      Map Form Fields
-                    </Link>
+                    <div className="flex items-center space-x-4">
+                      <Link to="/crm/admin/contracting/builder" className="font-medium text-blue-600 hover:text-blue-500 text-sm">
+                        Map Form Fields
+                      </Link>
+                      <button onClick={() => handleDeleteCarrier(carrier.name)} className="text-red-500 hover:text-red-700 transition-colors" title="Delete Carrier">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </li>
