@@ -1,12 +1,19 @@
 import React from 'react';
 import { useData } from '../../context/DataContext';
 import { Navbar } from '../../components/Navbar';
-import { FileText, Shield, User } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { FileText, Shield, User, LogOut } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types';
 
 export const ClientPortal: React.FC = () => {
-  const { user, clients } = useData();
+  const { user, clients, logout } = useData();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
 
   if (!user || user.role !== UserRole.CLIENT) {
     return <Navigate to="/login" replace />;
@@ -20,7 +27,12 @@ export const ClientPortal: React.FC = () => {
       <Navbar />
       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">My Client Portal</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-slate-900">My Client Portal</h1>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
+              <LogOut size={16} /> Sign Out
+            </button>
+          </div>
           <p className="text-slate-600">Welcome back, {user.name}. Manage your policies and documents.</p>
         </div>
 
