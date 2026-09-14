@@ -111,69 +111,48 @@ export default function ContractingHub() {
       </div>
 
       {activeApplication ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[85vh]">
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between shrink-0">
             <h2 className="text-xl font-semibold text-gray-900 flex items-center">
               Complete Application: {activeApplication.name}
             </h2>
-            <button onClick={() => setActiveApplication(null)} className="text-gray-500 hover:text-gray-700 font-medium">Cancel & Go Back</button>
+            <button onClick={() => setActiveApplication(null)} className="text-gray-500 hover:text-gray-700 font-medium px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm">Cancel & Go Back</button>
           </div>
           
-          <div className="flex flex-col lg:flex-row h-[75vh]">
-            {/* Digital Form (Left) */}
-            <div className="w-full lg:w-1/2 p-8 overflow-y-auto space-y-8 bg-white">
-              <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm border border-blue-100 flex items-start">
-                <CheckCircle2 className="w-5 h-5 mr-3 mt-0.5 text-blue-600 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-base">Smart Form Active</p>
-                  <p className="mt-1">We have automatically populated fields mapped to your Advisor Profile. Please complete the remaining fields and sign below.</p>
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-gray-100">
+            {/* Document Preview (Left/Main - Native Fillable PDF) */}
+            <div className="flex-1 overflow-hidden relative border-r border-gray-200">
+              {pdfData ? (
+                <iframe src={pdfData} className="w-full h-full" title="Contract Preview" />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center space-y-4">
+                  <FileText className="w-20 h-20 text-gray-300" />
+                  <p className="text-lg font-medium text-gray-500">Document Reference Not Available</p>
+                  <p className="text-sm">The original PDF was not cached locally on this device.</p>
                 </div>
-              </div>
-              
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium border-b pb-2">Contract Details</h3>
-                {loading ? (
-                  <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
-                ) : (
-                  applicationFields.map(field => {
-                    if (field.type === 'signature') return null; // Handle signatures separately at bottom
-                    
-                    const isAutoFilled = !!field.mappedTo;
-                    
-                    return (
-                      <div key={field.id} className="relative">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {field.name} {field.required && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                          type="text"
-                          className={`block w-full rounded-md shadow-sm sm:text-sm p-3 border ${isAutoFilled ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
-                          value={formValues[field.id] || ''}
-                          onChange={e => setFormValues({...formValues, [field.id]: e.target.value})}
-                          readOnly={isAutoFilled}
-                          placeholder={isAutoFilled ? '' : 'Enter value...'}
-                        />
-                        {isAutoFilled && <span className="absolute right-3 top-[34px] text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">Auto-Filled</span>}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              
-              <div className="space-y-4 pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-medium">Electronic Signature Required</h3>
-                <p className="text-sm text-gray-500">By signing below, you agree to the terms and conditions set forth by {activeApplication.name}.</p>
-                <div className="bg-gray-50 border rounded-lg p-2">
-                  <SignatureCanvas 
-                    onSign={(data) => setSignatureData(data)} 
-                    onClear={() => setSignatureData(null)} 
-                  />
+              )}
+            </div>
+
+            {/* Signature & Submit (Right/Sidebar) */}
+            <div className="w-full lg:w-96 bg-white flex flex-col shrink-0 overflow-y-auto">
+              <div className="p-6 space-y-6">
+                <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm border border-blue-200">
+                  <h4 className="font-bold flex items-center mb-2 text-base"><CheckCircle2 className="w-5 h-5 mr-2"/> Digital Form</h4>
+                  <p className="leading-relaxed">Please fill out the original paperwork directly in the document viewer to the left. Once completed, provide your electronic signature below.</p>
                 </div>
-              </div>
-              
-              <div className="pt-6 flex justify-end">
+
+                <div className="space-y-4">
+                  <h3 className="text-base font-bold text-gray-900">Electronic Signature</h3>
+                  <div className="bg-gray-50 border border-gray-300 rounded-xl p-2 shadow-inner">
+                    <SignatureCanvas 
+                      onSign={(data) => setSignatureData(data)} 
+                      onClear={() => setSignatureData(null)} 
+                    />
+                  </div>
+                </div>
+
                 <button 
-                  disabled={!isFormValid()}
+                  disabled={!signatureData}
                   onClick={async () => {
                     setLoading(true);
                     try {
@@ -200,7 +179,6 @@ export default function ContractingHub() {
                       alert('Application securely routed to carrier.');
                     }
                     
-                    // Optimistically add to submissions list
                     setSubmissions([
                       { id: Date.now(), carrier_name: activeApplication.name, application_type: 'New Contract', submitted_at: new Date().toISOString(), status: 'Pending Carrier' },
                       ...submissions
@@ -209,28 +187,10 @@ export default function ContractingHub() {
                     setActiveApplication(null);
                     setLoading(false);
                   }}
-                  className={`px-8 py-3 rounded-lg text-white font-bold transition-all shadow-sm ${isFormValid() ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md' : 'bg-gray-300 cursor-not-allowed'}`}
+                  className={`w-full py-4 rounded-xl text-white font-black uppercase tracking-wider transition-all shadow-sm ${signatureData ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg scale-100' : 'bg-gray-300 cursor-not-allowed scale-95'}`}
                 >
-                  Sign & Submit Application
+                  Submit & Append Signature
                 </button>
-              </div>
-            </div>
-
-            {/* Document Preview (Right) */}
-            <div className="hidden lg:flex w-1/2 bg-gray-100 border-l border-gray-200 flex-col">
-              <div className="p-3 bg-gray-50 border-b border-gray-200 font-medium text-sm flex items-center text-gray-700">
-                <FileText className="w-5 h-5 mr-2" /> Original Contract Reference
-              </div>
-              <div className="flex-1 overflow-hidden relative">
-                {pdfData ? (
-                  <iframe src={pdfData} className="w-full h-full" title="Contract Preview" />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center space-y-4">
-                    <FileText className="w-20 h-20 text-gray-300" />
-                    <p className="text-lg font-medium text-gray-500">Document Reference Not Available</p>
-                    <p className="text-sm">The original PDF was not cached locally on this device.</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
