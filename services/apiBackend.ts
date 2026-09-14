@@ -354,6 +354,18 @@ class NHFGBackend {
         return newPkg;
     }
 
+    async deleteCarrierPackage(id: string): Promise<void> {
+        if (USE_REAL_BACKEND) {
+            try {
+                await fetch(this.baseUrl + '/contracting/packages/' + id, { method: 'DELETE', headers: this.getAuthHeaders() });
+            } catch (e) {}
+        }
+        const pkgs = await DB.getAll('carrier_packages') || [];
+        const filtered = pkgs.filter((p: any) => p.id !== id);
+        // Clear all and resave to simulate delete (or just implement DB.delete if it exists)
+        await DB.delete('carrier_packages', id);
+    }
+    
     async getAutosavedSubmissions(): Promise<any[]> {
         return await DB.getAll('contracting_submissions') || [];
     }

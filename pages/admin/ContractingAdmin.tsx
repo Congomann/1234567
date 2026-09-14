@@ -21,6 +21,27 @@ export default function ContractingAdmin() {
     loadPackages();
   }, []);
 
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this package?')) {
+      await Backend.deleteCarrierPackage(id);
+      loadPackages();
+    }
+  };
+
+  const handleView = async (pkg: any) => {
+    const pdfId = `${pkg.carrier_name}-${pkg.version}`;
+    const caches = await DB.getAll('pdf_cache') || [];
+    const cached = caches.find(c => c.id === pdfId);
+    if (cached && cached.data) {
+      const win = window.open();
+      if (win) {
+        win.document.write(`<iframe src="${cached.data}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+      }
+    } else {
+      alert("PDF not found in local cache.");
+    }
+  };
+
   const loadPackages = async () => {
     const pkgs = await Backend.getCarrierPackages();
     setPackages(pkgs || []);
@@ -98,15 +119,15 @@ export default function ContractingAdmin() {
                   <div className="flex space-x-3">
                     <Link 
                       to={`/crm/admin/contracting/builder?carrier=${encodeURIComponent(pkg.carrier_name + '-' + pkg.version)}`}
-                      className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded border border-blue-200 hover:bg-blue-100"
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 shadow-sm transition"
                     >
                       Manage
                     </Link>
-                    <button className="px-3 py-1.5 bg-white text-gray-700 text-sm font-medium rounded border border-gray-300 hover:bg-gray-50">
+                    <button onClick={() => handleView(pkg)} className="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded border border-gray-300 hover:bg-gray-50 shadow-sm transition">
                       View
                     </button>
-                    <button className="px-3 py-1.5 bg-white text-red-600 text-sm font-medium rounded border border-gray-300 hover:bg-red-50">
-                      Disable
+                    <button onClick={() => handleDelete(pkg.id)} className="px-4 py-2 bg-white text-red-600 text-sm font-medium rounded border border-gray-300 hover:bg-red-50 shadow-sm transition">
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -129,16 +150,13 @@ export default function ContractingAdmin() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
-                  <select 
-                    className="w-full border-gray-300 rounded-md shadow-sm p-2 border"
+                  <input 
+                    type="text" 
+                    className="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g. Transamerica"
                     value={carrierName}
                     onChange={e => setCarrierName(e.target.value)}
-                  >
-                    <option value="Transamerica">Transamerica</option>
-                    <option value="Protective Life">Protective Life</option>
-                    <option value="Carrier B">Carrier B</option>
-                    <option value="Carrier C">Carrier C</option>
-                  </select>
+                  />
                 </div>
                 
                 <div>

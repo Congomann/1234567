@@ -13,10 +13,7 @@ export default function CarrierFormBuilder() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [drawStart, setDrawStart] = useState<{x: number, y: number, pageIndex: number} | null>(null);
-  const [currentDraw, setCurrentDraw] = useState<{x: number, y: number, w: number, h: number} | null>(null);
-    
+          
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const carrierName = searchParams.get('carrier') || 'Unknown Carrier';
@@ -52,58 +49,29 @@ export default function CarrierFormBuilder() {
   };
 
   
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, pageIndex: number) => {
+  
+  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>, pageIndex: number) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
-    setIsDrawing(true);
-    setDrawStart({ x, y, pageIndex });
-    setCurrentDraw({ x, y, w: 0, h: 0 });
-    e.currentTarget.setPointerCapture(e.pointerId);
+    // Docusign style: Drop a field exactly where clicked
+    const newField = {
+      id: 'field_' + Date.now(),
+      name: 'New Field',
+      type: 'text',
+      mappedTo: 'none',
+      x: x,
+      y: y,
+      width: 15, // Standard optimal width
+      height: 2.5, // Standard optimal height for a text line
+      pageNumber: pageIndex
+    };
+    
+    setFields([...fields, newField]);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>, pageIndex: number) => {
-    if (!isDrawing || !drawStart || drawStart.pageIndex !== pageIndex) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const currentX = ((e.clientX - rect.left) / rect.width) * 100;
-    const currentY = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    const x = Math.min(drawStart.x, currentX);
-    const y = Math.min(drawStart.y, currentY);
-    const w = Math.abs(currentX - drawStart.x);
-    const h = Math.abs(currentY - drawStart.y);
-    
-    setCurrentDraw({ x, y, w, h });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>, pageIndex: number) => {
-    if (!isDrawing || !drawStart) return;
-    
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    setIsDrawing(false);
-    
-    // Only create if dragged a minimum distance (e.g., 1% width/height) to avoid accidental micro-clicks
-    if (currentDraw && currentDraw.w > 1 && currentDraw.h > 1) {
-      const newField = {
-        id: 'field_' + Date.now(),
-        name: 'New Field',
-        type: 'text',
-        mappedTo: 'none',
-        x: currentDraw.x,
-        y: currentDraw.y,
-        width: currentDraw.w,
-        height: currentDraw.h,
-        pageNumber: pageIndex
-      };
-      setFields([...fields, newField]);
-    }
-    
-    setDrawStart(null);
-    setCurrentDraw(null);
-  };
 
 
   
@@ -188,21 +156,10 @@ export default function CarrierFormBuilder() {
                       ))}
                       
                       
-                      {/* Temporary Draw Box */}
-                      {isDrawing && currentDraw && drawStart?.pageIndex === (index + 1) && (
-                        <div 
-                          className="absolute border-2 border-dashed border-blue-600 bg-blue-400/20 pointer-events-none z-20"
-                          style={{ left: `${currentDraw.x}%`, top: `${currentDraw.y}%`, width: `${currentDraw.w}%`, height: `${currentDraw.h}%` }}
-                        />
-                      )}
-
-                      {/* Pointer Catcher for this page */}
+                      {/* Click Catcher for this page */}
                       <div 
                         className="absolute inset-0 z-10 touch-none" 
-                        onPointerDown={(e) => handlePointerDown(e, index + 1)}
-                        onPointerMove={(e) => handlePointerMove(e, index + 1)}
-                        onPointerUp={(e) => handlePointerUp(e, index + 1)}
-                        onPointerCancel={(e) => handlePointerUp(e, index + 1)}
+                        onClick={(e) => handlePdfClick(e, index + 1)} style={{ cursor: 'crosshair' }}
                       ></div>
                     </div>
                   ))}
@@ -255,7 +212,7 @@ export default function CarrierFormBuilder() {
             {fields.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <MousePointer2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p>Click and drag on the PDF to draw a precisely sized text box.</p>
+                <p>Point and click anywhere on the document to drop a precision field.</p>
               </div>
             ) : (
               fields.map(field => (
