@@ -79,6 +79,7 @@ export default function CarrierFormBuilder() {
   
   
   
+  
   const handleAutoDetect = async () => {
     if (!pdfData) return;
     try {
@@ -86,13 +87,12 @@ export default function CarrierFormBuilder() {
       const pdf = await loadingTask.promise;
       const detectedFields: any[] = [];
       let widgetCount = 0;
-      let underscoreCount = 0;
       
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1 });
         
-        // 1. Try to find native AcroForm Widgets
+        // Only map native AcroForm fields that the carrier precisely placed
         const annotations = await page.getAnnotations();
         annotations.forEach((anno: any) => {
           if (anno.subtype === 'Widget') {
@@ -104,7 +104,7 @@ export default function CarrierFormBuilder() {
             
             detectedFields.push({
               id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
-              name: anno.fieldName || 'Detected Box',
+              name: anno.fieldName || 'Form Field',
               type: anno.fieldType === 'Btn' ? 'checkbox' : 'text',
               mappedTo: 'none',
               x: x, y: y, width: w, height: h, pageNumber: i
@@ -112,51 +112,20 @@ export default function CarrierFormBuilder() {
             widgetCount++;
           }
         });
-
-        // 2. Fallback: Scan text layer for underscores (flattened PDFs)
-        if (widgetCount === 0) {
-          const textContent = await page.getTextContent();
-          textContent.items.forEach((item: any) => {
-            if (item.str && item.str.includes('____')) {
-              // item.transform is [scaleX, skewY, skewX, scaleY, tx, ty]
-              // tx, ty are bottom-left coordinates in PDF points
-              const tx = item.transform[4];
-              const ty = item.transform[5];
-              const widthPt = item.width;
-              const heightPt = item.height || 12; // default if 0
-              
-              const x = (tx / viewport.width) * 100;
-              const y = (1 - ((ty + heightPt) / viewport.height)) * 100; // top-left
-              const w = (widthPt / viewport.width) * 100;
-              const h = (heightPt / viewport.height) * 100;
-              
-              // Only add if it looks like a reasonable field line
-              if (w > 2) {
-                detectedFields.push({
-                  id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
-                  name: 'Underscore Line',
-                  type: 'text',
-                  mappedTo: 'none',
-                  x: x, y: y, width: w, height: Math.max(h, 2.5), pageNumber: i
-                });
-                underscoreCount++;
-              }
-            }
-          });
-        }
       }
       
       if (detectedFields.length > 0) {
         setFields([...fields, ...detectedFields]);
-        alert(`Success! Auto-detected ${widgetCount} native fields and ${underscoreCount} flattened lines from the PDF.`);
+        alert(`Success! Auto-detected ${widgetCount} native fields from the PDF.`);
       } else {
-        alert("No built-in fields or fillable lines detected. You will need to enable Manual Placement mode to point-and-click fields.");
+        alert("This PDF is flattened and contains no native form fields. Please enable Manual Placement to draw your own fields.");
       }
     } catch (e) {
       console.error(e);
       alert("Error auto-detecting fields.");
     }
   };
+
 
 
   const handleSave = async () => {
@@ -236,7 +205,7 @@ export default function CarrierFormBuilder() {
                       {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
                         <div 
                           key={field.id}
-                          className="absolute border-2 border-blue-500 bg-blue-100/40 flex items-center justify-center group"
+                          className="absolute border-2 border-blue-400 bg-blue-400/20 hover:bg-blue-400/40 hover:border-blue-500 transition-colors rounded-sm cursor-pointer"
                           style={{
                             left: `${field.x}%`,
                             top: `${field.y}%`,
@@ -244,7 +213,7 @@ export default function CarrierFormBuilder() {
                             height: `${field.height}%`,
                           }}
                         >
-                          <span className="text-[10px] font-bold text-blue-700 bg-white/80 px-1 truncate absolute -top-4 left-0 border border-blue-500 rounded-t">{field.name}</span>
+                          {/* Label removed for a cleaner visual look, the user manages names in the sidebar */}
                         </div>
                       ))}
                       
