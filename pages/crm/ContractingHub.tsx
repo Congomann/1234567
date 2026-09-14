@@ -86,8 +86,8 @@ export default function ContractingHub() {
                       body: JSON.stringify({
                         signatureData: signatureData,
                         mappedFields: {
-                          "Name": user?.firstName + ' ' + user?.lastName,
-                          "NPN": user?.npn || "12345678"
+                          "Name": (user as any)?.firstName ? ((user as any)?.firstName + ' ' + (user as any)?.lastName) : user?.name,
+                          "NPN": (user as any)?.npn || "12345678"
                         }
                       })
                     });

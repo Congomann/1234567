@@ -202,6 +202,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
         if (user.category === AdvisorCategory.INSURANCE || products.includes(ProductType.LIFE)) {
             vertical.push({ path: '/crm/applications', label: 'Policies & Apps', icon: FileText, tourId: 'nav-applications' });
             vertical.push({ path: '/crm/commissions', label: 'Commissions', icon: LineChart, tourId: 'nav-commissions' });
+            vertical.push({ path: '/crm/contracting', label: 'Contracting', icon: FileCheck, tourId: 'nav-contracting' });
         }
 
         
@@ -269,6 +270,8 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             admin.push({ path: '/crm/admin/marketing', label: 'API Integrations', icon: Webhook, tourId: 'nav-api-integrations' });
             admin.push({ path: '/crm/admin/analytics', label: 'User Analytics', icon: Activity, tourId: 'nav-analytics' });
             admin.push({ path: '/crm/admin/commissions', label: 'Commission Recon', icon: LineChart, tourId: 'nav-commissions-recon' });
+            admin.push({ path: '/crm/admin/contracting', label: 'Carrier Contracting', icon: Building2, tourId: 'nav-admin-contracting' });
+            admin.push({ path: '/crm/admin/contracting/queue', label: 'Contracting Queue', icon: ClipboardCheck, tourId: 'nav-admin-contracting-queue' });
             admin.push({ path: '/crm/admin/landing-pages', label: 'Landing Pages', icon: Layout, tourId: 'nav-landing-pages' });
         }
 
