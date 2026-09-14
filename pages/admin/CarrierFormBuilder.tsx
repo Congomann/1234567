@@ -80,6 +80,7 @@ export default function CarrierFormBuilder() {
   
   
   
+  
   const handleAutoDetect = async () => {
     if (!pdfData) return;
     try {
@@ -87,15 +88,19 @@ export default function CarrierFormBuilder() {
       const pdf = await loadingTask.promise;
       const detectedFields: any[] = [];
       let widgetCount = 0;
+      let textLineCount = 0;
       
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1 });
         
-        // Only map native AcroForm fields that the carrier precisely placed
         const annotations = await page.getAnnotations();
+        let pageHasWidgets = false;
+
+        // 1. Detect Native Fields
         annotations.forEach((anno: any) => {
           if (anno.subtype === 'Widget') {
+            pageHasWidgets = true;
             const rect = anno.rect;
             const x = (rect[0] / viewport.width) * 100;
             const y = (1 - (rect[3] / viewport.height)) * 100;
@@ -112,19 +117,50 @@ export default function CarrierFormBuilder() {
             widgetCount++;
           }
         });
+
+        // 2. If this SPECIFIC page has no native fields, use Text-Scanning for flattened lines
+        if (!pageHasWidgets) {
+          const textContent = await page.getTextContent();
+          textContent.items.forEach((item: any) => {
+            if (item.str && item.str.includes('____')) {
+              const tx = item.transform[4];
+              const ty = item.transform[5];
+              const widthPt = item.width;
+              const heightPt = item.height || 12;
+              
+              const x = (tx / viewport.width) * 100;
+              const y = (1 - ((ty + heightPt) / viewport.height)) * 100;
+              const w = (widthPt / viewport.width) * 100;
+              const h = (heightPt / viewport.height) * 100;
+              
+              // Only add if it's a reasonably sized line
+              if (w > 2) {
+                detectedFields.push({
+                  id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
+                  name: 'Detected Line',
+                  type: 'text',
+                  mappedTo: 'none',
+                  x: x, y: y, width: w, height: Math.max(h, 2.5), pageNumber: i
+                });
+                textLineCount++;
+              }
+            }
+          });
+        }
       }
       
       if (detectedFields.length > 0) {
         setFields([...fields, ...detectedFields]);
-        alert(`Success! Auto-detected ${widgetCount} native fields from the PDF.`);
+        alert(`Success! Auto-detected ${widgetCount} native fields and ${textLineCount} flattened lines across the full application.`);
       } else {
-        alert("This PDF is flattened and contains no native form fields. Please enable Manual Placement to draw your own fields.");
+        alert("This PDF is completely flattened and contains no native form fields or underscore lines. Please enable Manual Placement to draw your own fields.");
       }
     } catch (e) {
       console.error(e);
       alert("Error auto-detecting fields.");
     }
   };
+
 
 
 
