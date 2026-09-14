@@ -477,6 +477,7 @@ const initDB = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
 
+      ALTER TABLE carriers ADD COLUMN IF NOT EXISTS paperwork_file_name VARCHAR(255);
       CREATE TABLE IF NOT EXISTS carriers (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
@@ -5812,7 +5813,8 @@ app.post('/api/v1/partners/leads', authenticateApiKey, async (req, res) => {
 app.get('/api/carriers', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM carriers ORDER BY category, name');
-    res.json(rows);
+    const mapped = rows.map(r => ({ ...r, paperworkFileName: r.paperwork_file_name }));
+    res.json(mapped);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch carriers' });
   }
@@ -5831,11 +5833,13 @@ app.delete('/api/carriers/:name', async (req, res) => {
 });
 
 app.post('/api/carriers', async (req, res) => {
-  const { name, category } = req.body;
+  const { name, category, paperworkFileName } = req.body;
   if (!name || !category) return res.status(400).json({ error: 'name and category required' });
   try {
-    const { rows } = await pool.query('INSERT INTO carriers (name, category) VALUES ($1, $2) RETURNING *', [name, category]);
-    res.status(201).json(rows[0]);
+    const { rows } = await pool.query('INSERT INTO carriers (name, category, paperwork_file_name) VALUES ($1, $2, $3) RETURNING *', [name, category, paperworkFileName]);
+    const carrier = rows[0];
+    carrier.paperworkFileName = carrier.paperwork_file_name;
+    res.status(201).json(carrier);
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ error: 'Carrier already exists' });
     res.status(500).json({ error: 'Failed to add carrier' });

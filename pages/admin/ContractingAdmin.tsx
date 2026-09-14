@@ -19,13 +19,25 @@ export default function ContractingAdmin() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const handleNext = () => setWizardStep(prev => prev + 1);
+  const handleNext = () => {
+    if (wizardStep === 1 && !newCarrier.name.trim()) {
+      alert("Please enter a Carrier Name before proceeding.");
+      return;
+    }
+    if (wizardStep === 2 && !uploadedFile) {
+      alert("Please upload the carrier paperwork before proceeding.");
+      return;
+    }
+    setWizardStep(prev => prev + 1);
+  };
   const handleBack = () => setWizardStep(prev => prev - 1);
 
   const handleSaveCarrier = async () => {
     try {
       // Create carrier using the existing API structure
+      if (!newCarrier.name.trim()) return;
       await Backend.addCarrier(newCarrier.name, 'Contracting', uploadedFile?.name);
+      setNewCarrier({ name: '', code: '', description: '' });
       setShowWizard(false);
       setWizardStep(1);
       setUploadedFile(null);
