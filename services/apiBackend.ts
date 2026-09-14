@@ -297,8 +297,8 @@ class NHFGBackend {
         return this.apiRequest<any[]>('/carriers', { headers: this.getAuthHeaders() }, 'carriers');
     }
 
-    async addCarrier(name: string, category: string): Promise<any> {
-        const newCarrier = { name, category };
+    async addCarrier(name: string, category: string, paperworkFileName?: string): Promise<any> {
+        const newCarrier = { name, category, paperworkFileName };
         if (USE_REAL_BACKEND) {
             try {
                 await fetch(this.baseUrl + '/carriers', {
@@ -308,7 +308,7 @@ class NHFGBackend {
                 });
             } catch (e) {}
         }
-        await DB.save('carriers', { id: name, name, category }); // Use name as ID for simplicity
+        await DB.save('carriers', { id: name, name, category, paperworkFileName }); // Use name as ID for simplicity
         return newCarrier;
     }
 
