@@ -31,14 +31,14 @@ export default function ContractingHub() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+    return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <Building className="w-8 h-8 mr-3 text-primary-600" />
+          <Building className="w-8 h-8 mr-3 text-blue-600" />
           Carrier Contracting
         </h1>
         <p className="mt-2 text-sm text-gray-600">
@@ -105,7 +105,7 @@ export default function ContractingHub() {
                   setSignatureData(null);
                   setLoading(false);
                 }}
-                className={`px-6 py-3 rounded-lg text-white font-medium ${signatureData ? 'bg-primary-600 hover:bg-primary-700' : 'bg-gray-300 cursor-not-allowed'}`}
+                className={`px-6 py-3 rounded-lg text-white font-medium ${signatureData ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'}`}
               >
                 Sign & Submit Application
               </button>
@@ -131,7 +131,7 @@ export default function ContractingHub() {
                     <h3 className="text-md font-medium text-gray-900">{carrier.name}</h3>
                     <p className="text-sm text-gray-500">{carrier.description || 'Insurance Carrier'}</p>
                   </div>
-                  <button onClick={() => setActiveApplication(carrier)} className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
+                  <button onClick={() => setActiveApplication(carrier)} className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                     Start <ArrowRight className="w-4 h-4 ml-2" />
                   </button>
                 </div>

@@ -46,12 +46,12 @@ export default function CarrierFormBuilder() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <SlidersHorizontal className="w-8 h-8 mr-3 text-primary-600" />
+            <SlidersHorizontal className="w-8 h-8 mr-3 text-blue-600" />
             Digital Form Builder
           </h1>
           <p className="mt-2 text-sm text-gray-600">Map AI-extracted fields from the Carrier PDF to system properties.</p>
         </div>
-        <button onClick={handleSave} className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center font-medium">
+        <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center font-medium">
           <Check className="w-5 h-5 mr-2" /> Publish Configuration
         </button>
       </div>
@@ -74,7 +74,7 @@ export default function CarrierFormBuilder() {
           </div>
           <div className="p-4 flex-1 overflow-y-auto space-y-4">
             {loading ? <p className="text-gray-500 text-sm">Loading...</p> : fields.length === 0 ? <p className="text-gray-500 text-sm">No fields extracted yet.</p> : fields.map(field => (
-              <div key={field.id} className="p-4 border border-gray-200 rounded-md shadow-sm hover:border-primary-300 transition">
+              <div key={field.id} className="p-4 border border-gray-200 rounded-md shadow-sm hover:border-blue-300 transition">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-900">{field.name}</span>
                   <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 uppercase">{field.type}</span>
@@ -82,7 +82,7 @@ export default function CarrierFormBuilder() {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Map To Data Source</label>
                   <select 
-                    className="w-full border-gray-300 rounded-md text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full border-gray-300 rounded-md text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={field.mappedTo || ''}
                     onChange={(e) => {
                       const newFields = [...fields];
@@ -106,7 +106,7 @@ export default function CarrierFormBuilder() {
                   </select>
                 </div>
                 <div className="mt-3 flex items-center">
-                  <input type="checkbox" defaultChecked={field.required} className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4" />
+                  <input type="checkbox" defaultChecked={field.required} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4" />
                   <span className="ml-2 text-sm text-gray-600">Required Field</span>
                 </div>
               </div>
