@@ -10,7 +10,7 @@ const pool = new Pool({
 const imapConfig = {
     imap: {
         user: process.env.SMTP_USER || 'sales@newhollandfinancial.com',
-        password: process.env.SMTP_PASS || 'NewHollandSales26',
+        password: process.env.SMTP_PASS || 'SalesNew@2026',
         host: process.env.IMAP_HOST || 'imap.larksuite.com',
         port: process.env.IMAP_PORT || 993,
         tls: true,
