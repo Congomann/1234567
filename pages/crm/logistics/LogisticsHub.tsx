@@ -203,8 +203,8 @@ export const LogisticsHub: React.FC = () => {
       <Tab3DBanner
         cards={[
           { title: "Active Freight Loads", value: loads.length + " Freight Loads", subtitle: "Dispatched & Live", emoji: "🚚", gradient: "cyan", linkText: "Load Board", linkPath: "#load_board" },
-          { title: "Fleet GPS Dispatch", value: "42 Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow" },
-          { title: "Carrier Rate Confirmations", value: "$420,000 Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink" }
+          { title: "Fleet GPS Dispatch", value: (loads.length * 2) + " Active Trucks", subtitle: "Real-Time Tracking", emoji: "📍", gradient: "yellow" },
+          { title: "Carrier Rate Confirmations", value: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(loads.reduce((acc, l) => acc + (l.amount || 0), 0)) + " Gross", subtitle: "100% Rate Locked", emoji: "📦", gradient: "pink" }
         ]}
       />
 
