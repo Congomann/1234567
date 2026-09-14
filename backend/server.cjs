@@ -6009,13 +6009,17 @@ app.post('/api/admin/invite-user', authenticateToken, async (req, res) => {
       </div>
     `;
     
-    await sendEmail({
-      to: email,
-      subject: 'Welcome to New Holland Financial Group - Setup Your Account',
-      html
-    });
-    
-    res.json({ success: true, message: 'Invite sent' });
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to New Holland Financial Group - Setup Your Account',
+        html
+      });
+      res.json({ success: true, message: 'Invite sent', user: rows[0] });
+    } catch (emailErr) {
+      console.warn('[Email Warning] Failed to send invite email:', emailErr.message);
+      res.json({ success: true, message: 'User added, but email failed to send', emailError: emailErr.message, user: rows[0] });
+    }
   } catch (err) {
     console.error(err);
     console.error('Invite Error:', err);
