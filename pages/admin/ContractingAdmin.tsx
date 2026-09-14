@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { BuildingLibraryIcon, PlusIcon, DocumentArrowUpIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { Building, Plus, FileUp, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Backend from '../../services/apiBackend';
+import { Backend } from '../../services/apiBackend';
 
 import { useEffect } from 'react';
 
@@ -37,7 +37,7 @@ export default function ContractingAdmin() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <BuildingLibraryIcon className="w-8 h-8 mr-3 text-primary-600" />
+            <Building className="w-8 h-8 mr-3 text-primary-600" />
             Carrier Management
           </h1>
           <p className="mt-2 text-sm text-gray-600">
@@ -48,7 +48,7 @@ export default function ContractingAdmin() {
           onClick={() => setShowWizard(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
         >
-          <PlusIcon className="w-5 h-5 mr-2" />
+          <Plus className="w-5 h-5 mr-2" />
           Add Carrier
         </button>
       </div>
@@ -89,9 +89,9 @@ export default function ContractingAdmin() {
               <div className="mb-8 border-b border-gray-200 pb-4">
                 <nav className="flex justify-between" aria-label="Progress">
                   <ol className="flex items-center space-x-8 w-full justify-center">
-                    <li className={\`text-sm font-medium \${wizardStep >= 1 ? 'text-primary-600' : 'text-gray-400'}\`}>1. Details</li>
-                    <li className={\`text-sm font-medium \${wizardStep >= 2 ? 'text-primary-600' : 'text-gray-400'}\`}>2. Forms</li>
-                    <li className={\`text-sm font-medium \${wizardStep >= 3 ? 'text-primary-600' : 'text-gray-400'}\`}>3. Digitize</li>
+                    <li className={`text-sm font-medium ${wizardStep >= 1 ? 'text-primary-600' : 'text-gray-400'}`}>1. Details</li>
+                    <li className={`text-sm font-medium ${wizardStep >= 2 ? 'text-primary-600' : 'text-gray-400'}`}>2. Forms</li>
+                    <li className={`text-sm font-medium ${wizardStep >= 3 ? 'text-primary-600' : 'text-gray-400'}`}>3. Digitize</li>
                   </ol>
                 </nav>
               </div>
@@ -126,7 +126,7 @@ export default function ContractingAdmin() {
               {/* Step 2: Upload Forms */}
               {wizardStep === 2 && (
                 <div className="space-y-4 text-center py-8">
-                  <DocumentArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <FileUp className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="text-lg font-medium text-gray-900">Upload Carrier Paperwork</h3>
                   <p className="text-sm text-gray-500">Upload the blank PDF contracting and appointment forms for this carrier.</p>
                   <div className="mt-4">
@@ -140,7 +140,7 @@ export default function ContractingAdmin() {
               {/* Step 3: AI Digitization Mock */}
               {wizardStep === 3 && (
                 <div className="space-y-4 text-center py-8">
-                  <CheckCircleIcon className="mx-auto h-12 w-12 text-green-500" />
+                  <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
                   <h3 className="text-lg font-medium text-gray-900">Ready for AI Digitization</h3>
                   <p className="text-sm text-gray-500">The system will now scan the uploaded documents and identify all text fields, signature boxes, and checkboxes.</p>
                 </div>

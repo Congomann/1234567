@@ -31,13 +31,13 @@ async function processMessage(message, connection) {
         const fromEmail = mail.from.value[0].address;
         const textBody = mail.text || mail.html || "";
         
-        console.log(\`[IMAP Monitor] Processing email from \${fromEmail}: \${subject}\`);
+        console.log(`[IMAP Monitor] Processing email from ${fromEmail}: ${subject}`);
         
         // 1. Insert into mailbox_messages
         const msgResult = await pool.query(
-            \`INSERT INTO mailbox_messages (message_id, subject, from_email, body, processed_status)
-             VALUES ($1, $2, $3, $4, $5) RETURNING id\`,
-            [mail.messageId || \`uid-\${id}\`, subject, fromEmail, textBody, 'UNPROCESSED']
+            `INSERT INTO mailbox_messages (message_id, subject, from_email, body, processed_status)
+             VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+            [mail.messageId || `uid-${id}`, subject, fromEmail, textBody, 'UNPROCESSED']
         );
         const internalMsgId = msgResult.rows[0].id;
 
@@ -46,24 +46,24 @@ async function processMessage(message, connection) {
         
         if (classification.confidence >= 95 && classification.status === 'Approved') {
             // HIGH CONFIDENCE: Auto-process
-            console.log(\`[IMAP Monitor] High confidence approval detected for \${classification.advisorName}\`);
+            console.log(`[IMAP Monitor] High confidence approval detected for ${classification.advisorName}`);
             
             // Try to find the advisor in DB
-            const userRes = await pool.query(\`SELECT id FROM users WHERE email ILIKE $1 OR first_name || ' ' || last_name ILIKE $2 LIMIT 1\`, 
-                [\`%\${classification.advisorEmail}%\`, \`%\${classification.advisorName}%\`]);
+            const userRes = await pool.query(`SELECT id FROM users WHERE email ILIKE $1 OR first_name || ' ' || last_name ILIKE $2 LIMIT 1`, 
+                [`%${classification.advisorEmail}%`, `%${classification.advisorName}%`]);
                 
             if (userRes.rows.length > 0) {
                 const advisorId = userRes.rows[0].id;
                 
                 // Add carrier assignment
                 await pool.query(
-                    \`INSERT INTO carrier_assignments (advisor_id, carrier_id, contract_number, status, effective_date)
-                     VALUES ($1, $2, $3, $4, CURRENT_DATE)\`,
+                    `INSERT INTO carrier_assignments (advisor_id, carrier_id, contract_number, status, effective_date)
+                     VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
                     [advisorId, classification.carrierId || 1, classification.contractNumber, 'Active']
                 );
                 
                 // Mark email as AUTO_PROCESSED
-                await pool.query(\`UPDATE mailbox_messages SET processed_status = 'AUTO_PROCESSED' WHERE id = $1\`, [internalMsgId]);
+                await pool.query(`UPDATE mailbox_messages SET processed_status = 'AUTO_PROCESSED' WHERE id = $1`, [internalMsgId]);
                 
                 // Note: We would trigger a notification to the advisor here
             } else {
@@ -73,11 +73,11 @@ async function processMessage(message, connection) {
             
         } else if (classification.isCompanyContract) {
             // COMPANY CONTRACT: Requires CEO signature
-            console.log(\`[IMAP Monitor] Company Contract detected. Routing to CEO signature queue.\`);
+            console.log(`[IMAP Monitor] Company Contract detected. Routing to CEO signature queue.`);
             await routeToAdminQueue(internalMsgId, { ...classification, suggestedAction: 'Needs CEO Signature' });
         } else {
             // LOW CONFIDENCE or PENDING: Send to Admin Queue
-            console.log(\`[IMAP Monitor] Low confidence or manual review required. Routing to Admin Queue.\`);
+            console.log(`[IMAP Monitor] Low confidence or manual review required. Routing to Admin Queue.`);
             await routeToAdminQueue(internalMsgId, classification);
         }
 
@@ -91,11 +91,11 @@ async function processMessage(message, connection) {
 
 async function routeToAdminQueue(msgId, classification) {
     await pool.query(
-        \`INSERT INTO admin_review_queue (mailbox_message_id, ai_confidence, suggested_action, status)
-         VALUES ($1, $2, $3, $4)\`,
+        `INSERT INTO admin_review_queue (mailbox_message_id, ai_confidence, suggested_action, status)
+         VALUES ($1, $2, $3, $4)`,
         [msgId, classification.confidence, JSON.stringify(classification), 'PENDING']
     );
-    await pool.query(\`UPDATE mailbox_messages SET processed_status = 'QUEUED_FOR_REVIEW' WHERE id = $1\`, [msgId]);
+    await pool.query(`UPDATE mailbox_messages SET processed_status = 'QUEUED_FOR_REVIEW' WHERE id = $1`, [msgId]);
 }
 
 // Regex-based structured extraction based on PRD requirements
@@ -168,7 +168,7 @@ async function startMailMonitor() {
 
         // Listen for new mail
         connection.on('mail', async (numNewMsgs) => {
-            console.log(\`[IMAP Monitor] \${numNewMsgs} new mail(s) received\`);
+            console.log(`[IMAP Monitor] ${numNewMsgs} new mail(s) received`);
             const newMessages = await connection.search(['UNSEEN'], fetchOptions);
             for (let item of newMessages) {
                 await processMessage(item, connection);

@@ -3,6 +3,10 @@ import { RootInsuranceDashboard } from './pages/crm/insurance/RootInsuranceDashb
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
+import ContractingHub from './pages/crm/ContractingHub';
+import ContractingAdmin from './pages/admin/ContractingAdmin';
+import ContractingReviewQueue from './pages/admin/ContractingReviewQueue';
+import CarrierFormBuilder from './pages/admin/CarrierFormBuilder';
 import { SoftphoneProvider } from './context/SoftphoneContext';
 import { TrackingProvider } from './context/TrackingContext';
 import { ThemeProvider } from './components/ThemeProvider';

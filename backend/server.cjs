@@ -6065,6 +6065,14 @@ injectTrackingRoutes(app);
 if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`NHFG CRM API Server running on port ${PORT}`);
+    
+    // Start Carrier Contracting IMAP Mailbox Monitor
+    try {
+      const { startMailMonitor } = require('./services/imapMonitor.cjs');
+      startMailMonitor();
+    } catch (e) {
+      console.error('Failed to boot IMAP monitor:', e);
+    }
 
     // Auto-start Ad Lead Simulator unless explicitly disabled
     if (process.env.ENABLE_AD_SIMULATOR !== 'false') {

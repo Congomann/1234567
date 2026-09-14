@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DocumentTextIcon, AdjustmentsHorizontalIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { FileText, SlidersHorizontal, Check } from 'lucide-react';
 
 import { useEffect } from 'react';
 
@@ -46,13 +46,13 @@ export default function CarrierFormBuilder() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <AdjustmentsHorizontalIcon className="w-8 h-8 mr-3 text-primary-600" />
+            <SlidersHorizontal className="w-8 h-8 mr-3 text-primary-600" />
             Digital Form Builder
           </h1>
           <p className="mt-2 text-sm text-gray-600">Map AI-extracted fields from the Carrier PDF to system properties.</p>
         </div>
         <button onClick={handleSave} className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center font-medium">
-          <CheckIcon className="w-5 h-5 mr-2" /> Publish Configuration
+          <Check className="w-5 h-5 mr-2" /> Publish Configuration
         </button>
       </div>
 
@@ -60,7 +60,7 @@ export default function CarrierFormBuilder() {
         {/* Mock PDF Viewer Left Side */}
         <div className="w-1/2 bg-gray-200 rounded-lg flex flex-col border border-gray-300">
           <div className="p-3 bg-gray-100 border-b border-gray-300 font-medium text-sm flex items-center">
-            <DocumentTextIcon className="w-5 h-5 mr-2" /> Original Carrier PDF
+            <FileText className="w-5 h-5 mr-2" /> Original Carrier PDF
           </div>
           <div className="flex-1 flex items-center justify-center text-gray-400">
             [PDF Document Preview]
