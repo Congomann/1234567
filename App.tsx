@@ -1,8 +1,7 @@
 import { SetupAccount } from './pages/onboarding/SetupAccount';
 import { RootInsuranceDashboard } from './pages/crm/insurance/RootInsuranceDashboard';
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom";
-import { Navigate } from "react-router-dom"';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataContext';
 import ContractingHub from './pages/crm/ContractingHub';
 import ContractingAdmin from './pages/admin/ContractingAdmin';
