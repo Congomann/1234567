@@ -21,7 +21,7 @@ interface LiveEvent {
 }
 
 export const Dashboard: React.FC = () => {
-  const { user, tasks, addTask, toggleTask, deleteTask } = useData();
+  const { user, tasks, addTask, toggleTask, deleteTask, leads, clients, transactions } = useData();
   const navigate = useNavigate();
 
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
@@ -126,10 +126,10 @@ export const Dashboard: React.FC = () => {
       <Tab3DBanner
         cards={[
           ...(user?.category === 'SECURITIES' ? [{ title: "Weekly Portfolio Balance", value: "$0", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
-          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: "0", subtitle: "Total Value: $0", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
+          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: `${transactions?.length || 0}`, subtitle: "Total Value Active", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
           ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "0", subtitle: "Total Loads: 0", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
-          { title: "Applications In Line", value: "0", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
-          { title: "New Clients Onboarded", value: "0", subtitle: "Q3 New Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
+          { title: "Applications In Line", value: `${leads.length}`, subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
+          { title: "New Clients Onboarded", value: `${clients.length}`, subtitle: "Total Active Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
         ].slice(0, 3)}
       />
 

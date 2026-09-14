@@ -119,7 +119,7 @@ export const AnnualReportAdmin: React.FC = () => {
         cards={[
           { title: "Public Disclosure Audit", value: "SEC Compliant", subtitle: "2026 Audit Report", emoji: "📊", gradient: "cyan", linkText: "Audit Filings", linkPath: '#quarterly-reports' },
           { title: "Regulatory Filings", value: "100% Up to Date", subtitle: "48 Active States", emoji: "⚖️", gradient: "yellow", linkText: "State Disclosures", linkPath: '#transparency-ledger' },
-          { title: "Annual Financial Metric", value: "$142.8M AUM", subtitle: "0 Active Lawsuits", emoji: "📜", gradient: "pink", linkText: "Financial Metrics", linkPath: '#metrics-editor' }
+          { title: "Annual Financial Metric", value: `${metrics.totalSales}M AUM`, subtitle: "0 Active Lawsuits", emoji: "📜", gradient: "pink", linkText: "Financial Metrics", linkPath: '#metrics-editor' }
         ]}
       />
 
