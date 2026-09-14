@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Building, Plus, FileUp, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Backend } from '../../services/apiBackend';
@@ -14,6 +14,8 @@ export default function ContractingAdmin() {
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [newCarrier, setNewCarrier] = useState({ name: '', code: '', description: '' });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleNext = () => setWizardStep(prev => prev + 1);
@@ -25,6 +27,7 @@ export default function ContractingAdmin() {
       await Backend.addCarrier(newCarrier.name, 'Contracting');
       setShowWizard(false);
       setWizardStep(1);
+      setUploadedFile(null);
       const updated = await Backend.getActiveCarriers();
       setCarriers(updated || []);
     } catch (err) {
@@ -130,9 +133,37 @@ export default function ContractingAdmin() {
                   <h3 className="text-lg font-medium text-gray-900">Upload Carrier Paperwork</h3>
                   <p className="text-sm text-gray-500">Upload the blank PDF contracting and appointment forms for this carrier.</p>
                   <div className="mt-4">
-                    <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      Select PDF Files
-                    </button>
+                    <input 
+                      type="file" 
+                      accept=".pdf" 
+                      className="hidden" 
+                      ref={fileInputRef} 
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setUploadedFile(e.target.files[0]);
+                        }
+                      }} 
+                    />
+                    {!uploadedFile ? (
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      >
+                        Select PDF Files
+                      </button>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-200">
+                          {uploadedFile.name} ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </div>
+                        <button 
+                          onClick={() => setUploadedFile(null)}
+                          className="text-xs text-red-500 hover:text-red-700"
+                        >
+                          Remove File
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
