@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, SlidersHorizontal, Check, Scan, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FileText, SlidersHorizontal, Check, Scan, Loader2, MousePointer2, Trash2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { DB } from '../../services/database';
+import { Document, Page, pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function CarrierFormBuilder() {
   const [fields, setFields] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isScanning, setIsScanning] = useState(false);
   const [pdfData, setPdfData] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const carrierName = searchParams.get('carrier') || 'Unknown Carrier';
-  
-  // Hardcode ID 1 for now since we don't have routing params configured yet
-  const formId = 1; 
+  const formId = carrierName; // Use carrier name as ID for simplicity
 
   useEffect(() => {
-    // 1. Fetch PDF from local cache if available
     if (carrierName) {
       DB.getAll('pdf_cache').then(caches => {
         const cached = caches.find(c => c.id === carrierName);
@@ -27,42 +29,49 @@ export default function CarrierFormBuilder() {
       }).catch(console.error);
     }
 
-    // 2. Fetch existing fields
-    fetch('/api/carriers/forms/' + formId, {
+    fetch('/api/carriers/forms/' + encodeURIComponent(formId), {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
     })
     .then(res => res.json())
     .then(data => {
       const existing = data.extracted_schema && Array.isArray(data.extracted_schema) ? data.extracted_schema : [];
-      if (existing.length > 0) {
-        setFields(existing);
-        setLoading(false);
-      } else {
-        // Trigger AI Scanning Simulation
-        simulateAIScan();
-      }
+      setFields(existing);
+      setLoading(false);
     })
     .catch(err => {
       console.error(err);
-      simulateAIScan();
+      setLoading(false);
     });
   }, [carrierName]);
 
-  const simulateAIScan = () => {
-    setLoading(false);
-    setIsScanning(true);
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+  };
+
+  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
-    // Simulate 3 seconds of AI parsing
-    setTimeout(() => {
-      const mockExtracted: any[] = []; // No dummy data, requires real OCR backend integration
-      setFields(mockExtracted);
-      setIsScanning(false);
-    }, 3500);
+    // Create a new field at this coordinate
+    const newField = {
+      id: 'field_' + Date.now(),
+      name: 'New Field',
+      type: 'text',
+      x: (x / rect.width) * 100, // store as percentage
+      y: (y / rect.height) * 100,
+      width: 20, // default 20% width
+      height: 3, // default 3% height
+      pageNumber: pageNumber
+    };
+    
+    setFields([...fields, newField]);
   };
 
   const handleSave = async () => {
     try {
-      await fetch('/api/carriers/forms/' + formId, {
+      await fetch('/api/carriers/forms/' + encodeURIComponent(formId), {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -76,6 +85,14 @@ export default function CarrierFormBuilder() {
     }
   };
 
+  const removeField = (id: string) => {
+    setFields(fields.filter(f => f.id !== id));
+  };
+
+  const updateField = (id: string, updates: any) => {
+    setFields(fields.map(f => f.id === id ? { ...f, ...updates } : f));
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="flex justify-between items-center">
@@ -84,96 +101,99 @@ export default function CarrierFormBuilder() {
             <SlidersHorizontal className="w-8 h-8 mr-3 text-blue-600" />
             Digital Form Builder: {carrierName}
           </h1>
-          <p className="mt-2 text-sm text-gray-600">Map AI-extracted fields from the Carrier PDF to system properties.</p>
+          <p className="mt-2 text-sm text-gray-600">Click on the document below to draw input fields for the advisor to fill out.</p>
         </div>
         <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center font-medium shadow-sm transition">
           <Check className="w-5 h-5 mr-2" /> Publish Configuration
         </button>
       </div>
 
-      <div className="flex gap-6 h-[75vh]">
-        {/* PDF Viewer Left Side */}
-        <div className="w-1/2 bg-gray-200 rounded-lg flex flex-col border border-gray-300 shadow-inner overflow-hidden">
-          <div className="p-3 bg-gray-100 border-b border-gray-300 font-medium text-sm flex justify-between items-center">
-            <span className="flex items-center"><FileText className="w-5 h-5 mr-2 text-gray-600" /> Original Document Preview</span>
-            {isScanning && <span className="flex items-center text-blue-600 text-xs font-bold animate-pulse"><Scan className="w-4 h-4 mr-1" /> AI Vision Active</span>}
+      <div className="flex gap-6 h-[80vh]">
+        {/* PDF Viewer (Interactive) */}
+        <div className="w-2/3 bg-gray-200 rounded-lg flex flex-col border border-gray-300 shadow-inner overflow-hidden relative">
+          <div className="p-3 bg-gray-100 border-b border-gray-300 font-medium text-sm flex justify-between items-center shrink-0">
+            <span className="flex items-center"><MousePointer2 className="w-5 h-5 mr-2 text-gray-600" /> Interactive Canvas (Page {pageNumber} of {numPages || 1})</span>
+            <div className="flex space-x-2">
+              <button disabled={pageNumber <= 1} onClick={() => setPageNumber(p => p - 1)} className="px-2 py-1 bg-white border rounded text-xs disabled:opacity-50">Prev</button>
+              <button disabled={pageNumber >= (numPages || 1)} onClick={() => setPageNumber(p => p + 1)} className="px-2 py-1 bg-white border rounded text-xs disabled:opacity-50">Next</button>
+            </div>
           </div>
-          <div className="flex-1 flex flex-col relative bg-gray-50">
-            {isScanning && (
-              <div className="absolute inset-0 bg-blue-900/10 z-10 flex flex-col items-center justify-center backdrop-blur-[1px]">
-                <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-                <p className="text-blue-800 font-semibold shadow-sm">Running Antigravity OCR Engine...</p>
-                <div className="w-64 h-2 bg-gray-200 rounded-full mt-4 overflow-hidden">
-                   <div className="h-full bg-blue-600 animate-[pulse_1.5s_ease-in-out_infinite]" style={{ width: '60%' }}></div>
-                </div>
-              </div>
-            )}
+          
+          <div className="flex-1 overflow-auto bg-gray-600 flex justify-center p-4">
             {pdfData ? (
-              <iframe src={pdfData} className="w-full h-full" title="Carrier Document" />
+              <div 
+                className="relative bg-white shadow-xl cursor-crosshair inline-block" 
+                ref={containerRef}
+              >
+                <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess} renderMode="canvas">
+                  <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                </Document>
+                
+                {/* Overlay Fields */}
+                {fields.filter(f => f.pageNumber === pageNumber).map(field => (
+                  <div 
+                    key={field.id}
+                    className="absolute border-2 border-blue-500 bg-blue-100/40 flex items-center justify-center group"
+                    style={{
+                      left: `${field.x}%`,
+                      top: `${field.y}%`,
+                      width: `${field.width}%`,
+                      height: `${field.height}%`,
+                    }}
+                  >
+                    <span className="text-[10px] font-bold text-blue-700 bg-white/80 px-1 truncate absolute -top-4 left-0 border border-blue-500 rounded-t">{field.name}</span>
+                  </div>
+                ))}
+                
+                {/* Click Catcher */}
+                <div className="absolute inset-0 z-10" onClick={handlePdfClick}></div>
+              </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-400 p-8 text-center">
-                <FileText className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                <p>PDF Document Preview Not Available.<br/>Please re-upload in the Carrier Wizard to cache it locally.</p>
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center space-y-4">
+                <FileText className="w-20 h-20 text-gray-300" />
+                <p className="text-lg font-medium text-gray-400">Document Reference Not Available</p>
+                <p className="text-sm">Please upload the PDF in the Carrier Wizard first.</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Field Editor Right Side */}
-        <div className="w-1/2 bg-white rounded-lg border border-gray-300 flex flex-col shadow-sm">
-          <div className="p-3 bg-gray-50 border-b border-gray-300 font-medium text-sm flex justify-between items-center">
-            <span>AI Extracted Fields</span>
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">{fields.length} Detected</span>
+        {/* Field Editor Sidebar */}
+        <div className="w-1/3 bg-white rounded-lg border border-gray-200 flex flex-col shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center shrink-0">
+            <h3 className="font-semibold text-gray-900">Configured Fields</h3>
+            <span className="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">{fields.length} Total</span>
           </div>
-          <div className="p-4 flex-1 overflow-y-auto space-y-4 bg-gray-50">
-            {isScanning ? (
-              <div className="h-full flex items-center justify-center">
-                <p className="text-gray-500 text-sm animate-pulse">Extracting fillable fields and signatures...</p>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {fields.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <MousePointer2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p>Click anywhere on the PDF to create a fillable text box.</p>
               </div>
-            ) : fields.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center mt-10">No fields extracted.</p>
-            ) : fields.map(field => (
-              <div key={field.id} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 transition group relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="font-semibold text-gray-900">{field.name}</span>
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded-md text-gray-600 uppercase border border-gray-200">{field.type}</span>
+            ) : (
+              fields.map(field => (
+                <div key={field.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50 space-y-3 relative group">
+                  <button onClick={() => removeField(field.id)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Field Name (Label)</label>
+                    <input type="text" value={field.name} onChange={e => updateField(field.id, { name: e.target.value })} className="w-full text-sm border-gray-300 rounded p-1.5 focus:ring-blue-500 focus:border-blue-500 border" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Width (%)</label>
+                      <input type="number" value={Math.round(field.width)} onChange={e => updateField(field.id, { width: parseFloat(e.target.value) })} className="w-full text-sm border-gray-300 rounded p-1 border" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Height (%)</label>
+                      <input type="number" value={Math.round(field.height)} onChange={e => updateField(field.id, { height: parseFloat(e.target.value) })} className="w-full text-sm border-gray-300 rounded p-1 border" />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Map To CRM Field</label>
-                  <select 
-                    className="w-full border-gray-300 rounded-md text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition"
-                    value={field.mappedTo || ''}
-                    onChange={(e) => {
-                      const newFields = [...fields];
-                      const idx = newFields.findIndex(f => f.id === field.id);
-                      if (idx > -1) newFields[idx].mappedTo = e.target.value;
-                      setFields(newFields);
-                    }}
-                  >
-                    <option value="">-- Require Manual Entry by Advisor --</option>
-                    <optgroup label="Advisor Data">
-                      <option value="Advisor.firstName">Advisor First Name</option>
-                      <option value="Advisor.lastName">Advisor Last Name</option>
-                      <option value="Advisor.npn">Advisor NPN</option>
-                      <option value="Advisor.phone">Advisor Phone</option>
-                      <option value="Advisor.email">Advisor Email</option>
-                      <option value="Advisor.signature">Advisor Signature</option>
-                    </optgroup>
-                    <optgroup label="Agency / Company Data">
-                      <option value="Company.legalName">Agency Legal Name</option>
-                      <option value="Company.ein">Agency EIN</option>
-                      <option value="Company.address">Agency Address</option>
-                      <option value="Company.ceoSignature">CEO Signature (Requires Auth)</option>
-                    </optgroup>
-                  </select>
-                </div>
-                <div className="mt-3 flex items-center bg-gray-50 p-2 rounded border border-gray-100">
-                  <input type="checkbox" defaultChecked={field.required} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4" />
-                  <span className="ml-2 text-xs font-medium text-gray-600">Mark as Required Field</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
