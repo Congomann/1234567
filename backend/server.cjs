@@ -6085,8 +6085,7 @@ app.post('/api/onboarding/setup-account', async (req, res) => {
     if (rows.length === 0) return res.status(400).json({ error: 'Invalid or expired token' });
     
     const user = rows[0];
-    const bcrypt = require('bcryptjs');
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = require('crypto').createHash('sha256').update(password).digest('hex');
     
     await pool.query(
       "UPDATE users SET password_hash = $1, invite_token = NULL, status = 'active', onboarding_completed = true WHERE id = $2",
