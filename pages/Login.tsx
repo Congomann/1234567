@@ -141,14 +141,7 @@ export const Login: React.FC = () => {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-slate-500">
-              Don't have an account?{' '}
-              <Link to="/signup" className="font-medium text-[#0A62A7] hover:text-blue-600">
-                Sign up
-              </Link>
-            </p>
-          </div>
+          
         </div>
 
         <p className="mt-8 text-center text-xs font-medium text-slate-400 uppercase tracking-widest">

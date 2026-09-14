@@ -1,7 +1,8 @@
 import { SetupAccount } from './pages/onboarding/SetupAccount';
 import { RootInsuranceDashboard } from './pages/crm/insurance/RootInsuranceDashboard';
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom";
+import { Navigate } from "react-router-dom"';
 import { DataProvider, useData } from './context/DataContext';
 import ContractingHub from './pages/crm/ContractingHub';
 import ContractingAdmin from './pages/admin/ContractingAdmin';
@@ -39,7 +40,6 @@ import { ExploreSolutions } from './pages/website/ExploreSolutions';
 import { AnnualReport } from './pages/website/AnnualReport';
 import { PressReleases } from './pages/website/PressReleases';
 import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ClientPortal } from './pages/client/ClientPortal';
 import { CRMLayout } from './components/CRMData';
@@ -241,7 +241,7 @@ const App: React.FC = () => {
             {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />
           <Route path="/onboarding/setup" element={<SetupAccount />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/signup" element={<Navigate to="/login" replace />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/client-portal" element={<PublicLayout><ClientPortal /></PublicLayout>} />
 
