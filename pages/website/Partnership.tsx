@@ -85,20 +85,14 @@ export const Partnership: React.FC = () => {
 
     if (sandboxEndpoint === 'life-quote') {
       setApiResponse({
-        status: 200,
-        latency: "38ms",
-        endpoint: "/api/v1/quotes/life-term",
-        payload: {
-          applicant: { age: 38, gender: "Male", tobacco: false, state: "IA" },
-          faceAmount: 1000000,
-          termYears: 20,
-          carrierQuotes: [
-            { carrier: "Lincoln Financial", product: "TermAccord 20", monthlyPremium: "$48.50", underwritingTier: "Preferred Best", instantDecisionEligible: true },
-            { carrier: "Protective Life", product: "Custom Choice UL", monthlyPremium: "$51.20", underwritingTier: "Preferred Plus", instantDecisionEligible: true },
-            { carrier: "Mutual of Omaha", product: "Term Life Answers", monthlyPremium: "$53.80", underwritingTier: "Standard Plus", instantDecisionEligible: true }
-          ]
-        }
-      });
+          status: "success",
+          timestamp: new Date().toISOString(),
+          data: {
+            availableCarriers: [
+              { carrier: "Internal Sandbox Life", product: "Term 20", monthlyPremium: "$48.50", underwritingTier: "Preferred Best", instantDecisionEligible: true }
+            ]
+          }
+        });
     } else if (sandboxEndpoint === 'freight-dispatch') {
       setApiResponse({
         status: 200,
