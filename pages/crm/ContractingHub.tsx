@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PenTool, CheckCircle, FileText, Search, Info, MousePointer2, Maximize, Minimize } from 'lucide-react';
+import { PenTool, CheckCircle, FileText, Search, Info, MousePointer2, Maximize, Minimize, Check } from 'lucide-react';
 import { DB } from '../../services/database';
 import { useData } from '../../context/DataContext';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -321,13 +321,22 @@ export default function ContractingHub() {
                           height: `${field.height}%`,
                         }}
                       >
+                        {field.type === 'checkbox' ? (
+                        <div 
+                          className="w-full h-full absolute inset-0 z-40 flex items-center justify-center cursor-pointer border border-blue-400 bg-blue-100/40 hover:bg-blue-100/60 focus-within:ring-2 focus-within:ring-blue-600 rounded-sm"
+                          onClick={() => setFormValues({...formValues, [field.id]: formValues[field.id] === 'true' ? 'false' : 'true'})}
+                        >
+                          {formValues[field.id] === 'true' && <Check className="w-4 h-4 text-blue-700" />}
+                        </div>
+                      ) : (
                         <input
                           type="text"
                           placeholder={field.name}
                           value={formValues[field.id] || ''}
                           onChange={(e) => setFormValues({...formValues, [field.id]: e.target.value})}
-                          className="w-full h-full bg-blue-50/70 border-b-2 border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-medium text-gray-900 px-1 absolute inset-0 z-20 outline-none transition-colors"
+                          className="w-full h-full bg-blue-100/40 hover:bg-blue-100/60 border border-blue-400 focus:bg-yellow-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 text-sm font-medium text-gray-900 px-1 absolute inset-0 z-40 outline-none transition-all shadow-sm rounded-sm"
                         />
+                      )}
                       </div>
                     ))}
                   </div>
