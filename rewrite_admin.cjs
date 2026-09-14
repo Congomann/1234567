@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+const fs = require('fs');
+
+const adminContent = `import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Building, Plus, FileUp, CheckCircle, Trash2, Edit } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
@@ -46,7 +48,7 @@ export default function ContractingAdmin() {
     // Save PDF to cache using the package ID or carrier name
     // (CarrierFormBuilder uses carrier name to find it, so we'll store it by package_name to be precise, 
     // but to avoid breaking existing logic we'll store it by carrier_name + '-' + version)
-    const pdfId = `${carrierName}-${version}`;
+    const pdfId = \`\${carrierName}-\${version}\`;
     
     const reader = new FileReader();
     reader.readAsDataURL(uploadedFile);
@@ -97,7 +99,7 @@ export default function ContractingAdmin() {
                   </div>
                   <div className="flex space-x-3">
                     <Link 
-                      to={`/crm/admin/contracting/builder?carrier=${encodeURIComponent(pkg.carrier_name + '-' + pkg.version)}`}
+                      to={\`/crm/admin/contracting/builder?carrier=\${encodeURIComponent(pkg.carrier_name + '-' + pkg.version)}\`}
                       className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded border border-blue-200 hover:bg-blue-100"
                     >
                       Manage
@@ -215,3 +217,7 @@ export default function ContractingAdmin() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('pages/admin/ContractingAdmin.tsx', adminContent);
+console.log('Rewrote ContractingAdmin.tsx');

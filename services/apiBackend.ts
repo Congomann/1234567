@@ -325,6 +325,44 @@ class NHFGBackend {
     }
 
     // --- CONTRACTING & CARRIERS ---
+    
+    async getCarrierPackages(): Promise<any[]> {
+        if (USE_REAL_BACKEND) {
+            try {
+                const res = await fetch(this.baseUrl + '/contracting/packages', {
+                    headers: this.getAuthHeaders()
+                });
+                if (res.ok) return await res.json();
+            } catch (e) {}
+        }
+        return await DB.getAll('carrier_packages') || [];
+    }
+
+    async addCarrierPackage(pkg: any): Promise<any> {
+        if (USE_REAL_BACKEND) {
+            try {
+                const res = await fetch(this.baseUrl + '/contracting/packages', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(pkg)
+                });
+                if (res.ok) return await res.json();
+            } catch (e) {}
+        }
+        const newPkg = { id: Date.now().toString(), ...pkg, created_at: new Date().toISOString() };
+        await DB.save('carrier_packages', newPkg);
+        return newPkg;
+    }
+
+    async getAutosavedSubmissions(): Promise<any[]> {
+        return await DB.getAll('contracting_submissions') || [];
+    }
+    
+    async autosaveSubmission(submission: any): Promise<any> {
+        await DB.save('contracting_submissions', submission);
+        return submission;
+    }
+
     async getActiveCarriers(): Promise<any[]> {
         return this.apiRequest<any[]>(`${this.baseUrl}/carriers`, { headers: this.getAuthHeaders() }, 'carriers');
     }

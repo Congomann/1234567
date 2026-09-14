@@ -1,70 +1,122 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { PenTool, CheckCircle, FileText, Share2, Printer, Search, Info, MousePointer2, Maximize, Minimize } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { PenTool, CheckCircle, FileText, Search, Info, MousePointer2, Maximize, Minimize } from 'lucide-react';
 import { DB } from '../../services/database';
 import { useData } from '../../context/DataContext';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { Backend } from '../../services/apiBackend';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function ContractingHub() {
   const { user } = useData();
-  const [activeApplication, setActiveApplication] = useState<any | null>(null);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [submissions, setSubmissions] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [packages, setPackages] = useState<any[]>([]);
+  const [myContracts, setMyContracts] = useState<any[]>([]);
   
-  // PDF state
+  const [activeApplication, setActiveApplication] = useState<any | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
+  
   const [fields, setFields] = useState<any[]>([]);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string>('Saved');
 
   useEffect(() => {
-    fetch('/api/contracting/applications', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
-    })
-    .then(res => res.json())
-    .then(data => setApplications(Array.isArray(data) ? data : []))
-    .catch(console.error);
+    if (!activeApplication) {
+      loadData();
+    }
+  }, [activeApplication]);
 
-    fetch('/api/contracting/submissions', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
-    })
-    .then(res => res.json())
-    .then(data => setSubmissions(Array.isArray(data) ? data : []))
-    .catch(console.error);
-  }, []);
+  const loadData = async () => {
+    const pkgs = await Backend.getCarrierPackages();
+    const subs = await Backend.getAutosavedSubmissions();
+    setPackages(pkgs || []);
+    setMyContracts(subs || []);
+  };
 
-  const openApplication = async (app: any) => {
-    setActiveApplication(app);
-    setPageNumber(1);
-    setFormValues({});
+  // Autosave hook
+  useEffect(() => {
+    if (!activeApplication || !activeApplication.submissionId || Object.keys(formValues).length === 0) return;
     
-    // Load the PDF data
-    try {
-      const caches = await DB.getAll('pdf_cache');
-      const cached = caches.find(c => c.id === app.carrier_name);
-      if (cached && cached.data) {
-        setPdfData(cached.data);
-      } else {
-        setPdfData(null);
+    setSaveStatus('Saving...');
+    const timer = setTimeout(async () => {
+      try {
+        await Backend.autosaveSubmission({
+          id: activeApplication.submissionId,
+          package_id: activeApplication.id,
+          carrier_name: activeApplication.carrier_name,
+          package_name: activeApplication.package_name,
+          user_id: user?.id,
+          status: 'In Progress',
+          progress: Math.round((Object.keys(formValues).filter(k => formValues[k]).length / (fields.length || 1)) * 100),
+          data: formValues,
+          updated_at: new Date().toISOString()
+        });
+        setSaveStatus('Saved');
+      } catch (e) {
+        setSaveStatus('Error saving');
       }
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, [formValues]);
+
+  const handleStart = async (pkg: any) => {
+    // 1. Create a new "In Progress" submission
+    const newSub = await Backend.autosaveSubmission({
+      id: `sub_${Date.now()}`,
+      package_id: pkg.id,
+      carrier_name: pkg.carrier_name,
+      package_name: pkg.package_name,
+      user_id: user?.id,
+      status: 'In Progress',
+      progress: 0,
+      data: {},
+      updated_at: new Date().toISOString()
+    });
+    
+    await openApplication(pkg, newSub, false);
+  };
+
+  const handleContinue = async (sub: any) => {
+    // Find the package for this submission
+    const pkg = packages.find(p => p.id === sub.package_id) || {
+      id: sub.package_id,
+      carrier_name: sub.carrier_name,
+      package_name: sub.package_name,
+      version: 'Unknown'
+    };
+    await openApplication(pkg, sub, true);
+  };
+
+  const openApplication = async (pkg: any, sub: any, isResuming: boolean) => {
+    setActiveApplication({ ...pkg, submissionId: sub.id });
+    
+    // Load PDF
+    const pdfId = `${pkg.carrier_name}-${pkg.version}`;
+    const caches = await DB.getAll('pdf_cache') || [];
+    const cached = caches.find(c => c.id === pdfId) || caches.find(c => c.id === pkg.carrier_name);
+    if (cached && cached.data) {
+      setPdfData(cached.data);
+    } else {
+      setPdfData(null);
+    }
+    
+    // Load Fields mapped by admin
+    const adminFields = await DB.getAll('carrier_fields') || [];
+    const schema = adminFields.find(f => f.id === pdfId) || adminFields.find(f => f.id === pkg.carrier_name);
+    
+    if (schema && schema.extracted_schema) {
+      setFields(schema.extracted_schema);
       
-      // Load the field mapping
-      const res = await fetch('/api/carriers/forms/' + encodeURIComponent(app.carrier_name), {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
-      });
-      const data = await res.json();
-      
-      if (data.extracted_schema) {
-        setFields(data.extracted_schema);
-        
-        // Auto-fill mapped values
+      if (isResuming && sub.data) {
+        setFormValues(sub.data);
+      } else {
+        // Auto-fill mapped values if starting fresh
         const initialValues: Record<string, string> = {};
-        data.extracted_schema.forEach((f: any) => {
+        schema.extracted_schema.forEach((f: any) => {
           if (f.mappedTo && f.mappedTo !== 'none' && user) {
             if (f.mappedTo === 'firstName') initialValues[f.id] = user.name?.split(' ')[0] || '';
             if (f.mappedTo === 'lastName') initialValues[f.id] = user.name?.split(' ').slice(1).join(' ') || '';
@@ -75,56 +127,31 @@ export default function ContractingHub() {
           }
         });
         setFormValues(initialValues);
-      } else {
-        setFields([]);
       }
-
-    } catch (e) {
-      console.error(e);
+    } else {
+      setFields([]);
+      setFormValues({});
     }
   };
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-  };
-
-  const handleFieldChange = (id: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [id]: value }));
-  };
-
   const submitContract = async () => {
-    if (!activeApplication || !pdfData) return;
     setIsSubmitting(true);
-    
     try {
-      // We will send the field values to the backend to generate a signed PDF and email the carrier
-      const response = await fetch('/api/contracting/sign-and-submit', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token')
-        },
-        body: JSON.stringify({
-          carrier_name: activeApplication.carrier_name,
-          formValues,
-          fields,
-          pdfData
-        })
+      await Backend.autosaveSubmission({
+        id: activeApplication.submissionId,
+        package_id: activeApplication.id,
+        carrier_name: activeApplication.carrier_name,
+        package_name: activeApplication.package_name,
+        user_id: user?.id,
+        status: 'Submitted',
+        progress: 100,
+        data: formValues,
+        updated_at: new Date().toISOString()
       });
-
-      if (!response.ok) throw new Error('Failed to submit contract');
-      
-      alert('Contract Submitted Successfully! Copies sent to contracting department and New Holland sales team.');
+      alert('Contract Submitted Successfully! Sales will review and forward to ' + activeApplication.carrier_name + '.');
       setActiveApplication(null);
-      // Refresh submissions
-      const subRes = await fetch('/api/contracting/submissions', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
-      });
-      const subData = await subRes.json();
-      setSubmissions(Array.isArray(subData) ? subData : []);
     } catch (e) {
-      console.error(e);
-      alert('Error submitting contract.');
+      alert('Failed to submit contract.');
     } finally {
       setIsSubmitting(false);
     }
@@ -133,10 +160,10 @@ export default function ContractingHub() {
   if (activeApplication) {
     return (
       <div className={isFullscreen ? "fixed inset-0 z-50 bg-gray-100 flex flex-col" : "h-full flex flex-col bg-gray-100"}>
-        <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm shrink-0">
+        <div className="bg-white border-b px-6 py-4 flex justify-between items-center shrink-0 shadow-sm z-10">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{activeApplication.carrier_name} - {activeApplication.application_type || 'Contract'}</h1>
-            <p className="text-sm text-gray-500">Fill in the fields directly on the digital document.</p>
+            <h2 className="text-xl font-bold text-gray-900">{activeApplication.carrier_name}</h2>
+            <p className="text-sm text-gray-500">{activeApplication.package_name} • {saveStatus}</p>
           </div>
           <div className="flex items-center space-x-3">
             <button onClick={() => setIsFullscreen(!isFullscreen)} className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition" title="Toggle Fullscreen">
@@ -145,145 +172,138 @@ export default function ContractingHub() {
             <button onClick={() => { setActiveApplication(null); setIsFullscreen(false); }} className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition">
               Cancel & Back
             </button>
-            <button 
-              onClick={submitContract} 
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-[#0A62A7] text-white rounded-md font-bold shadow-md hover:bg-blue-700 transition flex items-center disabled:opacity-70"
-            >
-              {isSubmitting ? 'Processing...' : (
-                <>
-                  <PenTool className="w-4 h-4 mr-2" />
-                  Submit to Carrier
-                </>
-              )}
+            <button onClick={submitContract} disabled={isSubmitting} className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition shadow flex items-center">
+              {isSubmitting ? 'Submitting...' : 'Submit to Carrier'}
             </button>
           </div>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
-          {/* Document Viewer */}
-          <div className="flex-1 bg-gray-500 overflow-auto flex flex-col items-center p-8 relative">
-            <div className="mb-4 flex space-x-4 shrink-0 bg-white p-2 rounded-full shadow-lg"><span className="font-bold text-sm px-4 py-1">{numPages || 1} Pages Total - Scroll to view all</span></div>
-            
-            {pdfData ? (
-              <div className="relative bg-white shadow-2xl inline-block" style={{ minWidth: '800px' }}>
-                <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess} renderMode="canvas">
-                  {Array.from(new Array(numPages || 1), (el, index) => (
-                    <div key={`page_${index + 1}`} className="relative mb-6 shadow-md bg-white border border-gray-200">
-                      <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
-                      
-                      {/* Render overlay inputs for this page */}
-                      {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
-                        <div 
-                          key={field.id}
-                          className="absolute group"
-                          style={{
-                            left: `${field.x}%`,
-                            top: `${field.y}%`,
-                            width: `${field.width}%`,
-                            height: `${field.height}%`,
-                          }}
-                        >
-                          <input
-                            type="text"
-                            placeholder={field.name}
-                            value={formValues[field.id] || ''}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            className="w-full h-full bg-blue-50/70 border-b-2 border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-medium text-gray-900 px-1 absolute inset-0 z-20 outline-none transition-colors"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </Document>
-                
-                {/* Render overlay inputs */}
-                {fields.filter(f => f.pageNumber === pageNumber).map(field => (
-                  <div 
-                    key={field.id}
-                    className="absolute group"
-                    style={{
-                      left: `${field.x}%`,
-                      top: `${field.y}%`,
-                      width: `${field.width}%`,
-                      height: `${field.height}%`,
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder={field.name}
-                      value={formValues[field.id] || ''}
-                      onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                      className="w-full h-full bg-blue-50/70 border-b-2 border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-medium text-gray-900 px-1 absolute inset-0 z-20 outline-none transition-colors"
-                    />
+        <div className="flex-1 overflow-auto p-6 flex justify-center">
+          {pdfData ? (
+            <div className="bg-white shadow-xl relative w-[800px]">
+              <Document
+                file={pdfData}
+                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                loading={<div className="p-8 text-center text-gray-500">Loading document...</div>}
+              >
+                {Array.from(new Array(numPages || 1), (el, index) => (
+                  <div key={`page_${index + 1}`} className="relative mb-6 shadow-md bg-white border border-gray-200">
+                    <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                    
+                    {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
+                      <div 
+                        key={field.id}
+                        className="absolute group"
+                        style={{
+                          left: `${field.x}%`,
+                          top: `${field.y}%`,
+                          width: `${field.width}%`,
+                          height: `${field.height}%`,
+                        }}
+                      >
+                        <input
+                          type="text"
+                          placeholder={field.name}
+                          value={formValues[field.id] || ''}
+                          onChange={(e) => setFormValues({...formValues, [field.id]: e.target.value})}
+                          className="w-full h-full bg-blue-50/70 border-b-2 border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-medium text-gray-900 px-1 absolute inset-0 z-20 outline-none transition-colors"
+                        />
+                      </div>
+                    ))}
                   </div>
                 ))}
-              </div>
-            ) : (
-              <div className="p-12 bg-white rounded shadow text-center text-gray-500 w-full max-w-2xl mt-12">
-                <FileText className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                No PDF preview available. The administrator must upload the digital version of this paperwork first.
-              </div>
-            )}
-          </div>
+              </Document>
+            </div>
+          ) : (
+            <div className="mt-20 text-center">
+              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900">Document Unavailable</h3>
+              <p className="text-gray-500">The underlying PDF was not found.</p>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // Dashboard View (list applications/submissions)
+  // Determine available vs started
+  const startedIds = new Set(myContracts.map(c => c.package_id));
+  const availablePackages = packages.filter(p => !startedIds.has(p.id) && p.availability === 'Available');
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* ... keeping the dashboard view exactly the same but for brevity I will render a clean version ... */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <FileText className="w-6 h-6 mr-3 text-[#0A62A7]" />
-              Available Carrier Contracts
-            </h2>
-          </div>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {applications.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">No active contracting opportunities assigned to you.</div>
-          ) : (
-            applications.map(app => (
-              <div key={app.id} className="p-6 hover:bg-gray-50 transition-colors flex justify-between items-center group">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">{app.carrier_name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{app.application_type || 'New Contract'} • Initiated: {new Date(app.created_at).toLocaleDateString()}</p>
-                </div>
-                <button onClick={() => openApplication(app)} className="px-5 py-2 bg-white border-2 border-blue-600 text-blue-600 rounded-md font-bold hover:bg-blue-600 hover:text-white transition opacity-0 group-hover:opacity-100">
-                  Fill Contract
-                </button>
-              </div>
-            ))
-          )}
-        </div>
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">CONTRACTING</h1>
+        <p className="text-gray-500 mt-1">Complete carrier contracting at your convenience.</p>
       </div>
-      
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-8">
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-xl font-bold text-gray-900">Your Submitted Contracts</h2>
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-bold text-gray-900">AVAILABLE</h2>
+          <p className="text-sm text-gray-500">Contracts you haven't completed.</p>
         </div>
-        <div className="divide-y divide-gray-200">
-          {submissions.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">You haven't submitted any contracting requests yet.</div>
+        <ul className="divide-y divide-gray-200">
+          {availablePackages.length === 0 ? (
+            <li className="p-6 text-gray-500 text-center">No new contracts available.</li>
           ) : (
-            submissions.map(sub => (
-              <div key={sub.id} className="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+            availablePackages.map(pkg => (
+              <li key={pkg.id} className="p-6 flex items-center justify-between hover:bg-gray-50">
                 <div>
-                  <h3 className="text-base font-bold text-gray-900">{sub.carrier_name} - {sub.application_type || 'New Contract'}</h3>
-                  <p className="text-sm text-gray-500">Submitted: {new Date(sub.submitted_at).toLocaleDateString()}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{pkg.carrier_name}</h3>
+                  <p className="text-sm text-gray-500">{pkg.package_name}</p>
                 </div>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-green-100 text-green-800 border border-green-200">
-                  Submitted to Carrier
-                </span>
-              </div>
+                <button 
+                  onClick={() => handleStart(pkg)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 shadow-sm"
+                >
+                  Start
+                </button>
+              </li>
             ))
           )}
+        </ul>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-bold text-gray-900">MY CONTRACTING</h2>
+          <p className="text-sm text-gray-500">Everything you've started or completed.</p>
         </div>
+        <ul className="divide-y divide-gray-200">
+          {myContracts.length === 0 ? (
+            <li className="p-6 text-gray-500 text-center">You have not started any contracts yet.</li>
+          ) : (
+            myContracts.map(sub => (
+              <li key={sub.id} className="p-6 flex items-center justify-between hover:bg-gray-50">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{sub.carrier_name}</h3>
+                  <p className="text-sm text-gray-500">{sub.package_name}</p>
+                  <p className="text-xs mt-1 font-medium flex items-center">
+                    {sub.status === 'In Progress' ? (
+                      <><span className="w-2 h-2 rounded-full bg-yellow-400 mr-2"></span>In Progress ({sub.progress}%)</>
+                    ) : sub.status === 'Submitted' ? (
+                      <><span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>Submitted</>
+                    ) : (
+                      <><span className="w-2 h-2 rounded-full bg-gray-400 mr-2"></span>{sub.status}</>
+                    )}
+                  </p>
+                </div>
+                {sub.status === 'In Progress' ? (
+                  <button 
+                    onClick={() => handleContinue(sub)}
+                    className="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded font-medium hover:bg-blue-50 shadow-sm"
+                  >
+                    Continue
+                  </button>
+                ) : (
+                  <button className="px-4 py-2 bg-gray-100 text-gray-600 border border-gray-200 rounded font-medium hover:bg-gray-200 shadow-sm">
+                    View
+                  </button>
+                )}
+              </li>
+            ))
+          )}
+        </ul>
       </div>
     </div>
   );

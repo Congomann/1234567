@@ -1,7 +1,7 @@
 import { Lead, Client, User, CompanySettings, IntegrationLog, Workflow } from '../types';
 
 const DB_NAME = 'NHFG_Enterprise_DB';
-const DB_VERSION = 7;
+const DB_VERSION = 8;
 
 /**
  * PRODUCTION DATABASE ENGINE
@@ -36,7 +36,7 @@ export class DatabaseEngine {
 
         request.onupgradeneeded = (event: any) => {
           const db = event.target.result;
-          const stores = ['leads', 'clients', 'users', 'settings', 'logs', 'workflows', 'events', 'resources', 'testimonials', 'bank_verifications', 'properties', 'chat_channels', 'chat_messages', 'case_notes', 'pdf_cache'];
+          const stores = ['leads', 'clients', 'users', 'settings', 'logs', 'workflows', 'events', 'resources', 'testimonials', 'bank_verifications', 'properties', 'chat_channels', 'chat_messages', 'case_notes', 'pdf_cache', 'carrier_fields', 'carrier_packages', 'contracting_submissions'];
           stores.forEach(store => {
             if (!db.objectStoreNames.contains(store)) {
               db.createObjectStore(store, { keyPath: 'id' });
