@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Building, Plus, FileUp, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Backend } from '../../services/apiBackend';
+import { DB } from '../../services/database';
 
 import { useEffect } from 'react';
 
@@ -36,6 +37,15 @@ export default function ContractingAdmin() {
     try {
       // Create carrier using the existing API structure
       if (!newCarrier.name.trim()) return;
+      
+      if (uploadedFile) {
+        const reader = new FileReader();
+        reader.readAsDataURL(uploadedFile);
+        reader.onload = async () => {
+          await DB.save('pdf_cache', { id: newCarrier.name, data: reader.result });
+        };
+      }
+      
       await Backend.addCarrier(newCarrier.name, 'Contracting', uploadedFile?.name);
       setNewCarrier({ name: '', code: '', description: '' });
       setShowWizard(false);
