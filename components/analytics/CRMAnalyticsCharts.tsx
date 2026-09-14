@@ -64,151 +64,34 @@ interface TimeframeData {
 
 const TIMEFRAME_DATA: Record<Timeframe, TimeframeData> = {
   '7D': {
-    areaData: [
-      { label: 'Mon', revenue: 2.1, aum: 138.2 },
-      { label: 'Tue', revenue: 2.4, aum: 139.1 },
-      { label: 'Wed', revenue: 2.8, aum: 140.5 },
-      { label: 'Thu', revenue: 3.1, aum: 141.2 },
-      { label: 'Fri', revenue: 3.5, aum: 142.0 },
-      { label: 'Sat', revenue: 3.4, aum: 142.4 },
-      { label: 'Sun', revenue: 3.6, aum: 142.8 }
-    ],
-    barData: [
-      { channel: 'Meta Ads', leads: 145, converted: 48, fill: '#00f2fe' },
-      { channel: 'Google Search', leads: 190, converted: 72, fill: '#10b981' },
-      { channel: 'TV Broadcast', leads: 85, converted: 22, fill: '#f43f5e' },
-      { channel: 'Direct / Referral', leads: 110, converted: 55, fill: '#8b5cf6' }
-    ],
-    pieData: [
-      { name: 'Securities & Wealth', value: 64.2, color: '#00f2fe' },
-      { name: 'Real Estate & Escrow', value: 35.7, color: '#8e2de2' },
-      { name: 'Commercial Insurance', value: 21.4, color: '#10b981' },
-      { name: 'Mortgage Banking', value: 14.3, color: '#f43f5e' },
-      { name: 'Logistics Tech', value: 7.2, color: '#f59e0b' }
-    ],
-    kpi: {
-      totalAum: '$142.8M',
-      aumGrowth: '+3.3%',
-      totalLeads: 530,
-      leadsGrowth: '+12.4%',
-      conversionRate: '37.2%'
-    }
+    areaData: [],
+    barData: [],
+    pieData: [],
+    kpi: { totalAum: '$0', aumGrowth: '0%', totalLeads: 0, leadsGrowth: '0%', conversionRate: '0%' }
   },
   '30D': {
-    areaData: [
-      { label: 'Week 1', revenue: 9.8, aum: 128.4 },
-      { label: 'Week 2', revenue: 11.2, aum: 132.1 },
-      { label: 'Week 3', revenue: 12.9, aum: 137.6 },
-      { label: 'Week 4', revenue: 14.6, aum: 142.8 }
-    ],
-    barData: [
-      { channel: 'Meta Ads', leads: 520, converted: 185, fill: '#00f2fe' },
-      { channel: 'Google Search', leads: 740, converted: 290, fill: '#10b981' },
-      { channel: 'TV Broadcast', leads: 310, converted: 92, fill: '#f43f5e' },
-      { channel: 'Direct / Referral', leads: 420, converted: 215, fill: '#8b5cf6' }
-    ],
-    pieData: [
-      { name: 'Securities & Wealth', value: 62.8, color: '#00f2fe' },
-      { name: 'Real Estate & Escrow', value: 37.1, color: '#8e2de2' },
-      { name: 'Commercial Insurance', value: 22.8, color: '#10b981' },
-      { name: 'Mortgage Banking', value: 13.6, color: '#f43f5e' },
-      { name: 'Logistics Tech', value: 6.5, color: '#f59e0b' }
-    ],
-    kpi: {
-      totalAum: '$142.8M',
-      aumGrowth: '+11.2%',
-      totalLeads: 1990,
-      leadsGrowth: '+18.6%',
-      conversionRate: '39.3%'
-    }
+    areaData: [],
+    barData: [],
+    pieData: [],
+    kpi: { totalAum: '$0', aumGrowth: '0%', totalLeads: 0, leadsGrowth: '0%', conversionRate: '0%' }
   },
   '90D': {
-    areaData: [
-      { label: 'Month 1', revenue: 28.5, aum: 118.0 },
-      { label: 'Month 2', revenue: 34.2, aum: 129.5 },
-      { label: 'Month 3', revenue: 41.8, aum: 142.8 }
-    ],
-    barData: [
-      { channel: 'Meta Ads', leads: 1540, converted: 560, fill: '#00f2fe' },
-      { channel: 'Google Search', leads: 2210, converted: 890, fill: '#10b981' },
-      { channel: 'TV Broadcast', leads: 920, converted: 280, fill: '#f43f5e' },
-      { channel: 'Direct / Referral', leads: 1280, converted: 640, fill: '#8b5cf6' }
-    ],
-    pieData: [
-      { name: 'Securities & Wealth', value: 61.5, color: '#00f2fe' },
-      { name: 'Real Estate & Escrow', value: 38.5, color: '#8e2de2' },
-      { name: 'Commercial Insurance', value: 24.0, color: '#10b981' },
-      { name: 'Mortgage Banking', value: 12.8, color: '#f43f5e' },
-      { name: 'Logistics Tech', value: 6.0, color: '#f59e0b' }
-    ],
-    kpi: {
-      totalAum: '$142.8M',
-      aumGrowth: '+21.0%',
-      totalLeads: 5950,
-      leadsGrowth: '+24.1%',
-      conversionRate: '39.8%'
-    }
+    areaData: [],
+    barData: [],
+    pieData: [],
+    kpi: { totalAum: '$0', aumGrowth: '0%', totalLeads: 0, leadsGrowth: '0%', conversionRate: '0%' }
   },
   'YTD': {
-    areaData: [
-      { label: 'Jan', revenue: 8.2, aum: 105.0 },
-      { label: 'Feb', revenue: 12.5, aum: 110.2 },
-      { label: 'Mar', revenue: 18.1, aum: 116.8 },
-      { label: 'Apr', revenue: 23.4, aum: 122.4 },
-      { label: 'May', revenue: 29.8, aum: 128.9 },
-      { label: 'Jun', revenue: 35.6, aum: 134.5 },
-      { label: 'Jul', revenue: 41.2, aum: 139.0 },
-      { label: 'Aug', revenue: 48.5, aum: 142.8 }
-    ],
-    barData: [
-      { channel: 'Meta Ads', leads: 4100, converted: 1520, fill: '#00f2fe' },
-      { channel: 'Google Search', leads: 5800, converted: 2350, fill: '#10b981' },
-      { channel: 'TV Broadcast', leads: 2400, converted: 780, fill: '#f43f5e' },
-      { channel: 'Direct / Referral', leads: 3200, converted: 1650, fill: '#8b5cf6' }
-    ],
-    pieData: [
-      { name: 'Securities & Wealth', value: 65.6, color: '#00f2fe' },
-      { name: 'Real Estate & Escrow', value: 35.7, color: '#8e2de2' },
-      { name: 'Commercial Insurance', value: 22.8, color: '#10b981' },
-      { name: 'Mortgage Banking', value: 12.8, color: '#f43f5e' },
-      { name: 'Logistics Tech', value: 5.9, color: '#f59e0b' }
-    ],
-    kpi: {
-      totalAum: '$142.8M',
-      aumGrowth: '+36.0%',
-      totalLeads: 15500,
-      leadsGrowth: '+31.2%',
-      conversionRate: '40.6%'
-    }
+    areaData: [],
+    barData: [],
+    pieData: [],
+    kpi: { totalAum: '$0', aumGrowth: '0%', totalLeads: 0, leadsGrowth: '0%', conversionRate: '0%' }
   },
   '1Y': {
-    areaData: [
-      { label: 'Q3 Prev', revenue: 15.2, aum: 98.4 },
-      { label: 'Q4 Prev', revenue: 24.8, aum: 104.2 },
-      { label: 'Q1', revenue: 32.1, aum: 116.8 },
-      { label: 'Q2', revenue: 42.6, aum: 134.5 },
-      { label: 'Q3 Curr', revenue: 54.0, aum: 142.8 }
-    ],
-    barData: [
-      { channel: 'Meta Ads', leads: 6200, converted: 2310, fill: '#00f2fe' },
-      { channel: 'Google Search', leads: 8900, converted: 3620, fill: '#10b981' },
-      { channel: 'TV Broadcast', leads: 3600, converted: 1140, fill: '#f43f5e' },
-      { channel: 'Direct / Referral', leads: 4900, converted: 2510, fill: '#8b5cf6' }
-    ],
-    pieData: [
-      { name: 'Securities & Wealth', value: 64.2, color: '#00f2fe' },
-      { name: 'Real Estate & Escrow', value: 35.7, color: '#8e2de2' },
-      { name: 'Commercial Insurance', value: 21.4, color: '#10b981' },
-      { name: 'Mortgage Banking', value: 14.3, color: '#f43f5e' },
-      { name: 'Logistics Tech', value: 7.2, color: '#f59e0b' }
-    ],
-    kpi: {
-      totalAum: '$142.8M',
-      aumGrowth: '+45.1%',
-      totalLeads: 23600,
-      leadsGrowth: '+41.8%',
-      conversionRate: '40.6%'
-    }
+    areaData: [],
+    barData: [],
+    pieData: [],
+    kpi: { totalAum: '$0', aumGrowth: '0%', totalLeads: 0, leadsGrowth: '0%', conversionRate: '0%' }
   }
 };
 

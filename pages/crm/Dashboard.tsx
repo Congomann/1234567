@@ -125,11 +125,11 @@ export const Dashboard: React.FC = () => {
       {/* ── 3D VIBRANT ANIMATED BANNER CARDS ── */}
       <Tab3DBanner
         cards={[
-          ...(user?.category === 'SECURITIES' ? [{ title: "Weekly Portfolio Balance", value: "$142.8M", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
-          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: "18", subtitle: "Total Value: $18.4M", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
-          ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "42", subtitle: "Total Loads: 128", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
-          { title: "Applications In Line", value: "750", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
-          { title: "New Clients Onboarded", value: "150", subtitle: "Q3 New Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
+          ...(user?.category === 'SECURITIES' ? [{ title: "Weekly Portfolio Balance", value: "$0", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
+          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: "0", subtitle: "Total Value: $0", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
+          ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "0", subtitle: "Total Loads: 0", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
+          { title: "Applications In Line", value: "0", subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
+          { title: "New Clients Onboarded", value: "0", subtitle: "Q3 New Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
         ].slice(0, 3)}
       />
 
@@ -201,7 +201,7 @@ export const Dashboard: React.FC = () => {
               </span>
             </div>
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Securities & Advisory</h3>
-            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$142.8M</p>
+            <p className="text-4xl font-black text-slate-900 tracking-tight mb-2">$0</p>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
               Total Assets Under Management (AUM) across private wealth, annuities, and fee-based portfolios.
             </p>

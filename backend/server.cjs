@@ -6083,7 +6083,7 @@ if (require.main === module) {
     }
 
     // Auto-start Ad Lead Simulator unless explicitly disabled
-    if (process.env.ENABLE_AD_SIMULATOR !== 'false') {
+    if (process.env.ENABLE_AD_SIMULATOR === 'true') {
       try {
         const { startSimulator, stopSimulator } = require('./scripts/adSimulator.cjs');
         startSimulator({
