@@ -119,7 +119,7 @@ export default function ContractingAdmin() {
                   </div>
                   <div className="ml-4 flex-shrink-0">
                     <div className="flex items-center space-x-4">
-                      <Link to="/crm/admin/contracting/builder" className="font-medium text-blue-600 hover:text-blue-500 text-sm">
+                      <Link to={`/crm/admin/contracting/builder?carrier=${encodeURIComponent(carrier.name)}`} className="font-medium text-blue-600 hover:text-blue-500 text-sm">
                         Map Form Fields
                       </Link>
                       <button onClick={() => handleDeleteCarrier(carrier.name)} className="text-red-500 hover:text-red-700 transition-colors" title="Delete Carrier">

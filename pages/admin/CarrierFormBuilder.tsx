@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { DB } from '../../services/database';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function CarrierFormBuilder() {
   const [fields, setFields] = useState<any[]>([]);
@@ -12,8 +12,7 @@ export default function CarrierFormBuilder() {
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+    
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const carrierName = searchParams.get('carrier') || 'Unknown Carrier';
@@ -48,9 +47,8 @@ export default function CarrierFormBuilder() {
     setNumPages(numPages);
   };
 
-  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
+  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>, pageIndex: number) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
@@ -63,7 +61,7 @@ export default function CarrierFormBuilder() {
       y: (y / rect.height) * 100,
       width: 20, // default 20% width
       height: 3, // default 3% height
-      pageNumber: pageNumber
+      pageNumber: pageIndex
     };
     
     setFields([...fields, newField]);
@@ -113,40 +111,43 @@ export default function CarrierFormBuilder() {
         <div className="w-2/3 bg-gray-200 rounded-lg flex flex-col border border-gray-300 shadow-inner overflow-hidden relative">
           <div className="p-3 bg-gray-100 border-b border-gray-300 font-medium text-sm flex justify-between items-center shrink-0">
             <span className="flex items-center"><MousePointer2 className="w-5 h-5 mr-2 text-gray-600" /> Interactive Canvas (Page {pageNumber} of {numPages || 1})</span>
-            <div className="flex space-x-2">
-              <button disabled={pageNumber <= 1} onClick={() => setPageNumber(p => p - 1)} className="px-2 py-1 bg-white border rounded text-xs disabled:opacity-50">Prev</button>
-              <button disabled={pageNumber >= (numPages || 1)} onClick={() => setPageNumber(p => p + 1)} className="px-2 py-1 bg-white border rounded text-xs disabled:opacity-50">Next</button>
-            </div>
+            <div className="flex space-x-2"><span className="text-xs font-bold bg-gray-200 px-2 py-1 rounded">{numPages || 1} Pages Total</span></div>
           </div>
           
           <div className="flex-1 overflow-auto bg-gray-600 flex justify-center p-4">
             {pdfData ? (
               <div 
                 className="relative bg-white shadow-xl cursor-crosshair inline-block" 
-                ref={containerRef}
+                
               >
                 <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess} renderMode="canvas">
-                  <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                  {Array.from(new Array(numPages || 1), (el, index) => (
+                    <div key={`page_${index + 1}`} className="relative mb-4 shadow-md bg-white border border-gray-200">
+                      <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                      
+                      {/* Overlay Fields for this specific page */}
+                      {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
+                        <div 
+                          key={field.id}
+                          className="absolute border-2 border-blue-500 bg-blue-100/40 flex items-center justify-center group"
+                          style={{
+                            left: `${field.x}%`,
+                            top: `${field.y}%`,
+                            width: `${field.width}%`,
+                            height: `${field.height}%`,
+                          }}
+                        >
+                          <span className="text-[10px] font-bold text-blue-700 bg-white/80 px-1 truncate absolute -top-4 left-0 border border-blue-500 rounded-t">{field.name}</span>
+                        </div>
+                      ))}
+                      
+                      {/* Click Catcher for this page */}
+                      <div className="absolute inset-0 z-10" onClick={(e) => handlePdfClick(e, index + 1)}></div>
+                    </div>
+                  ))}
                 </Document>
                 
-                {/* Overlay Fields */}
-                {fields.filter(f => f.pageNumber === pageNumber).map(field => (
-                  <div 
-                    key={field.id}
-                    className="absolute border-2 border-blue-500 bg-blue-100/40 flex items-center justify-center group"
-                    style={{
-                      left: `${field.x}%`,
-                      top: `${field.y}%`,
-                      width: `${field.width}%`,
-                      height: `${field.height}%`,
-                    }}
-                  >
-                    <span className="text-[10px] font-bold text-blue-700 bg-white/80 px-1 truncate absolute -top-4 left-0 border border-blue-500 rounded-t">{field.name}</span>
-                  </div>
-                ))}
                 
-                {/* Click Catcher */}
-                <div className="absolute inset-0 z-10" onClick={handlePdfClick}></div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center space-y-4">

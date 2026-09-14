@@ -3,7 +3,7 @@ import { PenTool, CheckCircle, FileText, Share2, Printer, Search, Info, MousePoi
 import { DB } from '../../services/database';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function ContractingHub() {
   const [activeApplication, setActiveApplication] = useState<any | null>(null);
@@ -141,16 +141,38 @@ export default function ContractingHub() {
         <div className="flex-1 flex overflow-hidden">
           {/* Document Viewer */}
           <div className="flex-1 bg-gray-500 overflow-auto flex flex-col items-center p-8 relative">
-            <div className="mb-4 flex space-x-4 shrink-0 bg-white p-2 rounded-full shadow-lg">
-               <button disabled={pageNumber <= 1} onClick={() => setPageNumber(p => p - 1)} className="px-4 py-1 text-sm font-bold bg-gray-100 rounded-l-full hover:bg-gray-200 disabled:opacity-50">Prev Page</button>
-               <span className="font-bold text-sm px-4 py-1">Page {pageNumber} of {numPages || 1}</span>
-               <button disabled={pageNumber >= (numPages || 1)} onClick={() => setPageNumber(p => p + 1)} className="px-4 py-1 text-sm font-bold bg-gray-100 rounded-r-full hover:bg-gray-200 disabled:opacity-50">Next Page</button>
-            </div>
+            <div className="mb-4 flex space-x-4 shrink-0 bg-white p-2 rounded-full shadow-lg"><span className="font-bold text-sm px-4 py-1">{numPages || 1} Pages Total - Scroll to view all</span></div>
             
             {pdfData ? (
               <div className="relative bg-white shadow-2xl inline-block" style={{ minWidth: '800px' }}>
                 <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess} renderMode="canvas">
-                  <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                  {Array.from(new Array(numPages || 1), (el, index) => (
+                    <div key={`page_${index + 1}`} className="relative mb-6 shadow-md bg-white border border-gray-200">
+                      <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                      
+                      {/* Render overlay inputs for this page */}
+                      {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
+                        <div 
+                          key={field.id}
+                          className="absolute group"
+                          style={{
+                            left: `${field.x}%`,
+                            top: `${field.y}%`,
+                            width: `${field.width}%`,
+                            height: `${field.height}%`,
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder={field.name}
+                            value={formValues[field.id] || ''}
+                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                            className="w-full h-full bg-blue-50/70 border-b-2 border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-medium text-gray-900 px-1 absolute inset-0 z-20 outline-none transition-colors"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                 </Document>
                 
                 {/* Render overlay inputs */}
