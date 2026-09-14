@@ -70,15 +70,15 @@ export const SetupAccount: React.FC = () => {
                     </div>
                     <div className="relative z-10 space-y-4">
                         <div className={`flex items-center gap-3 text-sm font-bold \${step >= 1 ? 'text-white' : 'text-blue-400'}`}>
-                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 1 ? 'bg-[#0A62A7]' : 'border border-blue-400'}`}>1</div>
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 1 ? 'bg-blue-700' : 'border border-blue-400'}`}>1</div>
                             Password
                         </div>
                         <div className={`flex items-center gap-3 text-sm font-bold \${step >= 2 ? 'text-white' : 'text-blue-400/50'}`}>
-                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 2 ? 'bg-[#0A62A7]' : 'border border-blue-400/50'}`}>2</div>
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 2 ? 'bg-blue-700' : 'border border-blue-400/50'}`}>2</div>
                             Profile
                         </div>
                         <div className={`flex items-center gap-3 text-sm font-bold \${step >= 3 ? 'text-white' : 'text-blue-400/50'}`}>
-                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 3 ? 'bg-[#0A62A7]' : 'border border-blue-400/50'}`}>3</div>
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center \${step >= 3 ? 'bg-blue-700' : 'border border-blue-400/50'}`}>3</div>
                             Terms
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export const SetupAccount: React.FC = () => {
                                         else if (password !== confirmPassword) setError('Passwords do not match');
                                         else { setError(''); setStep(2); }
                                     }}
-                                    className="w-full bg-[#0A62A7] text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors"
+                                    className="w-full bg-blue-700 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors"
                                 >
                                     Continue
                                 </button>
@@ -154,7 +154,7 @@ export const SetupAccount: React.FC = () => {
                             
                             <div className="mt-8 flex gap-4">
                                 <button onClick={() => setStep(1)} className="px-6 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200">Back</button>
-                                <button onClick={() => setStep(3)} className="flex-1 bg-[#0A62A7] text-white font-bold py-3 rounded-xl hover:bg-blue-700">Continue</button>
+                                <button onClick={() => setStep(3)} className="flex-1 bg-blue-700 text-white font-bold py-3 rounded-xl hover:bg-blue-700">Continue</button>
                             </div>
                         </div>
                     )}
@@ -173,7 +173,7 @@ export const SetupAccount: React.FC = () => {
                             <label className="flex items-start gap-3 cursor-pointer group">
                                 <div className="mt-0.5">
                                     <input type="checkbox" className="hidden" checked={termsAgreed} onChange={e => setTermsAgreed(e.target.checked)} />
-                                    <div className={`h-5 w-5 rounded border flex items-center justify-center transition-colors \${termsAgreed ? 'bg-[#0A62A7] border-[#0A62A7]' : 'border-slate-300 group-hover:border-[#0A62A7]'}`}>
+                                    <div className={`h-5 w-5 rounded border flex items-center justify-center transition-colors \${termsAgreed ? 'bg-blue-700 border-blue-700' : 'border-slate-300 group-hover:border-blue-700'}`}>
                                         {termsAgreed && <CheckCircle2 className="h-3 w-3 text-white" />}
                                     </div>
                                 </div>
