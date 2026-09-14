@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PenTool, CheckCircle, FileText, Share2, Printer, Search, Info, MousePointer2 } from 'lucide-react';
+import { PenTool, CheckCircle, FileText, Share2, Printer, Search, Info, MousePointer2, Maximize, Minimize } from 'lucide-react';
 import { DB } from '../../services/database';
+import { useData } from '../../context/DataContext';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function ContractingHub() {
+  const { user } = useData();
   const [activeApplication, setActiveApplication] = useState<any | null>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -18,6 +20,7 @@ export default function ContractingHub() {
   const [fields, setFields] = useState<any[]>([]);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     fetch('/api/contracting/applications', {
@@ -55,11 +58,27 @@ export default function ContractingHub() {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token') }
       });
       const data = await res.json();
+      
       if (data.extracted_schema) {
         setFields(data.extracted_schema);
+        
+        // Auto-fill mapped values
+        const initialValues: Record<string, string> = {};
+        data.extracted_schema.forEach((f: any) => {
+          if (f.mappedTo && f.mappedTo !== 'none' && user) {
+            if (f.mappedTo === 'firstName') initialValues[f.id] = user.name?.split(' ')[0] || '';
+            if (f.mappedTo === 'lastName') initialValues[f.id] = user.name?.split(' ').slice(1).join(' ') || '';
+            if (f.mappedTo === 'fullName') initialValues[f.id] = user.name || '';
+            if (f.mappedTo === 'email') initialValues[f.id] = user.email || '';
+            if (f.mappedTo === 'phone') initialValues[f.id] = user.phone || '';
+            if (f.mappedTo === 'npn') initialValues[f.id] = user.npn || '';
+          }
+        });
+        setFormValues(initialValues);
       } else {
         setFields([]);
       }
+
     } catch (e) {
       console.error(e);
     }
@@ -113,14 +132,17 @@ export default function ContractingHub() {
 
   if (activeApplication) {
     return (
-      <div className="h-full flex flex-col bg-gray-100">
+      <div className={isFullscreen ? "fixed inset-0 z-50 bg-gray-100 flex flex-col" : "h-full flex flex-col bg-gray-100"}>
         <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm shrink-0">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{activeApplication.carrier_name} - {activeApplication.application_type || 'Contract'}</h1>
             <p className="text-sm text-gray-500">Fill in the fields directly on the digital document.</p>
           </div>
           <div className="flex items-center space-x-3">
-            <button onClick={() => setActiveApplication(null)} className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition">
+            <button onClick={() => setIsFullscreen(!isFullscreen)} className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition" title="Toggle Fullscreen">
+              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+            </button>
+            <button onClick={() => { setActiveApplication(null); setIsFullscreen(false); }} className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition">
               Cancel & Back
             </button>
             <button 
