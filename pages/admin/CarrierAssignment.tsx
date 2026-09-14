@@ -97,7 +97,7 @@ export const CarrierAssignment: React.FC = () => {
     <div className="space-y-8 relative">
       <Tab3DBanner
         cards={[
-          { title: "Insurance Carriers", value: "35 Partners", subtitle: "Mutual of Omaha, AIG, Lincoln", emoji: "🛡️", gradient: "cyan", linkText: "View Carriers", linkPath: "#insurance_carriers" },
+          { title: "Insurance Carriers", value: `${availableCarriers.length} Partners`, subtitle: "Active Carrier Network", emoji: "🛡️", gradient: "cyan", linkText: "View Carriers", linkPath: "#insurance_carriers" },
           { title: "Contracting Portal", value: "Active Contracting", subtitle: "Direct Advisor Appointments", emoji: "📝", gradient: "yellow" },
           { title: "Carrier Auto-Provisioning", value: "Live Sync", subtitle: "Tier-Based Contracting", emoji: "⚡", gradient: "pink" }
         ]}
