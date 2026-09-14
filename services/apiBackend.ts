@@ -294,7 +294,7 @@ class NHFGBackend {
 
     // --- CARRIERS ---
     async getCarriers(): Promise<any[]> {
-        return this.apiRequest<any[]>('/carriers', { headers: this.getAuthHeaders() }, 'carriers');
+        return this.apiRequest<any[]>(`${this.baseUrl}/carriers`, { headers: this.getAuthHeaders() }, 'carriers');
     }
 
     async addCarrier(name: string, category: string, paperworkFileName?: string): Promise<any> {
@@ -326,11 +326,11 @@ class NHFGBackend {
 
     // --- CONTRACTING & CARRIERS ---
     async getActiveCarriers(): Promise<any[]> {
-        return this.apiRequest<any[]>('/carriers', { headers: this.getAuthHeaders() }, 'carriers');
+        return this.apiRequest<any[]>(`${this.baseUrl}/carriers`, { headers: this.getAuthHeaders() }, 'carriers');
     }
 
     async getCarrierDetails(id: string): Promise<any> {
-        return this.apiRequest<any>('/carriers/' + id, { headers: this.getAuthHeaders() }, 'carrier_details');
+        return this.apiRequest<any>(`${this.baseUrl}/carriers/${id}`, { headers: this.getAuthHeaders() }, 'carrier_details');
     }
 
     async submitApplication(submissionData: any): Promise<any> {
