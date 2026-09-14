@@ -13,6 +13,7 @@ export default function CarrierFormBuilder() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDrawMode, setIsDrawMode] = useState(false);
           
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -51,6 +52,7 @@ export default function CarrierFormBuilder() {
   
   
   const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>, pageIndex: number) => {
+    if (!isDrawMode) return;
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -76,23 +78,25 @@ export default function CarrierFormBuilder() {
 
   
   
+  
   const handleAutoDetect = async () => {
     if (!pdfData) return;
     try {
-      alert("Scanning PDF for existing form fields...");
       const loadingTask = pdfjs.getDocument(pdfData);
       const pdf = await loadingTask.promise;
       const detectedFields: any[] = [];
+      let widgetCount = 0;
+      let underscoreCount = 0;
       
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1 });
-        const annotations = await page.getAnnotations();
         
+        // 1. Try to find native AcroForm Widgets
+        const annotations = await page.getAnnotations();
         annotations.forEach((anno: any) => {
           if (anno.subtype === 'Widget') {
             const rect = anno.rect;
-            // PDF coordinates: [x1, y1, x2, y2] from bottom-left
             const x = (rect[0] / viewport.width) * 100;
             const y = (1 - (rect[3] / viewport.height)) * 100;
             const w = ((rect[2] - rect[0]) / viewport.width) * 100;
@@ -103,27 +107,57 @@ export default function CarrierFormBuilder() {
               name: anno.fieldName || 'Detected Box',
               type: anno.fieldType === 'Btn' ? 'checkbox' : 'text',
               mappedTo: 'none',
-              x: x,
-              y: y,
-              width: w,
-              height: h,
-              pageNumber: i
+              x: x, y: y, width: w, height: h, pageNumber: i
             });
+            widgetCount++;
           }
         });
+
+        // 2. Fallback: Scan text layer for underscores (flattened PDFs)
+        if (widgetCount === 0) {
+          const textContent = await page.getTextContent();
+          textContent.items.forEach((item: any) => {
+            if (item.str && item.str.includes('____')) {
+              // item.transform is [scaleX, skewY, skewX, scaleY, tx, ty]
+              // tx, ty are bottom-left coordinates in PDF points
+              const tx = item.transform[4];
+              const ty = item.transform[5];
+              const widthPt = item.width;
+              const heightPt = item.height || 12; // default if 0
+              
+              const x = (tx / viewport.width) * 100;
+              const y = (1 - ((ty + heightPt) / viewport.height)) * 100; // top-left
+              const w = (widthPt / viewport.width) * 100;
+              const h = (heightPt / viewport.height) * 100;
+              
+              // Only add if it looks like a reasonable field line
+              if (w > 2) {
+                detectedFields.push({
+                  id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
+                  name: 'Underscore Line',
+                  type: 'text',
+                  mappedTo: 'none',
+                  x: x, y: y, width: w, height: Math.max(h, 2.5), pageNumber: i
+                });
+                underscoreCount++;
+              }
+            }
+          });
+        }
       }
       
       if (detectedFields.length > 0) {
         setFields([...fields, ...detectedFields]);
-        alert(`Success! Auto-detected ${detectedFields.length} fields from the PDF.`);
+        alert(`Success! Auto-detected ${widgetCount} native fields and ${underscoreCount} flattened lines from the PDF.`);
       } else {
-        alert("No built-in fields detected. This PDF might be flattened. You can still point-and-click to add fields manually.");
+        alert("No built-in fields or fillable lines detected. You will need to enable Manual Placement mode to point-and-click fields.");
       }
     } catch (e) {
       console.error(e);
       alert("Error auto-detecting fields.");
     }
   };
+
 
   const handleSave = async () => {
     try {
@@ -160,6 +194,12 @@ export default function CarrierFormBuilder() {
           </h1>
           <p className="mt-2 text-sm text-gray-600">Click on the document below to draw input fields for the advisor to fill out.</p>
         </div>
+        <button 
+          onClick={() => setIsDrawMode(!isDrawMode)} 
+          className={`px-4 py-2 ${isDrawMode ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} border rounded-md flex items-center font-medium shadow-sm transition mr-3`}
+        >
+          <MousePointer2 className="w-4 h-4 mr-2" /> {isDrawMode ? 'Disable Manual Placement' : 'Enable Manual Placement'}
+        </button>
         <button onClick={handleAutoDetect} className="px-4 py-2 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-md hover:bg-indigo-200 flex items-center font-medium shadow-sm transition mr-3">
           <Scan className="w-4 h-4 mr-2" /> Auto-Detect Fields
         </button>
@@ -212,7 +252,7 @@ export default function CarrierFormBuilder() {
                       {/* Click Catcher for this page */}
                       <div 
                         className="absolute inset-0 z-10 touch-none" 
-                        onClick={(e) => handlePdfClick(e, index + 1)} style={{ cursor: 'crosshair' }}
+                        onClick={(e) => handlePdfClick(e, index + 1)} style={{ cursor: isDrawMode ? 'crosshair' : 'default' }}
                       ></div>
                     </div>
                   ))}
