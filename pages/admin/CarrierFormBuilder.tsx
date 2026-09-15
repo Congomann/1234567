@@ -44,6 +44,19 @@ export default function CarrierFormBuilder() {
   }, [isFullscreen]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        if (selectedFieldId && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+          setFields(prev => prev.filter(f => f.id !== selectedFieldId));
+          setSelectedFieldId(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedFieldId]);
+
+  useEffect(() => {
     if (carrierId) {
       DB.getAll('pdf_cache').then(caches => {
         const cached = (caches as any[]).find(c => c.id === carrierId);
@@ -193,8 +206,8 @@ export default function CarrierFormBuilder() {
         y: Math.max(0, Math.min(y, 100 - (fields.find(f => f.id === actionState.id)?.height || 0)))
       });
     } else if (actionState.type === 'resize' && actionState.startMouseX !== undefined && actionState.startMouseY !== undefined && actionState.startWidth !== undefined && actionState.startHeight !== undefined) {
-      const deltaXPct = ((e.clientX - actionState.startMouseX) / parentRect.width) * 100;
-      const deltaYPct = ((e.clientY - actionState.startMouseY) / parentRect.height) * 100;
+      const deltaXPct = (((e.clientX - actionState.startMouseX) / parentRect.width) * 100) * 0.4; // Slower, steady crop
+      const deltaYPct = (((e.clientY - actionState.startMouseY) / parentRect.height) * 100) * 0.4;
       
       const field = fields.find(f => f.id === actionState.id);
       if (field) {
@@ -345,61 +358,7 @@ export default function CarrierFormBuilder() {
           )}
         </div>
 
-        {/* Floating Properties Panel (Replaces Sidebar) */}
-        {selectedFieldId && (
-          <div className="absolute right-6 top-6 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-[100] animate-fade-in">
-            {(() => {
-              const field = fields.find(f => f.id === selectedFieldId);
-              if (!field) return null;
-              return (
-                <div className="flex flex-col">
-                  <div className="p-3 bg-gray-900 text-white flex justify-between items-center">
-                    <h3 className="font-semibold text-sm flex items-center"><PenTool className="w-4 h-4 mr-2" /> Field Settings</h3>
-                    <button onClick={() => setSelectedFieldId(null)} className="text-gray-400 hover:text-white"><XSquare className="w-4 h-4" /></button>
-                  </div>
-                  
-                  <div className="p-4 space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Field Label</label>
-                      <input type="text" value={field.name} onChange={e => updateField(field.id, { name: e.target.value })} className="w-full text-sm font-medium text-gray-900 border-gray-300 rounded focus:ring-blue-500 shadow-sm" placeholder="e.g. Beneficiary Name" />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">CRM Auto-Fill Mapping</label>
-                      <select value={field.mappedTo || 'none'} onChange={e => updateField(field.id, { mappedTo: e.target.value })} className="w-full text-sm text-gray-700 border-gray-300 rounded focus:ring-blue-500 shadow-sm">
-                        <option value="none">No Auto-Fill (Manual)</option>
-                        <option value="firstName">Advisor First Name</option>
-                        <option value="lastName">Advisor Last Name</option>
-                        <option value="fullName">Advisor Full Name</option>
-                        <option value="email">Advisor Email</option>
-                        <option value="phone">Advisor Phone</option>
-                        <option value="npn">Advisor NPN</option>
-                        <option value="ssn">Advisor SSN</option>
-                      </select>
-                    </div>
-
-                    <div className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-100">
-                      <label className="text-sm font-semibold text-gray-700">Required Field</label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" checked={field.required || false} onChange={e => updateField(field.id, { required: e.target.checked })} className="sr-only peer" />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
-                    </div>
-                    
-                    
-
-                    <div className="pt-3 border-t border-gray-100 mt-2 flex justify-between">
-                      <button onClick={() => { removeField(field.id); setSelectedFieldId(null); }} className="flex items-center text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-2 rounded transition w-full justify-center">
-                        <Trash2 className="w-4 h-4 mr-2" /> Delete Field
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-      </div>
+              </div>
     </div>
   );
 }
