@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Eraser, CheckSquare, XSquare, Calendar, Square, GripHorizontal, Undo, Redo, FileText, Image as ImageIcon, Circle, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar, GripHorizontal, Undo, Redo, FileText, List } from 'lucide-react';
 import { DetectionEngine } from '../../services/DetectionEngine';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -59,9 +59,13 @@ export default function CarrierFormBuilder() {
     let w = 15;
     let h = 2.5;
 
-    if (activeTool === 'sign') { type = 'signature'; name = 'Signature'; w = 20; h = 5; }
-    if (activeTool === 'check') { type = 'checkbox'; name = 'Checkbox'; w = 2; h = 2; }
+    if (activeTool === 'text') { type = 'text'; name = 'Text Field'; w = 15; h = 2.5; }
+    if (activeTool === 'number') { type = 'number'; name = 'Number Field'; w = 10; h = 2.5; }
     if (activeTool === 'date') { type = 'date'; name = 'Date'; w = 12; h = 2.5; }
+    if (activeTool === 'sign') { type = 'signature'; name = 'Signature'; w = 20; h = 5; }
+    if (activeTool === 'initials') { type = 'initials'; name = 'Initials'; w = 8; h = 4; }
+    if (activeTool === 'check') { type = 'checkbox'; name = 'Checkbox'; w = 2; h = 2; }
+    if (activeTool === 'dropdown') { type = 'dropdown'; name = 'Dropdown'; w = 15; h = 2.5; }
     
     const newField = {
       id: 'field_' + Date.now(),
@@ -200,17 +204,14 @@ export default function CarrierFormBuilder() {
         
         <ToolBtn id="select" icon={MousePointer2} label="Select" />
         <ToolBtn id="text" icon={Type} label="Text Box" />
-        <ToolBtn id="sign" icon={PenTool} label="Sign" />
-        <ToolBtn id="check" icon={CheckSquare} label="Check" />
-        <ToolBtn id="cross" icon={XSquare} label="Cross" />
+        <ToolBtn id="number" icon={Hash} label="Number" />
         <ToolBtn id="date" icon={Calendar} label="Date" />
-        
-        <div className="flex items-center border-l border-gray-200 pl-3 ml-1 gap-1">
-           <ToolBtn id="erase" icon={Eraser} label="Erase" />
-           <ToolBtn id="image" icon={ImageIcon} label="Image" />
-           <ToolBtn id="shapes" icon={Circle} label="Shapes" />
-           <ToolBtn id="table" icon={LayoutGrid} label="Table" />
-        </div>
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        <ToolBtn id="sign" icon={PenTool} label="Signature" />
+        <ToolBtn id="initials" icon={PenTool} label="Initials" />
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        <ToolBtn id="check" icon={CheckSquare} label="Checkbox" />
+        <ToolBtn id="dropdown" icon={List} label="Dropdown" />
       </div>
 
       {/* Main Workspace */}
@@ -326,6 +327,20 @@ export default function CarrierFormBuilder() {
                         <input type="checkbox" checked={field.required || false} onChange={e => updateField(field.id, { required: e.target.checked })} className="sr-only peer" />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                       </label>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-gray-100 mt-2">
+                      <p className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wider">Field Sizing</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] text-gray-500 mb-1 flex justify-between"><span>Width</span> <span>{Math.round(field.width)}%</span></label>
+                          <input type="range" min="1" max="100" step="0.1" value={field.width} onChange={e => updateField(field.id, { width: parseFloat(e.target.value) })} className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-gray-500 mb-1 flex justify-between"><span>Height</span> <span>{Math.round(field.height)}%</span></label>
+                          <input type="range" min="1" max="100" step="0.1" value={field.height} onChange={e => updateField(field.id, { height: parseFloat(e.target.value) })} className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="pt-3 border-t border-gray-100 mt-2 flex justify-between">
