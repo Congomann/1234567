@@ -153,8 +153,8 @@ export const Navbar: React.FC = () => {
 
       {/* Maintenance Banner */}
       {companySettings?.maintenanceModeEnabled && (
-        <div className="fixed top-0 left-0 right-0 z-[110] bg-black text-white h-10 flex items-center overflow-hidden border-b border-white/10">
-          <div className="flex whitespace-nowrap animate-marquee px-4">
+        <div className="fixed top-0 left-0 right-0 z-[110] bg-black text-white min-h-[40px] pt-[env(safe-area-inset-top)] flex items-center overflow-hidden border-b border-white/10 shadow-md">
+          <div className="flex whitespace-nowrap animate-marquee px-4 w-max shrink-0 items-center">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4">
               <span className="text-amber-400">● NOTICE:</span> {companySettings.maintenanceModeText || "System under maintenance. Some services may be temporarily unavailable."}
               <span className="opacity-30">|</span>
@@ -178,7 +178,7 @@ export const Navbar: React.FC = () => {
       )}
 
       <nav 
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 flex justify-center py-6 px-4 md:px-12 pointer-events-none ${companySettings?.maintenanceModeEnabled ? 'mt-10' : ''}`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 flex justify-center py-6 px-4 md:px-12 pointer-events-none pt-[calc(env(safe-area-inset-top)+1.5rem)] ${companySettings?.maintenanceModeEnabled ? 'mt-[calc(env(safe-area-inset-top)+40px)]' : ''}`}
       >
         <div className={`max-w-6xl w-full pointer-events-auto transition-all duration-500 ${isScrolled ? 'translate-y-[-10px]' : ''}`}>
           <div className={`relative bg-white border border-slate-200 rounded-full px-8 py-3.5 flex items-center justify-between transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.04)] ${isScrolled ? 'shadow-[0_20px_60px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]' : ''}`}>
