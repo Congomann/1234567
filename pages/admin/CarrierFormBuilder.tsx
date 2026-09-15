@@ -64,6 +64,13 @@ export default function CarrierFormBuilder() {
           setPdfData(cached.data);
         }
       }).catch(console.error);
+      
+      DB.getAll('carrier_fields').then(configs => {
+        const config = (configs as any[]).find(c => c.id === carrierId);
+        if (config && config.extracted_schema) {
+          setFields(config.extracted_schema);
+        }
+      }).catch(console.error);
     }
   }, [carrierId]);
 
@@ -161,8 +168,17 @@ export default function CarrierFormBuilder() {
     }
   };
 
-  const handleSave = () => {
-    navigate('/crm');
+  const handleSave = async () => {
+    if (carrierId) {
+      await DB.save('carrier_fields', {
+        id: carrierId,
+        extracted_schema: fields,
+        updated_at: new Date().toISOString()
+      });
+      // Optionally update the package status in the backend/DB if needed, 
+      // but ContractingAdmin handles the Available/Hidden status.
+    }
+    navigate('/crm/admin/contracting'); // Navigate back to the Contracting Admin list
   };
 
   // Drag and Drop Logic

@@ -1,28 +1,24 @@
 const fs = require('fs');
-let builder = fs.readFileSync('pages/admin/CarrierFormBuilder.tsx', 'utf8');
+let content = fs.readFileSync('pages/admin/CarrierFormBuilder.tsx', 'utf8');
 
-const newSave = `
-  const handleSave = async () => {
-    try {
-      await DB.save('carrier_fields', { id: carrierName, extracted_schema: fields });
-      // Still attempt backend sync if needed, but local DB guarantees it works for the hub
-      fetch('/api/carriers/forms/' + encodeURIComponent(formId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extracted_schema: fields })
-      }).catch(e => {}); // ignore backend error if in mock mode
-      
-      alert('Configuration published to database. This form is now fully digitized!');
-    } catch (e) {
-      alert('Failed to save configuration.');
+const oldSave = `  const handleSave = () => {
+    navigate('/crm');
+  };`;
+
+const newSave = `  const handleSave = async () => {
+    if (carrierId) {
+      await DB.save('carrier_fields', {
+        id: carrierId,
+        extracted_schema: fields,
+        updated_at: new Date().toISOString()
+      });
+      // Optionally update the package status in the backend/DB if needed, 
+      // but ContractingAdmin handles the Available/Hidden status.
     }
-  };
-`;
+    navigate('/crm/admin/contracting'); // Navigate back to the Contracting Admin list
+  };`;
 
-builder = builder.replace(
-  /const handleSave = async \(\) => \{[\s\S]*?alert\('Failed to save configuration\.'\);\n    \}\n  \};/,
-  newSave
-);
+content = content.replace(oldSave, newSave);
 
-fs.writeFileSync('pages/admin/CarrierFormBuilder.tsx', builder);
-console.log('Fixed handleSave in CarrierFormBuilder');
+fs.writeFileSync('pages/admin/CarrierFormBuilder.tsx', content);
+console.log('Patched handleSave in CarrierFormBuilder');
