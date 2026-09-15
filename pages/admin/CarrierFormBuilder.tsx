@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar, GripHorizontal, Undo, Redo, FileText, List, XSquare } from 'lucide-react';
+import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar,  Undo, Redo, FileText, List, XSquare } from 'lucide-react';
 import { DetectionEngine } from '../../services/DetectionEngine';
 import { DB } from '../../services/database';
 
@@ -298,12 +298,9 @@ export default function CarrierFormBuilder() {
                       >
                         {selectedFieldId === field.id && activeTool === 'select' && (
                           <>
-                             <div className="absolute top-0 right-0 p-0.5 bg-blue-600 text-white rounded-bl opacity-80 pointer-events-none">
-                               <GripHorizontal className="w-3 h-3" />
-                             </div>
-                             {/* Resize Handle */}
+                             {/* Invisible Resize Handle */}
                              <div 
-                               className="absolute -bottom-1.5 -right-1.5 w-4 h-4 bg-blue-600 border-2 border-white rounded-full cursor-se-resize shadow-md z-[60]"
+                               className="absolute bottom-0 right-0 w-6 h-6 bg-transparent cursor-se-resize z-[60]"
                                onMouseDown={(e) => handleResizeMouseDown(e, field)}
                              />
                           </>
