@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, SlidersHorizontal, Check, Scan, Loader2, MousePointer2, Trash2, Maximize, Minimize } from 'lucide-react';
+import { FileText, SlidersHorizontal, Check, Scan, Loader2, MousePointer2, Trash2, Settings2, Maximize, Minimize } from 'lucide-react';
 import { DetectionEngine } from '../../services/DetectionEngine';
 import { useLocation } from 'react-router-dom';
 import { DB } from '../../services/database';
