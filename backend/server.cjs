@@ -6029,19 +6029,39 @@ app.post('/api/contracting/sign-and-submit', authenticateToken, async (req, res)
               let fontSize = 11;
               let yOffset = 0;
               
-              if (field.type === 'signature' || field.type === 'initials') {
-                font = await pdfDoc.embedFont(require('pdf-lib').StandardFonts.TimesRomanItalic);
-                fontSize = 18; // Make signatures larger
-                yOffset = -5;  // Adjust baseline for larger font
+              if ((field.type === 'signature' || field.type === 'initials') && String(textToDraw).startsWith('data:image/png;base64,')) {
+                // Handle drawn signature image
+                const imageBytes = Buffer.from(String(textToDraw).split(',')[1], 'base64');
+                const pngImage = await pdfDoc.embedPng(imageBytes);
+                
+                // Scale the image to fit inside the field width/height while maintaining aspect ratio
+                // The field is roughly fieldWidth/fieldHeight points. We'll constrain it.
+                const fWidth = (field.width / 100) * width;
+                const fHeight = (field.height / 100) * height;
+                const imgDims = pngImage.scaleToFit(fWidth || 150, fHeight || 40);
+                
+                // Draw centered vertically
+                page.drawImage(pngImage, {
+                  x: x,
+                  y: y - 5,
+                  width: imgDims.width,
+                  height: imgDims.height
+                });
+              } else {
+                if (field.type === 'signature' || field.type === 'initials') {
+                  font = await pdfDoc.embedFont(require('pdf-lib').StandardFonts.TimesRomanItalic);
+                  fontSize = 18; // Make signatures larger
+                  yOffset = -5;  // Adjust baseline for larger font
+                }
+  
+                page.drawText(String(textToDraw), {
+                  x: x,
+                  y: y + yOffset,
+                  size: fontSize,
+                  font: font,
+                  color: rgb(0.1, 0.1, 0.5) // Dark blue text for form entries
+                });
               }
-
-              page.drawText(String(textToDraw), {
-                x: x,
-                y: y + yOffset,
-                size: fontSize,
-                font: font,
-                color: rgb(0.1, 0.1, 0.5) // Dark blue text for form entries
-              });
             }
           }
         }
