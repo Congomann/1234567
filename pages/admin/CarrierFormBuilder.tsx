@@ -120,7 +120,6 @@ export default function CarrierFormBuilder() {
   const handleAutoDetect = async () => {
     if (!pdfData) return;
     try {
-      alert("Initializing Document Field-Detection Engine...");
       const detectedFields = await DetectionEngine.detectFields(pdfData);
       if (detectedFields.length > 0) {
         const mappedFields = detectedFields.map(df => ({
@@ -137,18 +136,16 @@ export default function CarrierFormBuilder() {
           confidence: df.confidence
         }));
         setFields([...fields, ...mappedFields]);
-        alert(`Detection Complete!\n\n${mappedFields.length} Fields Auto-Confirmed.`);
       } else {
-        alert("The detection engine found no viable input fields on this document.");
+        console.log("No viable fields detected.");
       }
     } catch (e) {
       console.error(e);
-      alert("Error during document detection.");
+      console.error("Detection error.");
     }
   };
 
   const handleSave = () => {
-    alert("Configuration Saved! Advisors can now fill this out perfectly via the CRM.");
     navigate('/crm');
   };
 
