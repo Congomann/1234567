@@ -48,7 +48,9 @@ export class DetectionEngine {
 
         // Placeholder Detection (Checkboxes)
         const str = item.str.trim();
-        if (str === '[ ]' || str === '[]' || str === '☐' || str === '( )') {
+        if (str === '[ ]' || str === '[]' || str === '☐' || str === '( )' || str === '○' || str === '〇' || str === 'o') {
+          // If it's a lowercase 'o', only trust it if it's perfectly isolated and small, to avoid matching the letter 'o' in words.
+          if (str === 'o' && w > 15) return;
           pageCandidates.push({
             id: 'cand_' + Date.now() + Math.random().toString(36).substring(2),
             pageNumber: i,
@@ -63,7 +65,8 @@ export class DetectionEngine {
         }
         
         // Placeholder Detection (Lines)
-        if (str.includes('____') && w > 2) {
+        const underscoreCount = (str.match(/_/g) || []).length;
+        if (underscoreCount >= 3 && w > 2) {
           pageCandidates.push({
             id: 'cand_' + Date.now() + Math.random().toString(36).substring(2),
             pageNumber: i,
@@ -145,6 +148,8 @@ export class DetectionEngine {
           else if (ctx.includes('address')) { candidate.type = 'address'; candidate.canonicalKey = 'address'; }
           else if (ctx.includes('phone')) { candidate.type = 'phone'; candidate.canonicalKey = 'phone'; }
           else if (ctx.includes('email')) { candidate.type = 'email'; candidate.canonicalKey = 'email'; }
+          else if (ctx.includes('social security') || ctx.includes('ssn')) { candidate.type = 'number'; candidate.canonicalKey = 'ssn'; }
+          else if (ctx.includes('imo') || ctx.includes('bga')) { candidate.type = 'text'; candidate.canonicalKey = 'imo'; }
           else if (ctx.includes('npn') || ctx.includes('license')) { candidate.type = 'text'; candidate.canonicalKey = 'npn'; }
           else if (ctx.includes('signature') || ctx.includes('sign')) { candidate.type = 'signature'; candidate.canonicalKey = 'signature'; }
           else if (ctx.includes('initial')) { candidate.type = 'initials'; candidate.canonicalKey = 'initials'; }
