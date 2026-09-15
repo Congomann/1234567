@@ -33,6 +33,15 @@ export const Home: React.FC = () => {
   const { companySettings } = useData();
   const [isMuted, setIsMuted] = useState(true);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(e => console.log('Autoplay prevented by iOS:', e));
+    }
+  }, [currentVideoIndex]);
   const [isLifeModalOpen, setIsLifeModalOpen] = useState(false);
   const [isMortgageModalOpen, setIsMortgageModalOpen] = useState(false);
   const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
@@ -73,14 +82,16 @@ export const Home: React.FC = () => {
         {isVideoType && currentVideoSrc ? (
           <>
             <video
+              ref={videoRef}
               key={currentVideoSrc}
               src={currentVideoSrc}
               autoPlay
-              muted={isMuted}
+              muted
               playsInline
               onEnded={handleVideoEnded}
               loop={playlist.length <= 1}
               className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectFit: 'cover' }}
             />
             <div className="absolute inset-0 bg-black/45 pointer-events-none"></div>
 
