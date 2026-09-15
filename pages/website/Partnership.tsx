@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useData } from "../../context/DataContext";
+import { ProductType } from "../../types";
 import { 
   Briefcase, 
   Globe, 

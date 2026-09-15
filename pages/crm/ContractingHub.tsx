@@ -195,8 +195,8 @@ export default function ContractingHub() {
     
     // Load PDF
     const pdfId = `${pkg.carrier_name}-${pkg.version}`;
-    const caches = await DB.getAll('pdf_cache') || [];
-    const cached = caches.find(c => c.id === pdfId) || caches.find(c => c.id === pkg.carrier_name);
+    const caches = (await DB.getAll('pdf_cache') || []) as any[];
+    const cached = caches.find((c: any) => c.id === pdfId) || caches.find((c: any) => c.id === pkg.carrier_name);
     if (cached && cached.data) {
       setPdfData(cached.data);
     } else {
@@ -204,8 +204,8 @@ export default function ContractingHub() {
     }
     
     // Load Fields mapped by admin
-    const adminFields = await DB.getAll('carrier_fields') || [];
-    const schema = adminFields.find(f => f.id === pdfId) || adminFields.find(f => f.id === pkg.carrier_name);
+    const adminFields = (await DB.getAll('carrier_fields') || []) as any[];
+    const schema = adminFields.find((f: any) => f.id === pdfId) || adminFields.find((f: any) => f.id === pkg.carrier_name);
     
     if (schema && schema.extracted_schema) {
       setFields(schema.extracted_schema);
@@ -222,7 +222,7 @@ export default function ContractingHub() {
             if (f.mappedTo === 'fullName') initialValues[f.id] = user.name || '';
             if (f.mappedTo === 'email') initialValues[f.id] = user.email || '';
             if (f.mappedTo === 'phone') initialValues[f.id] = user.phone || '';
-            if (f.mappedTo === 'npn') initialValues[f.id] = user.npn || '';
+            if (f.mappedTo === 'npn') initialValues[f.id] = (user as any).npn || '';
           }
         });
         setFormValues(initialValues);

@@ -87,6 +87,7 @@ interface DataContextType {
   rejectTestimonialEdit: (id: string) => void;
   addCallback: (request: any) => void;
   handleAdvisorLeadAction: (id: string, action: string, reason?: string) => void;
+  pushNotification: (title: string, message: string, type?: 'info' | 'success' | 'warning' | 'alert', resourceType?: any, relatedId?: string) => void;
 
   addEvent: (event: Partial<CalendarEvent>) => void;
   updateEvent: (event: Partial<CalendarEvent>) => void;
@@ -1006,7 +1007,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <DataContext.Provider value={{
       user, isLoading, allUsers, leads, clients, tasks, metrics: { totalRevenue: clients.length * 5000, activeClients: clients.length, pendingLeads: leads.length, monthlyPerformance: [], totalCommission: clients.length * 500 },
       automationMetrics, workflows, processingLeads,
-      notifications, companySettings, resources, commissions: [], events, testimonials,
+      notifications, chatMessages: [], originalAdminUser, impersonateUser: () => {}, stopImpersonating: () => {}, pushNotification, companySettings, resources, commissions: [], events, testimonials,
       availableCarriers, colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
       accessLogs, documents, interactions, userPreferences,
       login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,

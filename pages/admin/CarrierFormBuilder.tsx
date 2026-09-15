@@ -3,10 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar, GripHorizontal, Undo, Redo, FileText, List } from 'lucide-react';
+import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar, GripHorizontal, Undo, Redo, FileText, List, XSquare } from 'lucide-react';
 import { DetectionEngine } from '../../services/DetectionEngine';
+import { DB } from '../../services/database';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function CarrierFormBuilder() {
   const [searchParams] = useSearchParams();
@@ -41,6 +42,17 @@ export default function CarrierFormBuilder() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isFullscreen]);
+
+  useEffect(() => {
+    if (carrierId) {
+      DB.getAll('pdf_cache').then(caches => {
+        const cached = (caches as any[]).find(c => c.id === carrierId);
+        if (cached && cached.data) {
+          setPdfData(cached.data);
+        }
+      }).catch(console.error);
+    }
+  }, [carrierId]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -273,7 +285,13 @@ export default function CarrierFormBuilder() {
                   const file = e.target.files?.[0];
                   if (file) {
                     const reader = new FileReader();
-                    reader.onload = (e) => setPdfData(e.target?.result as string);
+                    reader.onload = (e) => {
+                      const data = e.target?.result as string;
+                      setPdfData(data);
+                      if (carrierId) {
+                        DB.put('pdf_cache', { id: carrierId, data, timestamp: Date.now() }).catch(console.error);
+                      }
+                    };
                     reader.readAsDataURL(file);
                   }
                 }} 

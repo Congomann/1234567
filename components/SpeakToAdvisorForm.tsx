@@ -61,7 +61,7 @@ export const SpeakToAdvisorForm: React.FC<{ productType?: string }> = ({ product
       case ProductType.MORTGAGE: return "Speak to Mortgage Specialist";
       case ProductType.SECURITIES: return "Speak to Wealth Manager";
       case ProductType.HOME_REPAIR: return "Speak to Property Specialist";
-      case ProductType.GROUP_BENEFITS: return "Speak to Benefits Advisor";
+      case 'Group Benefits': return "Speak to Benefits Advisor";
       default: return "Speak to an Advisor";
     }
   };

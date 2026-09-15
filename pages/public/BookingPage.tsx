@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarEvent, LeadStatus, ProductType, User } from '../../types';
+import { CalendarEvent, LeadStatus, ProductType, User, UserRole, AdvisorCategory } from '../../types';
 import {
   Calendar,
   Clock,
@@ -59,18 +59,17 @@ export const BookingPage: React.FC = () => {
 
   // Find Advisors List
   const activeAdvisors = useMemo(() => {
-    const list = (allUsers || []).filter(u => u.role === 'Advisor' || u.role === 'Admin' || u.role === 'Manager');
+    const list = (allUsers || []).filter(u => u.role === UserRole.ADVISOR || u.role === UserRole.ADMIN || u.role === UserRole.MANAGER);
     if (list.length === 0) {
       return [{
         id: 'remmy-shabani',
         name: 'Remmy Shabani',
         email: 'remmyk@newhollandfinancial.com',
         phone: '(717) 847-9638',
-        role: 'Advisor' as const,
-        advisorCategory: 'Real Estate & Insurance',
-          avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
-        active: true
-      }];
+        role: UserRole.ADVISOR,
+        category: AdvisorCategory.REAL_ESTATE,
+        avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`
+      } as User];
     }
     return list;
   }, [allUsers]);
@@ -86,30 +85,28 @@ export const BookingPage: React.FC = () => {
         a.email.toLowerCase().includes(cleanParam)
       );
       if (found) {
-        setSelectedAdvisor(found);
+        setSelectedAdvisor(found as User);
       } else {
         setSelectedAdvisor({
           id: 'remmy-shabani',
           name: 'Remmy Shabani',
           email: 'remmyk@newhollandfinancial.com',
           phone: '(717) 847-9638',
-          role: 'Advisor' as any,
-          advisorCategory: 'Real Estate & Insurance Advisor',
-            avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
-          active: true
-        });
+          role: UserRole.ADVISOR,
+          category: AdvisorCategory.REAL_ESTATE,
+          avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`
+        } as User);
       }
     } else {
-      setSelectedAdvisor(activeAdvisors[0] || {
+      setSelectedAdvisor((activeAdvisors[0] as User) || {
         id: 'remmy-shabani',
         name: 'Remmy Shabani',
         email: 'remmyk@newhollandfinancial.com',
         phone: '(717) 847-9638',
-        role: 'Advisor' as any,
-        advisorCategory: 'Real Estate & Insurance Advisor',
-          avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`,
-        active: true
-      });
+        role: UserRole.ADVISOR,
+        category: AdvisorCategory.REAL_ESTATE,
+        avatar: `https://ui-avatars.com/api/?name=Remmy+Shabani&background=0A62A7&color=fff`
+      } as User);
     }
   }, [advisorParam, activeAdvisors]);
 
@@ -263,7 +260,7 @@ export const BookingPage: React.FC = () => {
                     />
                     <div>
                       <h3 className="font-bold text-white text-sm leading-tight">{selectedAdvisor.name}</h3>
-                      <p className="text-[11px] text-[#F59E0B] font-semibold mt-0.5">{selectedAdvisor.advisorCategory || selectedAdvisor.role}</p>
+                      <p className="text-[11px] text-[#F59E0B] font-semibold mt-0.5">{selectedAdvisor.category || selectedAdvisor.role}</p>
                     </div>
                   </div>
                 </div>
@@ -337,7 +334,7 @@ export const BookingPage: React.FC = () => {
                             <img src={adv.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adv.name)}&background=0A62A7&color=fff`} alt={adv.name} className="w-10 h-10 rounded-full object-cover" />
                             <div className="overflow-hidden">
                               <span className={`font-bold text-xs block truncate ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{adv.name}</span>
-                              <span className={`text-[10px] block truncate ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>{adv.advisorCategory || adv.role}</span>
+                              <span className={`text-[10px] block truncate ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>{adv.category || adv.role}</span>
                             </div>
                           </button>
                         );

@@ -1,58 +1,54 @@
 const fs = require('fs');
-const file = 'pages/admin/ContractingAdmin.tsx';
-let content = fs.readFileSync(file, 'utf8');
+let content = fs.readFileSync('pages/admin/CarrierFormBuilder.tsx', 'utf8');
 
-const importTarget = "import React, { useState } from 'react';";
-const importReplacement = "import React, { useState, useRef } from 'react';";
-content = content.replace(importTarget, importReplacement);
+// 1. Fix the Worker Src
+const oldWorker = 'pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;';
+const newWorker = 'pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;';
+content = content.replace(oldWorker, newWorker);
 
-const stateTarget = "const [newCarrier, setNewCarrier] = useState({ name: '', code: '', description: '' });";
-const stateReplacement = "const [newCarrier, setNewCarrier] = useState({ name: '', code: '', description: '' });\n  const [uploadedFile, setUploadedFile] = useState<File | null>(null);\n  const fileInputRef = useRef<HTMLInputElement>(null);";
-content = content.replace(stateTarget, stateReplacement);
+// 2. Add imports for DB and useEffect logic
+content = content.replace(
+  "import { DetectionEngine } from '../../services/DetectionEngine';",
+  "import { DetectionEngine } from '../../services/DetectionEngine';\nimport { DB } from '../../services/database';"
+);
 
-const step2Target = `<div className="mt-4">
-                    <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      Select PDF Files
-                    </button>
-                  </div>`;
-const step2Replacement = `<div className="mt-4">
-                    <input 
-                      type="file" 
-                      accept=".pdf" 
-                      className="hidden" 
-                      ref={fileInputRef} 
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setUploadedFile(e.target.files[0]);
-                        }
-                      }} 
-                    />
-                    {!uploadedFile ? (
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                      >
-                        Select PDF Files
-                      </button>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-200">
-                          {uploadedFile.name} ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
-                        </div>
-                        <button 
-                          onClick={() => setUploadedFile(null)}
-                          className="text-xs text-red-500 hover:text-red-700"
-                        >
-                          Remove File
-                        </button>
-                      </div>
-                    )}
-                  </div>`;
-content = content.replace(step2Target, step2Replacement);
+// 3. Inject the useEffect
+const oldEffect = `  useEffect(() => {
+    const handleResize = () => {
+      const container = document.getElementById('pdf-container-wrapper');
+      if (container) {
+        setPdfWidth(container.clientWidth - 40);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isFullscreen]);`;
 
-const saveTarget = `setWizardStep(1);`;
-const saveReplacement = `setWizardStep(1);\n      setUploadedFile(null);`;
-content = content.replace(saveTarget, saveReplacement);
+const newEffect = `  useEffect(() => {
+    const handleResize = () => {
+      const container = document.getElementById('pdf-container-wrapper');
+      if (container) {
+        setPdfWidth(container.clientWidth - 40);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isFullscreen]);
 
-fs.writeFileSync(file, content);
-console.log("Fixed ContractingAdmin file upload");
+  useEffect(() => {
+    if (carrierId) {
+      DB.getAll('pdf_cache').then(caches => {
+        const cached = (caches as any[]).find(c => c.id === carrierId);
+        if (cached && cached.data) {
+          setPdfData(cached.data);
+        }
+      }).catch(console.error);
+    }
+  }, [carrierId]);`;
+
+content = content.replace(oldEffect, newEffect);
+
+fs.writeFileSync('pages/admin/CarrierFormBuilder.tsx', content);
+console.log('Fixed Worker URL and Restored IndexedDB cache loading');

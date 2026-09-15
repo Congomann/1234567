@@ -14,7 +14,7 @@ interface CommandItem {
 export const CRMCommandPalette: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const { leads, clients, properties, setSelectedTab } = useData();
+  const { leads, clients, properties } = useData();
   const navigate = useNavigate();
 
   // Keyboard Event Listener for Cmd + K / Ctrl + K
@@ -24,47 +24,50 @@ export const CRMCommandPalette: React.FC = () => {
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const navigationCommands: CommandItem[] = [
-    { id: 'nav-dashboard', title: 'Dashboard Terminal', category: 'Navigation', icon: Command, action: () => { setSelectedTab('dashboard'); setIsOpen(false); } },
-    { id: 'nav-leads', title: 'Leads Database', category: 'Navigation', icon: User, action: () => { setSelectedTab('leads'); setIsOpen(false); } },
-    { id: 'nav-calendar', title: 'Calendar & Schedules', category: 'Navigation', icon: Calendar, action: () => { setSelectedTab('calendar'); setIsOpen(false); } },
-    { id: 'nav-telephony', title: 'SignalWire AI Telephony', category: 'Navigation', icon: Phone, action: () => { setSelectedTab('telephony'); setIsOpen(false); } },
-    { id: 'nav-bank', title: 'Plaid Bank Verification', category: 'Navigation', icon: Landmark, action: () => { setSelectedTab('bank-verification'); setIsOpen(false); } },
-    { id: 'nav-logistics', title: 'Logistics Command Center', category: 'Navigation', icon: Truck, action: () => { setSelectedTab('logistics-command'); setIsOpen(false); } },
-    { id: 'nav-signature', title: 'Email Signature Generator', category: 'Navigation', icon: Command, action: () => { setSelectedTab('email-signature'); setIsOpen(false); } },
+  // Global actions for all users
+  const commands: CommandItem[] = [
+    { id: 'nav-dashboard', title: 'Dashboard Terminal', category: 'Navigation', icon: Command, action: () => { navigate('/crm/dashboard'); setIsOpen(false); } },
+    { id: 'nav-leads', title: 'Leads Database', category: 'Navigation', icon: User, action: () => { navigate('/crm/leads'); setIsOpen(false); } },
+    { id: 'nav-calendar', title: 'Calendar & Schedules', category: 'Navigation', icon: Calendar, action: () => { navigate('/crm/calendar'); setIsOpen(false); } },
+    { id: 'nav-telephony', title: 'SignalWire AI Telephony', category: 'Navigation', icon: Phone, action: () => { navigate('/crm/telephony'); setIsOpen(false); } },
+    { id: 'nav-bank', title: 'Plaid Bank Verification', category: 'Navigation', icon: Landmark, action: () => { navigate('/crm/bank-verification'); setIsOpen(false); } },
+    { id: 'nav-logistics', title: 'Logistics Command Center', category: 'Navigation', icon: Truck, action: () => { navigate('/crm/logistics-command'); setIsOpen(false); } },
+    { id: 'nav-signature', title: 'Email Signature Generator', category: 'Navigation', icon: Command, action: () => { navigate('/crm/admin/signature'); setIsOpen(false); } },
   ];
 
-  const leadCommands: CommandItem[] = (leads || []).slice(0, 5).map((lead) => ({
-    id: `lead-${lead.id}`,
-    title: `Lead: ${lead.name} (${lead.interest || 'General'})`,
-    category: 'Leads',
-    icon: User,
-    action: () => {
-      setSelectedTab('leads');
-      setIsOpen(false);
-    }
-  }));
+  // Dynamic entity actions based on loaded data
+  if (leads && leads.length > 0) {
+    commands.push({
+      id: 'recent-lead',
+      title: `View Recent Lead: ${(leads[0] as any).firstName || leads[0].name || ''} ${(leads[0] as any).lastName || ''}`.trim(),
+      category: 'Leads',
+      icon: Search,
+      action: () => {
+        navigate('/crm/leads');
+        setIsOpen(false);
+      }
+    });
+  }
 
-  const propertyCommands: CommandItem[] = (properties || []).slice(0, 5).map((prop) => ({
-    id: `prop-${prop.id}`,
-    title: `Property: ${prop.address} ($${prop.price.toLocaleString()})`,
-    category: 'Properties',
-    icon: Building2,
-    action: () => {
-      setSelectedTab('real-estate-cms');
-      setIsOpen(false);
-    }
-  }));
+  if (properties && properties.length > 0) {
+    commands.push({
+      id: 'recent-property',
+      title: `View Property: ${(properties[0] as any).title || properties[0].address || ''}`,
+      category: 'Properties',
+      icon: Search,
+      action: () => {
+        navigate('/crm/admin/real-estate-cms');
+        setIsOpen(false);
+      }
+    });
+  }
 
-  const allCommands = [...navigationCommands, ...leadCommands, ...propertyCommands];
+  const allCommands = commands;
 
   const filteredCommands = allCommands.filter((cmd) =>
     cmd.title.toLowerCase().includes(query.toLowerCase())

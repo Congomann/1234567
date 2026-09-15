@@ -663,6 +663,29 @@ class NHFGBackend {
         return await this.handleResponse(res);
     }
 
+    async put<T>(path: string, body: any): Promise<T> {
+        const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+        console.log(`[Backend PUT] ${url}`, body);
+        const options: RequestInit = {
+            method: 'PUT',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify(body)
+        };
+        const res = await fetch(url, options);
+        return await this.handleResponse(res);
+    }
+
+    async delete<T = void>(path: string): Promise<T> {
+        const url = path.startsWith('http') ? path : `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+        console.log(`[Backend DELETE] ${url}`);
+        const options: RequestInit = {
+            method: 'DELETE',
+            headers: this.getAuthHeaders()
+        };
+        const res = await fetch(url, options);
+        return await this.handleResponse(res);
+    }
+
     async uploadFile(filename: string, fileData: string): Promise<string> {
         const data = await this.post<{ url: string }>('/upload', { filename, fileData });
         return data.url;

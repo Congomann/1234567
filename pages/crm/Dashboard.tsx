@@ -6,7 +6,7 @@ import {
   RefreshCw, Phone, CheckCircle2, Radio, Sparkles,
   Building2, Landmark, Truck, Plus, Trash2
 } from 'lucide-react';
-import { TaskPriority } from '../../types';
+import { TaskPriority, AdvisorCategory, ProductType } from '../../types';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 import { CRMAnalyticsCharts } from '../../components/analytics/CRMAnalyticsCharts';
 
@@ -125,11 +125,11 @@ export const Dashboard: React.FC = () => {
       {/* ── 3D VIBRANT ANIMATED BANNER CARDS ── */}
       <Tab3DBanner
         cards={[
-          ...(user?.category === 'SECURITIES' ? [{ title: "Weekly Portfolio Balance", value: "$0", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan", linkPath: "/crm/securities", linkText: "View entire list" }] : []),
-          ...(user?.category === 'REAL_ESTATE' ? [{ title: "Active Escrow Deals", value: `${transactions?.length || 0}`, subtitle: "Total Value Active", emoji: "🏢", gradient: "cyan", linkPath: "/crm/properties", linkText: "View entire list" }] : []),
-          ...(user?.category === 'LOGISTICS' ? [{ title: "Active Dispatches", value: "0", subtitle: "Total Loads: 0", emoji: "🚛", gradient: "cyan", linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
-          { title: "Applications In Line", value: `${leads.length}`, subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow", linkPath: "/crm/leads", linkText: "View entire list" },
-          { title: "New Clients Onboarded", value: `${clients.length}`, subtitle: "Total Active Accounts", emoji: "🦸‍♀️", gradient: "pink", linkPath: "/crm/clients", linkText: "View entire list" }
+          ...(user?.category === AdvisorCategory.SECURITIES ? [{ title: "Weekly Portfolio Balance", value: "$0", subtitle: "Managed Wealth Assets", emoji: "💰", gradient: "cyan" as const, linkPath: "/crm/securities", linkText: "View entire list" }] : []),
+          ...(user?.category === AdvisorCategory.REAL_ESTATE ? [{ title: "Active Escrow Deals", value: `${transactions?.length || 0}`, subtitle: "Total Value Active", emoji: "🏢", gradient: "cyan" as const, linkPath: "/crm/properties", linkText: "View entire list" }] : []),
+          ...(user?.category === AdvisorCategory.LOGISTICS ? [{ title: "Active Dispatches", value: "0", subtitle: "Total Loads: 0", emoji: "🚛", gradient: "cyan" as const, linkPath: "/crm/logistics", linkText: "View entire list" }] : []),
+          { title: "Applications In Line", value: `${leads.length}`, subtitle: "Active Processing Queue", emoji: "📱", gradient: "yellow" as const, linkPath: "/crm/leads", linkText: "View entire list" },
+          { title: "New Clients Onboarded", value: `${clients.length}`, subtitle: "Total Active Accounts", emoji: "🦸‍♀️", gradient: "pink" as const, linkPath: "/crm/clients", linkText: "View entire list" }
         ].slice(0, 3)}
       />
 
@@ -186,7 +186,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         
         {/* 1. Wealth & Securities */}
-        {(user?.category === 'SECURITIES' || user?.productsSold?.includes('Securities / Series') ) && (
+        {(user?.category === AdvisorCategory.SECURITIES || user?.productsSold?.includes(ProductType.SECURITIES) ) && (
         <div 
           onClick={() => navigate('/crm/portfolio')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -214,7 +214,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 2. Real Estate & Escrow */}
-        {(user?.category === 'REAL_ESTATE' || user?.productsSold?.includes('Real Estate') ) && (
+        {(user?.category === AdvisorCategory.REAL_ESTATE || user?.productsSold?.includes(ProductType.REAL_ESTATE) ) && (
         <div 
           onClick={() => navigate('/crm/properties')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -242,7 +242,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 3. Life & Commercial Insurance */}
-        {(user?.category === 'INSURANCE' || user?.productsSold?.includes('Life Insurance') ) && (
+        {(user?.category === AdvisorCategory.INSURANCE || user?.productsSold?.includes(ProductType.LIFE) ) && (
         <div 
           onClick={() => navigate('/crm/applications')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -270,7 +270,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 4. Mortgage & Lending */}
-        {(user?.category === 'MORTGAGE' || user?.productsSold?.includes('Mortgage Lending & Refinance') ) && (
+        {(user?.category === AdvisorCategory.MORTGAGE || user?.productsSold?.includes(ProductType.MORTGAGE) ) && (
         <div 
           onClick={() => navigate('/crm/loans')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"
@@ -298,7 +298,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 5. Logistics & Fleet */}
-        {(user?.category === 'LOGISTICS' || user?.productsSold?.includes('Freight / Logistics') ) && (
+        {(user?.category === AdvisorCategory.LOGISTICS || user?.productsSold?.includes(ProductType.LOGISTICS) ) && (
         <div 
           onClick={() => navigate('/crm/logistics')}
           className="apple-glass p-8 rounded-[2.5rem] border border-white/80 shadow-xl apple-card cursor-pointer flex flex-col justify-between"

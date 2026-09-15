@@ -30,7 +30,7 @@ export default function ContractingAdmin() {
 
   const handleView = async (pkg: any) => {
     const pdfId = `${pkg.carrier_name}-${pkg.version}`;
-    const caches = await DB.getAll('pdf_cache') || [];
+    const caches = (await DB.getAll('pdf_cache') as any[]) || [];
     const cached = caches.find(c => c.id === pdfId);
     if (cached && cached.data) {
       const win = window.open();

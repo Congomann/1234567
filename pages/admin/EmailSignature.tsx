@@ -170,7 +170,7 @@ export const EmailSignature: React.FC = () => {
 
     const DEFAULT_LEGAL = "This email and any attachments may contain confidential and proprietary information intended only for the named recipient(s). If you have received this message in error, please notify the sender immediately and permanently delete it. Any unauthorized review, use, disclosure, or distribution is strictly prohibited.";
 
-    const [editForm, setEditForm] = useState({
+    const [editForm, setEditForm] = useState<any>({
         firstName: 'Remmy',
         lastName: 'Shabani',
         title: 'REAL ESTATE & INSURANCE ADVISOR',
@@ -744,7 +744,7 @@ export const EmailSignature: React.FC = () => {
                                 {/* TOP SECTION: LEFT DARK PANEL + RIGHT DETAILS */}
                                 <div style={{ display: 'flex', width: '100%', minHeight: '310px' }}>
                                     {/* LEFT DARK SIDEBAR */}
-                                    <div style={{ width: '32%', backgroundColor: '#0c0d12', padding: '32px 24px', display: 'flex', flexDirection: 'column', justifyBetween: 'space-between', borderTopLeftRadius: '24px' }}>
+                                    <div style={{ width: '32%', backgroundColor: '#0c0d12', padding: '32px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderTopLeftRadius: '24px' }}>
                                         {/* Logo Badge */}
                                         <div style={{ width: '64px', height: '64px', backgroundColor: '#000000', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                             <img

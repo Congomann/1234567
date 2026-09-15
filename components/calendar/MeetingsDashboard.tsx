@@ -157,7 +157,7 @@ export const MeetingsDashboard: React.FC<{ onOpenNewModal?: () => void }> = ({ o
               }
             } catch(e) {}
           }
-          if (evDate >= new Date() && evStatus !== 'completed') return false;
+          if (evDate >= new Date()) return false;
         }
       }
 
