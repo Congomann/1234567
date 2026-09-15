@@ -135,7 +135,23 @@ export default function CarrierFormBuilder() {
           needsReview: df.needsReview,
           confidence: df.confidence
         }));
-        setFields([...fields, ...mappedFields]);
+        
+        // Deduplicate against already existing fields in the builder
+        const newFields = mappedFields.filter(mf => {
+          return !fields.some(existing => {
+            if (existing.pageNumber !== mf.pageNumber) return false;
+            
+            const overlapX = Math.max(0, Math.min(mf.x + mf.width, existing.x + existing.width) - Math.max(mf.x, existing.x));
+            const overlapY = Math.max(0, Math.min(mf.y + mf.height, existing.y + existing.height) - Math.max(mf.y, existing.y));
+            const overlapArea = overlapX * overlapY;
+            
+            const mfArea = mf.width * mf.height;
+            const existingArea = existing.width * existing.height;
+            
+            return overlapArea > (mfArea * 0.25) || overlapArea > (existingArea * 0.25);
+          });
+        });
+        setFields([...fields, ...newFields]);
       } else {
         console.log("No viable fields detected.");
       }
