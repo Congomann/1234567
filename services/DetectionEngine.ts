@@ -211,7 +211,7 @@ export class DetectionEngine {
       // 5. Smart Whitespace Table Cell Detection (DocuSign Style)
       // For empty boxes that are drawn with vector lines, text mapping will miss them.
       // We look for strong standalone labels that have NO field near them.
-      const strongLabels = ['name', 'date', 'address', 'city', 'state', 'zip', 'phone', 'email', 'social security', 'ssn', 'tax id', 'suite', 'p.o. box', 'number', 'imo', 'market', 'licensed'];
+      const strongLabels = ['name', 'date', 'address', 'city', 'state', 'zip', 'phone', 'email', 'social security', 'ssn', 'tax id', 'suite', 'p.o. box', 'number', 'imo', 'market', 'licensed', 'birth', 'first', 'last'];
       
       textItems.forEach(textItem => {
         const ctx = textItem.str.toLowerCase();
@@ -221,9 +221,9 @@ export class DetectionEngine {
         if (!isStrongLabel) return;
 
         const hasExistingBox = pageCandidates.some(cand => {
-          const isRight = cand.x >= textItem.x && cand.x <= textItem.x + textItem.w + 30 && Math.abs(cand.y - textItem.y) < 5;
-          const isBelow = cand.y >= textItem.y && cand.y <= textItem.y + 8 && cand.x >= textItem.x - 5 && cand.x <= textItem.x + 20;
-          return isRight || isBelow || (cand.x <= textItem.x && cand.x + cand.width >= textItem.x && cand.y >= textItem.y - 2 && cand.y <= textItem.y + textItem.h + 5);
+          const isRight = cand.x >= textItem.x && cand.x <= textItem.x + textItem.w + 10 && Math.abs(cand.y - textItem.y) < 3;
+          const isBelow = cand.y >= textItem.y && cand.y <= textItem.y + 4 && cand.x >= textItem.x - 2 && cand.x <= textItem.x + 10;
+          return isRight || isBelow || (cand.x <= textItem.x + 2 && cand.x + cand.width >= textItem.x - 2 && cand.y >= textItem.y - 2 && cand.y <= textItem.y + textItem.h + 2);
         });
 
         if (!hasExistingBox) {
@@ -262,7 +262,12 @@ export class DetectionEngine {
           isDuplicate = deduplicated.some(other => {
             const overlapX = Math.max(0, Math.min(cand.x + cand.width, other.x + other.width) - Math.max(cand.x, other.x));
             const overlapY = Math.max(0, Math.min(cand.y + cand.height, other.y + other.height) - Math.max(cand.y, other.y));
-            return (overlapX > 0 && overlapY > 0);
+            
+            const overlapArea = overlapX * overlapY;
+            const candArea = cand.width * cand.height;
+            // Only consider it a duplicate if it overlaps by more than 30%
+            return (overlapArea > candArea * 0.3);
+
           });
         }
         if (!isDuplicate) {
