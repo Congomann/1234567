@@ -174,7 +174,7 @@ export default function CarrierFormBuilder() {
           onClick={() => setIsDrawMode(!isDrawMode)} 
           className={`px-4 py-2 ${isDrawMode ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} border rounded-md flex items-center font-medium shadow-sm transition mr-3`}
         >
-          <MousePointer2 className="w-4 h-4 mr-2" /> {isDrawMode ? 'Disable Manual Placement' : 'Enable Manual Placement'}
+          <MousePointer2 className="w-4 h-4 mr-2" /> {isDrawMode ? 'Cancel Drawing' : 'Click on PDF to Draw Field'}
         </button>
         <button onClick={handleAutoDetect} className="px-4 py-2 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-md hover:bg-indigo-200 flex items-center font-medium shadow-sm transition mr-3">
           <Scan className="w-4 h-4 mr-2" /> Auto-Detect Fields
@@ -274,14 +274,33 @@ export default function CarrierFormBuilder() {
         {/* Field Editor Sidebar */}
         <div className="w-1/3 bg-white rounded-lg border border-gray-200 flex flex-col shadow-sm overflow-hidden">
           <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center shrink-0">
-            <h3 className="font-semibold text-gray-900">Configured Fields</h3>
-            <span className="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full">{fields.length} Total</span>
+            <h3 className="font-semibold text-gray-900">Field Configuration</h3>
+            <button 
+              onClick={() => {
+                const newField = {
+                  id: 'field_' + Date.now(),
+                  name: 'New Custom Field',
+                  type: 'text',
+                  mappedTo: 'none',
+                  x: 30,
+                  y: 10,
+                  width: 25,
+                  height: 3,
+                  pageNumber: pageNumber || 1
+                };
+                setFields([...fields, newField]);
+                setSelectedFieldId(newField.id);
+              }}
+              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded shadow-sm hover:bg-blue-700 transition"
+            >
+              + Add Missing Field
+            </button>
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {fields.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                <p className="mt-2 text-sm text-gray-600">Click Auto-Detect to scan the document for fields automatically.</p>
+                <p className="mt-2 text-sm text-gray-600">Click Auto-Detect to scan, or click "+ Add Missing Field" to manually add fields the PDF missed.</p>
               </div>
             ) : (
               
