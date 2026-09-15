@@ -286,6 +286,11 @@ export default function CarrierFormBuilder() {
                         key={field.id}
                         className={`absolute border-2 ${selectedFieldId === field.id ? 'border-blue-600 bg-blue-500/20 shadow-[0_0_0_2px_rgba(37,99,235,0.4)] z-50' : 'border-gray-400 bg-blue-100/40 hover:bg-blue-200/50 hover:border-blue-400 z-40'} transition-colors rounded-sm cursor-${activeTool === 'select' ? (actionState?.id === field.id && actionState.type === 'drag' ? 'grabbing' : 'grab') : 'default'}`}
                         onMouseDown={(e) => handleFieldMouseDown(e, field)}
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          setFields(prev => prev.filter(f => f.id !== field.id));
+                          if (selectedFieldId === field.id) setSelectedFieldId(null);
+                        }}
                         style={{
                           left: `${field.x}%`,
                           top: `${field.y}%`,
