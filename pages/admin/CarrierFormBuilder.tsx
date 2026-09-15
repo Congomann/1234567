@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileText, SlidersHorizontal, Check, Scan, Loader2, MousePointer2, Trash2, Maximize, Minimize } from 'lucide-react';
+import { DetectionEngine } from '../../services/DetectionEngine';
 import { useLocation } from 'react-router-dom';
 import { DB } from '../../services/database';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -82,128 +83,45 @@ export default function CarrierFormBuilder() {
   
   
   
+  
   const handleAutoDetect = async () => {
     if (!pdfData) return;
     try {
-      const loadingTask = pdfjs.getDocument(pdfData);
-      const pdf = await loadingTask.promise;
-      const detectedFields: any[] = [];
-      let widgetCount = 0;
-      let textLineCount = 0;
+      alert("Initializing Document Field-Detection Engine...");
       
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1 });
-        
-        const annotations = await page.getAnnotations();
-        let pageHasWidgets = false;
-
-        // 1. Detect Native Fields (AcroForm)
-        annotations.forEach((anno: any) => {
-          if (anno.subtype === 'Widget') {
-            pageHasWidgets = true;
-            const rect = anno.rect;
-            const x = (rect[0] / viewport.width) * 100;
-            const y = (1 - (rect[3] / viewport.height)) * 100;
-            const w = ((rect[2] - rect[0]) / viewport.width) * 100;
-            const h = ((rect[3] - rect[1]) / viewport.height) * 100;
-            
-            let fieldType = 'text';
-            if (anno.fieldType === 'Btn') fieldType = 'checkbox'; // Button/Radio/Checkbox
-            if (anno.fieldType === 'Ch') fieldType = 'dropdown'; // Choice
-            if (anno.fieldType === 'Sig') fieldType = 'signature'; // Signature
-            
-            detectedFields.push({
-              id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
-              name: anno.fieldName || 'Form Field',
-              type: fieldType,
-              mappedTo: 'none',
-              x: x, y: y, width: w, height: h, pageNumber: i
-            });
-            widgetCount++;
-          }
-        });
-
-        // 2. Advanced Heuristic Text-Scanning for flattened pages
-        if (!pageHasWidgets) {
-          const textContent = await page.getTextContent();
-          
-          let lastTextContext = "";
-          
-          textContent.items.forEach((item: any) => {
-            const str = item.str.trim();
-            const tx = item.transform[4];
-            const ty = item.transform[5];
-            const widthPt = item.width;
-            const heightPt = item.height || 12;
-            
-            const x = (tx / viewport.width) * 100;
-            const y = (1 - ((ty + heightPt) / viewport.height)) * 100;
-            const w = (widthPt / viewport.width) * 100;
-            const h = (heightPt / viewport.height) * 100;
-
-            // A. Detect Checkboxes / Radios in text layer
-            if (str === '[ ]' || str === '[]' || str === '☐' || str === '( )') {
-               detectedFields.push({
-                  id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
-                  name: lastTextContext || 'Checkbox',
-                  type: 'checkbox',
-                  mappedTo: 'none',
-                  x: x, y: y, width: Math.max(w, 2), height: Math.max(h, 2), pageNumber: i
-               });
-               textLineCount++;
-               return;
-            }
-
-            // B. Detect Text Lines (Underscores)
-            if (str.includes('____')) {
-              if (w > 2) {
-                // Heuristic Classification based on context
-                let fieldName = "Detected Line";
-                let fieldType = "text";
-                const ctx = lastTextContext.toLowerCase();
-                
-                if (ctx.includes('date')) fieldName = "Date";
-                else if (ctx.includes('name')) fieldName = "Name";
-                else if (ctx.includes('address')) fieldName = "Address";
-                else if (ctx.includes('phone')) fieldName = "Phone Number";
-                else if (ctx.includes('email')) fieldName = "Email";
-                else if (ctx.includes('npn') || ctx.includes('license')) fieldName = "NPN / License";
-                else if (ctx.includes('signature') || ctx.includes('sign')) {
-                   fieldName = "Signature";
-                   fieldType = "signature";
-                }
-                else if (ctx.includes('initial')) fieldName = "Initials";
-                else if (ctx.includes('yes') || ctx.includes('no')) fieldName = "Yes/No Question";
-                
-                detectedFields.push({
-                  id: 'field_' + Date.now() + Math.random().toString(36).substr(2, 9),
-                  name: fieldName,
-                  type: fieldType,
-                  mappedTo: 'none',
-                  x: x, y: y, width: w, height: Math.max(h, 2.5), pageNumber: i
-                });
-                textLineCount++;
-              }
-            } else if (str.length > 2 && !str.includes('_')) {
-               // Update context buffer with meaningful words
-               lastTextContext = str;
-            }
-          });
-        }
-      }
+      const detectedFields = await DetectionEngine.detectFields(pdfData);
       
       if (detectedFields.length > 0) {
-        setFields([...fields, ...detectedFields]);
-        alert(`AI Scan Complete! Successfully detected ${widgetCount + textLineCount} fields including Text, Checkboxes, Dates, Signatures, and NPN fields across the document.`);
+        // Map generic DetectionResult to the existing UI state shape
+        const mappedFields = detectedFields.map(df => ({
+          id: df.id,
+          name: df.label || 'Unknown Field',
+          type: df.type === 'radio' ? 'checkbox' : df.type, // UI currently treats radio as checkbox visually
+          mappedTo: 'none',
+          x: df.x,
+          y: df.y,
+          width: df.width,
+          height: df.height,
+          pageNumber: df.pageNumber,
+          needsReview: df.needsReview,
+          confidence: df.confidence
+        }));
+        
+        setFields([...fields, ...mappedFields]);
+        
+        const autoConfirmed = mappedFields.filter(f => !f.needsReview).length;
+        const needsReview = mappedFields.filter(f => f.needsReview).length;
+        
+        alert(`Detection Complete!\n\n${autoConfirmed} High-Confidence Fields Auto-Confirmed.\n${needsReview} Suggested Fields (Needs Review).`);
       } else {
-        alert("This PDF is completely flattened and contains no native form fields or underscore lines. Please enable Manual Placement to draw your own fields.");
+        alert("The detection engine found no viable input fields on this document.");
       }
     } catch (e) {
       console.error(e);
-      alert("Error auto-detecting fields.");
+      alert("Error during document detection.");
     }
   };
+
 
 
 
@@ -286,7 +204,7 @@ export default function CarrierFormBuilder() {
                       {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
                         <div 
                           key={field.id}
-                          className="absolute border-2 border-blue-400 bg-blue-400/20 hover:bg-blue-400/40 hover:border-blue-500 transition-colors rounded-sm cursor-pointer"
+                          className={`absolute border-2 ${field.needsReview ? 'border-orange-400 bg-orange-400/20 hover:bg-orange-400/40 hover:border-orange-500 border-dashed' : 'border-blue-400 bg-blue-400/20 hover:bg-blue-400/40 hover:border-blue-500'} transition-colors rounded-sm cursor-pointer`}
                           style={{
                             left: `${field.x}%`,
                             top: `${field.y}%`,
