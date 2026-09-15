@@ -15,6 +15,7 @@ export default function CarrierFormBuilder() {
   const [pageNumber, setPageNumber] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDrawMode, setIsDrawMode] = useState(false);
+  const [expandedField, setExpandedField] = useState<string | null>(null);
           
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
