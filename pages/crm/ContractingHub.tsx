@@ -110,6 +110,13 @@ export default function ContractingHub() {
   
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
+  const [pdfWidth, setPdfWidth] = useState(typeof window !== 'undefined' ? Math.min(window.innerWidth - 48, 800) : 800);
+
+  useEffect(() => {
+    const handleResize = () => setPdfWidth(Math.min(window.innerWidth - 48, 800));
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [fields, setFields] = useState<any[]>([]);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -300,7 +307,7 @@ export default function ContractingHub() {
               >
                 {Array.from(new Array(numPages || 1), (el, index) => (
                   <div key={`page_${index + 1}`} className="relative mb-6 shadow-md bg-white border border-gray-200">
-                    <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={800} />
+                    <Page pageNumber={index + 1} renderTextLayer={false} renderAnnotationLayer={false} width={pdfWidth} />
                     
                     
                     <DrawingCanvas 
@@ -412,7 +419,7 @@ export default function ContractingHub() {
   const availablePackages = packages.filter(p => !startedIds.has(p.id) && p.availability === 'Available');
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-6 w-full max-w-7xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">CONTRACTING</h1>
         <p className="text-gray-500 mt-1">Complete carrier contracting at your convenience.</p>
