@@ -265,6 +265,7 @@ export const CRMLayout: React.FC<CRMLayoutProps> = ({ children }) => {
             admin.push({ path: '/crm/admin/press', label: 'Press Releases', icon: Newspaper, tourId: 'nav-press-admin' });
             admin.push({ path: '/crm/admin/products', label: 'Product CMS', icon: Database, tourId: 'nav-product-cms' });
             admin.push({ path: '/crm/admin/carriers', label: 'Carrier Setup', icon: ShieldCheck, tourId: 'nav-carrier-setup' });
+            admin.push({ path: '/crm/admin/carrier-apis', label: 'Carrier APIs', icon: ShieldCheck, tourId: 'nav-carrier-apis' });
             admin.push({ path: '/crm/admin/testimonials', label: 'Client Reviews', icon: Award, tourId: 'nav-client-reviews' });
             admin.push({ path: '/crm/admin/signature', label: 'Email Signature', icon: PenTool, tourId: 'nav-email-signature' });
             admin.push({ path: '/crm/admin/marketing', label: 'API Integrations', icon: Webhook, tourId: 'nav-api-integrations' });

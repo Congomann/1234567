@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation }
 import { DataProvider, useData } from './context/DataContext';
 import ContractingHub from './pages/crm/ContractingHub';
 import ContractingAdmin from './pages/admin/ContractingAdmin';
+import CarrierIntegrations from './pages/admin/CarrierIntegrations';
 import ContractingReviewQueue from './pages/admin/ContractingReviewQueue';
 import CarrierFormBuilder from './pages/admin/CarrierFormBuilder';
 import { SoftphoneProvider } from './context/SoftphoneContext';
@@ -310,6 +311,7 @@ const App: React.FC = () => {
                 <Route path="admin/press" element={<PressReleaseAdmin />} />
                 <Route path="admin/products" element={<ProductCms />} />
                 <Route path="admin/carriers" element={<CarrierAssignment />} />
+                <Route path="admin/carrier-apis" element={<CarrierIntegrations />} />
                 <Route path="admin/testimonials" element={<AdminTestimonials />} />
                 <Route path="admin/signature" element={<EmailSignature />} />
                 <Route path="admin/marketing" element={<MarketingIntegrations />} />

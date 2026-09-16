@@ -375,10 +375,13 @@ export default function ContractingHub() {
         pdfData: pdfData
       });
       
-      alert('Contract Generated & Submitted! The completed PDF has been automatically emailed to sales@newhollandfinancial.com and the Carrier Contracting Department.');
-      setActiveApplication(null);
+      setSaveStatus('Contract Submitted Successfully!');
+      setTimeout(() => {
+         setActiveApplication(null);
+      }, 2000);
     } catch (e) {
-      alert('Failed to generate and submit contract.');
+      setSaveStatus('Failed to submit contract.');
+      console.error(e);
     } finally {
       setIsSubmitting(false);
     }
