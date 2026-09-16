@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useData } from '../../../context/DataContext';
 import { ApplicationStatus, LeadStatus, ProductType } from '../../../types';
-import { FileText, CheckCircle, Hourglass, XCircle, Briefcase, Car, Truck, AlertTriangle, RefreshCw, Plus, Search, Filter, Send } from 'lucide-react';
+import { FileText, CheckCircle, Hourglass, XCircle, Briefcase, Car, Truck, AlertTriangle, RefreshCw, Plus, Search, Filter, Send, Activity, CheckCircle2, Clock, CreditCard, FileSignature, X } from 'lucide-react';
 import { EmbeddedRootInsuranceModal } from '../../../components/crm/EmbeddedRootInsuranceModal';
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -19,6 +19,34 @@ const StatusBadge = ({ status }: { status: string }) => {
 // --- 1. Policies & Apps (REFINED COLOR BOX DESIGN) ---
 export const PoliciesApps: React.FC = () => {
     const { applications, updateApplicationStatus, user } = useData();
+    const [trackingModalApp, setTrackingModalApp] = React.useState<any>(null);
+    
+    const generateTimeline = (status: string) => {
+        const events = [
+            { id: 1, title: 'Application Submitted', date: '2026-09-01T10:00:00Z', icon: FileSignature, color: 'text-blue-500', bg: 'bg-blue-100', completed: true },
+        ];
+        
+        if (['Underwriting', 'Approved', 'Issued', 'Active'].includes(status)) {
+            events.push({ id: 2, title: 'Carrier Received Application', date: '2026-09-02T14:30:00Z', icon: CheckCircle2, color: 'text-indigo-500', bg: 'bg-indigo-100', completed: true });
+        }
+        
+        if (['Approved', 'Issued', 'Active'].includes(status)) {
+            events.push({ id: 3, title: 'Underwriting Approved', date: '2026-09-05T09:15:00Z', icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-100', completed: true });
+            events.push({ id: 4, title: 'Initial Payment Processed', date: '2026-09-06T11:20:00Z', icon: CreditCard, color: 'text-emerald-500', bg: 'bg-emerald-100', completed: true });
+            events.push({ id: 5, title: 'Policy Active & In-Force', date: '2026-09-07T08:00:00Z', icon: Activity, color: 'text-green-500', bg: 'bg-green-100', completed: true });
+        } else if (status === 'Pending') {
+            events.push({ id: 2, title: 'Awaiting Signatures', date: 'Pending', icon: Clock, color: 'text-slate-400', bg: 'bg-slate-100', completed: false });
+        } else if (status === 'Underwriting') {
+            events.push({ id: 3, title: 'Underwriting Review', date: 'In Progress', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-100', completed: false });
+            events.push({ id: 4, title: 'Medical Exam Required', date: 'Pending Client Action', icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-100', completed: false });
+        }
+        
+        if (['Lapsed', 'Expired'].includes(status)) {
+            events.push({ id: 3, title: 'Payment Missed (Grace Period)', date: '2026-10-01T12:00:00Z', icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-100', completed: true });
+            events.push({ id: 4, title: 'Policy Lapsed', date: '2026-11-01T00:00:00Z', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-100', completed: true });
+        }
+        return events;
+    };
     
     const myApps = useMemo(() => {
         if (!user) return [];
@@ -108,8 +136,8 @@ export const PoliciesApps: React.FC = () => {
                                         <Send size={12} /> Submit
                                     </button>
                                 ) : (
-                                    <button onClick={() => alert('Feature in development')} className="w-full py-2 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-blue-600 transition-all">
-                                        Details
+                                    <button onClick={() => setTrackingModalApp(app)} className="w-full py-2 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all shadow-sm flex items-center justify-center gap-1">
+                                        <Activity size={12} /> Track
                                     </button>
                                 )}
                                 <div className="relative w-full">
