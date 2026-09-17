@@ -316,7 +316,7 @@ export default function CarrierFormBuilder() {
                     {fields.filter(f => f.pageNumber === (index + 1)).map(field => (
                       <div 
                         key={field.id}
-                        className={`absolute border-2 ${selectedFieldId === field.id ? 'border-blue-600 bg-blue-500/20 shadow-[0_0_0_2px_rgba(37,99,235,0.4)] z-50' : 'border-gray-400 bg-blue-100/40 hover:bg-blue-200/50 hover:border-blue-400 z-40'} transition-colors rounded-sm cursor-${activeTool === 'select' ? (actionState?.id === field.id && actionState.type === 'drag' ? 'grabbing' : 'grab') : 'default'}`}
+                        className={`absolute border-2 ${selectedFieldId === field.id ? 'border-blue-600 bg-blue-500/20 shadow-[0_0_0_2px_rgba(37,99,235,0.4)] z-50' : 'border-gray-400 bg-blue-100/40 hover:bg-blue-200/50 hover:border-blue-400 z-40'} transition-colors rounded-sm cursor-${activeTool === 'select' ? (actionState?.id === field.id && actionState.type === 'drag' ? 'grabbing' : 'text') : 'default'}`}
                         onMouseDown={(e) => handleFieldMouseDown(e, field)}
                         onDoubleClick={(e) => {
                           e.stopPropagation();
@@ -330,6 +330,21 @@ export default function CarrierFormBuilder() {
                           height: `${field.height}%`,
                         }}
                       >
+                        <input
+                           type="text"
+                           className="w-full h-full bg-transparent outline-none border-none text-[10px] font-bold text-blue-900 px-1"
+                           placeholder="Type field name..."
+                           value={field.name || ''}
+                           onChange={(e) => {
+                             setFields(prev => prev.map(f => f.id === field.id ? { ...f, name: e.target.value } : f));
+                           }}
+                           onMouseDown={(e) => {
+                             // Let the div handle drag start if it's a drag action, otherwise stop propagation to allow typing
+                             if (selectedFieldId === field.id && activeTool === 'select') {
+                               e.stopPropagation(); 
+                             }
+                           }}
+                        />
                         {selectedFieldId === field.id && activeTool === 'select' && (
                           <>
                              {/* Invisible Resize Handle */}
