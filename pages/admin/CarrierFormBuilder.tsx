@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar,  Undo, Redo, FileText, List, XSquare } from 'lucide-react';
+import { ChevronLeft, Maximize, Minimize, Check, Scan, Trash, Trash2, MousePointer2, Type, PenTool, Hash, CheckSquare, Calendar,  Undo, Redo, FileText, List, XSquare } from 'lucide-react';
 import { DetectionEngine } from '../../services/DetectionEngine';
 import { DB } from '../../services/database';
 
@@ -275,6 +275,9 @@ export default function CarrierFormBuilder() {
         <div className="flex items-center gap-3">
           <button onClick={handleAutoDetect} className="px-4 py-2 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-md hover:bg-indigo-200 flex items-center font-medium shadow-sm transition">
             <Scan className="w-4 h-4 mr-2" /> Auto-Detect Fields
+          </button>
+          <button onClick={() => setFields([])} className="px-4 py-2 bg-red-100 text-red-700 border border-red-200 rounded-md hover:bg-red-200 flex items-center font-medium shadow-sm transition ml-2">
+            <Trash className="w-4 h-4 mr-2" /> Clear All
           </button>
           <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center font-medium shadow-sm transition">
             <Check className="w-4 h-4 mr-2" /> Publish
