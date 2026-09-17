@@ -131,7 +131,7 @@ export default function CarrierFormBuilder() {
       if (detectedFields.length > 0) {
         const mappedFields = detectedFields.map(df => ({
           id: df.id,
-          name: df.label || 'Unknown Field',
+          name: '', // Do not auto-fill name to avoid repeating the text on the PDF
           type: df.type === 'radio' ? 'checkbox' : df.type,
           mappedTo: 'none',
           x: df.x,
@@ -333,7 +333,7 @@ export default function CarrierFormBuilder() {
                         <input
                            type="text"
                            className="w-full h-full bg-transparent outline-none border-none text-[10px] font-bold text-blue-900 px-1"
-                           placeholder="Type field name..."
+                           placeholder={selectedFieldId === field.id ? "Type name..." : ""}
                            value={field.name || ''}
                            onChange={(e) => {
                              setFields(prev => prev.map(f => f.id === field.id ? { ...f, name: e.target.value } : f));
