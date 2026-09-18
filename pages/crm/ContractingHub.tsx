@@ -504,7 +504,8 @@ export default function ContractingHub() {
                               type="date"
                               value={formValues[field.id] || ''}
                               onChange={(e) => setFormValues({...formValues, [field.id]: e.target.value})}
-                              className={`w-full h-full ${borderClass} focus:bg-yellow-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 text-sm font-medium text-gray-900 px-1 absolute inset-0 z-40 outline-none transition-all shadow-sm rounded-sm`}
+                              style={{ fontFamily: "Arial, sans-serif", fontSize: "18px" }}
+                              className={`w-full h-full ${borderClass} focus:bg-yellow-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 font-medium text-gray-900 px-1 absolute inset-0 z-40 outline-none transition-all shadow-sm rounded-sm`}
                             />
                           );
                         }
@@ -515,7 +516,8 @@ export default function ContractingHub() {
                               placeholder={field.name}
                               value={formValues[field.id] || ''}
                               onChange={(e) => setFormValues({...formValues, [field.id]: e.target.value})}
-                              className={`w-full h-full ${borderClass} focus:bg-yellow-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 text-sm font-medium text-gray-900 px-1 absolute inset-0 outline-none transition-all shadow-sm rounded-sm`}
+                              style={{ fontFamily: "Arial, sans-serif", fontSize: "18px" }}
+                              className={`w-full h-full ${borderClass} focus:bg-yellow-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 font-medium text-gray-900 px-1 absolute inset-0 outline-none transition-all shadow-sm rounded-sm`}
                             />
                             {isRequired && isEmpty && <span className="absolute -top-1 -right-1 text-red-500 text-xs font-bold pointer-events-none">*</span>}
                           </div>

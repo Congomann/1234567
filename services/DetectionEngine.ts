@@ -99,7 +99,7 @@ export class DetectionEngine {
         
         // If it's on the same Y level and very close in X, merge it!
         // We allow up to 4% X-gap to bridge spaces in "___ ___"
-        if (Math.abs(currentLine.y - item.y) < 2 && (item.x - (currentLine.x + currentLine.w)) < 4) {
+        if (Math.abs(currentLine.y - item.y) < 2 && (item.x - (currentLine.x + currentLine.w)) < 0.5) {
           currentLine.w = (item.x + item.w) - currentLine.x;
           currentLine.h = Math.max(currentLine.h, item.h);
           currentLine.str += item.str;

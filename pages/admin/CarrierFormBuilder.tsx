@@ -335,7 +335,8 @@ export default function CarrierFormBuilder() {
                       >
                         <input
                            type="text"
-                           className="w-full h-full bg-transparent outline-none border-none text-[10px] font-bold text-blue-900 px-1"
+                           style={{ fontFamily: "Arial, sans-serif", fontSize: "18px" }}
+                           className="w-full h-full bg-transparent outline-none border-none font-bold text-blue-900 px-1"
                            placeholder={selectedFieldId === field.id ? "Type name..." : ""}
                            value={field.name || ''}
                            onChange={(e) => {
