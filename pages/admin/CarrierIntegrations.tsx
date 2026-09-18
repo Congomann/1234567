@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { DB } from '../../services/database';
 import { Webhook, Plug, CheckCircle2, XCircle, RefreshCw, Key, Shield, Link as LinkIcon, Database, HardDrive, Plus, Trash2 } from 'lucide-react';
+import { ProductType } from '../../types';
 import { Tab3DBanner } from '../../components/shared/Tab3DBanner';
 
 export default function CarrierIntegrations() {
-  const { availableCarriers } = useData();
+  const { availableCarriers, addClient } = useData();
   const [connections, setConnections] = useState<any[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,6 +53,9 @@ export default function CarrierIntegrations() {
     setShowAdd(false);
     setIsSaving(false);
     
+    // Automatically trigger initial sync to pull client data into the CRM
+    handleSync(newConnection);
+    
     // Reset Form
     setSelectedCarrier('');
     setClientId('');
@@ -71,6 +75,37 @@ export default function CarrierIntegrations() {
     
     // Simulate API fetch delay
     setTimeout(async () => {
+      // Create mock clients pulled from this carrier API
+      try {
+        if (addClient) {
+          await addClient({
+            name: 'API Synced Client - ' + conn.carrier.split(' ')[0],
+            email: 'client_' + Date.now() + '@example.com',
+            policyNumber: 'SYNC-' + Math.floor(Math.random() * 1000000),
+            premium: Math.floor(Math.random() * 5000) + 1000,
+            product: ProductType.IUL,
+            carrier: conn.carrier,
+            status: 'Active',
+            coverageAmount: 500000,
+            policyDuration: 30
+          });
+          
+          await addClient({
+            name: 'API Synced Client 2 - ' + conn.carrier.split(' ')[0],
+            email: 'client2_' + Date.now() + '@example.com',
+            policyNumber: 'SYNC-' + Math.floor(Math.random() * 1000000),
+            premium: Math.floor(Math.random() * 2000) + 500,
+            product: ProductType.LIFE,
+            carrier: conn.carrier,
+            status: 'Pending',
+            coverageAmount: 1000000,
+            policyDuration: 20
+          });
+        }
+      } catch (e) {
+        console.error("Failed to sync clients", e);
+      }
+      
       const updatedConn = {
         ...conn,
         lastSync: new Date().toISOString()
@@ -78,6 +113,9 @@ export default function CarrierIntegrations() {
       await DB.save('carrier_api_connections', updatedConn);
       await loadConnections();
       setSyncingId(null);
+      
+      // Tell the user it succeeded
+      // No alerts per user request
     }, 1500);
   };
 

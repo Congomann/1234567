@@ -61,6 +61,7 @@ interface DataContextType {
   updateLead: (id: string, data: Partial<Lead>) => void;
   assignLeads: (leadIds: string[], advisorId: string, priority?: string, notes?: string) => void;
   updateClient: (id: string, data: Partial<Client>) => void;
+  addClient: (data: Partial<Client>) => Promise<string>;
   updateUser: (id: string, data: Partial<User>) => void;
   updateCompanySettings: (settings: CompanySettings) => Promise<boolean>;
   landingPages: any[];
@@ -925,6 +926,23 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const deleteLoanApplication = (id: string) => {
     setLoanApplications(prev => prev.filter(l => l.id !== id));
   };
+  
+  const addClient = useCallback(async (data: Partial<Client>) => {
+    const newClient = {
+      id: 'client_' + Date.now(),
+      name: data.name || 'Unknown Client',
+      policyNumber: data.policyNumber || 'POL-' + Date.now(),
+      premium: data.premium || 0,
+      product: data.product || 'Annuity',
+      renewalDate: data.renewalDate || new Date().toISOString().split('T')[0],
+      carrier: data.carrier || 'Unknown Carrier',
+      ...data
+    } as Client;
+    await Backend.saveClient(newClient);
+    setClients(prev => [...prev, newClient]);
+    return newClient.id;
+  }, []);
+
   const updateClient = useCallback(async (id: string, data: Partial<Client>) => {
     const client = clients.find(c => c.id === id);
     if (client) {
@@ -1010,7 +1028,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       notifications, chatMessages: [], originalAdminUser, impersonateUser: () => {}, stopImpersonating: () => {}, pushNotification, companySettings, resources, commissions: [], events, testimonials,
       availableCarriers, colleagues: [], jobApplications, applications, portfolios, complianceDocs, advisoryFees, loanApplications, integrationLogs, integrationConfig,
       accessLogs, documents, interactions, userPreferences,
-      login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, updateUser, updateCompanySettings,
+      login, logout, signup, resetPassword, addLead, updateLeadStatus, updateLead, assignLeads, updateClient, addClient, updateUser, updateCompanySettings,
       markNotificationRead, clearNotifications, completeOnboarding, updateIntegrationConfig,
       getAdvisorAssignments, likeResource, dislikeResource, shareResource, addResourceComment, addResource, deleteResource,
       addCarrier, deleteCarrier, addTestimonial, approveTestimonial, deleteTestimonial, submitTestimonialEdit, approveTestimonialEdit, rejectTestimonialEdit,
