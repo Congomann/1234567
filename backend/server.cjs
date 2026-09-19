@@ -5948,7 +5948,18 @@ app.post('/api/contracting/email-sync', authenticateToken, async (req, res) => {
         const urls = bodyString.match(urlRegex);
         
         if (urls && urls.length > 0) {
-          const contractingUrl = urls[0]; // Take the first URL found
+          // Filter out garbage signature links
+          let realUrls = urls.filter(u => 
+            !u.toLowerCase().includes('newhollandfinancial.com') && 
+            !u.toLowerCase().includes('instagram.com') && 
+            !u.toLowerCase().includes('tiktok.com') && 
+            !u.toLowerCase().includes('facebook.com') && 
+            !u.toLowerCase().includes('linkedin.com') &&
+            !u.toLowerCase().includes('w3.org')
+          );
+          
+          if (realUrls.length === 0) continue; // Skip if no real links found
+          const contractingUrl = realUrls[0];
           
           // Guess carrier name from subject (e.g., "Welcome to Protective Life Contracting")
           let carrierName = 'External Carrier';
