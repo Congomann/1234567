@@ -72,6 +72,8 @@ import { LegalCompliance } from './pages/crm/LegalCompliance';
 import { AdvisorResources } from './pages/crm/AdvisorResources';
 import { PrivacyPolicy } from './pages/website/PrivacyPolicy';
 import { TermsOfUse } from './pages/website/TermsOfUse';
+import { Disclaimer } from './pages/website/Disclaimer';
+import { CookiePolicy } from './pages/website/CookiePolicy';
 import {
   PoliciesApps,
   CommercialQuotes,
@@ -237,6 +239,8 @@ const App: React.FC = () => {
             <Route path="/activate/:token" element={<ActivateAccount />} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
+            <Route path="/disclaimer" element={<PublicLayout><Disclaimer /></PublicLayout>} />
+            <Route path="/cookies" element={<PublicLayout><CookiePolicy /></PublicLayout>} />
 
             {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />

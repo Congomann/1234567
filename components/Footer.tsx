@@ -304,6 +304,8 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap items-center gap-6">
             <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms of Use</Link>
+            <Link to="/disclaimer" className="hover:text-slate-300 transition-colors">Disclaimer</Link>
+            <Link to="/cookies" className="hover:text-slate-300 transition-colors">Cookie Policy</Link>
             <Link to="/transparency" className="hover:text-slate-300 transition-colors">State Disclosures</Link>
             <Link to="/developers" className="hover:text-slate-300 transition-colors">Developer Portal</Link>
           </div>
