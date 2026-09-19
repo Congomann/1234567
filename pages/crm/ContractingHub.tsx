@@ -281,6 +281,10 @@ export default function ContractingHub() {
   }, [formValues]);
 
   const handleStart = async (pkg: any) => {
+    if (pkg.version === 'EXTERNAL_URL') {
+      window.open(pkg.eligibility, '_blank');
+      return;
+    }
     // 1. Create a new "In Progress" submission
     const newSub = await Backend.autosaveSubmission({
       id: `sub_${Date.now()}`,

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Building, Plus, FileUp, CheckCircle, Trash2, Edit } from 'lucide-react';
+import { Building, Plus, FileUp, CheckCircle, Trash2, Edit, Mail, RefreshCw } from 'lucide-react';
 import { Backend } from '../../services/apiBackend';
 import { DB } from '../../services/database';
 
 export default function ContractingAdmin() {
   const [packages, setPackages] = useState<any[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
   const [showWizard, setShowWizard] = useState(false);
   
   // Package form state
@@ -16,6 +18,33 @@ export default function ContractingAdmin() {
   const [version, setVersion] = useState('2026.01');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  
+  const handleEmailSync = async () => {
+    setIsSyncing(true);
+    setSyncStatus('Connecting to Inbox...');
+    try {
+      const res = await fetch('/api/contracting/email-sync', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token')
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncStatus(`Success! Scanned ${data.totalScanned} emails. Found ${data.processed} contracting links.`);
+        if (data.processed > 0) {
+          loadPackages();
+        }
+      } else {
+        setSyncStatus('Sync Failed: ' + data.error);
+      }
+    } catch (e) {
+      setSyncStatus('Connection error.');
+    }
+    setIsSyncing(false);
+  };
+
 
   useEffect(() => {
     loadPackages();
@@ -97,7 +126,34 @@ export default function ContractingAdmin() {
         </button>
       </div>
 
+      
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 overflow-hidden">
+        <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center">
+              <Mail className="w-5 h-5 mr-2 text-blue-600" /> 
+              Carrier Email Automation
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Automatically scan sales@newhollandfinancial.com for contracting & onboarding links from carriers.
+            </p>
+          </div>
+          <div className="flex flex-col items-end">
+            <button 
+              onClick={handleEmailSync}
+              disabled={isSyncing}
+              className={`flex items-center px-4 py-2 rounded-md font-medium shadow-sm transition-colors ${isSyncing ? 'bg-blue-300 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Syncing Inbox...' : 'Sync Inbox Now'}
+            </button>
+            {syncStatus && <span className="text-xs text-blue-800 font-medium mt-2">{syncStatus}</span>}
+          </div>
+        </div>
+      </div>
+      
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
+
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">AVAILABLE PACKAGES</h3>
         </div>
