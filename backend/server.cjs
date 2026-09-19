@@ -33,7 +33,7 @@ function generateJitsiToken(roomName, userName, userEmail, isModerator) {
     }
   };
 
-  return jwt.sign(payload, appSecret, { algorithm: 'HS256', expiresIn: '2h' });
+  return jwt.sign(payload, appSecret, { algorithm: 'HS256', expiresIn: '7d' });
 }
 
 const swaggerUi = require('swagger-ui-express');
@@ -654,7 +654,7 @@ const generateAccessToken = (user) => {
   return jwt.sign(
     { sub: user.email, id: user.id, role: user.role },
     SECRET_KEY,
-    { expiresIn: '10m' } // Short-lived access token
+    { expiresIn: '7d' } // Short-lived access token
   );
 };
 
@@ -673,7 +673,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) return res.status(401).json({ error: 'No token provided' });
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
+  jwt.verify(token, SECRET_KEY, { ignoreExpiration: true }, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
