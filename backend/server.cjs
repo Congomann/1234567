@@ -5923,7 +5923,7 @@ app.post('/api/contracting/email-sync', authenticateToken, async (req, res) => {
     
     let createdCount = 0;
     
-    for (const item of messages) {
+    for (const item of messages.slice(0, 3)) {
       const rawPart = item.parts.find(p => p.which === '');
       if (!rawPart) continue;
       

@@ -1,3 +1,4 @@
+export const maxDuration = 60;
 export default async function(req, res) {
   try {
     const mod = await import('../backend/server.cjs');
