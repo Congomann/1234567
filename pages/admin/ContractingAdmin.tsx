@@ -27,7 +27,7 @@ export default function ContractingAdmin() {
       const res = await fetch('/api/contracting/email-sync', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('nhfg_access_token')
+          'Authorization': 'Bearer ' + (localStorage.getItem('nhfg_access_token') || localStorage.getItem('token') || localStorage.getItem('nhfg_token'))
         }
       });
       const data = await res.json();
