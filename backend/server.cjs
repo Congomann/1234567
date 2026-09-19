@@ -5924,7 +5924,7 @@ app.post('/api/contracting/email-sync', authenticateToken, async (req, res) => {
     let createdCount = 0;
     
     for (const item of messages) {
-      const all = await connection.getPartsData(item, ['TEXT']);
+      // removed getPartsData
       const headerPart = item.parts.find(p => p.which === 'HEADER');
       const textPart = item.parts.find(p => p.which === 'TEXT');
       
