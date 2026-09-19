@@ -5918,8 +5918,21 @@ app.post('/api/contracting/email-sync', authenticateToken, async (req, res) => {
     await connection.openBox('INBOX');
     
     const searchCriteria = ['UNSEEN'];
-    const fetchOptions = { bodies: ['HEADER', 'TEXT'], markSeen: true };
-    const messages = await connection.search(searchCriteria, fetchOptions);
+    const searchResults = await connection.search(searchCriteria, { bodies: [] });
+    const uids = searchResults.map(r => r.attributes.uid);
+    
+    let messages = [];
+    for (const uid of uids) {
+      try {
+        const fetched = await connection.search([['UID', uid]], { bodies: ['HEADER', 'TEXT'] });
+        if (fetched && fetched.length > 0) {
+          messages.push(fetched[0]);
+          await connection.addFlags(uid, ['\\Seen']); // Mark as seen
+        }
+      } catch (e) {
+        console.error("Error fetching UID " + uid, e);
+      }
+    }
     
     let createdCount = 0;
     
